@@ -1,0 +1,12 @@
+SELECT Scene.Data,SceneNodes.NodeID,SceneNodes.EntID,SceneNodes.Data,SceneNodes.Name,GameEntity.EntType,GameEntity.Name,GameEntity.Data FROM Scene 
+LEFT JOIN SceneNodes ON Scene.SceneID = SceneNodes.SceneID
+INNER JOIN GameEntity ON SceneNodes.EntID= GameEntity.EntID
+WHERE Scene.SceneID = 1
+
+
+
+SELECT DISTINCT Race.RaceID,Race.Data FROM Scene 
+LEFT JOIN SceneNodes ON SceneNodes.EntID= GameEntity.EntID 
+INNER JOIN GameEntity ON SceneNodes.EntID= GameEntity.EntID 
+INNER JOIN Race ON GameEntity.RaceID = Race .RaceID 
+WHERE Scene.SceneID = 1 AND GameEntity.RaceID > 0 

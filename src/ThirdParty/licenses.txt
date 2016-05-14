@@ -1,0 +1,6 @@
+sfml	zlib
+thor	zlib
+bullet	zlib
+gamekit	Free from viral licenses: only using components using MIT/BSD/Zlib style licenses
+sqlite	Public domain
+physfs 	zlib

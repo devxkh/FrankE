@@ -1,0 +1,6 @@
+cmake Options need to be set:
+OGRE_CONFIG_ENABLE_STBI		->	true
+OGRE_BUILD_COMPONENT_OVERLAY	->	false
+OGRE_BUILD_TOOLS		->	false
+OGRE_INSTALL_TOOLS		->	false
+OGRE_INSTALL_SAMPLES		->	false

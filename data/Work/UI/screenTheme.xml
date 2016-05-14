@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- One File represents one Viewport UI -->
+<screen  name="WorldState" atlas="completeGUIDemo">
+
+  <!--<atlas>completeGUIDemo.gorilla</atlas>-->
+  <!-- <atlas>world.gorilla</atlas> -->
+
+  <resourceLocations group="General">
+    <resourceLocation type="FileSystem" name=".//Models/" />
+    <resourceLocation type="FileSystem" name=".//Materials/" />
+  </resourceLocations>
+
+  <!-- Style -->
+  <style type="panel2D">
+    <states>
+      <default>
+        <background type="sprite" >panelBackground</background>
+        <!--<background type="colour" >green</background>-->
+      </default>
+    </states>
+  </style>
+
+  <style type="menu" itemWidth="150" itemHeight="150">
+    <setter property="width" value="170"/>
+    <setter property="height" value="600"/>
+    <states>
+      <default>
+        <setter property="colour" value="red"/>
+
+        <background type="gradient">
+            <gradientSart color="255 235 237 500" offset="0" />
+            <gradientStop color="255 87 86 50" offset="1" />
+        </background>
+        <border>
+          <setter property="padding" value="2"/>
+          <setter property="thickness" value="1"/>
+          <setter property="brush" value="red"/>
+        </border>
+      </default>
+    </states>
+  </style>
+
+  <style type="menuItem">
+    <setter property="height" value="50"/>
+    
+    <states>
+      <over>
+        <background type="sprite">menuitemover</background>
+        <caption>
+          <Setter property="fontSize" value="20" />
+          <Setter property="verticalAlignment" value="center" />
+        </caption>
+        <border>
+          <setter property="padding" value="4"/>
+          <setter property="thickness" value="1"/>
+          <setter property="brush" value="blue"/>
+        </border>
+      </over>
+      <default>
+        <background type="sprite">menuitemndefault</background>
+        <caption>
+          <Setter property="fontSize" value="20" />
+          <Setter property="verticalAlignment" value="center" />
+        </caption>
+        <border>
+          <setter property="padding" value="4"/>
+          <setter property="thickness" value="1"/>
+          <setter property="brush" value="blue"/>
+        </border>
+      </default>
+      <selected>
+        <background type="sprite">menuitemselected</background>
+        <caption>
+          <Setter property="fontSize" value="20" />
+          <Setter property="verticalAlignment" value="center" />
+        </caption>
+        <border>
+          <setter property="padding" value="4"/>
+          <setter property="thickness" value="1"/>
+          <setter property="brush" value="blue"/>
+        </border>
+      </selected>
+    </states>
+  </style>
+
+  <style type="menuItem" name="exitMenuItem">
+    <setter property="height" value="50"/>
+
+    <states>
+      <over>
+        <background type="gradient">
+          <gradientSart color="255 235 237 500" offset="0" />
+          <gradientStop color="255 87 86 50" offset="1" />
+        </background>
+        <caption>
+          <Setter property="fontSize" value="20" />
+          <Setter property="verticalAlignment" value="center" />
+        </caption>
+        <border>
+          <setter property="padding" value="4"/>
+          <setter property="thickness" value="1"/>
+          <setter property="brush" value="blue"/>
+        </border>
+      </over>
+      <default>
+        <background type="gradient">
+          <gradientSart color="28 72 136 500" offset="0" />
+          <gradientStop color="50 117 210 50" offset="1" />
+        </background>
+        <caption>
+          <Setter property="fontSize" value="20" />
+          <Setter property="verticalAlignment" value="center" />
+        </caption>
+        <border>
+          <setter property="padding" value="4"/>
+          <setter property="thickness" value="1"/>
+          <setter property="brush" value="blue"/>
+        </border>
+      </default>
+      <selected>
+        <background type="sprite">menuitemselected</background>
+        <caption>
+          <Setter property="fontSize" value="20" />
+          <Setter property="verticalAlignment" value="center" />
+        </caption>
+        <border>
+          <setter property="padding" value="4"/>
+          <setter property="thickness" value="1"/>
+          <setter property="brush" value="blue"/>
+        </border>
+      </selected>
+    </states>
+  </style>
+
+  <style type="navigation">
+    <setter property="itemWidth" value="150"/>
+    <setter property="height" value="30"/>
+    <setter property="width" value="600"/>
+    <setter property="margin" value="10"/>
+    <states>
+      <default>
+        <background type="gradient">
+          <gradientSart color="255 235 237 500" offset="0" />
+          <gradientStop color="255 87 86 50" offset="1" />
+        </background>
+        <caption>
+          <Setter property="fontSize" value="20" />
+          <Setter property="verticalAlignment" value="center" />
+        </caption>
+        <border>
+          <setter property="padding" value="1"/>
+          <setter property="thickness" value="1"/>
+          <setter property="brush" value="red"/>
+        </border>
+      </default>
+    </states>
+  </style>
+
+  <style type="navItem">
+    <setter property="height" value="30"/>
+    <states>
+      <over>
+        <background type="gradient">
+          <gradientSart color="255 235 237 500" offset="0" />
+          <gradientStop color="255 87 86 50" offset="1" />
+        </background>
+        <caption>
+          <Setter property="fontSize" value="20" />
+          <Setter property="verticalAlignment" value="center" />
+        </caption>
+        <border>
+          <setter property="padding" value="1"/>
+          <setter property="thickness" value="1"/>
+          <setter property="brush" value="green"/>
+        </border>
+      </over>
+      <default>
+        <background type="gradient">
+          <gradientSart color="28 72 136 500" offset="0" />
+          <gradientStop color="50 117 210 50" offset="1" />
+        </background>
+        <caption>
+          <Setter property="fontSize" value="20" />
+          <Setter property="verticalAlignment" value="center" />
+        </caption>
+        <border>
+          <setter property="padding" value="4"/>
+          <setter property="thickness" value="1"/>
+          <setter property="brush" value="red"/>
+        </border>
+      </default>
+      <selected>
+        <background type="sprite">menuitemselected</background>
+        <caption>
+          <Setter property="fontSize" value="20" />
+          <Setter property="verticalAlignment" value="center" />
+        </caption>
+        <border>
+          <setter property="padding" value="4"/>
+          <setter property="thickness" value="1"/>
+          <setter property="brush" value="blue"/>
+        </border>
+      </selected>
+    </states>
+  </style>
+
+</screen>

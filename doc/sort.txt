@@ -1,0 +1,16 @@
+D3D11RenderSystem* mRenderSystem = new D3D11RenderSystem();
+// Register the render system
+		
+mRoot->addRenderSystem(mRenderSystem);
+mRoot->setRenderSystem(mRenderSystem);
+mRoot->initialise(false);
+
+mWindowManager.createWindow
+createRenderWindow(sf::Window* window)
+
+OgreSceneManager::create
+controller->getCameraController().getOgreCamera().__OgreCameraPtr
+
+engine->getGraphicsManager().createWorkspace
+
+

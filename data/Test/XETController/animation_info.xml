@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<animation_info_list>
+	<animation_info name="DrawSwords">
+		<loop>false</loop>
+		<something_stupid />
+		<trigger_info_list>
+			<trigger_info>
+				<name>attack_start</name>
+				<time>0</time>
+				<time_type>relative</time_type>
+				<min_weight_threshold>0</min_weight_threshold>
+			</trigger_info>
+			<trigger_info>
+				<name>attack_hit</name>
+				<time>0.5</time>
+				<time_type>absolute</time_type>
+				<min_weight_threshold>0.03</min_weight_threshold>
+			</trigger_info>
+			<trigger_info>
+				<name>attack_025_to_end</name>
+				<time>-0.25</time>
+				<time_type>absolute</time_type>
+			</trigger_info>
+			<trigger_info>
+				<name>attack_end</name>
+				<time>1</time>
+				<time_type>relative</time_type>
+				<min_weight_threshold>0</min_weight_threshold>
+			</trigger_info>
+		</trigger_info_list>
+	</animation_info>
+	<animation_info>
+		<name>trogdor</name>
+	</animation_info>
+</animation_info_list>

@@ -1,0 +1,21 @@
+$pfile "E:\Projekte\coop\XEngine\src\LuaScript\pkgs\Math\MathDefs.pkg"
+$pfile "E:\Projekte\coop\XEngine\src\LuaScript\pkgs\Math\BoundingBox.pkg"
+$pfile "E:\Projekte\coop\XEngine\src\LuaScript\pkgs\Math\Color.pkg"
+$pfile "E:\Projekte\coop\XEngine\src\LuaScript\pkgs\Math\Frustum.pkg"
+$pfile "E:\Projekte\coop\XEngine\src\LuaScript\pkgs\Math\Matrix3.pkg"
+$pfile "E:\Projekte\coop\XEngine\src\LuaScript\pkgs\Math\Matrix3x4.pkg"
+$pfile "E:\Projekte\coop\XEngine\src\LuaScript\pkgs\Math\Matrix4.pkg"
+$pfile "E:\Projekte\coop\XEngine\src\LuaScript\pkgs\Math\Plane.pkg"
+$pfile "E:\Projekte\coop\XEngine\src\LuaScript\pkgs\Math\Polyhedron.pkg"
+$pfile "E:\Projekte\coop\XEngine\src\LuaScript\pkgs\Math\Quaternion.pkg"
+$pfile "E:\Projekte\coop\XEngine\src\LuaScript\pkgs\Math\Random.pkg"
+$pfile "E:\Projekte\coop\XEngine\src\LuaScript\pkgs\Math\Ray.pkg"
+$pfile "E:\Projekte\coop\XEngine\src\LuaScript\pkgs\Math\Rect.pkg"
+$pfile "E:\Projekte\coop\XEngine\src\LuaScript\pkgs\Math\Sphere.pkg"
+$pfile "E:\Projekte\coop\XEngine\src\LuaScript\pkgs\Math\StringHash.pkg"
+$pfile "E:\Projekte\coop\XEngine\src\LuaScript\pkgs\Math\Vector2.pkg"
+$pfile "E:\Projekte\coop\XEngine\src\LuaScript\pkgs\Math\Vector3.pkg"
+$pfile "E:\Projekte\coop\XEngine\src\LuaScript\pkgs\Math\Vector4.pkg"
+
+$using namespace XE;
+$#pragma warning(disable:4800)

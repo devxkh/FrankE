@@ -1,0 +1,11 @@
+add in file XEngine\src\Ogre\OgreMain\CMakeLists.txt
+include_directories(${PROJECT_SOURCE_DIR}/../../ThirdParty/rapidjson/include)
+
+zlibfile_library
+E:/Projekte/coop/XEngine/extlibs/libs-msvc/x64/zlib.lib
+
+
+E:/Projekte/coop/XGame_build/XEngine/src/Ogre/sdk/share/doc/RapidJSON
+
+Boost_INCKUDE_DIR
+E:\Projekte\boost_1_60_0

@@ -1,0 +1,58 @@
+PRAGMA foreign_keys = ON;
+
+CREATE TABLE Scene(
+  SceneID  INTEGER DEFAULT '''0''' PRIMARY KEY NOT NULL,
+  Name varchar ,
+  [Data] BLOB  NULL
+);
+
+
+
+
+
+CREATE  TABLE EntityData
+("EntDID" INTEGER PRIMARY KEY  NOT NULL ,
+ "Data" BLOB);
+
+
+CREATE TABLE Entity(
+  EntID  INTEGER DEFAULT '''0''' PRIMARY KEY NOT NULL,
+  EntType NUMERIC ,
+  Name varchar ,
+  EntDID INTEGER,
+  [Data] BLOB  NULL,
+  FOREIGN KEY(EntDID) REFERENCES EntityData
+);
+
+
+
+CREATE TABLE SceneNode(
+  NodeID  INTEGER NOT NULL,
+  EntID INTEGER ,
+  SceneID INTEGER ,
+   [Data] BLOB  NULL,
+  Name varchar,
+  PRIMARY KEY (NodeID , SceneID),
+  FOREIGN KEY(SceneID) REFERENCES Scene
+  FOREIGN KEY(EntID) REFERENCES Entity
+);
+
+
+CREATE  TABLE "main"."UI" ("Name" VARCHAR PRIMARY KEY  NOT NULL , "Data" BLOB);
+
+
+CREATE TABLE PhysUsedInScene(
+  SceneID  INTEGER NOT NULL,
+  POID INTEGER ,
+  FOREIGN KEY(SceneID) REFERENCES Scene
+  FOREIGN KEY(POID) REFERENCES PhysicObject
+);
+
+
+
+CREATE TABLE MatUsedInScene(
+  SceneID  INTEGER NOT NULL,
+  MatID INTEGER ,
+  FOREIGN KEY(SceneID) REFERENCES Scene
+  FOREIGN KEY(MatID ) REFERENCES Material
+);

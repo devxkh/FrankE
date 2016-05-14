@@ -1,0 +1,35 @@
+
+Ogre::AnimationState* m_t_animationState; -> Ogre::v1::AnimationState* m_t_animationState;
+
+Ogre::ManualObject -> Ogre::v1::ManualObject
+
+Decal:
+
+
+Ogre::RenderOperation -> Ogre::v1::RenderOperation
+
+Ogre::HardwareVertexBufferSharedPtr -> Ogre::v1::HardwareVertexBufferSharedPtr
+
+
+Ogre::MeshPtr -> Ogre::v1::MeshPtr
+Ogre::SubMesh -> Ogre::v1::SubMesh
+
+
+Ogre::IndexData -> Ogre::v1::IndexData
+Ogre::VertexData -> Ogre::v1::VertexData
+Ogre::VertexElement ->  Ogre::v1::VertexElement
+
+Ogre::HardwareBuffer -> Ogre::v1::HardwareBuffer
+
+Ogre::HardwareVertexBufferSharedPtr -> Ogre::v1::HardwareVertexBufferSharedPtr
+
+
+
+Spell:
+
+Ogre::MeshManager -> Ogre::v1::MeshManager
+
+
+btogre:
+
+Ogre::SimpleRenderable -> Ogre::v1::SimpleRenderable

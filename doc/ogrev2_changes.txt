@@ -1,0 +1,2 @@
+mCompositorPassProvider (nullptr)  in OgreCompositorManager2.cpp for  if (!m_compositorManager->getCompositorPassProvider()) check es not null
+item setOrientation 1,0,0,0 crash 
