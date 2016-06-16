@@ -66,7 +66,7 @@ namespace XE {
 
 		sf::Vector2f    texCoords[4];
 
-		std::vector<std::unique_ptr<GlyphKerning>> kerning;
+		std::vector<GlyphKerning> kerning;
 
 		// Get kerning value of a character to the right of another.
 		// Ab -- get the kerning value of b, pass on A.
@@ -77,8 +77,8 @@ namespace XE {
 
 			for (size_t i = 0; i < kerning.size(); i++)
 			{
-				if (kerning[i]->character == left_of)
-					return kerning[i]->kerning;
+				if (kerning[i].character == left_of)
+					return kerning[i].kerning;
 			}
 
 			return 0;

@@ -15,6 +15,8 @@ struct Colour;
 struct Clipping;
 struct PhysicsConstraint;
 struct PhysicsObject;
+struct LocalFile;
+struct Material;
 struct MeshFile;
 struct MeshCube;
 struct MeshPlane;
@@ -25,10 +27,7 @@ struct Sound;
 struct AI;
 struct SpawnPointComponent;
 struct Trigger;
-struct EntityBase;
 struct PhysicsComponent;
-struct Debug;
-struct Material;
 struct SoundListener;
 struct Light;
 struct Camera;
@@ -50,6 +49,7 @@ struct LookAtNode;
 struct RandomSelectNode;
 struct MixNode;
 struct AnimNode;
+struct BodyComponent;
 struct AnimationComponent;
 struct SoundComponent;
 
@@ -124,6 +124,18 @@ inline const char **EnumNamesPCType() {
 }
 
 inline const char *EnumNamePCType(PCType e) { return EnumNamesPCType()[static_cast<int>(e)]; }
+
+enum FileLocation {
+  FileLocation_FILELOC_Asset = 0,
+  FileLocation_FILELOC_DBDataFile = 1
+};
+
+inline const char **EnumNamesFileLocation() {
+  static const char *names[] = { "FILELOC_Asset", "FILELOC_DBDataFile", nullptr };
+  return names;
+}
+
+inline const char *EnumNameFileLocation(FileLocation e) { return EnumNamesFileLocation()[static_cast<int>(e)]; }
 
 enum UMesh {
   UMesh_NONE = 0,
@@ -477,6 +489,7 @@ struct PhysicsObject FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   uint8_t parentIsNode() const { return GetField<uint8_t>(52, 0); }
   const flatbuffers::Vector<flatbuffers::Offset<PhysicsConstraint>> *physicsConstraints() const { return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<PhysicsConstraint>> *>(54); }
   const flatbuffers::String *name() const { return GetPointer<const flatbuffers::String *>(56); }
+  const LocalFile *file() const { return GetPointer<const LocalFile *>(58); }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
            VerifyField<uint16_t>(verifier, 4 /* id */) &&
@@ -511,6 +524,8 @@ struct PhysicsObject FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
            verifier.VerifyVectorOfTables(physicsConstraints()) &&
            VerifyField<flatbuffers::uoffset_t>(verifier, 56 /* name */) &&
            verifier.Verify(name()) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, 58 /* file */) &&
+           verifier.VerifyTable(file()) &&
            verifier.EndTable();
   }
 };
@@ -545,10 +560,11 @@ struct PhysicsObjectBuilder {
   void add_parentIsNode(uint8_t parentIsNode) { fbb_.AddElement<uint8_t>(52, parentIsNode, 0); }
   void add_physicsConstraints(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<PhysicsConstraint>>> physicsConstraints) { fbb_.AddOffset(54, physicsConstraints); }
   void add_name(flatbuffers::Offset<flatbuffers::String> name) { fbb_.AddOffset(56, name); }
+  void add_file(flatbuffers::Offset<LocalFile> file) { fbb_.AddOffset(58, file); }
   PhysicsObjectBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
   PhysicsObjectBuilder &operator=(const PhysicsObjectBuilder &);
   flatbuffers::Offset<PhysicsObject> Finish() {
-    auto o = flatbuffers::Offset<PhysicsObject>(fbb_.EndTable(start_, 27));
+    auto o = flatbuffers::Offset<PhysicsObject>(fbb_.EndTable(start_, 28));
     return o;
   }
 };
@@ -580,8 +596,10 @@ inline flatbuffers::Offset<PhysicsObject> CreatePhysicsObject(flatbuffers::FlatB
    const Vec3f *offset = 0,
    uint8_t parentIsNode = 0,
    flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<PhysicsConstraint>>> physicsConstraints = 0,
-   flatbuffers::Offset<flatbuffers::String> name = 0) {
+   flatbuffers::Offset<flatbuffers::String> name = 0,
+   flatbuffers::Offset<LocalFile> file = 0) {
   PhysicsObjectBuilder builder_(_fbb);
+  builder_.add_file(file);
   builder_.add_name(name);
   builder_.add_physicsConstraints(physicsConstraints);
   builder_.add_offset(offset);
@@ -612,17 +630,89 @@ inline flatbuffers::Offset<PhysicsObject> CreatePhysicsObject(flatbuffers::FlatB
   return builder_.Finish();
 }
 
-struct MeshFile FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  const flatbuffers::String *fileName() const { return GetPointer<const flatbuffers::String *>(4); }
-  const flatbuffers::String *RessGrp() const { return GetPointer<const flatbuffers::String *>(6); }
-  const flatbuffers::Vector<flatbuffers::Offset<Material>> *materials() const { return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<Material>> *>(8); }
+struct LocalFile FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+  FileLocation fileLocation() const { return static_cast<FileLocation>(GetField<int8_t>(4, 0)); }
+  const flatbuffers::String *fileName() const { return GetPointer<const flatbuffers::String *>(6); }
+  const flatbuffers::String *filePath() const { return GetPointer<const flatbuffers::String *>(8); }
+  const flatbuffers::String *resourceGrp() const { return GetPointer<const flatbuffers::String *>(10); }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, 4 /* fileName */) &&
+           VerifyField<int8_t>(verifier, 4 /* fileLocation */) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, 6 /* fileName */) &&
            verifier.Verify(fileName()) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, 6 /* RessGrp */) &&
-           verifier.Verify(RessGrp()) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, 8 /* materials */) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, 8 /* filePath */) &&
+           verifier.Verify(filePath()) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, 10 /* resourceGrp */) &&
+           verifier.Verify(resourceGrp()) &&
+           verifier.EndTable();
+  }
+};
+
+struct LocalFileBuilder {
+  flatbuffers::FlatBufferBuilder &fbb_;
+  flatbuffers::uoffset_t start_;
+  void add_fileLocation(FileLocation fileLocation) { fbb_.AddElement<int8_t>(4, static_cast<int8_t>(fileLocation), 0); }
+  void add_fileName(flatbuffers::Offset<flatbuffers::String> fileName) { fbb_.AddOffset(6, fileName); }
+  void add_filePath(flatbuffers::Offset<flatbuffers::String> filePath) { fbb_.AddOffset(8, filePath); }
+  void add_resourceGrp(flatbuffers::Offset<flatbuffers::String> resourceGrp) { fbb_.AddOffset(10, resourceGrp); }
+  LocalFileBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
+  LocalFileBuilder &operator=(const LocalFileBuilder &);
+  flatbuffers::Offset<LocalFile> Finish() {
+    auto o = flatbuffers::Offset<LocalFile>(fbb_.EndTable(start_, 4));
+    return o;
+  }
+};
+
+inline flatbuffers::Offset<LocalFile> CreateLocalFile(flatbuffers::FlatBufferBuilder &_fbb,
+   FileLocation fileLocation = FileLocation_FILELOC_Asset,
+   flatbuffers::Offset<flatbuffers::String> fileName = 0,
+   flatbuffers::Offset<flatbuffers::String> filePath = 0,
+   flatbuffers::Offset<flatbuffers::String> resourceGrp = 0) {
+  LocalFileBuilder builder_(_fbb);
+  builder_.add_resourceGrp(resourceGrp);
+  builder_.add_filePath(filePath);
+  builder_.add_fileName(fileName);
+  builder_.add_fileLocation(fileLocation);
+  return builder_.Finish();
+}
+
+struct Material FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+  const LocalFile *file() const { return GetPointer<const LocalFile *>(4); }
+  bool Verify(flatbuffers::Verifier &verifier) const {
+    return VerifyTableStart(verifier) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, 4 /* file */) &&
+           verifier.VerifyTable(file()) &&
+           verifier.EndTable();
+  }
+};
+
+struct MaterialBuilder {
+  flatbuffers::FlatBufferBuilder &fbb_;
+  flatbuffers::uoffset_t start_;
+  void add_file(flatbuffers::Offset<LocalFile> file) { fbb_.AddOffset(4, file); }
+  MaterialBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
+  MaterialBuilder &operator=(const MaterialBuilder &);
+  flatbuffers::Offset<Material> Finish() {
+    auto o = flatbuffers::Offset<Material>(fbb_.EndTable(start_, 1));
+    return o;
+  }
+};
+
+inline flatbuffers::Offset<Material> CreateMaterial(flatbuffers::FlatBufferBuilder &_fbb,
+   flatbuffers::Offset<LocalFile> file = 0) {
+  MaterialBuilder builder_(_fbb);
+  builder_.add_file(file);
+  return builder_.Finish();
+}
+
+struct MeshFile FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+  const LocalFile *file() const { return GetPointer<const LocalFile *>(4); }
+  const flatbuffers::Vector<flatbuffers::Offset<Material>> *materials() const { return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<Material>> *>(6); }
+  bool Verify(flatbuffers::Verifier &verifier) const {
+    return VerifyTableStart(verifier) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, 4 /* file */) &&
+           verifier.VerifyTable(file()) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, 6 /* materials */) &&
            verifier.Verify(materials()) &&
            verifier.VerifyVectorOfTables(materials()) &&
            verifier.EndTable();
@@ -632,43 +722,36 @@ struct MeshFile FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
 struct MeshFileBuilder {
   flatbuffers::FlatBufferBuilder &fbb_;
   flatbuffers::uoffset_t start_;
-  void add_fileName(flatbuffers::Offset<flatbuffers::String> fileName) { fbb_.AddOffset(4, fileName); }
-  void add_RessGrp(flatbuffers::Offset<flatbuffers::String> RessGrp) { fbb_.AddOffset(6, RessGrp); }
-  void add_materials(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Material>>> materials) { fbb_.AddOffset(8, materials); }
+  void add_file(flatbuffers::Offset<LocalFile> file) { fbb_.AddOffset(4, file); }
+  void add_materials(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Material>>> materials) { fbb_.AddOffset(6, materials); }
   MeshFileBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
   MeshFileBuilder &operator=(const MeshFileBuilder &);
   flatbuffers::Offset<MeshFile> Finish() {
-    auto o = flatbuffers::Offset<MeshFile>(fbb_.EndTable(start_, 3));
+    auto o = flatbuffers::Offset<MeshFile>(fbb_.EndTable(start_, 2));
     return o;
   }
 };
 
 inline flatbuffers::Offset<MeshFile> CreateMeshFile(flatbuffers::FlatBufferBuilder &_fbb,
-   flatbuffers::Offset<flatbuffers::String> fileName = 0,
-   flatbuffers::Offset<flatbuffers::String> RessGrp = 0,
+   flatbuffers::Offset<LocalFile> file = 0,
    flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Material>>> materials = 0) {
   MeshFileBuilder builder_(_fbb);
   builder_.add_materials(materials);
-  builder_.add_RessGrp(RessGrp);
-  builder_.add_fileName(fileName);
+  builder_.add_file(file);
   return builder_.Finish();
 }
 
 struct MeshCube FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   const flatbuffers::String *Name() const { return GetPointer<const flatbuffers::String *>(4); }
-  const flatbuffers::String *RessGrp() const { return GetPointer<const flatbuffers::String *>(6); }
-  const flatbuffers::Vector<flatbuffers::Offset<Material>> *materials() const { return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<Material>> *>(8); }
-  float width() const { return GetField<float>(10, 0); }
+  const Material *material() const { return GetPointer<const Material *>(6); }
+  float width() const { return GetField<float>(8, 0); }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
            VerifyField<flatbuffers::uoffset_t>(verifier, 4 /* Name */) &&
            verifier.Verify(Name()) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, 6 /* RessGrp */) &&
-           verifier.Verify(RessGrp()) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, 8 /* materials */) &&
-           verifier.Verify(materials()) &&
-           verifier.VerifyVectorOfTables(materials()) &&
-           VerifyField<float>(verifier, 10 /* width */) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, 6 /* material */) &&
+           verifier.VerifyTable(material()) &&
+           VerifyField<float>(verifier, 8 /* width */) &&
            verifier.EndTable();
   }
 };
@@ -677,65 +760,58 @@ struct MeshCubeBuilder {
   flatbuffers::FlatBufferBuilder &fbb_;
   flatbuffers::uoffset_t start_;
   void add_Name(flatbuffers::Offset<flatbuffers::String> Name) { fbb_.AddOffset(4, Name); }
-  void add_RessGrp(flatbuffers::Offset<flatbuffers::String> RessGrp) { fbb_.AddOffset(6, RessGrp); }
-  void add_materials(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Material>>> materials) { fbb_.AddOffset(8, materials); }
-  void add_width(float width) { fbb_.AddElement<float>(10, width, 0); }
+  void add_material(flatbuffers::Offset<Material> material) { fbb_.AddOffset(6, material); }
+  void add_width(float width) { fbb_.AddElement<float>(8, width, 0); }
   MeshCubeBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
   MeshCubeBuilder &operator=(const MeshCubeBuilder &);
   flatbuffers::Offset<MeshCube> Finish() {
-    auto o = flatbuffers::Offset<MeshCube>(fbb_.EndTable(start_, 4));
+    auto o = flatbuffers::Offset<MeshCube>(fbb_.EndTable(start_, 3));
     return o;
   }
 };
 
 inline flatbuffers::Offset<MeshCube> CreateMeshCube(flatbuffers::FlatBufferBuilder &_fbb,
    flatbuffers::Offset<flatbuffers::String> Name = 0,
-   flatbuffers::Offset<flatbuffers::String> RessGrp = 0,
-   flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Material>>> materials = 0,
+   flatbuffers::Offset<Material> material = 0,
    float width = 0) {
   MeshCubeBuilder builder_(_fbb);
   builder_.add_width(width);
-  builder_.add_materials(materials);
-  builder_.add_RessGrp(RessGrp);
+  builder_.add_material(material);
   builder_.add_Name(Name);
   return builder_.Finish();
 }
 
 struct MeshPlane FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   const flatbuffers::String *Name() const { return GetPointer<const flatbuffers::String *>(4); }
-  const flatbuffers::String *RessGrp() const { return GetPointer<const flatbuffers::String *>(6); }
-  const flatbuffers::Vector<flatbuffers::Offset<Material>> *materials() const { return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<Material>> *>(8); }
-  const Vec3f *normal() const { return GetStruct<const Vec3f *>(10); }
-  float constant() const { return GetField<float>(12, 0); }
-  float width() const { return GetField<float>(14, 0); }
-  float height() const { return GetField<float>(16, 0); }
-  uint32_t xsegments() const { return GetField<uint32_t>(18, 0); }
-  uint32_t ysegments() const { return GetField<uint32_t>(20, 0); }
-  uint8_t normals() const { return GetField<uint8_t>(22, 0); }
-  uint32_t numTexCoordSets() const { return GetField<uint32_t>(24, 0); }
-  float xTile() const { return GetField<float>(26, 0); }
-  float yTile() const { return GetField<float>(28, 0); }
-  const Vec3f *upVector() const { return GetStruct<const Vec3f *>(30); }
+  const Material *material() const { return GetPointer<const Material *>(6); }
+  const Vec3f *normal() const { return GetStruct<const Vec3f *>(8); }
+  float constant() const { return GetField<float>(10, 0); }
+  float width() const { return GetField<float>(12, 0); }
+  float height() const { return GetField<float>(14, 0); }
+  uint32_t xsegments() const { return GetField<uint32_t>(16, 0); }
+  uint32_t ysegments() const { return GetField<uint32_t>(18, 0); }
+  uint8_t normals() const { return GetField<uint8_t>(20, 0); }
+  uint32_t numTexCoordSets() const { return GetField<uint32_t>(22, 0); }
+  float xTile() const { return GetField<float>(24, 0); }
+  float yTile() const { return GetField<float>(26, 0); }
+  const Vec3f *upVector() const { return GetStruct<const Vec3f *>(28); }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
            VerifyField<flatbuffers::uoffset_t>(verifier, 4 /* Name */) &&
            verifier.Verify(Name()) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, 6 /* RessGrp */) &&
-           verifier.Verify(RessGrp()) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, 8 /* materials */) &&
-           verifier.Verify(materials()) &&
-           verifier.VerifyVectorOfTables(materials()) &&
-           VerifyField<Vec3f>(verifier, 10 /* normal */) &&
-           VerifyField<float>(verifier, 12 /* constant */) &&
-           VerifyField<float>(verifier, 14 /* width */) &&
-           VerifyField<float>(verifier, 16 /* height */) &&
-           VerifyField<uint32_t>(verifier, 18 /* xsegments */) &&
-           VerifyField<uint32_t>(verifier, 20 /* ysegments */) &&
-           VerifyField<uint8_t>(verifier, 22 /* normals */) &&
-           VerifyField<uint32_t>(verifier, 24 /* numTexCoordSets */) &&
-           VerifyField<float>(verifier, 26 /* xTile */) &&
-           VerifyField<float>(verifier, 28 /* yTile */) &&
-           VerifyField<Vec3f>(verifier, 30 /* upVector */) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, 6 /* material */) &&
+           verifier.VerifyTable(material()) &&
+           VerifyField<Vec3f>(verifier, 8 /* normal */) &&
+           VerifyField<float>(verifier, 10 /* constant */) &&
+           VerifyField<float>(verifier, 12 /* width */) &&
+           VerifyField<float>(verifier, 14 /* height */) &&
+           VerifyField<uint32_t>(verifier, 16 /* xsegments */) &&
+           VerifyField<uint32_t>(verifier, 18 /* ysegments */) &&
+           VerifyField<uint8_t>(verifier, 20 /* normals */) &&
+           VerifyField<uint32_t>(verifier, 22 /* numTexCoordSets */) &&
+           VerifyField<float>(verifier, 24 /* xTile */) &&
+           VerifyField<float>(verifier, 26 /* yTile */) &&
+           VerifyField<Vec3f>(verifier, 28 /* upVector */) &&
            verifier.EndTable();
   }
 };
@@ -744,31 +820,29 @@ struct MeshPlaneBuilder {
   flatbuffers::FlatBufferBuilder &fbb_;
   flatbuffers::uoffset_t start_;
   void add_Name(flatbuffers::Offset<flatbuffers::String> Name) { fbb_.AddOffset(4, Name); }
-  void add_RessGrp(flatbuffers::Offset<flatbuffers::String> RessGrp) { fbb_.AddOffset(6, RessGrp); }
-  void add_materials(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Material>>> materials) { fbb_.AddOffset(8, materials); }
-  void add_normal(const Vec3f *normal) { fbb_.AddStruct(10, normal); }
-  void add_constant(float constant) { fbb_.AddElement<float>(12, constant, 0); }
-  void add_width(float width) { fbb_.AddElement<float>(14, width, 0); }
-  void add_height(float height) { fbb_.AddElement<float>(16, height, 0); }
-  void add_xsegments(uint32_t xsegments) { fbb_.AddElement<uint32_t>(18, xsegments, 0); }
-  void add_ysegments(uint32_t ysegments) { fbb_.AddElement<uint32_t>(20, ysegments, 0); }
-  void add_normals(uint8_t normals) { fbb_.AddElement<uint8_t>(22, normals, 0); }
-  void add_numTexCoordSets(uint32_t numTexCoordSets) { fbb_.AddElement<uint32_t>(24, numTexCoordSets, 0); }
-  void add_xTile(float xTile) { fbb_.AddElement<float>(26, xTile, 0); }
-  void add_yTile(float yTile) { fbb_.AddElement<float>(28, yTile, 0); }
-  void add_upVector(const Vec3f *upVector) { fbb_.AddStruct(30, upVector); }
+  void add_material(flatbuffers::Offset<Material> material) { fbb_.AddOffset(6, material); }
+  void add_normal(const Vec3f *normal) { fbb_.AddStruct(8, normal); }
+  void add_constant(float constant) { fbb_.AddElement<float>(10, constant, 0); }
+  void add_width(float width) { fbb_.AddElement<float>(12, width, 0); }
+  void add_height(float height) { fbb_.AddElement<float>(14, height, 0); }
+  void add_xsegments(uint32_t xsegments) { fbb_.AddElement<uint32_t>(16, xsegments, 0); }
+  void add_ysegments(uint32_t ysegments) { fbb_.AddElement<uint32_t>(18, ysegments, 0); }
+  void add_normals(uint8_t normals) { fbb_.AddElement<uint8_t>(20, normals, 0); }
+  void add_numTexCoordSets(uint32_t numTexCoordSets) { fbb_.AddElement<uint32_t>(22, numTexCoordSets, 0); }
+  void add_xTile(float xTile) { fbb_.AddElement<float>(24, xTile, 0); }
+  void add_yTile(float yTile) { fbb_.AddElement<float>(26, yTile, 0); }
+  void add_upVector(const Vec3f *upVector) { fbb_.AddStruct(28, upVector); }
   MeshPlaneBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
   MeshPlaneBuilder &operator=(const MeshPlaneBuilder &);
   flatbuffers::Offset<MeshPlane> Finish() {
-    auto o = flatbuffers::Offset<MeshPlane>(fbb_.EndTable(start_, 14));
+    auto o = flatbuffers::Offset<MeshPlane>(fbb_.EndTable(start_, 13));
     return o;
   }
 };
 
 inline flatbuffers::Offset<MeshPlane> CreateMeshPlane(flatbuffers::FlatBufferBuilder &_fbb,
    flatbuffers::Offset<flatbuffers::String> Name = 0,
-   flatbuffers::Offset<flatbuffers::String> RessGrp = 0,
-   flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Material>>> materials = 0,
+   flatbuffers::Offset<Material> material = 0,
    const Vec3f *normal = 0,
    float constant = 0,
    float width = 0,
@@ -791,8 +865,7 @@ inline flatbuffers::Offset<MeshPlane> CreateMeshPlane(flatbuffers::FlatBufferBui
   builder_.add_width(width);
   builder_.add_constant(constant);
   builder_.add_normal(normal);
-  builder_.add_materials(materials);
-  builder_.add_RessGrp(RessGrp);
+  builder_.add_material(material);
   builder_.add_Name(Name);
   builder_.add_normals(normals);
   return builder_.Finish();
@@ -800,19 +873,15 @@ inline flatbuffers::Offset<MeshPlane> CreateMeshPlane(flatbuffers::FlatBufferBui
 
 struct MeshSphere FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   const flatbuffers::String *Name() const { return GetPointer<const flatbuffers::String *>(4); }
-  const flatbuffers::String *RessGrp() const { return GetPointer<const flatbuffers::String *>(6); }
-  const flatbuffers::Vector<flatbuffers::Offset<Material>> *materials() const { return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<Material>> *>(8); }
-  float rad() const { return GetField<float>(10, 0); }
+  const Material *material() const { return GetPointer<const Material *>(6); }
+  float rad() const { return GetField<float>(8, 0); }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
            VerifyField<flatbuffers::uoffset_t>(verifier, 4 /* Name */) &&
            verifier.Verify(Name()) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, 6 /* RessGrp */) &&
-           verifier.Verify(RessGrp()) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, 8 /* materials */) &&
-           verifier.Verify(materials()) &&
-           verifier.VerifyVectorOfTables(materials()) &&
-           VerifyField<float>(verifier, 10 /* rad */) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, 6 /* material */) &&
+           verifier.VerifyTable(material()) &&
+           VerifyField<float>(verifier, 8 /* rad */) &&
            verifier.EndTable();
   }
 };
@@ -821,26 +890,23 @@ struct MeshSphereBuilder {
   flatbuffers::FlatBufferBuilder &fbb_;
   flatbuffers::uoffset_t start_;
   void add_Name(flatbuffers::Offset<flatbuffers::String> Name) { fbb_.AddOffset(4, Name); }
-  void add_RessGrp(flatbuffers::Offset<flatbuffers::String> RessGrp) { fbb_.AddOffset(6, RessGrp); }
-  void add_materials(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Material>>> materials) { fbb_.AddOffset(8, materials); }
-  void add_rad(float rad) { fbb_.AddElement<float>(10, rad, 0); }
+  void add_material(flatbuffers::Offset<Material> material) { fbb_.AddOffset(6, material); }
+  void add_rad(float rad) { fbb_.AddElement<float>(8, rad, 0); }
   MeshSphereBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
   MeshSphereBuilder &operator=(const MeshSphereBuilder &);
   flatbuffers::Offset<MeshSphere> Finish() {
-    auto o = flatbuffers::Offset<MeshSphere>(fbb_.EndTable(start_, 4));
+    auto o = flatbuffers::Offset<MeshSphere>(fbb_.EndTable(start_, 3));
     return o;
   }
 };
 
 inline flatbuffers::Offset<MeshSphere> CreateMeshSphere(flatbuffers::FlatBufferBuilder &_fbb,
    flatbuffers::Offset<flatbuffers::String> Name = 0,
-   flatbuffers::Offset<flatbuffers::String> RessGrp = 0,
-   flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Material>>> materials = 0,
+   flatbuffers::Offset<Material> material = 0,
    float rad = 0) {
   MeshSphereBuilder builder_(_fbb);
   builder_.add_rad(rad);
-  builder_.add_materials(materials);
-  builder_.add_RessGrp(RessGrp);
+  builder_.add_material(material);
   builder_.add_Name(Name);
   return builder_.Finish();
 }
@@ -880,13 +946,24 @@ inline flatbuffers::Offset<Mesh> CreateMesh(flatbuffers::FlatBufferBuilder &_fbb
 }
 
 struct RenderableComponent FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  const EntityBase *entitybase() const { return GetPointer<const EntityBase *>(4); }
-  MemoryMgrType memType() const { return static_cast<MemoryMgrType>(GetField<uint8_t>(6, 0)); }
+  MemoryMgrType memType() const { return static_cast<MemoryMgrType>(GetField<uint8_t>(4, 0)); }
+  uint32_t renderqueue() const { return GetField<uint32_t>(6, 0); }
+  const flatbuffers::Vector<flatbuffers::Offset<Mesh>> *meshes() const { return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<Mesh>> *>(8); }
+  uint8_t castShadows() const { return GetField<uint8_t>(10, 0); }
+  uint32_t mode() const { return GetField<uint32_t>(12, 0); }
+  uint8_t showAABB() const { return GetField<uint8_t>(14, 0); }
+  uint32_t group() const { return GetField<uint32_t>(16, 0); }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, 4 /* entitybase */) &&
-           verifier.VerifyTable(entitybase()) &&
-           VerifyField<uint8_t>(verifier, 6 /* memType */) &&
+           VerifyField<uint8_t>(verifier, 4 /* memType */) &&
+           VerifyField<uint32_t>(verifier, 6 /* renderqueue */) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, 8 /* meshes */) &&
+           verifier.Verify(meshes()) &&
+           verifier.VerifyVectorOfTables(meshes()) &&
+           VerifyField<uint8_t>(verifier, 10 /* castShadows */) &&
+           VerifyField<uint32_t>(verifier, 12 /* mode */) &&
+           VerifyField<uint8_t>(verifier, 14 /* showAABB */) &&
+           VerifyField<uint32_t>(verifier, 16 /* group */) &&
            verifier.EndTable();
   }
 };
@@ -894,37 +971,46 @@ struct RenderableComponent FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table 
 struct RenderableComponentBuilder {
   flatbuffers::FlatBufferBuilder &fbb_;
   flatbuffers::uoffset_t start_;
-  void add_entitybase(flatbuffers::Offset<EntityBase> entitybase) { fbb_.AddOffset(4, entitybase); }
-  void add_memType(MemoryMgrType memType) { fbb_.AddElement<uint8_t>(6, static_cast<uint8_t>(memType), 0); }
+  void add_memType(MemoryMgrType memType) { fbb_.AddElement<uint8_t>(4, static_cast<uint8_t>(memType), 0); }
+  void add_renderqueue(uint32_t renderqueue) { fbb_.AddElement<uint32_t>(6, renderqueue, 0); }
+  void add_meshes(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Mesh>>> meshes) { fbb_.AddOffset(8, meshes); }
+  void add_castShadows(uint8_t castShadows) { fbb_.AddElement<uint8_t>(10, castShadows, 0); }
+  void add_mode(uint32_t mode) { fbb_.AddElement<uint32_t>(12, mode, 0); }
+  void add_showAABB(uint8_t showAABB) { fbb_.AddElement<uint8_t>(14, showAABB, 0); }
+  void add_group(uint32_t group) { fbb_.AddElement<uint32_t>(16, group, 0); }
   RenderableComponentBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
   RenderableComponentBuilder &operator=(const RenderableComponentBuilder &);
   flatbuffers::Offset<RenderableComponent> Finish() {
-    auto o = flatbuffers::Offset<RenderableComponent>(fbb_.EndTable(start_, 2));
+    auto o = flatbuffers::Offset<RenderableComponent>(fbb_.EndTable(start_, 7));
     return o;
   }
 };
 
 inline flatbuffers::Offset<RenderableComponent> CreateRenderableComponent(flatbuffers::FlatBufferBuilder &_fbb,
-   flatbuffers::Offset<EntityBase> entitybase = 0,
-   MemoryMgrType memType = MemoryMgrType_SCENE_DYNAMIC) {
+   MemoryMgrType memType = MemoryMgrType_SCENE_DYNAMIC,
+   uint32_t renderqueue = 0,
+   flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Mesh>>> meshes = 0,
+   uint8_t castShadows = 0,
+   uint32_t mode = 0,
+   uint8_t showAABB = 0,
+   uint32_t group = 0) {
   RenderableComponentBuilder builder_(_fbb);
-  builder_.add_entitybase(entitybase);
+  builder_.add_group(group);
+  builder_.add_mode(mode);
+  builder_.add_meshes(meshes);
+  builder_.add_renderqueue(renderqueue);
+  builder_.add_showAABB(showAABB);
+  builder_.add_castShadows(castShadows);
   builder_.add_memType(memType);
   return builder_.Finish();
 }
 
 struct Sound FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  const flatbuffers::String *name() const { return GetPointer<const flatbuffers::String *>(4); }
-  const flatbuffers::String *fileName() const { return GetPointer<const flatbuffers::String *>(6); }
-  const flatbuffers::String *ressGrp() const { return GetPointer<const flatbuffers::String *>(8); }
+  const LocalFile *file() const { return GetPointer<const LocalFile *>(4); }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, 4 /* name */) &&
-           verifier.Verify(name()) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, 6 /* fileName */) &&
-           verifier.Verify(fileName()) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, 8 /* ressGrp */) &&
-           verifier.Verify(ressGrp()) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, 4 /* file */) &&
+           verifier.VerifyTable(file()) &&
            verifier.EndTable();
   }
 };
@@ -932,34 +1018,28 @@ struct Sound FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
 struct SoundBuilder {
   flatbuffers::FlatBufferBuilder &fbb_;
   flatbuffers::uoffset_t start_;
-  void add_name(flatbuffers::Offset<flatbuffers::String> name) { fbb_.AddOffset(4, name); }
-  void add_fileName(flatbuffers::Offset<flatbuffers::String> fileName) { fbb_.AddOffset(6, fileName); }
-  void add_ressGrp(flatbuffers::Offset<flatbuffers::String> ressGrp) { fbb_.AddOffset(8, ressGrp); }
+  void add_file(flatbuffers::Offset<LocalFile> file) { fbb_.AddOffset(4, file); }
   SoundBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
   SoundBuilder &operator=(const SoundBuilder &);
   flatbuffers::Offset<Sound> Finish() {
-    auto o = flatbuffers::Offset<Sound>(fbb_.EndTable(start_, 3));
+    auto o = flatbuffers::Offset<Sound>(fbb_.EndTable(start_, 1));
     return o;
   }
 };
 
 inline flatbuffers::Offset<Sound> CreateSound(flatbuffers::FlatBufferBuilder &_fbb,
-   flatbuffers::Offset<flatbuffers::String> name = 0,
-   flatbuffers::Offset<flatbuffers::String> fileName = 0,
-   flatbuffers::Offset<flatbuffers::String> ressGrp = 0) {
+   flatbuffers::Offset<LocalFile> file = 0) {
   SoundBuilder builder_(_fbb);
-  builder_.add_ressGrp(ressGrp);
-  builder_.add_fileName(fileName);
-  builder_.add_name(name);
+  builder_.add_file(file);
   return builder_.Finish();
 }
 
 struct AI FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  const flatbuffers::String *scriptName() const { return GetPointer<const flatbuffers::String *>(4); }
+  const LocalFile *scriptfile() const { return GetPointer<const LocalFile *>(4); }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, 4 /* scriptName */) &&
-           verifier.Verify(scriptName()) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, 4 /* scriptfile */) &&
+           verifier.VerifyTable(scriptfile()) &&
            verifier.EndTable();
   }
 };
@@ -967,7 +1047,7 @@ struct AI FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
 struct AIBuilder {
   flatbuffers::FlatBufferBuilder &fbb_;
   flatbuffers::uoffset_t start_;
-  void add_scriptName(flatbuffers::Offset<flatbuffers::String> scriptName) { fbb_.AddOffset(4, scriptName); }
+  void add_scriptfile(flatbuffers::Offset<LocalFile> scriptfile) { fbb_.AddOffset(4, scriptfile); }
   AIBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
   AIBuilder &operator=(const AIBuilder &);
   flatbuffers::Offset<AI> Finish() {
@@ -977,9 +1057,9 @@ struct AIBuilder {
 };
 
 inline flatbuffers::Offset<AI> CreateAI(flatbuffers::FlatBufferBuilder &_fbb,
-   flatbuffers::Offset<flatbuffers::String> scriptName = 0) {
+   flatbuffers::Offset<LocalFile> scriptfile = 0) {
   AIBuilder builder_(_fbb);
-  builder_.add_scriptName(scriptName);
+  builder_.add_scriptfile(scriptfile);
   return builder_.Finish();
 }
 
@@ -1051,86 +1131,6 @@ inline flatbuffers::Offset<Trigger> CreateTrigger(flatbuffers::FlatBufferBuilder
   return builder_.Finish();
 }
 
-struct EntityBase FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  uint16_t entityId() const { return GetField<uint16_t>(4, 0); }
-  const flatbuffers::Vector<flatbuffers::Offset<Mesh>> *meshes() const { return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<Mesh>> *>(6); }
-  const flatbuffers::Vector<flatbuffers::Offset<Material>> *materials() const { return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<Material>> *>(8); }
-  const flatbuffers::String *boneparent() const { return GetPointer<const flatbuffers::String *>(10); }
-  uint32_t mode() const { return GetField<uint32_t>(12, 0); }
-  uint8_t castShadows() const { return GetField<uint8_t>(14, 0); }
-  const Debug *debug() const { return GetPointer<const Debug *>(16); }
-  uint32_t renderqueue() const { return GetField<uint32_t>(18, 0); }
-  uint32_t group() const { return GetField<uint32_t>(20, 0); }
-  const flatbuffers::String *name() const { return GetPointer<const flatbuffers::String *>(22); }
-  bool Verify(flatbuffers::Verifier &verifier) const {
-    return VerifyTableStart(verifier) &&
-           VerifyField<uint16_t>(verifier, 4 /* entityId */) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, 6 /* meshes */) &&
-           verifier.Verify(meshes()) &&
-           verifier.VerifyVectorOfTables(meshes()) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, 8 /* materials */) &&
-           verifier.Verify(materials()) &&
-           verifier.VerifyVectorOfTables(materials()) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, 10 /* boneparent */) &&
-           verifier.Verify(boneparent()) &&
-           VerifyField<uint32_t>(verifier, 12 /* mode */) &&
-           VerifyField<uint8_t>(verifier, 14 /* castShadows */) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, 16 /* debug */) &&
-           verifier.VerifyTable(debug()) &&
-           VerifyField<uint32_t>(verifier, 18 /* renderqueue */) &&
-           VerifyField<uint32_t>(verifier, 20 /* group */) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, 22 /* name */) &&
-           verifier.Verify(name()) &&
-           verifier.EndTable();
-  }
-};
-
-struct EntityBaseBuilder {
-  flatbuffers::FlatBufferBuilder &fbb_;
-  flatbuffers::uoffset_t start_;
-  void add_entityId(uint16_t entityId) { fbb_.AddElement<uint16_t>(4, entityId, 0); }
-  void add_meshes(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Mesh>>> meshes) { fbb_.AddOffset(6, meshes); }
-  void add_materials(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Material>>> materials) { fbb_.AddOffset(8, materials); }
-  void add_boneparent(flatbuffers::Offset<flatbuffers::String> boneparent) { fbb_.AddOffset(10, boneparent); }
-  void add_mode(uint32_t mode) { fbb_.AddElement<uint32_t>(12, mode, 0); }
-  void add_castShadows(uint8_t castShadows) { fbb_.AddElement<uint8_t>(14, castShadows, 0); }
-  void add_debug(flatbuffers::Offset<Debug> debug) { fbb_.AddOffset(16, debug); }
-  void add_renderqueue(uint32_t renderqueue) { fbb_.AddElement<uint32_t>(18, renderqueue, 0); }
-  void add_group(uint32_t group) { fbb_.AddElement<uint32_t>(20, group, 0); }
-  void add_name(flatbuffers::Offset<flatbuffers::String> name) { fbb_.AddOffset(22, name); }
-  EntityBaseBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
-  EntityBaseBuilder &operator=(const EntityBaseBuilder &);
-  flatbuffers::Offset<EntityBase> Finish() {
-    auto o = flatbuffers::Offset<EntityBase>(fbb_.EndTable(start_, 10));
-    return o;
-  }
-};
-
-inline flatbuffers::Offset<EntityBase> CreateEntityBase(flatbuffers::FlatBufferBuilder &_fbb,
-   uint16_t entityId = 0,
-   flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Mesh>>> meshes = 0,
-   flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Material>>> materials = 0,
-   flatbuffers::Offset<flatbuffers::String> boneparent = 0,
-   uint32_t mode = 0,
-   uint8_t castShadows = 0,
-   flatbuffers::Offset<Debug> debug = 0,
-   uint32_t renderqueue = 0,
-   uint32_t group = 0,
-   flatbuffers::Offset<flatbuffers::String> name = 0) {
-  EntityBaseBuilder builder_(_fbb);
-  builder_.add_name(name);
-  builder_.add_group(group);
-  builder_.add_renderqueue(renderqueue);
-  builder_.add_debug(debug);
-  builder_.add_mode(mode);
-  builder_.add_boneparent(boneparent);
-  builder_.add_materials(materials);
-  builder_.add_meshes(meshes);
-  builder_.add_entityId(entityId);
-  builder_.add_castShadows(castShadows);
-  return builder_.Finish();
-}
-
 struct PhysicsComponent FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   const flatbuffers::Vector<flatbuffers::Offset<PhysicsObject>> *physics() const { return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<PhysicsObject>> *>(4); }
   bool Verify(flatbuffers::Verifier &verifier) const {
@@ -1158,80 +1158,6 @@ inline flatbuffers::Offset<PhysicsComponent> CreatePhysicsComponent(flatbuffers:
    flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<PhysicsObject>>> physics = 0) {
   PhysicsComponentBuilder builder_(_fbb);
   builder_.add_physics(physics);
-  return builder_.Finish();
-}
-
-struct Debug FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  uint8_t Show() const { return GetField<uint8_t>(4, 0); }
-  uint8_t ShowAABB() const { return GetField<uint8_t>(6, 0); }
-  bool Verify(flatbuffers::Verifier &verifier) const {
-    return VerifyTableStart(verifier) &&
-           VerifyField<uint8_t>(verifier, 4 /* Show */) &&
-           VerifyField<uint8_t>(verifier, 6 /* ShowAABB */) &&
-           verifier.EndTable();
-  }
-};
-
-struct DebugBuilder {
-  flatbuffers::FlatBufferBuilder &fbb_;
-  flatbuffers::uoffset_t start_;
-  void add_Show(uint8_t Show) { fbb_.AddElement<uint8_t>(4, Show, 0); }
-  void add_ShowAABB(uint8_t ShowAABB) { fbb_.AddElement<uint8_t>(6, ShowAABB, 0); }
-  DebugBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
-  DebugBuilder &operator=(const DebugBuilder &);
-  flatbuffers::Offset<Debug> Finish() {
-    auto o = flatbuffers::Offset<Debug>(fbb_.EndTable(start_, 2));
-    return o;
-  }
-};
-
-inline flatbuffers::Offset<Debug> CreateDebug(flatbuffers::FlatBufferBuilder &_fbb,
-   uint8_t Show = 0,
-   uint8_t ShowAABB = 0) {
-  DebugBuilder builder_(_fbb);
-  builder_.add_ShowAABB(ShowAABB);
-  builder_.add_Show(Show);
-  return builder_.Finish();
-}
-
-struct Material FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  const flatbuffers::String *name() const { return GetPointer<const flatbuffers::String *>(4); }
-  const flatbuffers::String *fileName() const { return GetPointer<const flatbuffers::String *>(6); }
-  const flatbuffers::String *RessGrp() const { return GetPointer<const flatbuffers::String *>(8); }
-  bool Verify(flatbuffers::Verifier &verifier) const {
-    return VerifyTableStart(verifier) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, 4 /* name */) &&
-           verifier.Verify(name()) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, 6 /* fileName */) &&
-           verifier.Verify(fileName()) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, 8 /* RessGrp */) &&
-           verifier.Verify(RessGrp()) &&
-           verifier.EndTable();
-  }
-};
-
-struct MaterialBuilder {
-  flatbuffers::FlatBufferBuilder &fbb_;
-  flatbuffers::uoffset_t start_;
-  void add_name(flatbuffers::Offset<flatbuffers::String> name) { fbb_.AddOffset(4, name); }
-  void add_fileName(flatbuffers::Offset<flatbuffers::String> fileName) { fbb_.AddOffset(6, fileName); }
-  void add_RessGrp(flatbuffers::Offset<flatbuffers::String> RessGrp) { fbb_.AddOffset(8, RessGrp); }
-  MaterialBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
-  MaterialBuilder &operator=(const MaterialBuilder &);
-  flatbuffers::Offset<Material> Finish() {
-    auto o = flatbuffers::Offset<Material>(fbb_.EndTable(start_, 3));
-    return o;
-  }
-};
-
-inline flatbuffers::Offset<Material> CreateMaterial(flatbuffers::FlatBufferBuilder &_fbb,
-   flatbuffers::Offset<flatbuffers::String> name = 0,
-   flatbuffers::Offset<flatbuffers::String> fileName = 0,
-   flatbuffers::Offset<flatbuffers::String> RessGrp = 0) {
-  MaterialBuilder builder_(_fbb);
-  builder_.add_RessGrp(RessGrp);
-  builder_.add_fileName(fileName);
-  builder_.add_name(name);
   return builder_.Finish();
 }
 
@@ -1559,10 +1485,16 @@ inline flatbuffers::Offset<ParameterNode> CreateParameterNode(flatbuffers::FlatB
 }
 
 struct TransitionSelectNode FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  uint16_t size() const { return GetField<uint16_t>(4, 0); }
+  uint16_t select() const { return GetField<uint16_t>(4, 0); }
+  float timeIn() const { return GetField<float>(6, 0); }
+  float timeOut() const { return GetField<float>(8, 0); }
+  uint16_t size() const { return GetField<uint16_t>(10, 0); }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
-           VerifyField<uint16_t>(verifier, 4 /* size */) &&
+           VerifyField<uint16_t>(verifier, 4 /* select */) &&
+           VerifyField<float>(verifier, 6 /* timeIn */) &&
+           VerifyField<float>(verifier, 8 /* timeOut */) &&
+           VerifyField<uint16_t>(verifier, 10 /* size */) &&
            verifier.EndTable();
   }
 };
@@ -1570,19 +1502,28 @@ struct TransitionSelectNode FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table
 struct TransitionSelectNodeBuilder {
   flatbuffers::FlatBufferBuilder &fbb_;
   flatbuffers::uoffset_t start_;
-  void add_size(uint16_t size) { fbb_.AddElement<uint16_t>(4, size, 0); }
+  void add_select(uint16_t select) { fbb_.AddElement<uint16_t>(4, select, 0); }
+  void add_timeIn(float timeIn) { fbb_.AddElement<float>(6, timeIn, 0); }
+  void add_timeOut(float timeOut) { fbb_.AddElement<float>(8, timeOut, 0); }
+  void add_size(uint16_t size) { fbb_.AddElement<uint16_t>(10, size, 0); }
   TransitionSelectNodeBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
   TransitionSelectNodeBuilder &operator=(const TransitionSelectNodeBuilder &);
   flatbuffers::Offset<TransitionSelectNode> Finish() {
-    auto o = flatbuffers::Offset<TransitionSelectNode>(fbb_.EndTable(start_, 1));
+    auto o = flatbuffers::Offset<TransitionSelectNode>(fbb_.EndTable(start_, 4));
     return o;
   }
 };
 
 inline flatbuffers::Offset<TransitionSelectNode> CreateTransitionSelectNode(flatbuffers::FlatBufferBuilder &_fbb,
+   uint16_t select = 0,
+   float timeIn = 0,
+   float timeOut = 0,
    uint16_t size = 0) {
   TransitionSelectNodeBuilder builder_(_fbb);
+  builder_.add_timeOut(timeOut);
+  builder_.add_timeIn(timeIn);
   builder_.add_size(size);
+  builder_.add_select(select);
   return builder_.Finish();
 }
 
@@ -1783,13 +1724,52 @@ inline flatbuffers::Offset<AnimNode> CreateAnimNode(flatbuffers::FlatBufferBuild
   return builder_.Finish();
 }
 
+struct BodyComponent FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+  const Vec3f *position() const { return GetStruct<const Vec3f *>(4); }
+  const Quat4f *rotation() const { return GetStruct<const Quat4f *>(6); }
+  const Vec3f *scale() const { return GetStruct<const Vec3f *>(8); }
+  bool Verify(flatbuffers::Verifier &verifier) const {
+    return VerifyTableStart(verifier) &&
+           VerifyField<Vec3f>(verifier, 4 /* position */) &&
+           VerifyField<Quat4f>(verifier, 6 /* rotation */) &&
+           VerifyField<Vec3f>(verifier, 8 /* scale */) &&
+           verifier.EndTable();
+  }
+};
+
+struct BodyComponentBuilder {
+  flatbuffers::FlatBufferBuilder &fbb_;
+  flatbuffers::uoffset_t start_;
+  void add_position(const Vec3f *position) { fbb_.AddStruct(4, position); }
+  void add_rotation(const Quat4f *rotation) { fbb_.AddStruct(6, rotation); }
+  void add_scale(const Vec3f *scale) { fbb_.AddStruct(8, scale); }
+  BodyComponentBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
+  BodyComponentBuilder &operator=(const BodyComponentBuilder &);
+  flatbuffers::Offset<BodyComponent> Finish() {
+    auto o = flatbuffers::Offset<BodyComponent>(fbb_.EndTable(start_, 3));
+    return o;
+  }
+};
+
+inline flatbuffers::Offset<BodyComponent> CreateBodyComponent(flatbuffers::FlatBufferBuilder &_fbb,
+   const Vec3f *position = 0,
+   const Quat4f *rotation = 0,
+   const Vec3f *scale = 0) {
+  BodyComponentBuilder builder_(_fbb);
+  builder_.add_scale(scale);
+  builder_.add_rotation(rotation);
+  builder_.add_position(position);
+  return builder_.Finish();
+}
+
 struct AnimationComponent FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   const flatbuffers::String *animationTree() const { return GetPointer<const flatbuffers::String *>(4); }
   const flatbuffers::String *animationInfo() const { return GetPointer<const flatbuffers::String *>(6); }
   const flatbuffers::Vector<flatbuffers::Offset<AnimNode>> *nodes() const { return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<AnimNode>> *>(8); }
   const flatbuffers::Vector<const Connection *> *connections() const { return GetPointer<const flatbuffers::Vector<const Connection *> *>(10); }
   const flatbuffers::Vector<const Constant *> *constants() const { return GetPointer<const flatbuffers::Vector<const Constant *> *>(12); }
-  uint32_t output() const { return GetField<uint32_t>(14, 0); }
+  const flatbuffers::String *boneparent() const { return GetPointer<const flatbuffers::String *>(14); }
+  uint32_t output() const { return GetField<uint32_t>(16, 0); }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
            VerifyField<flatbuffers::uoffset_t>(verifier, 4 /* animationTree */) &&
@@ -1803,7 +1783,9 @@ struct AnimationComponent FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
            verifier.Verify(connections()) &&
            VerifyField<flatbuffers::uoffset_t>(verifier, 12 /* constants */) &&
            verifier.Verify(constants()) &&
-           VerifyField<uint32_t>(verifier, 14 /* output */) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, 14 /* boneparent */) &&
+           verifier.Verify(boneparent()) &&
+           VerifyField<uint32_t>(verifier, 16 /* output */) &&
            verifier.EndTable();
   }
 };
@@ -1816,11 +1798,12 @@ struct AnimationComponentBuilder {
   void add_nodes(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<AnimNode>>> nodes) { fbb_.AddOffset(8, nodes); }
   void add_connections(flatbuffers::Offset<flatbuffers::Vector<const Connection *>> connections) { fbb_.AddOffset(10, connections); }
   void add_constants(flatbuffers::Offset<flatbuffers::Vector<const Constant *>> constants) { fbb_.AddOffset(12, constants); }
-  void add_output(uint32_t output) { fbb_.AddElement<uint32_t>(14, output, 0); }
+  void add_boneparent(flatbuffers::Offset<flatbuffers::String> boneparent) { fbb_.AddOffset(14, boneparent); }
+  void add_output(uint32_t output) { fbb_.AddElement<uint32_t>(16, output, 0); }
   AnimationComponentBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
   AnimationComponentBuilder &operator=(const AnimationComponentBuilder &);
   flatbuffers::Offset<AnimationComponent> Finish() {
-    auto o = flatbuffers::Offset<AnimationComponent>(fbb_.EndTable(start_, 6));
+    auto o = flatbuffers::Offset<AnimationComponent>(fbb_.EndTable(start_, 7));
     return o;
   }
 };
@@ -1831,9 +1814,11 @@ inline flatbuffers::Offset<AnimationComponent> CreateAnimationComponent(flatbuff
    flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<AnimNode>>> nodes = 0,
    flatbuffers::Offset<flatbuffers::Vector<const Connection *>> connections = 0,
    flatbuffers::Offset<flatbuffers::Vector<const Constant *>> constants = 0,
+   flatbuffers::Offset<flatbuffers::String> boneparent = 0,
    uint32_t output = 0) {
   AnimationComponentBuilder builder_(_fbb);
   builder_.add_output(output);
+  builder_.add_boneparent(boneparent);
   builder_.add_constants(constants);
   builder_.add_connections(connections);
   builder_.add_nodes(nodes);

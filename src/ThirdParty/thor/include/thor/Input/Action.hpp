@@ -34,6 +34,7 @@
 
 #include <functional>
 
+#include <SDL.h>
 
 namespace thor
 {
@@ -45,6 +46,28 @@ namespace detail
 } // namespace detail
 
 // ---------------------------------------------------------------------------------------------------------------------------
+enum MouseBottonID
+{
+	NONE = -1,
+	MBID_0,
+	MBID_1,
+	MBID_2,
+	MBID_3,
+	MBID_4,
+	MBID_5,
+	MBID_6,
+	MBID_7,
+	MBID_8,
+	MBID_9
+};
+
+enum MouseWheelEvt
+{
+	MW_UP,
+	MW_DOWN,
+	MW_LEFT,
+	MW_RIGHT,
+};
 
 
 /// @addtogroup Input
@@ -75,29 +98,31 @@ class THOR_API Action
 		/// @brief Construct key action
 		/// @details Creates an action that is in effect when @a key is manipulated. The second parameter specifies whether
 		///  KeyPressed events, KeyReleased events or sf::Keyboard::isKeyPressed() act as action source.
-		explicit					Action(sf::Keyboard::Key key, ActionType action = Hold);
+		explicit					Action(SDL_Scancode key, ActionType action = Hold);
 
 		/// @brief Construct mouse button action
 		/// @details Creates an action that is in effect when @a mouseButton is manipulated. The second parameter specifies whether
 		///  MouseButtonPressed events, MouseButtonReleased events or sf::Mouse::isButtonPressed() act as action source.
-		explicit					Action(sf::Mouse::Button mouseButton, ActionType action = Hold);
+		explicit					Action(MouseBottonID mouseButton, ActionType action = Hold);
+
+		explicit					Action(MouseWheelEvt mouseWheel);
 
 		/// @brief Construct joystick button action
 		/// @details Creates an action that is in effect when the joystick button stored in @a joystickState is manipulated.
 		///  The second parameter specifies whether JoyButtonPressed events, JoyButtonReleased events or
 		///  sf::Joystick::isButtonPressed() act as action source.
-		explicit					Action(JoystickButton joystickState, ActionType action = Hold);
+		explicit					Action(SDL_JoyButtonEvent joystickState, ActionType action = Hold);
 
 		/// @brief Construct joystick axis action
 		/// @details Creates an action that is in effect when the absolute value of the joystick axis position exceeds a threshold
 		///  (both axis and threshold are stored in @a joystickAxis). The source of the action is sf::Joystick::getAxisPosition()
 		///  and not JoystickMoved events. This implies that the action will also be active if the axis remains unchanged in a
 		///  position above the threshold.
-		explicit					Action(JoystickAxis joystickState);
+		explicit					Action(SDL_JoyAxisEvent joystickState);
 
 		/// @brief Construct SFML event action
 		/// @details Creates an action that is in effect when a SFML event of the type @a eventType is fired.
-		explicit					Action(sf::Event::EventType eventType);
+		explicit					Action(SDL_EventType eventType);
 
 
 	// ---------------------------------------------------------------------------------------------------------------------------
@@ -132,7 +157,7 @@ class THOR_API Action
 	friend Action THOR_API operator|| (const Action& lhs, const Action& rhs);
 	friend Action THOR_API operator&& (const Action& lhs, const Action& rhs);
 	friend Action THOR_API operator! (const Action& action);
-	friend Action THOR_API eventAction(std::function<bool(const sf::Event&)> filter);
+	friend Action THOR_API eventAction(std::function<bool(const SDL_Event&)> filter);
 	friend Action THOR_API realtimeAction(std::function<bool()> filter);
 	/// @endcond
 };
@@ -187,7 +212,7 @@ Action THOR_API				operator! (const Action& action);
 ///
 /// thor::Action xPressed = thor::eventAction(&isXPressed);
 /// @endcode
-Action THOR_API				eventAction(std::function<bool(const sf::Event&)> filter);
+Action THOR_API				eventAction(std::function<bool(const SDL_Event&)> filter);
 
 /// @relates Action
 /// @brief Creates a custom action that operates on realtime input

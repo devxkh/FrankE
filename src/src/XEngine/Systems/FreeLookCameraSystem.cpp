@@ -93,8 +93,8 @@ namespace XE {
 
 				camera.get()->getRenderable().updateTransform(camNode.getPosition(), camNode.getOrientation());
 
-				camera->m_CameraYaw = 0;
-				camera->m_CameraPitch = 0;
+			//	camera->m_CameraYaw = 0;
+		//		camera->m_CameraPitch = 0;
 
 				camera->IsDirty(false);
 			}	  

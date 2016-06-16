@@ -7,8 +7,12 @@ typedef struct sqlite3 sqlite3;
 
 namespace XE {
 
+	class XEngine;
+
 	class DB
 	{
+	public:
+		DB(XEngine& settings);
 
 	protected:
 		void open();
@@ -18,6 +22,8 @@ namespace XE {
 		sqlite3* mDB;
 
 	private:
+
+		XEngine& m_engine;
 		int mSQLCode;
 		Ogre::String mQuery = "";
 		char* mErrMsg = 0;

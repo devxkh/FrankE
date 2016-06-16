@@ -1,11 +1,11 @@
 #include <XEngine/Components/Controller.hpp>
 
 
-#include <XEngine/Controller/InputCmd.hpp>
+//#include <XEngine/Controller/InputCmd.hpp>
 
-#include <XEInput/InputConfigFile.hpp>
+//#include <XEInput/InputConfigFile.hpp>
 
-#include <Thor/Input/InputNames.hpp>
+//#include <Thor/Input/InputNames.hpp>
 
 #include <iostream>
 
@@ -14,7 +14,7 @@
 #include "flatbuffers/util.h"
 
 
-#include <ThirdParty/sfml/include/sfml/Window.hpp>
+//#include <ThirdParty/sfml/include/sfml/Window.hpp>
 
 namespace XE
 {
@@ -22,14 +22,19 @@ namespace XE
 	using namespace thor;
 	//using namespace sf;
 
-	ControllerComponent::ControllerComponent(sf::Uint16 id, XEngine& engine, sf::Window* window, bool defaultCtrl)
+	ControllerComponent::ControllerComponent(Uint16 id, XEngine& engine, SDL_Window* window, bool defaultCtrl)
 		: isActive(false)
 		, m_window(window)
 		, mID(id)
 		, engine(engine)
 	{
-		_windowState.width = window->getSize().x;
-		_windowState.height = window->getSize().y;
+		SDL_GetWindowSize(window,
+			&_windowState.width,
+			&_windowState.width);
+
+
+		//_windowState.width = window->getSize().x;
+		//_windowState.height = window->getSize().y;
 		_windowState.isDirty = true;
 
 		//default mouse keyboard

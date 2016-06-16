@@ -29,14 +29,8 @@
 #ifndef THOR_ACTIONCONTEXT_HPP
 #define THOR_ACTIONCONTEXT_HPP
 
-
-namespace sf
-{
-
-	class Window;
-	class Event;
-
-} // namespace sf
+class SDL_Window;
+//class SDL_Event;
 
 
 namespace thor
@@ -54,7 +48,7 @@ template <typename ActionId>
 struct ActionContext
 {
 	// Constructor
-	ActionContext(sf::Window* window, const sf::Event* event, const ActionId& actionId)
+	ActionContext(SDL_Window* window, const SDL_Event* event, const ActionId& actionId)
 	: window(window)
 	, event(event)
 	, actionId(actionId)
@@ -66,7 +60,7 @@ struct ActionContext
 	/// @brief Pointer to sf::Window passed to the ActionMap::invokeCallbacks().
 	/// @details Use this variable to access the window inside a callback function. This pointer can be @a nullptr if you
 	///  didn't specify a window when calling ActionMap::invokeCallbacks().
-	sf::Window*					window;
+	SDL_Window*					window;
 
 	/// @brief Pointer to a sf::Event that contributed to this action's activation.
 	/// @details Do not store the pointer. It is a null pointer if the action is not an event action (triggered by a sf::Event), but a realtime action (triggered
@@ -83,7 +77,7 @@ struct ActionContext
 	/// Note that meaningful combinations of logical operators involve at most one %event action and possibly multiple realtime actions that can be active at the same time
 	/// (see operator documentation). Example actions are <i>event && realtime</i> or <i>event || event</i>. Thus, only one context will be built for logical combinations,
 	/// and at most one event will be stored in it.
-	const sf::Event*			event;
+	const SDL_Event*			event;
 
 	/// @brief Identifier of the action.
 	/// @details This is the ID referring to this action, used as argument for ActionMap::operator[] and EventSystem::connect().

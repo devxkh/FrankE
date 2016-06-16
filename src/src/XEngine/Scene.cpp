@@ -87,19 +87,19 @@ namespace XE {
 	}
 
 
-	void Scene::create(XE::Uint16 sceneID, char* fbData)
+	void Scene::create(Uint16 sceneID, void* fbData)
 	{
 		m_sceneID = sceneID;
 
 
-		//	systems.add<XE::ControllerSystem>(0, m_engine);
+		//	systems.add<ControllerSystem>(0, m_engine);
 		systems.add<PhysicsSystem>(*this);
 		systems.add<FreeLookCameraSystem>(*this);// 0, mGraphicsManager, this);
 		systems.add<RenderBodySystem>(m_engine.getGraphicsManager());
 		systems.add<EntityRenderSystem>();
 		systems.add<AnimationControllerSystem>(m_engine.getGraphicsManager(), *this);
 		//systems.add<UIStateManager>(); // UISystem
-		//	XE::SpawnSystem* spawnSysten = scene->systems.add<XE::SpawnSystem>();
+		//	SpawnSystem* spawnSysten = scene->systems.add<SpawnSystem>();
 		systems.configure();
 
 		//load scene from datasource
@@ -139,15 +139,15 @@ namespace XE {
 		});
 	}
 
-	void Scene::reload(char* fbData)
+	void Scene::reload(void* fbData)
 	{
 	}
 
-	void Scene::createEntity(XE::Int32 entityID, char* entityData, bool replicateEntity)
+	entityx::Entity Scene::createEntity(Int32 entityID, void* entityData, bool replicateEntity)
 	{
 		auto entity = entities.create();
 
-		bool deleteBufferInRenderThread = createEntity(entity, m_engine, m_sceneID, entityID, entityData, replicateEntity);
+		bool deleteBufferInRenderThread = createEntity(entity, m_sceneID, entityID, entityData, replicateEntity);
 
 		if (deleteBufferInRenderThread)
 		{
@@ -169,9 +169,11 @@ namespace XE {
 				entityData = nullptr;
 			}
 		}
+
+		return entity;
 	}
 
-	int Scene::callbackNewNode(Scene& scenePointer, XE::Int32 entityID, char* entityData, bool replicateEntity)
+	int Scene::callbackNewNode(Scene& scenePointer, Int32 entityID, char* entityData, bool replicateEntity)
 	{
 		std::cout << "callbackNewNode entID:" << entityID << std::endl;// << gameEntity.getName();
 
@@ -189,43 +191,43 @@ namespace XE {
 	{
 	}
 
-	bool Scene::createEntity(entityx::Entity entity, XE::XEngine& engine, XE::Uint16 sceneID, XE::Uint32 entityID, char* entityData, bool replicateEntity)
+	bool Scene::createEntity(entityx::Entity entity, Uint16 sceneID, Uint32 entityID, void* entityData, bool replicateEntity)
 	{
-		if (replicateEntity && !entity.has_component<XE::NetIdComponent>())
+		if (replicateEntity && !entity.has_component<NetIdComponent>())
 		{
-			auto netID = entity.assign<XE::NetIdComponent>();
+			auto netID = entity.assign<NetIdComponent>();
 			netID->entityID = entityID;
 		}
 
 		return createEntityType(entity, entityData);
 	}
 
-	void Scene::createSoundComponent(XE::XEngine& engine, entityx::Entity entity, XE::Uint16 scendId, const void* fbData)
+	void Scene::createSoundComponent( entityx::Entity entity, Uint16 scendId, const void* fbData)
 	{
 
 	}
 
-	void Scene::updateSoundComponent(XE::XEngine& engine, entityx::Entity entity, XE::Uint16 scendId, const void* fbData)
+	void Scene::updateSoundComponent(entityx::Entity entity, Uint16 scendId, const void* fbData)
 	{
 
 	}
 
 
-	void Scene::createPhysicsComponent(XE::XEngine& engine, entityx::Entity entity, XE::Uint16 scendId, const void* fbData)
+	void Scene::createPhysicsComponent( entityx::Entity entity, Uint16 scendId, const void* fbData)
 	{
 		const XFBType::PhysicsComponent* fbPhysicsComponent = (const XFBType::PhysicsComponent*)fbData;
 
 		auto physics = fbPhysicsComponent->physics();
 		if (physics)
 		{
-			entityx::ComponentHandle<XE::PhysicsComponent> physicsComponent = entity.assign<XE::PhysicsComponent>();
+			entityx::ComponentHandle<PhysicsComponent> physicsComponent = entity.assign<PhysicsComponent>();
 
 			for (auto physicObject : *physics)
 			{
 				if (physicObject->type() == XFBType::PhysicsType::PhysicsType_PT_CHARACTER)
 				{
-					auto rigidbody = std::unique_ptr<XE::CharacterPhysics>(new XE::CharacterPhysics);
-					rigidbody->create(systems.system<XE::PhysicsSystem>()->getDynamicsWorld(), physicObject);
+					auto rigidbody = std::unique_ptr<CharacterPhysics>(new CharacterPhysics);
+					rigidbody->create(systems.system<PhysicsSystem>()->getDynamicsWorld(), physicObject);
 
 					//set data
 					rigidbody->Id = physicObject->id();
@@ -236,8 +238,8 @@ namespace XE {
 				}
 				else// if(physicObject->type() == XFBType::PhysicsType::PhysicsType_PT_RIGID)
 				{
-					auto rigidbody = std::unique_ptr<XE::RigidBody>(new XE::RigidBody);
-					rigidbody->create(systems.system<XE::PhysicsSystem>()->getDynamicsWorld(), physicObject);
+					auto rigidbody = std::unique_ptr<RigidBody>(new RigidBody);
+					rigidbody->create(systems.system<PhysicsSystem>()->getDynamicsWorld(), physicObject);
 
 					//set data
 					rigidbody->Id = physicObject->id();
@@ -247,9 +249,9 @@ namespace XE {
 			}
 
 			//set body for phyiscs
-			if (entity.has_component<XE::BodyComponent>())
+			if (entity.has_component<BodyComponent>())
 			{
-				auto body = entity.component<XE::BodyComponent>();
+				auto body = entity.component<BodyComponent>();
 
 				for each (auto& physicsObj in physicsComponent->objects)
 				{
@@ -266,14 +268,14 @@ namespace XE {
 		}
 	}
 
-	void Scene::updatePhysicsComponent(XE::XEngine& engine, entityx::Entity entity, XE::Uint16 scendId, const void* fbData)
+	void Scene::updatePhysicsComponent(entityx::Entity entity, Uint16 scendId, const void* fbData)
 	{
 		const XFBType::PhysicsComponent* fbPhysicsComponent = (const XFBType::PhysicsComponent*)fbData;
 
 		auto physics = fbPhysicsComponent->physics();
 		if (physics)
 		{
-			entityx::ComponentHandle<XE::PhysicsComponent> physicsComponent = entity.assign<XE::PhysicsComponent>();
+			entityx::ComponentHandle<PhysicsComponent> physicsComponent = entity.assign<PhysicsComponent>();
 
 			for (auto fbPhysicObject : *physics)
 			{
@@ -284,11 +286,11 @@ namespace XE {
 					{
 						if (fbPhysicObject->type() == XFBType::PhysicsType::PhysicsType_PT_CHARACTER)
 						{
-							auto rigidBody = static_cast<XE::RigidBody*>(physicsObj.get());
+							auto rigidBody = static_cast<RigidBody*>(physicsObj.get());
 
 							//todo change without destroy!
 							rigidBody->rigidBody->destroy(); // destroy
-							rigidBody->create(systems.system<XE::PhysicsSystem>()->getDynamicsWorld(), fbPhysicObject); //create
+							rigidBody->create(systems.system<PhysicsSystem>()->getDynamicsWorld(), fbPhysicObject); //create
 						}
 
 						break; //found
@@ -298,43 +300,41 @@ namespace XE {
 		}
 	}
 
-	void Scene::createRenderableComponent(XE::XEngine& engine, entityx::Entity entity, XE::Uint16 scendId, const void* fbData)
+	void Scene::createRenderableComponent(entityx::Entity entity, Uint16 scendId, const void* fbData)
 	{
 		const XFBType::RenderableComponent* staticRenderableItem = (const XFBType::RenderableComponent*)fbData;
 
-		auto entbase = staticRenderableItem->entitybase();
+		auto renderable = entity.assign<Renderable>(m_engine.getGraphicsManager(), *this, fbData);
+		auto netID = entity.component<NetIdComponent>();
+		netID->id = m_engine.getNetworkManager().newNetID();
 
-		auto renderable = entity.assign<XE::Renderable>(engine.getGraphicsManager(), engine.getScene(), fbData);
-		auto netID = entity.component<XE::NetIdComponent>();
-		netID->id = engine.getNetworkManager().newNetID();
-
-		if (entity.has_component<XE::AnimationComponent>())
+		if (entity.has_component<AnimationComponent>())
 		{
-			auto animationComponent = entity.component<XE::AnimationComponent>();
+			auto animationComponent = entity.component<AnimationComponent>();
 			renderable->createAnimations(*animationComponent.get());
 		}
 	}
 
-	void Scene::updateRenderableComponent(XE::XEngine& engine, entityx::Entity entity, XE::Uint16 scendId, const void* fbData)
+	void Scene::updateRenderableComponent(entityx::Entity entity, Uint16 scendId, const void* fbData)
 	{
 		const XFBType::RenderableComponent* staticRenderableItem = (const XFBType::RenderableComponent*)fbData;
 
-		auto renderable = entity.component<XE::Renderable>(); //(entbase->entityId(), engine.getGraphicsManager(), scene, fbData->data());#
+		auto renderable = entity.component<Renderable>(); //(entbase->entityId(), engine.getGraphicsManager(), scene, fbData->data());#
 		renderable->update(fbData);
 	}
 
-	void Scene::createBodyComponent(XE::XEngine& engine, entityx::Entity entity, const void* fbData)
+	void Scene::createBodyComponent(entityx::Entity entity, const void* fbData)
 	{
 		const XFBType::Node* node = (const XFBType::Node*)fbData;
 
-		entityx::ComponentHandle<XE::BodyComponent> body = entity.assign<XE::BodyComponent>(node->transform());// , scene->getNodeMemoryMgr());
-		auto netID = entity.component<XE::NetIdComponent>();
-		netID->id = engine.getNetworkManager().newNetID();
+		entityx::ComponentHandle<BodyComponent> body = entity.assign<BodyComponent>(node->transform());// , scene->getNodeMemoryMgr());
+		auto netID = entity.component<NetIdComponent>();
+		netID->id = m_engine.getNetworkManager().newNetID();
 
 		//set body for physics
-		if (entity.has_component<XE::PhysicsComponent>())
+		if (entity.has_component<PhysicsComponent>())
 		{
-			auto physicsComponent = entity.component<XE::PhysicsComponent>();
+			auto physicsComponent = entity.component<PhysicsComponent>();
 			for each (auto& physicsObj in physicsComponent->objects)
 			{
 				physicsObj->setEntityWithBody(entity);
@@ -349,24 +349,13 @@ namespace XE {
 		//	std::cout << netID->id;
 	}
 
-	void Scene::updateBodyComponent(XE::XEngine& engine, entityx::Entity entity, const void* fbData)
+	void Scene::updateBodyComponent( entityx::Entity entity, const void* fbData)
 	{
 		const XFBType::Node* node = (const XFBType::Node*)fbData;
-		entity.component<XE::BodyComponent>()->setPosition(node->transform()->loc()->x(), node->transform()->loc()->y(), node->transform()->loc()->z());
+		entity.component<BodyComponent>()->setPosition(node->transform()->loc()->x(), node->transform()->loc()->y(), node->transform()->loc()->z());
 	}
 
-	void Scene::createScene(XE::XEngine& engine, const void* fbData)
-	{
-		if (fbData)
-		{
-			const XFBType::Scene* sceneData = (const XFBType::Scene*)fbData;
-			engine.getLua().loadScene(sceneData->sceneid());
-		}
-		else
-			LOG(WARNING) << "fbData paremeter is null! in createScene";
-	}
-
-	void Scene::updateScene(XE::XEngine& engine, XE::Uint16 scendId, const void* fbData)
+	void Scene::updateScene(Uint16 scendId, const void* fbData)
 	{
 		const XFBType::Scene* sceneData = (const XFBType::Scene*)fbData;
 
@@ -377,58 +366,58 @@ namespace XE {
 		}
 	}
 
-	void Scene::createSpawnPointComponent(XE::XEngine& engine, entityx::Entity entity, const void* fbData)
+	void Scene::createSpawnPointComponent(entityx::Entity entity, const void* fbData)
 	{
 		const XFBType::SpawnPointComponent* fbSPoint = (const XFBType::SpawnPointComponent*)fbData;
 
-		auto sp = entity.assign<XE::SpawnPointComponent>();
+		auto sp = entity.assign<SpawnPointComponent>();
 		sp->id = fbSPoint->id();
 		sp->m_group = fbSPoint->SPGroup();
 	}
 
-	void Scene::updateSpawnPointComponent(XE::XEngine& engine, entityx::Entity entity, const void* fbData)
+	void Scene::updateSpawnPointComponent(entityx::Entity entity, const void* fbData)
 	{
 		const XFBType::SpawnPointComponent* fbSPoint = (const XFBType::SpawnPointComponent*)fbData;
-		auto sp = entity.component<XE::SpawnPointComponent>();
+		auto sp = entity.component<SpawnPointComponent>();
 		sp->id = fbSPoint->id();
 		sp->m_group = fbSPoint->SPGroup();
 	}
 
-	void Scene::createLightComponent(XE::XEngine& engine, entityx::Entity entity, XE::Uint16 scendId, const void* fbData)
+	void Scene::createLightComponent(entityx::Entity entity, Uint16 scendId, const void* fbData)
 	{
 		const XFBType::Light* characterComp = (const XFBType::Light*)fbData;
 
-		entity.assign<XE::LightRenderable>(engine.getGraphicsManager(), engine.getScene(), fbData);
+		entity.assign<LightRenderable>(m_engine.getGraphicsManager(), *this, fbData);
 	}
 
-	void Scene::updateLightComponent(XE::XEngine& engine, entityx::Entity entity, const void* fbData)
+	void Scene::updateLightComponent(entityx::Entity entity, const void* fbData)
 	{
 		const XFBType::Light* characterComp = (const XFBType::Light*)fbData;
-		//	entity.component<XE::LightComponent>()->setTransform(node->transform());
+		//	entity.component<LightComponent>()->setTransform(node->transform());
 	}
 
-	void Scene::createAnimationComponent(XE::XEngine& engine, entityx::Entity entity, const void* fbData)
+	void Scene::createAnimationComponent(entityx::Entity entity, const void* fbData)
 	{
 		const XFBType::AnimationComponent* animationComp = (const XFBType::AnimationComponent*)fbData;
 
-		auto animationComponent = entity.assign<XE::AnimationComponent>(engine.getGraphicsManager(), entity);
+		auto animationComponent = entity.assign<AnimationComponent>(m_engine.getGraphicsManager(), entity);
 
 		animationComponent->initialize(animationComp);
 
 		//animationComponent->animationSystem.loadAnimationTree("D:/Projekte/Src Game/Data/Data_Tests/XETCharacter/simpleOrgeDanceTree.xml");
 		//animationComponent->animationSystem.loadAnimationInfo("D:/Projekte/Src Game/Data/Data_Tests/XETCharacter/animation_info.xml");
 
-		if (entity.has_component<XE::Renderable>())
+		if (entity.has_component<Renderable>())
 		{
-			auto renderable = entity.component<XE::Renderable>();
+			auto renderable = entity.component<Renderable>();
 			renderable->createAnimations(*animationComponent.get());
 		}
 	}
 
-	void Scene::updateAnimationComponent(XE::XEngine& engine, entityx::Entity entity, const void* fbData)
+	void Scene::updateAnimationComponent(entityx::Entity entity, const void* fbData)
 	{
 		const XFBType::AnimationComponent* animationComp = (const XFBType::AnimationComponent*)fbData;
-		//	entity.component<XE::LightComponent>()->setTransform(node->transform());
+		//	entity.component<LightComponent>()->setTransform(node->transform());
 	}
 
 } // namespace XE

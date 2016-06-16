@@ -4,15 +4,10 @@
 
 #include <XEngine/Controller/UI/UI_Console.hpp>
 #include <XEngine/Controller/UI/UIFrameStatState.hpp>
-
 #include <XEngine/Components/CameraFree.hpp>
 #include <XEngine/Components/Controller.hpp>
 #include <XEPhysics/Physics/gkRayTest.h>
-
-
 #include "Controllers_generated.h"
-
-
 #include <functional>
 
 namespace XET {
@@ -35,7 +30,6 @@ namespace XET {
 
 		controller.system.connect(ControllerSettings::ActionType_Resized, [this](XE::ActionContext context) { onResized(context); });
 
-
 		controller.system.connect(ControllerSettings::ActionType_KeyPressed, [this](XE::ActionContext context) { onKeyPressed(context); });
 		controller.system.connect(ControllerSettings::ActionType_TextEntered, [this](XE::ActionContext context) { onTextEntered(context); });
 
@@ -45,136 +39,115 @@ namespace XET {
 		controller.system.connect(ControllerSettings::ActionType_PointMoved, [this](XE::ActionContext context) { onPointMoved(context); });
 	}
 
-
 	TestControllerSystem::TestControllerSystem(XE::XEngine& engine)
 		: mEngine(engine)
 		, mDecalDestroy(false)
 		, _lastMousePos(0, 0)
 		, _mousePressed(false)
 		, moveDirection(0, 0, 0)
-		//, _windowState()
 
 		, _turn_speed(0)
 		, _zoom_speed(0)
 	{
 		//	mCamera.getCamera()->setNearClipDistance(0.7);
-		/*	Ogre::uint16 fd = 5;
-			CameraController test(engine->getGraphicsManager(), engine->getScene());*/
-
-			//	settingActionMap();
-
-				//engine->getGraphicsManager().createWorkspace(window);
-
-				//engine->getGraphicsManager().addFrameListener(this);
-
-				//mRayScnQuery = mEngine->getCurrentState()->getStateData()->mScene->getSceneMgr()->createRayQuery(Ogre::Ray());
+		//mRayScnQuery = mEngine->mScene->getSceneMgr()->createRayQuery(Ogre::Ray());
 	}
 
 	TestControllerSystem::~TestControllerSystem()
 	{
-
 	}
 
-	/// needed for sfgui mouse clicked events!!
 	void TestControllerSystem::onPointMoved(XE::ActionContext context)
 	{
-		//if (mConsole)
-		//	mConsole->onKeyPressed(event.key.code);
+		// Ignore this if it happened due to a warp
+		if (handleWarpMotion(context.event->motion))
+			return;
 
-		sf::Vector2i mousePosition = sf::Vector2i(context.event->mouseMove.x, context.event->mouseMove.y);//;sf::Mouse::getPosition(*controller.m_window);
+		// Try to keep the mouse inside the window
+		if (m_windowHasFocus)
+			wrapMousePointer(context.event->motion, context.window);
+
+		// If in relative mode, don't trigger events unless window has focus
+		if (m_wantRelative && !m_windowHasFocus)
+			return;
+
+		sf::Vector2i mousePosition = sf::Vector2i(context.event->button.x, context.event->button.y);//;sf::Mouse::getPosition(*controller.m_window);
 
 		std::cout << "onPointMoved! x:" << mousePosition.x << ",y:" << mousePosition.y << std::endl;
 
 		entityx::ComponentHandle<TestControllerComponent> controller;
 		entityx::ComponentHandle<XE::ScreenComponent> screen;
 
-		//todo !!! check all scenes for controllers or handle all controllers in a separat list?
 		for (entityx::Entity entity : mEngine.getScene().entities.entities_with_components(controller, screen)) {
 
-			screen->m_Desktop->HandleEvent(*context.event);
+			screen->m_Desktop->onPointMoved(mousePosition.x, mousePosition.y);
 
-			sf::Vector2i pos = sf::Mouse::getPosition(*controller->m_window);
+			if (!_mousePressed)
+				continue;
 
+			//-----------------------------------------------
+			//TODO only if no Interface active!!!!
+			float tx = controller->_windowState.width;
+			float ty = controller->_windowState.height;
 
-			sf::Vector2i delta;
+			float deltax = -context.event->motion.xrel / tx;
+			float deltay = -context.event->motion.yrel / ty;
 
-			if (_mousePressed)
+			//	std::cout << "delta! x:" << deltax << ",y:" << deltay << std::endl;
+
+			if (entity.has_component<XE::CameraFreeComponent>())
 			{
-				//Mouse bewegt?
-				if (_lastMousePos != pos && _lastMousePos != sf::Vector2i(0, 0))
-				{
-					sf::Mouse::setPosition(_lastMousePos, *controller->m_window);
-					delta = _lastMousePos - pos;
-
-					//if (mGameEntity)
-					//	mCameraController.updateCameraGoal(delta.x, delta.y, 0);
-					//	else
-					if (entity.has_component<XE::CameraFreeComponent>())
-					{
-						entity.component<XE::CameraFreeComponent>()->rotate(delta.x, delta.y);
-					}
-
-					std::cout << "onCameraMove   delta = (" << delta.x << ", " << delta.y << ")" << std::endl;
-				}
+				entity.component<XE::CameraFreeComponent>()->rotate(deltax, deltay);
 			}
 		}
-
 	}
 
 	void TestControllerSystem::onKeyPressed(XE::ActionContext context)
 	{
-		//if (mConsole)
-		//	mConsole->onKeyPressed(event.key.code);
-
-		std::cout << "onKeyPressed! " << context.event->key.code << std::endl;
+		std::cout << "onKeyPressed! " << context.event->key.keysym.scancode << std::endl;
 
 		entityx::ComponentHandle<TestControllerComponent> controller;
 		entityx::ComponentHandle<XE::ScreenComponent> screen;
 
-		//todo !!! check all scenes for controllers or handle all controllers in a separat list?
 		for (entityx::Entity entity : mEngine.getScene().entities.entities_with_components(controller, screen)) {
-
-			screen->m_Desktop->HandleEvent(*context.event);
+			screen->m_Desktop->onKeyEvent(context.event->key);
 		}
 	}
 
 	void TestControllerSystem::onTextEntered(XE::ActionContext context)
 	{
-		//if (mConsole)
-		//	mConsole->onTextEntered(event.key.code);
-
-		std::cout << "onTextEntered! " << context.event->key.code << std::endl;
+		std::cout << "onTextEntered! " << context.event->text.text << std::endl;
 
 		entityx::ComponentHandle<TestControllerComponent> controller;
 		entityx::ComponentHandle<XE::ScreenComponent> screen;
 
-		//todo !!! check all scenes for controllers or handle all controllers in a separat list?
 		for (entityx::Entity entity : mEngine.getScene().entities.entities_with_components(controller, screen)) {
-
-			screen->m_Desktop->HandleEvent(*context.event);
+			screen->m_Desktop->onTextEvent(context.event->text);
 		}
 	}
 
 	void TestControllerSystem::onPointSelectStart(XE::ActionContext context)
 	{
-		std::cout << "onPointSelectStart! " << context.event->key.code << std::endl;
+		std::cout << "onPointSelectStart! " << context.event->button.button << std::endl;
+
+		setGrabMousePointer(true, context.window);
+		setMouseVisible(false, context.window);
 
 		entityx::ComponentHandle<TestControllerComponent> controller;
 		entityx::ComponentHandle<XE::ScreenComponent> screen;
 
-		//todo !!! check all scenes for controllers or handle all controllers in a separat list?
 		for (entityx::Entity entity : mEngine.getScene().entities.entities_with_components(controller, screen)) {
 
-			screen->m_Desktop->HandleEvent(*context.event);
+			screen->m_Desktop->onPointDown(context.event->button.x, context.event->button.y);
 		}
 
-		_lastMousePos = sf::Vector2i(context.event->mouseMove.x, context.event->mouseMove.y);
+		_lastMousePos = sf::Vector2i(context.event->button.x, context.event->button.y);
 		_mousePressed = true;
 	}
 
 	void TestControllerSystem::onPointSelectEnd(XE::ActionContext context)
 	{
-		std::cout << "onPointSelectEnd! " << context.event->key.code << std::endl;
+		std::cout << "onPointSelectEnd! " << context.event->button.button << std::endl;
 
 		entityx::ComponentHandle<TestControllerComponent> controller;
 		entityx::ComponentHandle<XE::ScreenComponent> screen;
@@ -182,44 +155,32 @@ namespace XET {
 		//todo !!! check all scenes for controllers or handle all controllers in a separat list?
 		for (entityx::Entity entity : mEngine.getScene().entities.entities_with_components(controller, screen)) {
 
-			screen->m_Desktop->HandleEvent(*context.event);
+			screen->m_Desktop->onPointUp(context.event->button.x, context.event->button.y);
 		}
+
+		setGrabMousePointer(false, context.window);
+		setMouseVisible(true, context.window);
 		_mousePressed = false;
 	}
 
 	void TestControllerSystem::onResized(XE::ActionContext context)
 	{
-		// The XE::Event member variable called type has always the value XE::Event::Resized, as specified in the XE::Action
-		// constructor. Since the Resize action has been triggered by an XE::Event (and not by a XE::Keyboard, XE::Mouse or
-		// XE::Joystick), we can also be sure that context.event is no null pointer.
-		///	XE::Event event = *context.event;
+		SDLInputHandler::onWindowEvent(context);
 
-		//	mUIScreen->setSize(m_window->getSize().x,m_window->getSize().y);
-
-		//KH needed??		mView.mRenderWindow->resize(event.size.width, event.size.height);
-		//	ogreCamera->setAspectRatio(Ogre::Real(event.size.width) / Ogre::Real(event.size.height));
-
-		// context.Window is a pointer to the sf::Window passed to the thor::ActionMap constructor.It can
-		// be used for mouse input relative to a window, as follows:
-		sf::Vector2i mousePosition = sf::Mouse::getPosition(*context.window);
-		//	std::cout << "Shoot: " << thor::toString(mousePosition) << std::endl;
-
-		mEngine.getGraphicsManager().resizeRenderWindow(context.window->getSize().x, context.window->getSize().y);
+		sf::Vector2i size;
+		SDL_GetWindowSize(context.window, &size.x, &size.y);
+		mEngine.getGraphicsManager().resizeRenderWindow(size.x, size.y);
 
 		entityx::ComponentHandle<TestControllerComponent> controller;
 
-		//todo !!! check all scenes for controllers or handle all controllers in a separat list?
 		for (entityx::Entity entity : mEngine.getScene().entities.entities_with_components(controller)) {
 
-			controller->_windowState.width = context.event->size.width;
-			controller->_windowState.height = context.event->size.height;
+			controller->_windowState.width = size.x;
+			controller->_windowState.height = size.y;
 			controller->_windowState.isDirty = true;
 		}
 
-		//KH todo ---		mEngine->getUIMgr().windowResized(mView.mRenderWindow);
-
-		std::cout << "Resized!   New size = (" << context.event->size.width << ", " << context.event->size.height << ")" << std::endl;
-		std::cout << "Resized!   New Screensize = (x:" << context.window->getSize().x << ",y: " << context.window->getSize().y << ")" << std::endl;
+		std::cout << "Resized!   New size = (" << size.x << ", " << size.y << ")" << std::endl;
 	}
 
 	void TestControllerSystem::menuNav(XE::ActionContext context, TestControllerComponent& controller)
@@ -297,8 +258,7 @@ namespace XET {
 		for (entityx::Entity entity : es.entities_with_components(controller)) {
 
 			if (controller->m_window)
-				controller->actionmap.update(*controller->m_window); //clears events !!
-
+				controller->actionmap.update(); //clearing events !!
 
 			// Forward actions to callbacks: Invokes onResize() in case of Event::Resized events
 			controller->actionmap.invokeCallbacks(controller->system, controller->m_window);
@@ -316,13 +276,7 @@ namespace XET {
 				//		LOG(INFO) << "camposx:" << camera->getCameraNode().getPosition().x << "camposy:" << camera->getCameraNode().getPosition().y << "camposz:" << camera->getCameraNode().getPosition().z;
 			}
 
-
 			moveDirection = XE::Vector3(0, 0, 0);
-
-			//	moveDirection = Vector3(0,0,0);
-
-				//if (mConsole)
-				//	mConsole->update();
 
 			if (entity.has_component<XE::ScreenComponent>())
 			{

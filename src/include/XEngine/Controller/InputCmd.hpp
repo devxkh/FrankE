@@ -1,8 +1,8 @@
 #ifndef __INPUTCMD_HPP__
 #define __INPUTCMD_HPP__
 
-#include <sfml/Config.hpp>
-#include <sfml/System/Vector2.hpp>
+//#include <sfml/Config.hpp>
+//#include <sfml/System/Vector2.hpp>
 
 namespace InputCmd
 {

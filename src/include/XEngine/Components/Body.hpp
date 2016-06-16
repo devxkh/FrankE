@@ -475,6 +475,8 @@ namespace XE
 		useful for simple transforms that don't require a child node.*/
 		virtual_l2 Ogre::Quaternion convertLocalToWorldOrientation(const Ogre::Quaternion &localOrientation);
 
+		mutable bool _isNetIDDirty;
+
 	protected:
 		/// Whether to yaw around a fixed axis.
 		bool mYawFixed;
@@ -487,6 +489,7 @@ namespace XE
 
 		/// World transform needs update flag.
 		mutable bool _isDirty;
+		
 		/// Enabled flag.
 		bool m_isEnabled;
 

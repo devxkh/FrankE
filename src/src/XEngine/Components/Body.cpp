@@ -11,7 +11,8 @@ namespace XE
 		, mYawFixed(true)
 		, mYawFixedAxis(Ogre::Vector3::UNIT_Y)
 		,mPosition(0,0,0),
-		 _isDirty(true)
+		 _isDirty(true)	
+		,_isNetIDDirty(true)
 		,mOrientation(1,0,0,0),
 		mScale(1,1,1),
 		mDerivedPosition(0,0,0),
@@ -40,6 +41,7 @@ namespace XE
 		mInheritOrientation(true),
 		mInheritScale(true)
 		,_isDirty(true)
+		, _isNetIDDirty(true)
 		, m_parent(nullptr)
 	{
 		setPosition(transform->loc()->x(), transform->loc()->y(), transform->loc()->z());
@@ -53,6 +55,9 @@ namespace XE
 	void BodyComponent::isDirty(bool isDirty)
 	{
 		_isDirty = isDirty;
+
+		if(isDirty)
+			_isNetIDDirty = true; //only set to false in serversystem!
 
 		for each (auto& child in m_children)
 		{
@@ -379,7 +384,9 @@ namespace XE
 			// Note the order of the mult, i.e. q comes after
 			mOrientation = mOrientation * qnorm;
 			break;
-		}		
+		}	
+
+		isDirty(true);
 	}
 
 	//-----------------------------------------------------------------------

@@ -107,10 +107,10 @@ namespace XE {
 		void draw() override;
 		sf::Vector2f CalculateRequisition();
 
-		void HandleMouseButtonEvent(sf::Mouse::Button button, bool press, int x, int y) override;
+		void HandleMouseButtonEvent(bool press, int x, int y) override;
 	//	void HandleUpdate(float seconds) override;
-		void HandleTextEvent(sf::Uint32 character) override;
-		void HandleKeyEvent(sf::Keyboard::Key key, bool press) override;
+		void HandleTextEvent(const char* character) override;
+		void HandleKeyEvent(const SDL_KeyboardEvent& key, bool press) override;
 		//void HandleSizeChange() override;
 		void HandleFocusChange(Widget::Ptr focused_widget) override;
 

@@ -176,7 +176,7 @@ namespace XE
 						event.peer->incomingPeerID);
 					fflush(stdout);
 
-					m_peers[event.peer->incomingPeerID] = event.peer;
+				//	m_peers[event.peer->incomingPeerID] = event.peer;
 
 					char buf[64];
 					sprintf(buf, "%u:%u", event.peer->address.host, event.peer->address.port);
@@ -201,7 +201,7 @@ namespace XE
 					NWMessage msg;
 					msg.data = event.packet->data; //evtl. flatbuffer data
 					msg.len = event.packet->dataLength;
-					msg.peerID = event.peer->incomingPeerID;
+					msg.peer = event.peer;// ->incomingPeerID;
 
 					autodeleteBuffer = receivedMessage(msg);
 
@@ -231,9 +231,9 @@ namespace XE
 
 					// 5. Publisher broadcasts
 					for (int i = 0; i < views.size(); i++)
-						views[i]->disconnected(event.peer->incomingPeerID);
+						views[i]->disconnected(event.peer);
 
-					m_peers.erase(event.peer->incomingPeerID);
+				//	m_peers.erase(event.peer->incomingPeerID);
 
 					event.peer->data = 0; // reset the peer's client information.
 					peer = 0;
@@ -302,11 +302,12 @@ namespace XE
 		views.push_back(obs);
 	}
 
-	void NetworkManager::sendMessage(NetIdComponent& netComponent, const void * data, size_t dataLength, _ENetPacketFlag flag){
+	void NetworkManager::sendMessage(ENetPeer* peer, const void * data, size_t dataLength, _ENetPacketFlag flag){
 		
-		if (m_peers.size() <= 0)// || netComponent.peerID == 0)
+	//	if (m_peers.size() <= 0)// || netComponent.peerID == 0)
+	//		return;
+		if (!peer)
 			return;
-
 		//const char* pack = "nodes mit size und orientation";
 		
 		/* Create a reliable packet of size 7 containing "packet\0" */
@@ -324,7 +325,7 @@ namespace XE
 	// Pick channel for sending and broadcast to all peers
 	//--->>todo 	enet_host_broadcast(host, 0, packet);
 
-		enet_peer_send(m_peers[netComponent.peerID], 0, packet);
+		enet_peer_send(peer, 0, packet);
 
 		/* One could just use enet_host_service() instead. */
 		enet_host_flush(host);

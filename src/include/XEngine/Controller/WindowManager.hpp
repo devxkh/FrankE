@@ -1,8 +1,8 @@
 #ifndef __WINDOWMANAGER_HPP__
 #define __WINDOWMANAGER_HPP__
-
-#include <sfml/Window/Window.hpp>
-#include <sfml/System/String.hpp>
+//
+//#include <sfml/Window/Window.hpp>
+//#include <sfml/System/String.hpp>
 
 #include <memory>
 
@@ -13,36 +13,36 @@ namespace XE {
 	class XEngine;
 
 
-	class WindowManager
-	{
+	//class WindowManager
+	//{
 
-	public:
+	//public:
 
-		WindowManager();
-		~WindowManager();
+	//	WindowManager();
+	//	~WindowManager();
 
-		//void UpdateViews();
-		sf::Window* createWindow(sf::VideoMode mode, const sf::String& title, sf::Uint32 style = sf::Style::Default);
-		sf::Window* createWindow(sf::WindowHandle hwnd);
-		
-		sf::Window* getWindow(sf::Uint8 id) { return _window; }
+	//	//void UpdateViews();
+	//	sf::Window* createWindow(sf::VideoMode mode, const sf::String& title, sf::Uint32 style = sf::Style::Default);
+	//	sf::Window* createWindow(sf::WindowHandle hwnd);
+	//	
+	//	sf::Window* getWindow(sf::Uint8 id) { return _window; }
 
-		//void createWorkspace(Controller& controller);
+	//	//void createWorkspace(Controller& controller);
 
-		//inline sf::Window* getWindow() { return mWindow; }
+	//	//inline sf::Window* getWindow() { return mWindow; }
 
-	protected:
+	//protected:
 
-	private:
-		//obsolete
-		//void createViewport(Controller& controller, Ogre::RenderWindow* renderWindow = nullptr, Ogre::RenderTarget* renderTarget = nullptr);
+	//private:
+	//	//obsolete
+	//	//void createViewport(Controller& controller, Ogre::RenderWindow* renderWindow = nullptr, Ogre::RenderTarget* renderTarget = nullptr);
 
-		//Ogre::TexturePtr mRtt_texture;
+	//	//Ogre::TexturePtr mRtt_texture;
 
-		XEngine* mEngine;
-		sf::Window* _window;
-		//Ogre::RenderWindow* mRenderWindow;
-	};
+	//	XEngine* mEngine;
+	//	sf::Window* _window;
+	//	//Ogre::RenderWindow* mRenderWindow;
+	//};
 
 } // namespace XE
 

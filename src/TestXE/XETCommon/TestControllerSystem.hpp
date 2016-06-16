@@ -14,10 +14,7 @@ namespace XE
 
 namespace XET {
 
-	//class ControllerComponent;
-
-
-	class TestControllerSystem : public entityx::System < TestControllerSystem >
+	class TestControllerSystem : public entityx::System < TestControllerSystem > , public XE::SDLInputHandler
 	{
 	public:
 
@@ -26,8 +23,7 @@ namespace XET {
 		~TestControllerSystem();
 
 		void createConsole();
-
-
+		
 		void setBasicInputEvents(TestControllerComponent& controller);
 
 		virtual void onPointMoved(XE::ActionContext context);
@@ -50,20 +46,17 @@ namespace XET {
 
 	private:
 
-		const std::string m_atlasName = "XEngine";
 		float _turn_speed;
 		float _zoom_speed;
 		XE::XEngine& mEngine;
-
 		bool mDecalDestroy;
 		sf::Vector2i mMousePos;
-
 		sf::Vector2i _lastMousePos;
 		bool _mousePressed;
-		XE::Vector3 moveDirection; // pro Frame auf null setzen 
+		XE::Vector3 moveDirection; // set to null per frame
 	};
 
-} // namespace XE
+} // namespace XET
 
 #endif //__TestControllerSystem_HPP__
 

@@ -48,94 +48,166 @@ namespace XE {
 		}
 	}
 
-	void Desktop::HandleEvent(const sf::Event& event) {
 
-		sf::Vector2f position;
-		bool check_inside(false);
-		Widget::Ptr last_receiver(m_last_receiver.lock());
-
-		// If we've got a mouse event, get local mouse position and mark event for being checked against widget's allocation.
-		if (event.type == sf::Event::MouseMoved) {
-			m_last_mouse_pos.x = event.mouseMove.x;
-			m_last_mouse_pos.y = event.mouseMove.y;
-			position = sf::Vector2f(static_cast<float>(event.mouseMove.x), static_cast<float>(event.mouseMove.y));
-			check_inside = true;
-		}
-		else if (event.type == sf::Event::MouseButtonPressed || event.type == sf::Event::MouseButtonReleased) {
-			m_last_mouse_pos.x = event.mouseButton.x;
-			m_last_mouse_pos.y = event.mouseButton.y;
-			position = sf::Vector2f(static_cast<float>(event.mouseButton.x), static_cast<float>(event.mouseButton.y));
-			check_inside = true;
-		}
-
+	void Desktop::onPointMoved(const float& x, const float& y) {
+	
 		//dont use an iterator here! it's possible widget deletion happens while iterating here
 		for (int index = 0; index < static_cast<int>(m_children.size()); ++index) {
 			Widget::Ptr widget(m_children[static_cast<std::size_t>(index)]);
-		
+
 			// Skip widget if not visible or is insensitive.
 			if (!widget->IsLocallyVisible() || widget->GetState() == Widget::State::INSENSITIVE) {
 				continue;
 			}
 
-			//bool is_inside(widget->GetAllocation().contains(position));
-
-			// If the event is a mouse button press, check if we need to focus another widget.
-			// If there is a modal widget, skip reordering.
-			//if (
-			//	index > 0 &&
-			//	event.type == sf::Event::MouseButtonPressed &&
-			//	is_inside &&
-			//	!Widget::HasModal()
-			//	) {
-			//	m_children.erase(m_children.begin() + index);
-			//	m_children.push_front(widget);
-
-			//	RecalculateWidgetLevels();
-			//}
-
-			//// If inside check is needed, do so for all widgets except the top window.
-			//// Else it would run into trouble when moving the window, for example,
-			//// where the mouse may be outside the widget's allocation.
-			//if (check_inside && !is_inside && index > 0) {
-			//	continue;
-			//}
-
-			//// If last receiver is different from current, fake a mouse move event so
-			//// that states are reset correctly. Warning, this is a hack, but it works™.
-			//// The fake event is also sent when the last mouse move event receiver
-			//// isn't the current and top one.
-			//if (event.type == sf::Event::MouseMoved && last_receiver && last_receiver != widget && last_receiver != m_children.front()) {
-			//	SendFakeMouseMoveEvent(last_receiver);
-			//	m_last_receiver = widget;
-			//	last_receiver = widget;
-			//}
-
-
-			//else if (event.type == sf::Event::KeyPressed)
-			//{
-			//	widget->HandleEvent(event);
-			//	LOG(INFO) << "KeyPressed";
-			//}
-			//else if (event.type == sf::Event::KeyReleased)
-			//{
-			//	LOG(INFO) << "KeyReleased";
-			//}
-			//else if (event.type == sf::Event::TextEntered) {
-			//	LOG(INFO) << "TextEntered";
-			//	widget->HandleEvent(event);
-			//}
-
-
-			widget->HandleEvent(event);
-
-			//if (check_inside && is_inside) {
-			//	if (index < m_children.size() && widget == m_children[index]) {
-			//		m_last_receiver = widget;
-			//	}
-			//	break;
-			//}
+			widget->onPointMoved(x,y);
 		}
 	}
+
+	void Desktop::onPointDown(const float& x, const float& y) {
+		//dont use an iterator here! it's possible widget deletion happens while iterating here
+		for (int index = 0; index < static_cast<int>(m_children.size()); ++index) {
+			Widget::Ptr widget(m_children[static_cast<std::size_t>(index)]);
+
+			// Skip widget if not visible or is insensitive.
+			if (!widget->IsLocallyVisible() || widget->GetState() == Widget::State::INSENSITIVE) {
+				continue;
+			}
+
+			widget->onPointDown(x, y);
+		}
+	}
+
+	void Desktop::onPointUp(const float& x, const float& y) {
+		//dont use an iterator here! it's possible widget deletion happens while iterating here
+		for (int index = 0; index < static_cast<int>(m_children.size()); ++index) {
+			Widget::Ptr widget(m_children[static_cast<std::size_t>(index)]);
+
+			// Skip widget if not visible or is insensitive.
+			if (!widget->IsLocallyVisible() || widget->GetState() == Widget::State::INSENSITIVE) {
+				continue;
+			}
+
+			widget->onPointUp(x, y);
+		}
+	}
+
+	void Desktop::onKeyEvent(const  SDL_KeyboardEvent& key) {
+		//dont use an iterator here! it's possible widget deletion happens while iterating here
+		for (int index = 0; index < static_cast<int>(m_children.size()); ++index) {
+			Widget::Ptr widget(m_children[static_cast<std::size_t>(index)]);
+
+			// Skip widget if not visible or is insensitive.
+			if (!widget->IsLocallyVisible() || widget->GetState() == Widget::State::INSENSITIVE) {
+				continue;
+			}
+
+			widget->onKeyEvent(key);
+		}
+	}
+
+	void Desktop::onTextEvent(const SDL_TextInputEvent& text) {
+		//dont use an iterator here! it's possible widget deletion happens while iterating here
+		for (int index = 0; index < static_cast<int>(m_children.size()); ++index) {
+			Widget::Ptr widget(m_children[static_cast<std::size_t>(index)]);
+
+			// Skip widget if not visible or is insensitive.
+			if (!widget->IsLocallyVisible() || widget->GetState() == Widget::State::INSENSITIVE) {
+				continue;
+			}
+
+			widget->onTextEvent(text);
+		}
+	}
+
+	//void Desktop::HandleEvent(const sf::Event& event) {
+
+	//	//sf::Vector2f position;
+	//	//bool check_inside(false);
+	//	//Widget::Ptr last_receiver(m_last_receiver.lock());
+
+	//	//// If we've got a mouse event, get local mouse position and mark event for being checked against widget's allocation.
+	//	//if (event.type == sf::Event::MouseMoved) {
+	//	//	m_last_mouse_pos.x = event.mouseMove.x;
+	//	//	m_last_mouse_pos.y = event.mouseMove.y;
+	//	//	position = sf::Vector2f(static_cast<float>(event.mouseMove.x), static_cast<float>(event.mouseMove.y));
+	//	//	check_inside = true;
+	//	//}
+	//	//else if (event.type == sf::Event::MouseButtonPressed || event.type == sf::Event::MouseButtonReleased) {
+	//	//	m_last_mouse_pos.x = event.mouseButton.x;
+	//	//	m_last_mouse_pos.y = event.mouseButton.y;
+	//	//	position = sf::Vector2f(static_cast<float>(event.mouseButton.x), static_cast<float>(event.mouseButton.y));
+	//	//	check_inside = true;
+	//	//}
+
+	//	//dont use an iterator here! it's possible widget deletion happens while iterating here
+	//	for (int index = 0; index < static_cast<int>(m_children.size()); ++index) {
+	//		Widget::Ptr widget(m_children[static_cast<std::size_t>(index)]);
+	//	
+	//		// Skip widget if not visible or is insensitive.
+	//		if (!widget->IsLocallyVisible() || widget->GetState() == Widget::State::INSENSITIVE) {
+	//			continue;
+	//		}
+
+	//		//bool is_inside(widget->GetAllocation().contains(position));
+
+	//		// If the event is a mouse button press, check if we need to focus another widget.
+	//		// If there is a modal widget, skip reordering.
+	//		//if (
+	//		//	index > 0 &&
+	//		//	event.type == sf::Event::MouseButtonPressed &&
+	//		//	is_inside &&
+	//		//	!Widget::HasModal()
+	//		//	) {
+	//		//	m_children.erase(m_children.begin() + index);
+	//		//	m_children.push_front(widget);
+
+	//		//	RecalculateWidgetLevels();
+	//		//}
+
+	//		//// If inside check is needed, do so for all widgets except the top window.
+	//		//// Else it would run into trouble when moving the window, for example,
+	//		//// where the mouse may be outside the widget's allocation.
+	//		//if (check_inside && !is_inside && index > 0) {
+	//		//	continue;
+	//		//}
+
+	//		//// If last receiver is different from current, fake a mouse move event so
+	//		//// that states are reset correctly. Warning, this is a hack, but it works™.
+	//		//// The fake event is also sent when the last mouse move event receiver
+	//		//// isn't the current and top one.
+	//		//if (event.type == sf::Event::MouseMoved && last_receiver && last_receiver != widget && last_receiver != m_children.front()) {
+	//		//	SendFakeMouseMoveEvent(last_receiver);
+	//		//	m_last_receiver = widget;
+	//		//	last_receiver = widget;
+	//		//}
+
+
+	//		//else if (event.type == sf::Event::KeyPressed)
+	//		//{
+	//		//	widget->HandleEvent(event);
+	//		//	LOG(INFO) << "KeyPressed";
+	//		//}
+	//		//else if (event.type == sf::Event::KeyReleased)
+	//		//{
+	//		//	LOG(INFO) << "KeyReleased";
+	//		//}
+	//		//else if (event.type == sf::Event::TextEntered) {
+	//		//	LOG(INFO) << "TextEntered";
+	//		//	widget->HandleEvent(event);
+	//		//}
+
+
+	//		widget->HandleEvent(event);
+
+	//		//if (check_inside && is_inside) {
+	//		//	if (index < m_children.size() && widget == m_children[index]) {
+	//		//		m_last_receiver = widget;
+	//		//	}
+	//		//	break;
+	//		//}
+	//	}
+	//}
 
 	//void Desktop::Remove(std::shared_ptr<Widget> widget) {
 	//	WidgetsList::iterator iter(std::find(m_children.begin(), m_children.end(), widget));
@@ -198,13 +270,13 @@ namespace XE {
 		RecalculateWidgetLevels();
 	}*/
 
-	void Desktop::SendFakeMouseMoveEvent(std::shared_ptr<Widget> widget, int x, int y) const {
-		sf::Event fake_event;
-		fake_event.type = sf::Event::MouseMoved;
-		fake_event.mouseMove.x = x;
-		fake_event.mouseMove.y = y;
-		widget->HandleEvent(fake_event);
-	}
+	//void Desktop::SendFakeMouseMoveEvent(std::shared_ptr<Widget> widget, int x, int y) const {
+	//	sf::Event fake_event;
+	//	fake_event.type = sf::Event::MouseMoved;
+	//	fake_event.mouseMove.x = x;
+	//	fake_event.mouseMove.y = y;
+	//	widget->HandleEvent(fake_event);
+	//}
 
 	/*void Desktop::RecalculateWidgetLevels() {
 		auto children_size = m_children.size();

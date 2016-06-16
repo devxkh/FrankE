@@ -1,19 +1,12 @@
 #pragma once
 
 
-#include <Ogre/OgreMain/include/OgreVector2.h>
-#include <Ogre/OgreMain/include/OgreVector3.h>
-#include <Ogre/OgreMain/include/OgreMemoryAllocatedObject.h>
+#include <ThirdParty/sfml/include/sfml/System/Vector2.hpp>
 
-#include <sfml/Graphics/Rect.hpp>
-
-//#include <SFGUI/Config.hpp>
 #include <XEUI/Object.hpp>
 #include <memory>
-//#include <SFGUI/RenderQueue.hpp>
 
-//#include <SFML/Graphics/Drawable.hpp>
-#include <SFML/Window/Event.hpp>
+#include <SDL.h>
 #include <map>
 #include <string>
 #include <cstdint>
@@ -119,13 +112,11 @@ class Widget : public Object, public std::enable_shared_from_this<Widget> {
 		 */
 		State GetState() const;
 
-		/** Handle SFML event.
-		 * Handle an SFML event and fire proper signals. Normally reimplemented by
-		 * containers only.
-		 * @param event SFML event.
-		 */
-		virtual void HandleEvent( const sf::Event& event );
-
+		virtual void onPointMoved( const float& x, const float& y);
+		virtual void onPointDown( const float& x, const float& y);
+		virtual void onPointUp( const float& x, const float& y);
+		virtual void onKeyEvent(const  SDL_KeyboardEvent& key);
+		virtual void onTextEvent(const SDL_TextInputEvent& text);
 		
 		/** Handle global visibility changes.
 		 */
@@ -245,12 +236,12 @@ class Widget : public Object, public std::enable_shared_from_this<Widget> {
 		 * @param button Given mouse button. Defaults to check if ANY button is down.
 		 * @return true if the given mouse button is down.
 		 */
-		bool IsMouseButtonDown( sf::Mouse::Button button = sf::Mouse::ButtonCount ) const;
+		//bool IsMouseButtonDown( sf::Mouse::Button button = sf::Mouse::ButtonCount ) const;
 
-		/** Set whether the given mouse button is down.
-		 * @param button Given mouse button. Defaults to clear button down state for all buttons.
-		 */
-		void SetMouseButtonDown( sf::Mouse::Button button = sf::Mouse::ButtonCount );
+		///** Set whether the given mouse button is down.
+		// * @param button Given mouse button. Defaults to clear button down state for all buttons.
+		// */
+		//void SetMouseButtonDown( sf::Mouse::Button button = sf::Mouse::ButtonCount );
 
 		// Internal handling methods.
 
@@ -266,13 +257,13 @@ class Widget : public Object, public std::enable_shared_from_this<Widget> {
 		 * @param x Mouse X position.
 		 * @param y Mouse Y position.
 		 */
-		virtual void HandleMouseButtonEvent( sf::Mouse::Button button, bool press, int x, int y );
+		virtual void HandleMouseButtonEvent( bool press, int x, int y );
 
 		/** Handle key event.
 		 * @param key Key.
 		 * @param press true if button was pressed, false if released.
 		 */
-		virtual void HandleKeyEvent( sf::Keyboard::Key key, bool press );
+		virtual void HandleKeyEvent(const SDL_KeyboardEvent& key, bool press );
 		
 		/** Handle state changes.
 		 * The default behaviour is to accept any state change and invalidate the
@@ -284,7 +275,7 @@ class Widget : public Object, public std::enable_shared_from_this<Widget> {
 		/** Handle text event.
 		 * @param character Character.
 		 */
-		virtual void HandleTextEvent( sf::Uint32 character );
+		virtual void HandleTextEvent(const char* character );
 
 		/** Handle mouse enter.
 		 * @param x Mouse X position.
@@ -303,7 +294,7 @@ class Widget : public Object, public std::enable_shared_from_this<Widget> {
 		 * @param x Mouse X position.
 		 * @param y Mouse Y position.
 		 */
-		virtual void HandleMouseClick( sf::Mouse::Button button, int x, int y );
+		virtual void HandleMouseClick( int x, int y );
 
 		/** Handle focus change.
 		 * @param focused_widget Widget currently being focused.
@@ -345,6 +336,8 @@ class Widget : public Object, public std::enable_shared_from_this<Widget> {
 			std::string id;
 			std::string class_;
 		};
+
+		bool HandleEvent();
 
 		static void SetActiveWidget( Ptr widget );
 		static bool IsActiveWidget( PtrConst widget );

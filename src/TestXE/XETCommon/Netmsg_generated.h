@@ -16,6 +16,8 @@ struct Colour;
 struct Clipping;
 struct PhysicsConstraint;
 struct PhysicsObject;
+struct LocalFile;
+struct Material;
 struct MeshFile;
 struct MeshCube;
 struct MeshPlane;
@@ -26,10 +28,7 @@ struct Sound;
 struct AI;
 struct SpawnPointComponent;
 struct Trigger;
-struct EntityBase;
 struct PhysicsComponent;
-struct Debug;
-struct Material;
 struct SoundListener;
 struct Light;
 struct Camera;
@@ -51,6 +50,7 @@ struct LookAtNode;
 struct RandomSelectNode;
 struct MixNode;
 struct AnimNode;
+struct BodyComponent;
 struct AnimationComponent;
 struct SoundComponent;
 }  // namespace XFBType
@@ -239,20 +239,21 @@ enum UComponent {
   UComponent_CharacterComponent = 1,
   UComponent_SpawnPointComponent = 2,
   UComponent_AnimationComponent = 3,
-  UComponent_PlayerComponent = 4,
-  UComponent_SpellComponent = 5,
-  UComponent_RenderableComponent = 6,
-  UComponent_StaticComponent = 7,
-  UComponent_Node = 8,
-  UComponent_Camera = 9,
-  UComponent_Light = 10,
-  UComponent_SoundListener = 11,
-  UComponent_PhysicsComponent = 12,
-  UComponent_SoundComponent = 13
+  UComponent_BodyComponent = 4,
+  UComponent_PlayerComponent = 5,
+  UComponent_SpellComponent = 6,
+  UComponent_RenderableComponent = 7,
+  UComponent_StaticComponent = 8,
+  UComponent_Node = 9,
+  UComponent_Camera = 10,
+  UComponent_Light = 11,
+  UComponent_SoundListener = 12,
+  UComponent_PhysicsComponent = 13,
+  UComponent_SoundComponent = 14
 };
 
 inline const char **EnumNamesUComponent() {
-  static const char *names[] = { "NONE", "CharacterComponent", "SpawnPointComponent", "AnimationComponent", "PlayerComponent", "SpellComponent", "RenderableComponent", "StaticComponent", "Node", "Camera", "Light", "SoundListener", "PhysicsComponent", "SoundComponent", nullptr };
+  static const char *names[] = { "NONE", "CharacterComponent", "SpawnPointComponent", "AnimationComponent", "BodyComponent", "PlayerComponent", "SpellComponent", "RenderableComponent", "StaticComponent", "Node", "Camera", "Light", "SoundListener", "PhysicsComponent", "SoundComponent", nullptr };
   return names;
 }
 
@@ -282,11 +283,8 @@ inline const char *EnumNameData(Data e) { return EnumNamesData()[static_cast<int
 inline bool VerifyData(flatbuffers::Verifier &verifier, const void *union_obj, Data type);
 
 struct SpellComponent FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  const XFBType::EntityBase *entitybase() const { return GetPointer<const XFBType::EntityBase *>(4); }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, 4 /* entitybase */) &&
-           verifier.VerifyTable(entitybase()) &&
            verifier.EndTable();
   }
 };
@@ -294,19 +292,16 @@ struct SpellComponent FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
 struct SpellComponentBuilder {
   flatbuffers::FlatBufferBuilder &fbb_;
   flatbuffers::uoffset_t start_;
-  void add_entitybase(flatbuffers::Offset<XFBType::EntityBase> entitybase) { fbb_.AddOffset(4, entitybase); }
   SpellComponentBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
   SpellComponentBuilder &operator=(const SpellComponentBuilder &);
   flatbuffers::Offset<SpellComponent> Finish() {
-    auto o = flatbuffers::Offset<SpellComponent>(fbb_.EndTable(start_, 1));
+    auto o = flatbuffers::Offset<SpellComponent>(fbb_.EndTable(start_, 0));
     return o;
   }
 };
 
-inline flatbuffers::Offset<SpellComponent> CreateSpellComponent(flatbuffers::FlatBufferBuilder &_fbb,
-   flatbuffers::Offset<XFBType::EntityBase> entitybase = 0) {
+inline flatbuffers::Offset<SpellComponent> CreateSpellComponent(flatbuffers::FlatBufferBuilder &_fbb) {
   SpellComponentBuilder builder_(_fbb);
-  builder_.add_entitybase(entitybase);
   return builder_.Finish();
 }
 
@@ -363,13 +358,10 @@ inline flatbuffers::Offset<GameState> CreateGameState(flatbuffers::FlatBufferBui
 }
 
 struct CharacterComponent FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  const XFBType::EntityBase *entitybase() const { return GetPointer<const XFBType::EntityBase *>(4); }
-  const XFBType::AI *ai() const { return GetPointer<const XFBType::AI *>(6); }
+  const XFBType::AI *ai() const { return GetPointer<const XFBType::AI *>(4); }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, 4 /* entitybase */) &&
-           verifier.VerifyTable(entitybase()) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, 6 /* ai */) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, 4 /* ai */) &&
            verifier.VerifyTable(ai()) &&
            verifier.EndTable();
   }
@@ -378,22 +370,19 @@ struct CharacterComponent FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
 struct CharacterComponentBuilder {
   flatbuffers::FlatBufferBuilder &fbb_;
   flatbuffers::uoffset_t start_;
-  void add_entitybase(flatbuffers::Offset<XFBType::EntityBase> entitybase) { fbb_.AddOffset(4, entitybase); }
-  void add_ai(flatbuffers::Offset<XFBType::AI> ai) { fbb_.AddOffset(6, ai); }
+  void add_ai(flatbuffers::Offset<XFBType::AI> ai) { fbb_.AddOffset(4, ai); }
   CharacterComponentBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
   CharacterComponentBuilder &operator=(const CharacterComponentBuilder &);
   flatbuffers::Offset<CharacterComponent> Finish() {
-    auto o = flatbuffers::Offset<CharacterComponent>(fbb_.EndTable(start_, 2));
+    auto o = flatbuffers::Offset<CharacterComponent>(fbb_.EndTable(start_, 1));
     return o;
   }
 };
 
 inline flatbuffers::Offset<CharacterComponent> CreateCharacterComponent(flatbuffers::FlatBufferBuilder &_fbb,
-   flatbuffers::Offset<XFBType::EntityBase> entitybase = 0,
    flatbuffers::Offset<XFBType::AI> ai = 0) {
   CharacterComponentBuilder builder_(_fbb);
   builder_.add_ai(ai);
-  builder_.add_entitybase(entitybase);
   return builder_.Finish();
 }
 
@@ -701,6 +690,7 @@ inline bool VerifyUComponent(flatbuffers::Verifier &verifier, const void *union_
     case UComponent_CharacterComponent: return verifier.VerifyTable(reinterpret_cast<const CharacterComponent *>(union_obj));
     case UComponent_SpawnPointComponent: return verifier.VerifyTable(reinterpret_cast<const XFBType::SpawnPointComponent *>(union_obj));
     case UComponent_AnimationComponent: return verifier.VerifyTable(reinterpret_cast<const XFBType::AnimationComponent *>(union_obj));
+    case UComponent_BodyComponent: return verifier.VerifyTable(reinterpret_cast<const XFBType::BodyComponent *>(union_obj));
     case UComponent_PlayerComponent: return verifier.VerifyTable(reinterpret_cast<const PlayerComponent *>(union_obj));
     case UComponent_SpellComponent: return verifier.VerifyTable(reinterpret_cast<const SpellComponent *>(union_obj));
     case UComponent_RenderableComponent: return verifier.VerifyTable(reinterpret_cast<const XFBType::RenderableComponent *>(union_obj));

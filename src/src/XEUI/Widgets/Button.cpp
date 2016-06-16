@@ -97,7 +97,7 @@ namespace XE {
 		}
 	}
 
-	void Button::HandleMouseButtonEvent(sf::Mouse::Button button, bool press, int /*x*/, int /*y*/) {
+	void Button::HandleMouseButtonEvent(bool press, int /*x*/, int /*y*/) {
 		if (!IsMouseInWidget()) {
 			if (GetState() == State::ACTIVE) {
 				SetState(State::NORMAL);
@@ -106,14 +106,14 @@ namespace XE {
 			return;
 		}
 
-		if (button == sf::Mouse::Left) {
+		//if (button == sf::Mouse::Left) {
 			if (press) {
 				SetState(State::ACTIVE);
 			}
 			else if (GetState() == State::ACTIVE) {
 				SetState(State::PRELIGHT);
 			}
-		}
+		//}
 	}
 
 	const std::string& Button::GetName() const {

@@ -4,6 +4,9 @@
 #include <XESystem/SystemConfig.hpp>
 #include <XESystem/TransportData.hpp>
 
+struct _ENetPeer;
+typedef _ENetPeer ENetPeer;
+
 namespace XE
 {
 	///net object
@@ -12,28 +15,32 @@ namespace XE
 	public:
 		NetIdComponent()
 			: id (0)
-			, peerID(0)
+			, peer(0)
+			, peerId(0)
 		{
 
 		}
 
-		NetIdComponent(sf::Uint16 id)
+		NetIdComponent(Uint16 id)
 			: id(id)
-			, peerID(0)
+			, peer(0)
+			, peerId(0)
 		{
 
 		}
 
 		/// unique network objectid
-		sf::Uint16 id;
+		Uint16 id;
 
 		///enet peerID
-		sf::Uint16 peerID;
+		ENetPeer* peer;
+		
+		Uint16 peerId;
 
-		sf::Uint8 sceneId;
+		Uint8 sceneId;
 
 		///entityID 
-		XE::Uint32 entityID;
+		Uint32 entityID;
 
 	};
 

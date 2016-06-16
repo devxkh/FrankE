@@ -5,20 +5,19 @@
 
 namespace XET {
 
-class TestScene : public XE::Scene
-{
+	class TestScene : public XE::Scene
+	{
 
-public:
-	TestScene(XE::XEngine& engine);
+	public:
+		TestScene(XE::XEngine& engine);
 
-	virtual bool createEntityType(entityx::Entity entity, char* entityData) override;
+		virtual bool createEntityType(entityx::Entity entity, void* entityData) override;
 
-	virtual void update(float deltaTime) override;
+		virtual void update(float deltaTime) override;
 
-private:
-	XE::XEngine& m_engine;
-
-};
+	private:
+		XE::XEngine& m_engine;
+	};
 
 } // namespace XET
 

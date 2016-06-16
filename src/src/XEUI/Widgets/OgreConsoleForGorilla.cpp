@@ -179,16 +179,16 @@ void OgreConsole::shutdown()
  
 }
 
-void OgreConsole::HandleEvent(const sf::Event& event)
+void OgreConsole::HandleEvent(const SDL_Event& event)
 {
-	Widget::HandleEvent(event);
+	//Widget::HandleKeyEvent(event);
 
-	if (event.type == sf::Event::KeyPressed) {
-		onKeyPressed(event.key.code);
-	}
-	else if (event.type == sf::Event::TextEntered) {
-		onTextEntered(event.key.code);
-	}
+	//if (event.type == SDL_KEYDOWN) {
+	//	onKeyPressed(event.key);
+	//}
+	//else if (event.type == SDL_KEYUP) {
+	//	onTextEntered(event.key.keysym.scancode);
+	//}
 }
 
 void OgreConsole::onTextEntered(const unsigned char &text)
@@ -204,11 +204,11 @@ void OgreConsole::onTextEntered(const unsigned char &text)
 	mUpdatePrompt = true;
 }
 
-void OgreConsole::onKeyPressed(const sf::Keyboard::Key &arg)
+void OgreConsole::onKeyPressed(const SDL_KeyboardEvent &arg)
 {
 	if (!mIsVisible) return;
 
-	if (arg == sf::Keyboard::Key::Return) // || arg == sf::Keyboard::Key::)
+	if (arg.keysym.scancode == SDL_SCANCODE_KP_ENTER) // || arg == sf::Keyboard::Key::)
 	{
 		if (!mActive)
 		{
@@ -241,28 +241,28 @@ void OgreConsole::onKeyPressed(const sf::Keyboard::Key &arg)
 
 	if (!mActive) return;
 
-	if (arg == sf::Keyboard::Key::BackSpace)
-	{
-		if (prompt.size())
-		{
-			prompt.erase(prompt.end() - 1); //=prompt.substr(0,prompt.length()-1);
-			mUpdatePrompt = true;
-		}
-	}
+	//if (arg == sf::Keyboard::Key::BackSpace)
+	//{
+	//	if (prompt.size())
+	//	{
+	//		prompt.erase(prompt.end() - 1); //=prompt.substr(0,prompt.length()-1);
+	//		mUpdatePrompt = true;
+	//	}
+	//}
 
-	else if (arg == sf::Keyboard::Key::PageUp)
-	{
-		if (mStartline > 0)
-			mStartline--;
-		mUpdateConsole = true;
-	}
+	//else if (arg == sf::Keyboard::Key::PageUp)
+	//{
+	//	if (mStartline > 0)
+	//		mStartline--;
+	//	mUpdateConsole = true;
+	//}
 
-	else if (arg == sf::Keyboard::Key::PageDown)
-	{
-		if (mStartline < lines.size())
-			mStartline++;
-		mUpdateConsole = true;
-	}
+	//else if (arg == sf::Keyboard::Key::PageDown)
+	//{
+	//	if (mStartline < lines.size())
+	//		mStartline++;
+	//	mUpdateConsole = true;
+	//}
 }
 
 bool OgreConsole::update()

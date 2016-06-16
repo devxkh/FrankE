@@ -8,8 +8,11 @@
 #include <XEngine/Animation/Nodes/AnimationNode.h>
 #include <XEngine/Animation/Nodes/OutputNode.h>
 #include <XEngine/Animation/Nodes/ParameterNode.h>
+#include <XEngine/Animation/Nodes/MixNode.h>
 #include <XEngine/Animation/Nodes/TransitionSelectNode.h>
 #include <XEDAL/Objects/FBEngineTypes_generated.h>
+
+#include <XESystem/Logging.hpp>
 
 namespace XE
 {
@@ -70,6 +73,8 @@ namespace XE
 					newNode = std::unique_ptr<ParameterNode>(new ParameterNode);
 				else if (var->node_type() == XFBType::UAnimationNode::UAnimationNode_TransitionSelectNode)
 					newNode = std::unique_ptr<TransitionSelectNode>(new TransitionSelectNode);
+				else if (var->node_type() == XFBType::UAnimationNode::UAnimationNode_MixNode)
+					newNode = std::unique_ptr<MixNode>(new MixNode);
 
 				if (newNode)
 				{
@@ -86,29 +91,26 @@ namespace XE
 		{
 			for (auto connection : *connections)
 			{
+				auto t1 = connection->nodeIn(); //debug
+				auto t2 = connection->nodeOut();
+
 				INode* nodeIn = _nodes[connection->nodeIn()].get(); // getNode(idAssociations[nodeInId]);
 				INode* nodeOut = _nodes[connection->nodeOut()].get();
 
 				if (nodeIn == NULL)
 				{
-					std::stringstream message;
-					message << "Connection with invalid node_in " << connection->nodeIn();
-					throw std::runtime_error(message.str().c_str());
+					LOG(ERROR) << "Connection with invalid node_in: " << connection->nodeIn();
 				}
 
 				if (nodeOut == NULL)
 				{
-					std::stringstream message;
-					message << "Connection with invalid node_out " << connection->nodeOut();
-					throw std::runtime_error(message.str().c_str());
+					LOG(ERROR) << "Connection with invalid node_out: " << connection->nodeOut();
 				}
 
 				Port* port = nodeIn->getPort(connection->portIn());
 				if (port == NULL)
 				{
-					std::stringstream message;
-					message << "Connection with invalid port " << connection->portIn() << " for node " << connection->nodeIn();
-					throw std::runtime_error(message.str().c_str());
+					LOG(ERROR) << "Connection with invalid port: " << connection->portIn() << " for node " << connection->nodeIn();
 				}
 
 				port->setConnectedNode(nodeOut);
@@ -126,23 +128,19 @@ namespace XE
 			{
 				INode* node = _nodes[constant->nodeId()].get();
 
-				if(node == NULL)
+				if (node == NULL)
 				{
-					std::stringstream message;
-					message << "Constant with invalid node_id " << constant->nodeId();
-					throw std::runtime_error(message.str().c_str());
+					LOG(ERROR) << "Connection with invalid node_id: " << constant->nodeId();
 				}
 
 				bool validPort = node->hasPort(constant->portId());
+				
 				if (!validPort)
 				{
-					std::stringstream message;
-					message << "Constant with invalid port " << constant->portId() << " for node " << constant->nodeId();
-				//	throw std::runtime_error(message.str().c_str());
+					LOG(ERROR) << "Constant with invalid port " << constant->portId() << " for node " << constant->nodeId();
 				}
 				else
 				{
-
 					Port* port = node->getPort(constant->portId());
 
 					port->setDefaultValue(constant->value());

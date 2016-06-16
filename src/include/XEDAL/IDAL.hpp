@@ -8,6 +8,7 @@
 
 namespace XE {
 
+	class XEngine;
 	class Scene;
 
 
@@ -24,8 +25,10 @@ namespace XE {
 			int len;
 		};
 
-		IDAL();
+		IDAL(XEngine& engine);
 		~IDAL();
+
+		void open();
 		
 		//void setGameEntityProperties(Ogre::uint16 id, GameEntityProperties& props);
 		//void setPhysicProperties(Ogre::uint16 id, gkPhysicsProperties& props);

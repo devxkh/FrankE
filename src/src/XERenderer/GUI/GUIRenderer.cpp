@@ -53,13 +53,13 @@ namespace XE
 	/*		m_graphicsManager.getIntoRendererQueue().push([this]()
 		{*/
 
-	//	m_layerRenderer._t_update();
-	//	done in gorilla renderqueue!?
-			/*for each (WScreen* var in m_screens)
-			{
-				var->_t_screen->renderOnce();
-			}*/
-	//	});
+		//	m_layerRenderer._t_update();
+		//	done in gorilla renderqueue!?
+				/*for each (WScreen* var in m_screens)
+				{
+					var->_t_screen->renderOnce();
+				}*/
+				//	});
 	}
 
 	void GUIRenderer::addScreen(WScreen* screen)
@@ -90,7 +90,7 @@ namespace XE
 		auto stateView = lua.set("GUIRenderer", this); //set object instance
 	}
 
-	void GUIRenderer::loadAtlas(const std::string& fileName)
+	bool GUIRenderer::loadAtlas(const std::string& fileName)
 	{
 		PhysFsStream wonderfullStream;
 		if (wonderfullStream.open(fileName.c_str()))//"UI/TestAtlas.fbbin"))
@@ -107,7 +107,7 @@ namespace XE
 				addAtlas(atlasName, atlas->texture()->c_str(), Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
 
 				LOG(INFO) << "load sprite data";
-				
+
 				//sprites
 				for (auto it = atlas->sprites()->begin(); it != atlas->sprites()->end(); ++it)
 				{
@@ -125,55 +125,58 @@ namespace XE
 				//fonts
 				for (auto it = atlas->fonts()->begin(); it != atlas->fonts()->end(); ++it)
 				{
-					std::unique_ptr<Font> newFont = std::unique_ptr<Font>(new Font());
-					
+					Font newFont;
+
 					//glyphs
 					for (auto itGlyph = (*it)->glyphs()->begin(); itGlyph != (*it)->glyphs()->end(); ++itGlyph)
 					{
-						LOG(INFO) << "Glyph:";
-						LOG(INFO) << "code:" << (*itGlyph)->code();
+						//LOG(INFO) << "Glyph:";
+					//	LOG(INFO) << "code:" << (*itGlyph)->code(); //->> Attention!! causing sometimes a memory crash??
 
-						std::unique_ptr<FontGlyph> newGlyph = std::unique_ptr<FontGlyph>(new FontGlyph());
-						newGlyph->glyphAdvance = (*itGlyph)->glyphAdvance();
-						newGlyph->glyphHeight = (*itGlyph)->glyphHeight();
-						newGlyph->glyphWidth = (*itGlyph)->glyphWidth();
+						FontGlyph newGlyph;
+						newGlyph.glyphAdvance = (*itGlyph)->glyphAdvance();
+						newGlyph.glyphHeight = (*itGlyph)->glyphHeight();
+						newGlyph.glyphWidth = (*itGlyph)->glyphWidth();
 
 						if ((*itGlyph)->kerningList())
 						{
 							//kerning
-							for (auto itKerning = (*itGlyph)->kerningList()->begin(); itKerning != (*itGlyph)->kerningList()->end(); ++itKerning)
+							for (auto itKerning = (*itGlyph)->kerningList()->begin(); itKerning != (*itGlyph)->kerningList()->end(); ++itKerning)							
 							{
-								std::unique_ptr<GlyphKerning> newKerning = std::unique_ptr<GlyphKerning>(new GlyphKerning((*itKerning)->character()
-									, (*itKerning)->kerning()));
-								newGlyph->kerning.emplace_back(std::move(newKerning));
+								newGlyph.kerning.emplace_back(GlyphKerning((*itKerning)->character(), (*itKerning)->kerning()));
 							}
 						}
-						
-						newGlyph->uvBottom = (*itGlyph)->uvBottom();
-						newGlyph->uvHeight = (*itGlyph)->uvHeight();
-						newGlyph->uvLeft = (*itGlyph)->uvLeft();
-						newGlyph->uvRight = (*itGlyph)->uvRight();
-						newGlyph->uvTop = (*itGlyph)->uvTop();
-						newGlyph->uvWidth = (*itGlyph)->uvWidth();
-						newGlyph->verticalOffset = (*itGlyph)->verticalOffset();
 
-						newFont->mGlyphs[(*itGlyph)->code()] = std::move(newGlyph);
+						newGlyph.uvBottom = (*itGlyph)->uvBottom();
+						newGlyph.uvHeight = (*itGlyph)->uvHeight();
+						newGlyph.uvLeft = (*itGlyph)->uvLeft();
+						newGlyph.uvRight = (*itGlyph)->uvRight();
+						newGlyph.uvTop = (*itGlyph)->uvTop();
+						newGlyph.uvWidth = (*itGlyph)->uvWidth();
+						newGlyph.verticalOffset = (*itGlyph)->verticalOffset();
+
+						newFont.mGlyphs.emplace((*itGlyph)->code(),newGlyph);
 					}
+					
+					newFont.mBaseline = (*it)->baseline();
+					newFont.mLetterSpacing = (*it)->letterSpacing();
+					newFont.mLineHeight = (*it)->lineHeight();
+					newFont.mLineSpacing = (*it)->lineSpacing();
+					newFont.mMonoWidth = (*it)->monoWidth();
+					//	newFont->mRangeBegin = (*it)->rangeBegin();
+					//	newFont->mRangeEnd = (*it)->rangeEnd();
+					newFont.mSpaceLength = (*it)->spaceLength();
 
-					newFont->mBaseline = (*it)->baseline();
-					newFont->mLetterSpacing = (*it)->letterSpacing();
-					newFont->mLineHeight = (*it)->lineHeight();
-					newFont->mLineSpacing = (*it)->lineSpacing();
-					newFont->mMonoWidth = (*it)->monoWidth();
-				//	newFont->mRangeBegin = (*it)->rangeBegin();
-				//	newFont->mRangeEnd = (*it)->rangeEnd();
-					newFont->mSpaceLength = (*it)->spaceLength();
-
-					_fonts[(*it)->id()] = std::move(newFont);
+					_fonts.emplace((*it)->id(),newFont);
 				}
 
 				//todo from renderthread! ?? into main thread_calculateCoordinates();
 			}
+		}
+		else
+		{
+			LOG(ERROR) << "GUIRenderer::loadAtlas -> atlasfile not found: " << fileName;
+			return false;
 		}
 	}
 
@@ -182,34 +185,34 @@ namespace XE
 		return 22;
 	}
 
-	void  GUIRenderer::_calculateCoordinates(sf::Vector2f texelOffset , sf::Vector2f inverseTextureSize)
+	void  GUIRenderer::_calculateCoordinates(sf::Vector2f texelOffset, sf::Vector2f inverseTextureSize)
 	{
-		for (std::map<XE::Uint32, std::unique_ptr<Font>>::iterator gd_it = _fonts.begin(); gd_it != _fonts.end(); gd_it++)
+		for (std::map<XE::Uint32, Font>::iterator gd_it = _fonts.begin(); gd_it != _fonts.end(); gd_it++)
 		{
-			for (std::unordered_map<Uint32, std::unique_ptr<FontGlyph>>::iterator it = (*gd_it).second.get()->mGlyphs.begin(); it != (*gd_it).second.get()->mGlyphs.end(); it++)
+			for (std::unordered_map<Uint32, FontGlyph>::iterator it = (*gd_it).second.mGlyphs.begin(); it != (*gd_it).second.mGlyphs.end(); it++)
 			{
 
-				(*it).second->uvLeft -= texelOffset.x;
-				(*it).second->uvTop += texelOffset.y;
-				(*it).second->uvRight += texelOffset.x;
-				(*it).second->uvBottom -= texelOffset.y;
+				(*it).second.uvLeft -= texelOffset.x;
+				(*it).second.uvTop += texelOffset.y;
+				(*it).second.uvRight += texelOffset.x;
+				(*it).second.uvBottom -= texelOffset.y;
 
-				(*it).second->uvLeft *= inverseTextureSize.x;
-				(*it).second->uvTop *= inverseTextureSize.y;
-				(*it).second->uvRight *= inverseTextureSize.x;
-				(*it).second->uvBottom *= inverseTextureSize.y;
+				(*it).second.uvLeft *= inverseTextureSize.x;
+				(*it).second.uvTop *= inverseTextureSize.y;
+				(*it).second.uvRight *= inverseTextureSize.x;
+				(*it).second.uvBottom *= inverseTextureSize.y;
 
-				(*it).second->texCoords[TopLeft].x = (*it).second->uvLeft;
-				(*it).second->texCoords[TopLeft].y = (*it).second->uvTop;
-				(*it).second->texCoords[TopRight].x = (*it).second->uvRight;
-				(*it).second->texCoords[TopRight].y = (*it).second->uvTop;
-				(*it).second->texCoords[BottomRight].x = (*it).second->uvRight;
-				(*it).second->texCoords[BottomRight].y = (*it).second->uvBottom;
-				(*it).second->texCoords[BottomLeft].x = (*it).second->uvLeft;
-				(*it).second->texCoords[BottomLeft].y = (*it).second->uvBottom;
+				(*it).second.texCoords[TopLeft].x = (*it).second.uvLeft;
+				(*it).second.texCoords[TopLeft].y = (*it).second.uvTop;
+				(*it).second.texCoords[TopRight].x = (*it).second.uvRight;
+				(*it).second.texCoords[TopRight].y = (*it).second.uvTop;
+				(*it).second.texCoords[BottomRight].x = (*it).second.uvRight;
+				(*it).second.texCoords[BottomRight].y = (*it).second.uvBottom;
+				(*it).second.texCoords[BottomLeft].x = (*it).second.uvLeft;
+				(*it).second.texCoords[BottomLeft].y = (*it).second.uvBottom;
 
-				(*it).second->glyphWidth = (*it).second->uvWidth;
-				(*it).second->glyphHeight = (*it).second->uvHeight;
+				(*it).second.glyphWidth = (*it).second.uvWidth;
+				(*it).second.glyphHeight = (*it).second.uvHeight;
 
 			}
 		}
@@ -295,16 +298,16 @@ namespace XE
 		return retSize;
 	}
 
-    const Font* GUIRenderer::getFont(const XE::Uint32 fontId) const
+	const Font* GUIRenderer::getFont(const XE::Uint32 fontId) const
 	{
-		std::map<XE::Uint32, std::unique_ptr<Font>>::const_iterator it = _fonts.find(fontId);
+		std::map<XE::Uint32, Font>::const_iterator it = _fonts.find(fontId);
 		if (it == _fonts.end())
 		{
 			LOG(ERROR) << "Glyph not found: " << fontId;
 			return 0;
 		}
 		else
-			return (*it).second.get();
+			return &(*it).second;
 	}
 
 	sf::Vector2i GUIRenderer::GetTextStringMetrics(const sf::String& string, unsigned int font_size) const
@@ -335,11 +338,11 @@ namespace XE
 				continue;
 			}
 
-		/*	if (thisChar < font->mRangeBegin || thisChar > font->mRangeEnd)
-			{
-				lastChar = 0;
-				continue;
-			}*/
+			/*	if (thisChar < font->mRangeBegin || thisChar > font->mRangeEnd)
+				{
+					lastChar = 0;
+					continue;
+				}*/
 
 			glyph = font->getGlyph(thisChar);
 			if (glyph == 0)
@@ -380,7 +383,7 @@ namespace XE
 		}
 
 		m_graphicsManager.getIntoRendererQueue().push([this, atlasName, texName, ressGroup, atlasDataPtr, atlasId]() {
-						
+
 			//load Textures -> todo getByName without file extension!?
 			Ogre::TexturePtr texture = Ogre::TextureManager::getSingletonPtr()->getByName(texName, ressGroup);
 
@@ -392,7 +395,7 @@ namespace XE
 			XE::Uint32 texWidth = texture->getWidth();
 			XE::Uint32 textHeight = texture->getHeight();
 
-			Ogre::RenderSystem* rs = Ogre::Root::getSingletonPtr()->getRenderSystem();
+			Ogre::RenderSystem* rs = m_graphicsManager.getRoot()->getRenderSystem();
 
 			sf::Vector2f texelOffset;
 			texelOffset.x = rs->getHorizontalTexelOffset();
@@ -404,17 +407,17 @@ namespace XE
 
 			atlasDataPtr->_t_textureAtlasPtr = atlas.get();
 
-			auto sceneMgr = Ogre::Root::getSingletonPtr()->getSceneManager("MyFirstSceneManager");
+			auto sceneMgr = m_graphicsManager.getRoot()->getSceneManager("MyFirstSceneManager");
 
 			_t_init(atlasDataPtr->_t_textureAtlasPtr, &sceneMgr->_getEntityMemoryManager(Ogre::SCENE_DYNAMIC), sceneMgr);
 
 			//calculation in mainthread
 			m_graphicsManager.getFromRendererQueue().push([this, texelOffset, inverseTextureSize, atlasDataPtr, texWidth, textHeight]() {
-				
+
 				atlasDataPtr->texelOffset = texelOffset;
 				atlasDataPtr->textureSize = sf::Vector2f(texWidth, textHeight);
 				_calculateCoordinates(texelOffset, inverseTextureSize);
-				
+
 				auto tmp = getSprite("whitepixel.png");
 				float texelOffsetX = atlasDataPtr->texelOffset.x, texelOffsetY = atlasDataPtr->texelOffset.y;
 				texelOffsetX /= atlasDataPtr->textureSize.x;

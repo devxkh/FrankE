@@ -1,14 +1,4 @@
 #include <XERenderer/OgreWorkspace.hpp>
-//#include <XEController/StateData.hpp>
-//#include <XEController/Controller.hpp>
-//#include <XEController/ControllerManager.hpp>
-//#include <XEController/View.hpp>
-//#include <XEController/Camera.hpp>
-//
-//#include <Ogre/OgreMain/include/OgreRoot.h>
-//
-////#include <XERenderSystem/XERenderWindow.hpp>
-//#include <sfml/Window/Window.hpp>
 
 #include <XEngine.hpp>
 
@@ -24,6 +14,10 @@
 
 #include <Ogre/OgreMain/include/Compositor/OgreCompositorWorkspaceListener.h>
 #include <Ogre/OgreMain/include/Compositor/OgreCompositorWorkspace.h>
+
+
+#include <SDL_syswm.h>
+
 
 namespace XE {
 
@@ -88,47 +82,94 @@ namespace XE {
 		return nullptr; //todo KH view.mRenderTarget = mRtt_texture->getBuffer()->getRenderTarget();
 	}
 
-	Ogre::RenderWindow* OgreWorkspace::_t_createRenderWindow(sf::Window* window)
+	Ogre::RenderWindow* OgreWorkspace::_t_createRenderWindow(void* window)
 	{
 		//View& view = controller.getView();
 
 		//-------------------------------
 		// Create Window
 
-		Ogre::NameValuePairList misc;
+		Ogre::NameValuePairList params;
 
 		//http://www.ogre3d.org/forums/viewtopic.php?f=1&t=79384
-#ifdef _WIN32
 
 		if (window)
 		{
-			unsigned long winHandle = reinterpret_cast<unsigned long>(window->getSystemHandle());
+			//Get the native whnd
+			SDL_SysWMinfo wmInfo;
+			SDL_VERSION(&wmInfo.version);
+
+			if (SDL_GetWindowWMInfo((SDL_Window*)window, &wmInfo) == SDL_FALSE)
+				LOG(ERROR) << "Couldn't get WM Info! (SDL2) - GraphicsSystem::initialize";
+
+			Ogre::String winHandle;
+
+			switch (wmInfo.subsystem)
+			{
+#ifdef WIN32
+			case SDL_SYSWM_WINDOWS:
+				// Windows code
+				winHandle = Ogre::StringConverter::toString((uintptr_t)wmInfo.info.win.window);
+				break;
+#elif __MACOSX__
+			case SDL_SYSWM_COCOA:
+				//required to make OGRE play nice with our window
+				params.insert(std::make_pair("macAPI", "cocoa"));
+				params.insert(std::make_pair("macAPICocoaUseNSView", "true"));
+
+				winHandle = Ogre::StringConverter::toString(WindowContentViewHandle(wmInfo));
+				break;
+#else
+			case SDL_SYSWM_X11:
+				winHandle = Ogre::StringConverter::toString((uintptr_t)wmInfo.info.x11.window);
+				break;
+#endif
+			default:
+				OGRE_EXCEPT(Ogre::Exception::ERR_NOT_IMPLEMENTED,
+					"Unexpected WM! (SDL2)",
+					"GraphicsSystem::initialize");
+				break;
+			}
+
+			//params.insert(std::make_pair("title", windowTitle));
+			params.insert(std::make_pair("gamma", "true"));
+		//	params.insert(std::make_pair("FSAA", cfgOpts["FSAA"].currentValue));
+		//	params.insert(std::make_pair("vsync", cfgOpts["VSync"].currentValue));
+
+#if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
+			params.insert(std::make_pair("externalWindowHandle", winHandle));
+#else
+			params.insert(std::make_pair("parentWindowHandle", winHandle));
+#endif
+
+
+		//	unsigned long winHandle = reinterpret_cast<unsigned long>(window->getSystemHandle());
 			//unsigned long winGlContext = reinterpret_cast<unsigned long>(wglGetCurrentContext());
 
-			misc["externalWindowHandle"] = Ogre::StringConverter::toString(winHandle);
+		//	misc["externalWindowHandle"] = Ogre::StringConverter::toString(winHandle);
 		}
 		else
 		{
-			misc["hidden"] = Ogre::String("True");
+			params["hidden"] = Ogre::String("True");
 		}
 		//	misc["externalGLContext"] = XE::StringConverter::toString(winGlContext);
 		//	misc["externalGLControl"] = Ogre::String("True");
-#else
-		misc["currentGLContext"] = String("True");
-#endif
+//#else
+//		misc["currentGLContext"] = String("True");
+//#endif
 
 		//--------------------------------
 	
-			Ogre::RenderWindow* renderWindow = Ogre::Root::getSingleton().createRenderWindow("Main", 0, 0, false, &misc);
+			Ogre::RenderWindow* renderWindow = Ogre::Root::getSingleton().createRenderWindow("Main", 0, 0, false, &params);
 		//	}
 
 		//	view.mWindow = mWindow;
 		//über graphics controller!!!!	controller.setRenderWindow(mRenderWindow);
 		//view.mRenderWindow = mRenderWindow;
 
-		sf::WindowHandle mHwnd = 0;
-		renderWindow->getCustomAttribute("WINDOW", &mHwnd);
-		renderWindow->setActive(true);
+	//	sf::WindowHandle mHwnd = 0;
+		//renderWindow->getCustomAttribute("WINDOW", &mHwnd);
+	//	renderWindow->setActive(true);
 		//todo KH	view.mRenderWindow->setAutoUpdated(false);
 
 

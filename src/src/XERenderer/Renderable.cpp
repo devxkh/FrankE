@@ -99,8 +99,7 @@ namespace XE
 		const XFBType::RenderableComponent* renderable = (const XFBType::RenderableComponent*)fbData;
 
 	//	auto renderable = flatbuffers::GetRoot<XFBType::RenderableComponent>(fbData);
-		auto entbase = renderable->entitybase();
-		auto meshes = entbase->meshes();
+		auto meshes = renderable->meshes();
 
 		//------------------------------------------------------------------------------
 		//------------------- create all meshes for this entity -----------------------

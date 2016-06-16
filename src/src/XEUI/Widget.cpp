@@ -165,32 +165,29 @@ namespace XE {
 
 	}
 
-	void Widget::HandleEvent(const sf::Event& event) {
+	bool Widget::HandleEvent() {
 		if (!IsGloballyVisible()) {
-			return;
+			return false;
 		}
 
 		// Ignore the event if widget is insensitive
 		if (GetState() == State::INSENSITIVE) {
-			return;
+			return false;
 		}
 
 		// Ignore the event if another widget is active.
 		if (!IsActiveWidget() && !IsActiveWidget(PtrConst())) {
-			return;
+			return false;
 		}
 
 		// Ignore the event if another widget is modal.
 		if (HasModal() && !IsModal()) {
-			return;
+			return false;
 		}
-
-		// Set widget active in context.
-		//KH Context::Get().SetActiveWidget( shared_from_this() );
 
 		auto parent = m_parent.lock();
 
-		switch (event.type) {
+	/*	switch (event.type) {
 		case sf::Event::MouseLeft:
 			if (IsMouseInWidget()) {
 				SetMouseInWidget(false);
@@ -206,109 +203,7 @@ namespace XE {
 			HandleMouseButtonEvent(sf::Mouse::Right, false, std::numeric_limits<int>::min(), std::numeric_limits<int>::min());
 
 			break;
-
-		case sf::Event::MouseMoved:
-		{
-			sf::FloatRect rec(Widget::getPosition(), size);
-			// Check if pointer inside of widget's allocation.
-			if (rec.contains(static_cast<float>(event.mouseMove.x), static_cast<float>(event.mouseMove.y))) {
-				// Check for enter event.
-				if (!IsMouseInWidget()) {
-					SetMouseInWidget(true);
-
-					GetSignals().Emit(OnMouseEnter);
-					HandleMouseEnter(event.mouseMove.x, event.mouseMove.y);
-				}
-
-				GetSignals().Emit(OnMouseMove);
-			}
-			else if (IsMouseInWidget()) { // Check for leave event.
-				SetMouseInWidget(false);
-
-				GetSignals().Emit(OnMouseLeave);
-				HandleMouseLeave(event.mouseMove.x, event.mouseMove.y);
-			}
-
-			HandleMouseMoveEvent(event.mouseMove.x, event.mouseMove.y);
-			break;
-		}
-		case sf::Event::MouseButtonPressed:
-			if (!IsMouseButtonDown() && IsMouseInWidget()) {
-				SetMouseButtonDown(event.mouseButton.button);
-			}
-
-			HandleMouseButtonEvent(event.mouseButton.button, true, event.mouseButton.x, event.mouseButton.y);
-
-			if (IsMouseInWidget()) {
-				if (event.mouseButton.button == sf::Mouse::Left) {
-					GetSignals().Emit(OnMouseLeftPress);
-				}
-				else if (event.mouseButton.button == sf::Mouse::Right) {
-					GetSignals().Emit(OnMouseRightPress);
-				}
-			}
-
-			break;
-
-		case sf::Event::MouseButtonReleased:
-			// Only process as a click when mouse button has been pressed inside the widget before.
-			if (IsMouseButtonDown(event.mouseButton.button)) {
-				SetMouseButtonDown();
-
-				// When released inside the widget, the event can be considered a click.
-				if (IsMouseInWidget()) {
-					HandleMouseClick(event.mouseButton.button, event.mouseButton.x, event.mouseButton.y);
-
-					if (event.mouseButton.button == sf::Mouse::Left) {
-						GetSignals().Emit(OnLeftClick);
-					}
-					else if (event.mouseButton.button == sf::Mouse::Right) {
-						GetSignals().Emit(OnRightClick);
-					}
-				}
-			}
-
-			HandleMouseButtonEvent(event.mouseButton.button, false, event.mouseButton.x, event.mouseButton.y);
-
-			if (IsMouseInWidget()) {
-				if (event.mouseButton.button == sf::Mouse::Left) {
-					GetSignals().Emit(OnMouseLeftRelease);
-				}
-				else if (event.mouseButton.button == sf::Mouse::Right) {
-					GetSignals().Emit(OnMouseRightRelease);
-				}
-			}
-
-			break;
-
-		case sf::Event::KeyPressed:
-			if (HasFocus()) {
-				// TODO: Delegate event too when widget's not active?
-				HandleKeyEvent(event.key.code, true);
-				GetSignals().Emit(OnKeyPress);
-			}
-
-			break;
-
-		case sf::Event::KeyReleased:
-			if (HasFocus()) {
-				// TODO: Delegate event too when widget's not active?
-				HandleKeyEvent(event.key.code, false);
-				GetSignals().Emit(OnKeyRelease);
-			}
-			break;
-
-		case sf::Event::TextEntered:
-			if (HasFocus()) {
-				// TODO: Delegate event too when widget's not active?
-				HandleTextEvent(event.text.unicode);
-				GetSignals().Emit(OnText);
-			}
-			break;
-
-		default:
-			break;
-		}
+*/
 	}
 
 	void Widget::SetState(State state) {
@@ -366,19 +261,19 @@ namespace XE {
 		m_mouse_in = in_widget;
 	}
 
-	bool Widget::IsMouseButtonDown(sf::Mouse::Button button) const {
-		// Check if any button is down if requested.
-		if (button == sf::Mouse::ButtonCount) {
-			return m_mouse_button_down != sf::Mouse::ButtonCount;
-		}
+	//bool Widget::IsMouseButtonDown(sf::Mouse::Button button) const {
+	//	// Check if any button is down if requested.
+	//	if (button == sf::Mouse::ButtonCount) {
+	//		return m_mouse_button_down != sf::Mouse::ButtonCount;
+	//	}
 
-		// Check if requested button is down.
-		return m_mouse_button_down == button;
-	}
+	//	// Check if requested button is down.
+	//	return m_mouse_button_down == button;
+	//}
 
-	void Widget::SetMouseButtonDown(sf::Mouse::Button button) {
-		m_mouse_button_down = static_cast<unsigned char>(button & 0x3f); // 6 bits
-	}
+	//void Widget::SetMouseButtonDown(sf::Mouse::Button button) {
+	//	m_mouse_button_down = static_cast<unsigned char>(button & 0x3f); // 6 bits
+	//}
 
 	void Widget::Show(bool show) {
 		if (show == IsLocallyVisible()) {
@@ -554,20 +449,153 @@ namespace XE {
 		return result;
 	}
 
-	void Widget::HandleMouseMoveEvent(int /*x*/, int /*y*/) {
+
+	void Widget::HandleMouseMoveEvent(int x, int y) {
 	}
 
-	void Widget::HandleMouseButtonEvent(sf::Mouse::Button /*button*/, bool /*press*/, int /*x*/, int /*y*/) {
+	void Widget::HandleMouseButtonEvent(bool press, int x, int y) {
 	}
 
-	void Widget::HandleKeyEvent(sf::Keyboard::Key /*key*/, bool /*press*/) {
+	void Widget::HandleKeyEvent(const SDL_KeyboardEvent& key, bool press) {
 	}
+
+	void Widget::HandleMouseClick(int x, int y) {
+
+	}
+
+	void Widget::onPointMoved(const float& x, const float& y) {
+		
+		if (!HandleEvent())
+			return;
+
+		SDL_Rect rec{ Widget::getPosition().x,Widget::getPosition().y , size.x,size.y };
+		SDL_Point point{x,y};
+		// Check if pointer inside of widget's allocation.
+		if (SDL_PointInRect(&point, &rec)) {
+			// Check for enter event.
+			if (!IsMouseInWidget()) {
+				SetMouseInWidget(true);
+
+				GetSignals().Emit(OnMouseEnter);
+				HandleMouseEnter(x, y);
+			}
+
+			GetSignals().Emit(OnMouseMove);
+		}
+		else if (IsMouseInWidget()) { // Check for leave event.
+			SetMouseInWidget(false);
+
+			GetSignals().Emit(OnMouseLeave);
+			HandleMouseLeave(x, y);
+		}
+
+		HandleMouseMoveEvent(x, y);
+	}
+
+	void Widget::onPointDown(const float& x, const float& y) {
+		
+		if (!HandleEvent())
+			return;
+
+		/*if (!IsMouseButtonDown() && IsMouseInWidget()) {
+			SetMouseButtonDown(event.mouseButton.button);
+		}*/
+
+		//HandleMouseButtonEvent(event.mouseButton.button, true, event.mouseButton.x, event.mouseButton.y);
+
+		if (IsMouseInWidget()) {
+			//if (event.mouseButton.button == sf::Mouse::Left) {
+				GetSignals().Emit(OnMouseLeftPress);
+		//	}
+		/*	else if (event.mouseButton.button == sf::Mouse::Right) {
+				GetSignals().Emit(OnMouseRightPress);
+			}*/
+		}
+
+
+	}
+	void Widget::onPointUp(const float& x, const float& y) {
+		if (!HandleEvent())
+			return;
+
+		// Only process as a click when mouse button has been pressed inside the widget before.
+		/*if (IsMouseButtonDown(event.mouseButton.button)) {
+			SetMouseButtonDown();*/
+
+			// When released inside the widget, the event can be considered a click.
+			if (IsMouseInWidget()) {
+				HandleMouseClick(x, y);
+
+				//if (event.mouseButton.button == sf::Mouse::Left) {
+					GetSignals().Emit(OnLeftClick);
+				/*}
+				else if (event.mouseButton.button == sf::Mouse::Right) {
+					GetSignals().Emit(OnRightClick);
+				}*/
+			}
+	//	}
+
+		HandleMouseButtonEvent(false, x, y);
+
+		if (IsMouseInWidget()) {
+		//	if (event.mouseButton.button == sf::Mouse::Left) {
+				GetSignals().Emit(OnMouseLeftRelease);
+			/*}
+			else if (event.mouseButton.button == sf::Mouse::Right) {
+				GetSignals().Emit(OnMouseRightRelease);
+			}*/
+		}
+	}
+	
+	void Widget::onKeyEvent(const SDL_KeyboardEvent& key) {
+		if (!HandleEvent())
+			return;
+
+		switch(key.type){
+		case SDL_KEYDOWN:
+			if (HasFocus()) {
+				// TODO: Delegate event too when widget's not active?
+				HandleKeyEvent(key, true);
+				GetSignals().Emit(OnKeyPress);
+			}
+
+			break;
+
+		case SDL_KEYUP:
+			if (HasFocus()) {
+				// TODO: Delegate event too when widget's not active?
+				HandleKeyEvent(key, false);
+				GetSignals().Emit(OnKeyRelease);
+			}
+			break;
+
+		default:
+			break;
+		}
+	}
+
+	void Widget::onTextEvent(const SDL_TextInputEvent& text) {
+		if (!HandleEvent())
+			return;
+
+			if (HasFocus()) {
+				// TODO: Delegate event too when widget's not active?
+				HandleTextEvent(text.text);// event.text.unicode);
+				GetSignals().Emit(OnText);
+			}	
+	}
+
+	//void Widget::HandleMouseButtonEvent(sf::Mouse::Button /*button*/, bool /*press*/, int /*x*/, int /*y*/) {
+	//}
+
+	//void Widget::HandleKeyEvent(sf::Keyboard::Key /*key*/, bool /*press*/) {
+	//}
 	
 	void Widget::HandleStateChange(State /*old_state*/) {
 		
 	}
 
-	void Widget::HandleTextEvent(sf::Uint32 /*character*/) {
+	void Widget::HandleTextEvent(const char* /*character*/) {
 	}
 
 	void Widget::HandleMouseEnter(int /*x*/, int /*y*/) {
@@ -576,8 +604,8 @@ namespace XE {
 	void Widget::HandleMouseLeave(int /*x*/, int /*y*/) {
 	}
 
-	void Widget::HandleMouseClick(sf::Mouse::Button /*button*/, int /*x*/, int /*y*/) {
-	}
+	//void Widget::HandleMouseClick(sf::Mouse::Button /*button*/, int /*x*/, int /*y*/) {
+	//}
 
 	void Widget::HandleFocusChange(Widget::Ptr focused_widget) {
 		if ((focused_widget != shared_from_this()) && (GetState() == State::ACTIVE)) {

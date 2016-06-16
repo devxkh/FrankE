@@ -15,12 +15,16 @@ namespace XE {
 	
 	LayerRenderer::LayerRenderer(GraphicsManager& graphMgr)
 		: m_graphMgr(graphMgr)
+		, _t_OgreSceneMgrPtr(0)
 	{
 
 	}
 
 	RenderableLayer* LayerRenderer::_t_createRenderableLayer(XE::Uint32 id, const XE::Uint16 atlasId)
 	{
+		assert(_t_OgreSceneMgrPtr);
+			
+
 		RenderableLayer* layer = new RenderableLayer(id,
 													m_graphMgr.getGUIRenderer(),
 													&_t_OgreSceneMgrPtr->_getEntityMemoryManager(Ogre::SCENE_DYNAMIC)	
@@ -49,6 +53,9 @@ namespace XE {
 	void LayerRenderer::_t_initRenderer(TextureAtlas* atlas, Ogre::ObjectMemoryManager* objManager, Ogre::SceneManager* sceneMgr)
 	{
 		 _t_OgreSceneMgrPtr = sceneMgr;
+
+
+
 	}
 
 	void LayerRenderer::redrawAllLayers()

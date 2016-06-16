@@ -1,6 +1,5 @@
 #include <XEScripts/LUAEngine.h>
 
-#include <XEngine.hpp>
 #include <Ogre/OgreMain/include/OgreVector3.h>
 #include <XEScripts/LUA/LuaVector3.hpp>
 #include <XEDAL/PhysFS/PhysFsStream.hpp>
@@ -31,15 +30,6 @@ namespace XE {
 	//	script1.call();
 	//	//script1(); //execute
 	//}
-
-
-	void LuaEngine::loadAtlas(std::string atlasFile) {
-		m_engine.getGraphicsManager().getGUIRenderer().loadAtlas(atlasFile);
-	}
-
-	void LuaEngine::loadScene(int sceneId) {
-		m_engine.getScene().create(sceneId);
-	}
 
 	void LuaEngine::executeScript(const std::string& filepath)
 	{

@@ -2,13 +2,13 @@
 
 namespace XE
 {
-	CameraFreeComponent::CameraFreeComponent(CameraRenderable& cameraRenderable)
+	CameraFreeComponent::CameraFreeComponent(CameraRenderable& cameraRenderable, BodyComponent& bodyComponent)
 		: _cameraRenderable(cameraRenderable)
 		, m_SpeedModifier(false)
 		, mTopSpeed(150)
 		, mFastMove(false)
 		, _isDirty(false)
-		, _cameraBodyNode()
+		, _cameraBodyNode(bodyComponent)
 		, m_CameraYaw(0)
 		, m_CameraPitch(0)
 	{
@@ -21,7 +21,8 @@ namespace XE
 	}
 
 	void CameraFreeComponent::IsDirty(bool isDirty) {
-		_isDirty = isDirty; _cameraBodyNode.isDirty(false);
+		_isDirty = isDirty;
+		_cameraBodyNode.isDirty(false);
 	}
 
 	bool CameraFreeComponent::IsDirty() {

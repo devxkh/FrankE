@@ -9,6 +9,10 @@
 // Headers
 ////////////////////////////////////////////////////////////
 #include <XEDebugger.hpp>
+#define SDL_MAIN_HANDLED
+#include <SDL.h>
+
+#include <XEngine/Settings.hpp>
 
 #include <XESystem.hpp>
 #include <XESystem/Entityx/entityx.h>
@@ -86,7 +90,7 @@ namespace XE
 	{
 	public:
 		///Ctor
-		XEngine(const std::string& ressFile, const std::string& title, bool isEditor = false);
+		XEngine();
 		~XEngine();
 
 		void setScene(std::unique_ptr<Scene> scene);
@@ -105,7 +109,8 @@ namespace XE
 
 		inline bool running() {  
 			return m_running; }
-
+		
+		void init();
 		void quit();
 
 		template < typename T >
@@ -114,7 +119,7 @@ namespace XE
 		inline bool isInitialized() {
 			return m_initialized;
 		}
-
+		
 		inline IDAL& getIDAL() {
 			return mIDAL;
 		}
@@ -137,6 +142,7 @@ namespace XE
 			return *m_scene.get();
 		}
 
+		Settings settings;
 
 	protected:
 

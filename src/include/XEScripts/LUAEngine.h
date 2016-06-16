@@ -40,10 +40,7 @@ public:
 	void executeScript(const std::string& filepath);
 	void removeScript(const std::string& filepath);
 	void reloadScript(const std::string& filepath);
-
-	void loadAtlas(std::string atlasFile);
-	void loadScene(int sceneId);
-
+	
 	sol::state state;
 
 private:

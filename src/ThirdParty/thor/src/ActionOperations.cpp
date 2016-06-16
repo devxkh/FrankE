@@ -25,13 +25,14 @@
 
 #include <Thor/Input/Detail/ActionOperations.hpp>
 
-#include <SFML/Window/Window.hpp>
+#include <SDL.h>
 
 #include <iterator>
 #include <algorithm>
 
 using namespace std::placeholders;
 
+#include <Thor/Input/Action.hpp>
 
 namespace thor
 {
@@ -43,19 +44,19 @@ namespace detail
 	{
 	}
 
-	void EventBuffer::pushEvent(const sf::Event& event)
+	void EventBuffer::pushEvent(const SDL_Event& event)
 	{
 		// Generate realtime actions only if window has the focus. For example, key presses don't invoke callbacks when the
 		// window is not focussed.
 		switch (event.type)
 		{
-			case sf::Event::GainedFocus:
-				mRealtimeEnabled = true;
-				break;
+		case SDL_WINDOWEVENT_FOCUS_GAINED:
+			mRealtimeEnabled = true;
+			break;
 
-			case sf::Event::LostFocus:
-				mRealtimeEnabled = false;
-				break;
+		case SDL_WINDOWEVENT_FOCUS_LOST:
+			mRealtimeEnabled = false;
+			break;
 		}
 
 		// Store event
@@ -69,11 +70,11 @@ namespace detail
 
 	bool EventBuffer::containsEvent(const EventNode& filterNode) const
 	{
-		std::vector<sf::Event> unused;
+		std::vector<SDL_Event> unused;
 		return filterEvents(filterNode, unused);
 	}
 
-	bool EventBuffer::filterEvents(const EventNode& filterNode, std::vector<sf::Event>& out) const
+	bool EventBuffer::filterEvents(const EventNode& filterNode, std::vector<SDL_Event>& out) const
 	{
 		// Variable to check if something was actually inserted (don't look at range, it's not filtered yet)
 		std::size_t oldSize = out.size();
@@ -88,11 +89,11 @@ namespace detail
 		return mRealtimeEnabled;
 	}
 
-	void EventBuffer::pollEvents(sf::Window& window)
+	void EventBuffer::pollEvents()
 	{
-		sf::Event event;
+		SDL_Event event;
 
-		while (window.pollEvent(event))
+		while (SDL_PollEvent(&event))
 			pushEvent(event);
 	}
 	
@@ -154,7 +155,7 @@ namespace detail
 	// ---------------------------------------------------------------------------------------------------------------------------
 
 
-	RealtimeKeyLeaf::RealtimeKeyLeaf(sf::Keyboard::Key key)
+	RealtimeKeyLeaf::RealtimeKeyLeaf(SDL_Scancode key)
 	: RealtimeNode()
 	, mKey(key)
 	{
@@ -162,28 +163,32 @@ namespace detail
 
 	bool RealtimeKeyLeaf::isRealtimeActive() const
 	{
-		return sf::Keyboard::isKeyPressed(mKey);
+		const Uint8 *state = SDL_GetKeyboardState(NULL);
+		if (state[mKey])
+			return true; // is pressed
+		else 
+			return false;	
 	}
 
 	// ---------------------------------------------------------------------------------------------------------------------------
 
 
-	EventKeyLeaf::EventKeyLeaf(sf::Keyboard::Key key, bool pressed)
+	EventKeyLeaf::EventKeyLeaf(SDL_Scancode key, bool pressed)
 	: EventNode()
 	{
-		mEvent.type = pressed ? sf::Event::KeyPressed : sf::Event::KeyReleased;
-		mEvent.key.code = key;
+		mEvent.type = pressed ? SDL_KEYDOWN : SDL_KEYUP;
+	//TODO?	mEvent.key = key;
 	}
 
-	bool EventKeyLeaf::isEventActive(const sf::Event& event) const
+	bool EventKeyLeaf::isEventActive(const SDL_Event& event) const
 	{
-		return event.type == mEvent.type && event.key.code == mEvent.key.code;
+		return event.type == mEvent.type && event.key.keysym.scancode == mEvent.key.keysym.scancode;
 	}
 
 	// ---------------------------------------------------------------------------------------------------------------------------
 
 
-	RealtimeMouseLeaf::RealtimeMouseLeaf(sf::Mouse::Button mouseButton)
+	RealtimeMouseLeaf::RealtimeMouseLeaf(MouseBottonID mouseButton)
 	: RealtimeNode()
 	, mMouseButton(mouseButton)
 	{
@@ -191,28 +196,64 @@ namespace detail
 
 	bool RealtimeMouseLeaf::isRealtimeActive() const
 	{
-		return sf::Mouse::isButtonPressed(mMouseButton);
+		if (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(mMouseButton))
+			return true;
+		else
+			return false;
 	}
 
 	// ---------------------------------------------------------------------------------------------------------------------------
-
-
-	EventMouseLeaf::EventMouseLeaf(sf::Mouse::Button mouseButton, bool pressed)
+	
+	EventMouseLeaf::EventMouseLeaf(MouseBottonID mouseButton, bool pressed)
 	: EventNode()
 	{
-		mEvent.type = pressed ? sf::Event::MouseButtonPressed : sf::Event::MouseButtonReleased;
-		mEvent.mouseButton.button = mouseButton;
+		mEvent.type = pressed ? SDL_MOUSEBUTTONDOWN : SDL_MOUSEBUTTONUP;
+		mEvent.button.button = mouseButton;
 	}
 
-	bool EventMouseLeaf::isEventActive(const sf::Event& event) const
+	bool EventMouseLeaf::isEventActive(const SDL_Event& event) const
 	{
-		return event.type == mEvent.type && event.mouseButton.button == mEvent.mouseButton.button;
+		return event.type == mEvent.type && event.button.button == mEvent.button.button;
+	}
+
+	// ---------------------------------------------------------------------------------------------------------------------------
+
+	EventMouseWheelLeaf::EventMouseWheelLeaf(MouseWheelEvt mouseWheel)
+		: EventNode() 
+	{
+		mEvent.type = SDL_MOUSEWHEEL;
+		switch (mouseWheel)
+		{
+		case thor::MW_UP: mEvent.wheel.y = 1;  break;
+		case thor::MW_DOWN: mEvent.wheel.y = -1;  break;
+		case thor::MW_LEFT: mEvent.wheel.x = -1;  break;
+		case thor::MW_RIGHT: mEvent.wheel.x = 1;  break;
+		}
+	}
+
+	bool EventMouseWheelLeaf::isEventActive(const SDL_Event& event) const {
+
+		if (event.type == mEvent.type && event.wheel.y != 0)
+		{
+			if (event.wheel.y > 0 && mEvent.wheel.y == 1)
+			{
+				return true; //UP
+			}
+			else if (event.wheel.y < 0 && mEvent.wheel.y == -1)
+			{
+				return true; //DOWN
+			}
+		}
+		else if (event.type == mEvent.type && event.wheel.x != 0)
+			//TODO horizontal scroll ?
+
+		return false; 
 	}
 
 	// ---------------------------------------------------------------------------------------------------------------------------
 
 
-	RealtimeJoystickButtonLeaf::RealtimeJoystickButtonLeaf(JoystickButton joystick)
+	RealtimeJoystickButtonLeaf::RealtimeJoystickButtonLeaf(SDL_JoyButtonEvent joystick)
 	: RealtimeNode()
 	, mJoystick(joystick)
 	{
@@ -220,13 +261,13 @@ namespace detail
 
 	bool RealtimeJoystickButtonLeaf::isRealtimeActive() const
 	{
-		return sf::Joystick::isButtonPressed(mJoystick.joystickId, mJoystick.button);
+		return  mJoystick.type == SDL_JOYBUTTONDOWN;// sf::Joystick::isButtonPressed(mJoystick.which, mJoystick.button);
 	}
 
 	// ---------------------------------------------------------------------------------------------------------------------------
 
 
-	RealtimeJoystickAxisLeaf::RealtimeJoystickAxisLeaf(JoystickAxis joystick)
+	RealtimeJoystickAxisLeaf::RealtimeJoystickAxisLeaf(SDL_JoyAxisEvent joystick)
 	: RealtimeNode()
 	, mJoystick(joystick)
 	{
@@ -234,38 +275,41 @@ namespace detail
 
 	bool RealtimeJoystickAxisLeaf::isRealtimeActive() const
 	{
-		float axisPos = sf::Joystick::getAxisPosition(mJoystick.joystickId, mJoystick.axis);
+		//FIXME
+		//float axisPos = mJoystick.value; //  sf::Joystick::getAxisPosition(mJoystick.joystickId, mJoystick.axis);
 
-		return mJoystick.above && axisPos > mJoystick.threshold
-			|| !mJoystick.above && axisPos < mJoystick.threshold;
+		//return mJoystick.type == SDL_Joy .above && axisPos > mJoystick.threshold
+		//	|| !mJoystick.above && axisPos < mJoystick.threshold;
+		return false;
 	}
 
 	// ---------------------------------------------------------------------------------------------------------------------------
 
 
-	EventJoystickLeaf::EventJoystickLeaf(JoystickButton joystick, bool pressed)
+	EventJoystickLeaf::EventJoystickLeaf(SDL_JoyButtonEvent joystick, bool pressed)
 	: EventNode()
 	{
-		mEvent.type = pressed ? sf::Event::JoystickButtonPressed : sf::Event::JoystickButtonReleased;
-		mEvent.joystickButton.joystickId = joystick.joystickId;
-		mEvent.joystickButton.button = joystick.button;
+		mEvent.type = pressed ? SDL_JOYBUTTONDOWN : SDL_JOYBUTTONUP;
+		//FIXME
+		//mEvent.jbutton. = joystick.button;//.joy.joystickButton.joystickId = joystick.joystickId;
+		//mEvent.joystickButton.button = joystick.button;
 	}
 
-	bool EventJoystickLeaf::isEventActive(const sf::Event& event) const
+	bool EventJoystickLeaf::isEventActive(const SDL_Event& event) const
 	{
-		return event.type == mEvent.type && event.joystickButton.button == mEvent.joystickButton.button;
+		return event.type == mEvent.type && event.jbutton.button == mEvent.jbutton.button;
 	}
 
 	// ---------------------------------------------------------------------------------------------------------------------------
 
 
-	MiscEventLeaf::MiscEventLeaf(sf::Event::EventType eventType)
+	MiscEventLeaf::MiscEventLeaf(SDL_EventType eventType)
 	: EventNode()
 	{
 		mEvent.type = eventType;
 	}
 
-	bool MiscEventLeaf::isEventActive(const sf::Event& event) const
+	bool MiscEventLeaf::isEventActive(const SDL_Event& event) const
 	{
 		return mEvent.type == event.type;
 	}
@@ -273,12 +317,12 @@ namespace detail
 	// ---------------------------------------------------------------------------------------------------------------------------
 
 
-	CustomEventLeaf::CustomEventLeaf(std::function<bool(const sf::Event&)> filter)
+	CustomEventLeaf::CustomEventLeaf(std::function<bool(const SDL_Event&)> filter)
 	: mFilter(std::move(filter))
 	{
 	}
 
-	bool CustomEventLeaf::isEventActive(const sf::Event& event) const
+	bool CustomEventLeaf::isEventActive(const SDL_Event& event) const
 	{
 		return mFilter(event);
 	}

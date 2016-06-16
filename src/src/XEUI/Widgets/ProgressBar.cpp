@@ -3,6 +3,7 @@
 //#include <SFGUI/RenderQueue.hpp>
 //#include <SFGUI/Engine.hpp>
 
+#include <ThirdParty/sfml/include/sfml/Graphics/Rect.hpp>
 #include <XEUI/Container.hpp>
 
 namespace XE {
@@ -64,22 +65,22 @@ namespace XE {
 			if (GetOrientation() == ProgressBar::Orientation::HORIZONTAL) {
 				float frac_width(std::max(2.f * bar_border_width, size.x * GetFraction()));
 
-				bar_rect = sf::FloatRect(
+				bar_rect = sf::FloatRect{
 					border_width,
 					border_width,
 					std::max(0.f, frac_width - 2.f * border_width),
 					std::max(0.f, size.y - 2.f * border_width)
-					);
+				};
 			}
 			else {
 				float frac_height(std::max(2.f * bar_border_width, size.y * GetFraction()));
 
-				bar_rect = sf::FloatRect(
+				bar_rect = sf::FloatRect{
 					border_width,
 					std::max(0.f, size.y - frac_height + border_width),
 					std::max(0.f, size.x - 2.f * border_width),
 					std::max(0.f, frac_height - 2.f * border_width)
-					);
+				};
 			}
 
 			// Bar Pane.

@@ -1,6 +1,7 @@
 #ifndef __GRAPHICSMANAGER_HPP__
 #define __GRAPHICSMANAGER_HPP__
 
+#include <XESystem/SystemConfig.hpp>
 #include <XEngine/Controller/Export.hpp>
 
 #include <XESystem/QueueManager.hpp>
@@ -8,13 +9,13 @@
 
 #include <XEngine/Controller/WindowManager.hpp>
 
+#include <XEngine/OgreLogListener.hpp>
+
 #include <mutex>
 #include <thread>
 
-namespace sf
-{
-	class Window;
-}
+#include <SDL.h>
+
 namespace sol { class state; }
 
 namespace Ogre
@@ -87,9 +88,10 @@ namespace XE
 
 		inline FrameStats& getFrameStats() { return  m_FrameStats; }
 		
-		Ogre::RenderWindow* _t_getRenderWindow(sf::Uint16 id){ return _t_RenderWindow; }
+		Ogre::RenderWindow* _t_getRenderWindow(XE::Uint16 id){ return _t_RenderWindow; }
 
-		WindowManager& getWindowManager() { return mWindowManager; }
+//		WindowManager& getWindowManager() { return mWindowManager; }
+		SDL_Window* getWindow();
 
 		RenderTask& GetRenderTask(RenderTaskID id);
 
@@ -100,11 +102,15 @@ namespace XE
 
 	private:
 
+		OgreLogListener m_ogreLog;
+
+		SDL_Window* m_SdlWindow;
+
 		void RenderThread(GraphicsManager* graphicsMgr, XE::XEngine* engine);
 
 		std::vector<RenderTask> _renderTasks;
 
-		WindowManager	mWindowManager;
+	//	WindowManager	mWindowManager;
 
 		Ogre::RenderWindow*  _t_RenderWindow;
 		//todo multiple workspaces!

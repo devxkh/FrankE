@@ -83,7 +83,13 @@ class XE_API Desktop : public Container  {
 		/** Handle event.
 		 * @param event SFML event.
 		 */
-		void HandleEvent( const sf::Event& event );
+		//void HandleEvent( const sf::Event& event );
+
+		virtual void onPointMoved(const float& x, const float& y);
+		virtual void onPointDown(const float& x, const float& y);
+		virtual void onPointUp(const float& x, const float& y);
+		virtual void onKeyEvent(const  SDL_KeyboardEvent& key);
+		virtual void onTextEvent(const SDL_TextInputEvent& text);
 
 //		void HandleSizeChange() override;
 
@@ -138,7 +144,7 @@ class XE_API Desktop : public Container  {
 
 		//typedef std::deque<std::shared_ptr<Widget> > WidgetsList;
 
-		void SendFakeMouseMoveEvent( std::shared_ptr<Widget> widget, int x = -1337, int y = -1337 ) const;
+	//	void SendFakeMouseMoveEvent( std::shared_ptr<Widget> widget, int x = -1337, int y = -1337 ) const;
 	//	void RecalculateWidgetLevels();
 
 		//mutable Context m_context;

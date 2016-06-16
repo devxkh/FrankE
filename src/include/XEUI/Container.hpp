@@ -50,7 +50,10 @@ public:
 
 	void Refresh() override;
 
-	void HandleEvent(const sf::Event& event) override;
+	virtual void onPointMoved(const float& x, const float& y);
+	virtual void onPointDown(const float& x, const float& y);
+	virtual void onPointUp(const float& x, const float& y);
+	virtual void onKeyEvent(const  SDL_KeyboardEvent& key);
 
 	/** Used to inform parent that a child has been invalidated
 	* @param child Widget that was invalidated.
@@ -68,6 +71,8 @@ protected:
 	WidgetsList m_children;
 
 private:
+
+		bool HandleEvent();
 };
 
 }

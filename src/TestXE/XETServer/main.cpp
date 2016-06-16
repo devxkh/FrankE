@@ -6,9 +6,15 @@ int main()
 
 	// leaving the scope of 'game' will cleanup the engine
 
-	XE::XEngine game("F:/Projekte/coop/XEngine/data/Test/XETController/resources.cfg", "Ogre3D v2.0 and SFML v2.2 - XETServer");
+	XE::XEngine game;
 
-
+	//game.settings.dbDataFolder = "F:\\Projekte\\coop\\XGame\\data\\dbData";
+	//game.settings.assetsFolder = "F:\\Projekte\\coop\\XGame\\data\\assets";
+	//game.settings.dbFileName = "F:\\Projekte\\coop\\XGame\\data\\dbData.s3db";
+	//game.settings.windowTitle = "Ogre3D v2.0 and SDL 2 - XETServer";
+	
+	game.settings.load("F:/Projekte/coop/XGame/data/");
+	game.init();
 	game.run(game.build<ServerState>(game, true));
 
 	while (game.running())
@@ -17,4 +23,7 @@ int main()
 	}
 
 	game.quit();
+
+
+	return 0;
 }

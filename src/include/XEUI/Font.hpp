@@ -39,17 +39,17 @@ namespace XE {
 		*/
 		inline const FontGlyph* getGlyph(Uint32 character) const
 		{
-			std::unordered_map<Uint32, std::unique_ptr<FontGlyph>>::const_iterator i = mGlyphs.find(character);
+			std::unordered_map<Uint32, FontGlyph>::const_iterator i = mGlyphs.find(character);
 			if (i == mGlyphs.end())
 			{
 			//	LOG(WARNING) << "getGlyph -> glyph not found" << character;
 				return 0;
 			}
 
-			return i->second.get();
+			return &i->second;
 		}
 
-		std::unordered_map<Uint32, std::unique_ptr<FontGlyph>> mGlyphs;
+		std::unordered_map<Uint32, FontGlyph> mGlyphs;
 
 	/*	Uint32          mRangeBegin
 							, mRangeEnd;*/

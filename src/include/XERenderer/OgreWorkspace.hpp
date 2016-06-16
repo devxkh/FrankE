@@ -1,8 +1,6 @@
 #ifndef __OGREWORKSPACE_HPP__
 #define __OGREWORKSPACE_HPP__
 
-#include <sfml/System/String.hpp>
-
 #include <Ogre/OgreMain/include/OgrePrerequisites.h>
 #include <Ogre/OgreMain/include/OgreTexture.h>
 #include <Ogre/OgreMain/include/OgreSharedPtr.h>
@@ -11,10 +9,7 @@
 #include <Ogre/OgreMain/include/Compositor/Pass/OgreCompositorPassDef.h>
 #include <Ogre/OgreMain/include/Compositor/Pass/OgreCompositorPassProvider.h>
 
-namespace sf
-{
-	class Window;
-}
+class SDL_Window;
 
 namespace Ogre
 {
@@ -101,7 +96,7 @@ namespace XE {
 		OgreWorkspace(XEngine& engine, GraphicsManager& graphicsMgr);
 		~OgreWorkspace();
 		
-		static Ogre::RenderWindow* _t_createRenderWindow(sf::Window* window = nullptr);
+		static Ogre::RenderWindow* _t_createRenderWindow(void* window = nullptr);
 		
 		static Ogre::TexturePtr createTextureRenderTarget(int width, int height);
 		Ogre::RenderTarget* createRenderTarget(int width, int height, Ogre::RenderTarget* renderTarget = nullptr);

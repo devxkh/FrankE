@@ -34,7 +34,7 @@
 #include <Thor/Input/ActionMap.hpp>
 #include <Thor/Input/EventSystem.hpp>
 #include <Thor/Input/Connection.hpp>
-#include <Thor/Input/InputNames.hpp>
+//#include <Thor/Input/InputNames.hpp>
 #include <Thor/Input/Joystick.hpp>
 
 #endif // THOR_MODULE_INPUT_HPP

@@ -113,6 +113,7 @@ source_group("src\\Scripts\\LUA" FILES ${XEScripts_LUASRC})
 # all source files
 set(XEController_SOURCES
 #	 ${SRCROOT}/XEngine/Controller/ControllerManager.cpp
+	${SRCROOT}/XEngine/Controller/SDLInputHandler.cpp
 	${SRCROOT}/XEngine/Controller/WindowManager.cpp
 )
 
@@ -122,6 +123,7 @@ source_group("src\\controller" FILES ${XEController_SOURCES})
 set(XEController_HEADER
 #	  ${INCROOT}/XEngine/Controller/InputCmd.hpp
 #	 ${INCROOT}/XEngine/Controller/ControllerManager.hpp
+	${INCROOT}/XEngine/Controller/SDLInputHandler.hpp
 	${INCROOT}/XEngine/Controller/WindowManager.hpp
 
 )
@@ -204,25 +206,27 @@ source_group("src\\components" FILES ${XEComponents_SOURCES})
 
 #---------------- Extern ----------------------
 # all source files
-set(XEEngineExtern_SOURCES
-   
-     ${SRCROOT}/XEngine/Extern/Extern.cpp
- 
-)
-source_group("src\\extern" FILES ${XEEngineExtern_SOURCES})
-
-# all header files
-set(XEEngineExtern_HEADER
-	 ${INCROOT}/XEngine/Extern/Extern.h
-)
-
-source_group("include\\extern" FILES ${XEEngineExtern_HEADER})
+#set(XEEngineExtern_SOURCES
+#   
+#     ${SRCROOT}/XEngine/Extern/Extern.cpp
+# 
+#)
+#source_group("src\\extern" FILES ${XEEngineExtern_SOURCES})
+#
+## all header files
+#set(XEEngineExtern_HEADER
+#	 ${INCROOT}/XEngine/Extern/Extern.h
+#)
+#
+#source_group("include\\extern" FILES ${XEEngineExtern_HEADER})
 
 
 #--------------------------------------
 set(XEngine_main_INCLUDES
     ${INCROOT}/XEngine/XENetObserver.hpp
-    ${INCROOT}/XEngine/Scene.hpp
+     ${INCROOT}/XEngine/OgreLogListener.hpp
+   ${INCROOT}/XEngine/Scene.hpp
+    ${INCROOT}/XEngine/Settings.hpp
     ${INCROOT}/XEngine/Node.hpp
 	
     ${INCROOT}/XEngine/EntityHolder.hpp
@@ -232,6 +236,8 @@ source_group("include\\main" FILES ${XEngine_main_INCLUDES})
 
 set(XEngine_main_SOURCES
     ${SRCROOT}/XEngine/Scene.cpp
+    ${SRCROOT}/XEngine/Settings.cpp
+    ${SRCROOT}/XEngine/OgreLogListener.cpp
     ${SRCROOT}/XEngine/Node.cpp
     ${SRCROOT}/XEngine/XENetObserver.cpp
 )
@@ -346,7 +352,7 @@ sfml_add_library(XEngine
 		 ${XEComponents_HEADER} ${XEComponents_SOURCES} ${XESystems_HEADER} ${XESystems_SOURCES}
 		${XEngine_main_INCLUDES} ${XEngine_main_SOURCES} ${XEngine_math_INCLUDES}
 			${XEEngineAnimation_HEADER} ${XEEngineAnimation_SOURCES}
-			${XEEngineExtern_HEADER} ${XEEngineExtern_SOURCES}
+		#	${XEEngineExtern_HEADER} ${XEEngineExtern_SOURCES}
 				 ${XEAudio_SOURCES} ${XEAudio_HEADER} 
 			${XEScripts_SOURCES} ${XEScripts_HEADER} ${XEScripts_LUASRC} ${XEScripts_LUAHEADER}
 	 ${XEController_SOURCES} ${XEController_HEADER} ${XEController_UI_SOURCES} ${XEController_UI_HEADER}

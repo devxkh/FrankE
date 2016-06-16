@@ -30,6 +30,7 @@ namespace XE
 				//TODO use transformation for performance?
 				renderable->setWorldPosition(body->getPosition());
 				renderable->setOrientation(body->getOrientation()); 
+				body->isDirty(false);
 			}			
 		}
 

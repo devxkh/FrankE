@@ -43,15 +43,15 @@ namespace XE {
 		return m_title;
 	}
 
-	sf::FloatRect UIWindow::GetClientRect() const {
-		sf::FloatRect clientrect(0, 0, size.x, size.y);
+	SDL_Rect UIWindow::GetClientRect() const {
+		SDL_Rect clientrect { 0, 0, size.x, size.y };
 		float border_width(0); // (Context::Get().GetEngine().GetProperty<float>("BorderWidth", shared_from_this()));
 		float gap(0); // (Context::Get().GetEngine().GetProperty<float>("Gap", shared_from_this()));
 
-		clientrect.left += border_width + gap;
-		clientrect.top += border_width + gap;
-		clientrect.width -= 2 * border_width + 2 * gap;
-		clientrect.height -= 2 * border_width + 2 * gap;
+		clientrect.x += border_width + gap;
+		clientrect.y += border_width + gap;
+		clientrect.w -= 2 * border_width + 2 * gap;
+		clientrect.h -= 2 * border_width + 2 * gap;
 
 		/*if (HasStyle(TITLEBAR)) {
 			unsigned int title_font_size(Context::Get().GetEngine().GetProperty<unsigned int>("FontSize", shared_from_this()));
@@ -123,10 +123,10 @@ namespace XE {
 		return name;
 	}
 
-	void UIWindow::HandleMouseButtonEvent(sf::Mouse::Button button, bool press, int x, int y) {
-		if (button != sf::Mouse::Left) {
-			return;
-		}
+	void UIWindow::HandleMouseButtonEvent(bool press, int x, int y) {
+		//if (button != sf::Mouse::Left) {
+		//	return;
+		//}
 
 		if (!press) {
 			m_dragging = false;
@@ -142,14 +142,16 @@ namespace XE {
 			);*/
 
 		// Check for mouse being inside the title area.
-		sf::FloatRect area(
+		SDL_Rect area{
 			Widget::getPosition().x,
 			Widget::getPosition().y,
 			size.x,
 			title_height
-			);
+		};
 
-		if (area.contains(static_cast<float>(x), static_cast<float>(y))) {
+		SDL_Point point{ x, y };
+
+		if (SDL_PointInRect(&point, &area)) {
 			if (HasStyle(TITLEBAR) && !m_dragging) {
 				if (HasStyle(CLOSE)) {
 					/*auto close_height(Context::Get().GetEngine().GetProperty<float>("CloseHeight", shared_from_this()));
@@ -181,12 +183,12 @@ namespace XE {
 		else {
 			float handle_size(0);// Context::Get().GetEngine().GetProperty<float>("HandleSize", shared_from_this()));
 
-			area.left = Widget::getPosition().x + size.x - handle_size;
-			area.top = Widget::getPosition().y + size.x - handle_size;
-			area.width = handle_size;
-			area.height = handle_size;
+			area.x = Widget::getPosition().x + size.x - handle_size;
+			area.y = Widget::getPosition().y + size.x - handle_size;
+			area.w = handle_size;
+			area.h = handle_size;
 
-			if (area.contains(static_cast<float>(x), static_cast<float>(y))) {
+			if (SDL_PointInRect(&point, &area)) {
 				m_dragging = false;
 				m_resizing = true;
 

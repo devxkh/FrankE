@@ -37,6 +37,10 @@ namespace XE {
 		, m_currentIndexBufferSize(0)
 		,_initalizied(false)
 	{
+		//set renderqueue
+		sceneMgr->getRenderQueue()->setRenderQueueMode(254, Ogre::RenderQueue::Modes::FAST);
+		this->setRenderQueueGroup(254);
+
 		m_sceneNodeLines = sceneMgr->getRootSceneNode(Ogre::SCENE_DYNAMIC)->createChildSceneNode(Ogre::SCENE_DYNAMIC);
 		m_sceneNodeLines->attachObject(this);
 
@@ -146,13 +150,7 @@ namespace XE {
 			//texture
 			*mVertexBufferCursor++ = vertex.uv.x;
 			*mVertexBufferCursor++ = vertex.uv.y;
-
-
-
-			//-----------> position(vertex.position.x, vertex.position.y, vertex.position.z);
-			//colour(vertex.colour.r, vertex.colour.g, vertex.colour.b, vertex.colour.a);
-			//-----------> textureCoord(vertex.uv.x, vertex.uv.y);
-
+			
 			//if (vertexCnt == 0)
 			//	idx = 0; //set Index 0
 			//else if (vertexCnt == 1)
@@ -202,7 +200,6 @@ namespace XE {
 		//mObjectData.mLocalRadius[mObjectData.mIndex] = aabb.getRadius();//3D
 		mObjectData.mLocalRadius[mObjectData.mIndex] = std::numeric_limits<Ogre::Real>::max();
 		mObjectData.mWorldRadius[mObjectData.mIndex] = std::numeric_limits<Ogre::Real>::max();
-
 	}
 
 	void RenderableLayer::clear()

@@ -4,28 +4,24 @@
 
 #include <Ogre/RenderSystems/Direct3D11/include/OgreD3D11Plugin.h>
 #include <Ogre/RenderSystems/GL3Plus/include/OgreGL3PlusPlugin.h>
-
-//#include <Ogre/OgreMain/include/Compositor/OgreCompositorManager2.h>
 #include <XERenderer/OgreWorkspace.hpp>
 #include <Ogre/OgreMain/include/OgreFrameStats.h>
-
 #include <Ogre/Components/Hlms/Unlit/include/OgreHlmsUnlit.h>
 #include <Ogre/Components/Hlms/Pbs/include/OgreHlmsPbs.h>
 #include <Ogre/OgreMain/include/OgreHlmsManager.h>
-
-
 #include <XEScripts/LUAEngine.h>
-//#include <Ogre/OgreMain/include/OgreRoot.h>
 
+#include <Ogre/OgreMain/include/OgreLog.h>
+#include <Ogre/OgreMain/include/OgreLogManager.h>
 
 namespace XE
 {
 	//#define GRAPHICS_THREAD 1  //compile with graphics render thread
 
 	GraphicsManager::GraphicsManager(XE::XEngine* engine) :
-		mRoot(OGRE_NEW Ogre::Root())
+		mRoot(0)
 
-		, mWindowManager()
+		//	, mWindowManager()
 		, _t_OgreWorkspace(nullptr) //creates window in mainthread
 		, my_QueueManager()
 		, my_FromRSQueueManager()
@@ -34,13 +30,29 @@ namespace XE
 		//#endif
 		mEngine(engine)
 		, m_GUIRenderer(*this)
+		, m_SdlWindow(0)
+		, m_ogreLog()
 	{
+		
+		new Ogre::LogManager();// Creating the manager. This may only be called once!
+		auto m_pLog = LogManager::getSingleton().createLog("log.txt", true, true);
+		m_pLog->setDebugOutputEnabled(false);
+		m_pLog->addListener(&m_ogreLog);
+
+
+		mRoot = OGRE_NEW Ogre::Root();
+
+
+
 		_renderTasks.push_back(RenderTask(RenderTaskID::AnimationAddTimes));
 		_renderTasks.push_back(RenderTask(RenderTaskID::AnimationTimes));
 		_renderTasks.push_back(RenderTask(RenderTaskID::DebugLines));
 		_renderTasks.push_back(RenderTask(RenderTaskID::RenderBody));
 		_renderTasks.push_back(RenderTask(RenderTaskID::Camera));
 		_renderTasks.push_back(RenderTask(RenderTaskID::RenderGUI));
+
+		if (SDL_Init(SDL_INIT_EVERYTHING) != 0)
+			LOG(ERROR) << "Cannot initialize SDL2! - GraphicsSystem::initialize";
 
 		createRenderer();
 
@@ -58,6 +70,16 @@ namespace XE
 	{
 		delete mRenderThread;
 		delete _t_OgreWorkspace;
+
+		if (m_SdlWindow)
+		{
+			// Restore desktop resolution on exit
+			SDL_SetWindowFullscreen(m_SdlWindow, 0);
+			SDL_DestroyWindow(m_SdlWindow);
+			m_SdlWindow = 0;
+		}
+
+		SDL_Quit();
 	}
 
 	//Ogre::TexturePtr GraphicsManager::createTextureRenderTarget(int width, int height)
@@ -67,9 +89,13 @@ namespace XE
 	//	//return rt;
 	//}
 
+	SDL_Window* GraphicsManager::getWindow() {
+		return m_SdlWindow;
+	}
+
 	void GraphicsManager::resizeRenderWindow(size_t w, size_t h)
 	{
-		getIntoRendererQueue().push([this, w, h](){
+		getIntoRendererQueue().push([this, w, h]() {
 
 			_t_RenderWindow->windowMovedOrResized();
 			//_t_RenderWindow->resize(w, h);
@@ -78,14 +104,32 @@ namespace XE
 
 	void GraphicsManager::createRenderWindow(const std::string& title)
 	{
+		int screen = 0;
+		int posX = SDL_WINDOWPOS_CENTERED_DISPLAY(screen);
+		int posY = SDL_WINDOWPOS_CENTERED_DISPLAY(screen);
+
+		bool fullscreen = false;//Ogre::StringConverter::parseBool(cfgOpts["Full Screen"].currentValue);
+		if (fullscreen)
+		{
+			posX = SDL_WINDOWPOS_UNDEFINED_DISPLAY(screen);
+			posY = SDL_WINDOWPOS_UNDEFINED_DISPLAY(screen);
+		}
+
+		m_SdlWindow = SDL_CreateWindow(
+			title.c_str(),    // window title
+			posX,               // initial x position
+			posY,               // initial y position
+			800,              // width, in pixels
+			600,             // height, in pixels
+			SDL_WINDOW_SHOWN
+			| (fullscreen ? SDL_WINDOW_FULLSCREEN : 0) | SDL_WINDOW_RESIZABLE);
+
 		//todo manage multiple windows
-		sf::Window* window = mWindowManager.createWindow(sf::VideoMode(800, 600), title, sf::Style::Default);
+		//sf::Window* window = mWindowManager.createWindow(sf::VideoMode(800, 600), title, sf::Style::Default);
+		
+		getIntoRendererQueue().push([this]() {
 
-
-		getIntoRendererQueue().push([this, window](){
-
-			//todo lock and stop render thread while adding renderwindow
-			_t_RenderWindow = OgreWorkspace::_t_createRenderWindow(window); //need window handle (else wnd is hidden), always a renderwindow is needed
+			_t_RenderWindow = OgreWorkspace::_t_createRenderWindow(m_SdlWindow); //need window handle (else wnd is hidden), always a renderwindow is needed
 		});
 	}
 
@@ -105,7 +149,7 @@ namespace XE
 
 	void GraphicsManager::setRenderSystem()
 	{
-	
+
 		//D3D11RenderSystem* mRenderSystem = new D3D11RenderSystem();
 		Ogre::GL3PlusRenderSystem* mRenderSystem = new Ogre::GL3PlusRenderSystem();
 		// Register the render system
@@ -126,49 +170,39 @@ namespace XE
 
 	void GraphicsManager::registerHlms(void)
 	{
-		getIntoRendererQueue().push([this](){
-	
-//		Ogre::ConfigFile cf;
-	//	cf.load("resources2.cfg");
+		getIntoRendererQueue().push([this]() {
 
-		Ogre::String dataFolder = "F:/Projekte/coop/XEngine/data/Test/XETController";//cf.getSetting("DoNotUseAsResource", "Hlms", "");
+			Ogre::String dataFolder = mEngine->settings.FBSettings()->resourceData()->hlmsDataFolder()->c_str();
 
-		if (dataFolder.empty())
-			dataFolder = "./";
-		else if (*(dataFolder.end() - 1) != '/')
-			dataFolder += "/";
+			if (dataFolder.empty())
+				dataFolder = "./";
+			else if (*(dataFolder.end() - 1) != '/')
+				dataFolder += "/";
 
-		Ogre::String shaderSyntax = "GLSL";
-		if (mRoot->getRenderSystem()->getName() == "Direct3D11 Rendering Subsystem")
-			shaderSyntax = "HLSL";
+			Ogre::String shaderSyntax = "GLSL";
+			if (mRoot->getRenderSystem()->getName() == "Direct3D11 Rendering Subsystem")
+				shaderSyntax = "HLSL";
 
-		Ogre::Archive *archiveLibrary = Ogre::ArchiveManager::getSingletonPtr()->load(
-			dataFolder + "Hlms/Common/" + shaderSyntax,
-			"FileSystem", true);
+			Ogre::Archive *archiveLibrary = Ogre::ArchiveManager::getSingletonPtr()->load(dataFolder + shaderSyntax + "/Common", "FileSystem", true);
+			Ogre::Archive *archiveUnlit = Ogre::ArchiveManager::getSingletonPtr()->load(dataFolder + shaderSyntax + "/Unlit", "FileSystem", true);
+			Ogre::Archive *archivePbs = Ogre::ArchiveManager::getSingletonPtr()->load(dataFolder + shaderSyntax + "/Pbs", "FileSystem", true);
 
-		Ogre::ArchiveVec library;
-		library.push_back(archiveLibrary);
+			Ogre::ArchiveVec library;
+			library.push_back(archiveLibrary);
+			
+			Ogre::HlmsUnlit *hlmsUnlit = OGRE_NEW Ogre::HlmsUnlit(archiveUnlit, &library);
+			mRoot->getHlmsManager()->registerHlms(hlmsUnlit);
+		
+			Ogre::HlmsPbs *hlmsPbs = OGRE_NEW Ogre::HlmsPbs(archivePbs, &library);
+			mRoot->getHlmsManager()->registerHlms(hlmsPbs);
 
-		Ogre::Archive *archiveUnlit = Ogre::ArchiveManager::getSingletonPtr()->load(
-			dataFolder + "Hlms/Unlit/" + shaderSyntax,
-			"FileSystem", true);
 
-		Ogre::HlmsUnlit *hlmsUnlit = OGRE_NEW Ogre::HlmsUnlit(archiveUnlit, &library);
-		Ogre::Root::getSingleton().getHlmsManager()->registerHlms(hlmsUnlit);
-
-		Ogre::Archive *archivePbs = Ogre::ArchiveManager::getSingletonPtr()->load(
-			dataFolder + "Hlms/Pbs/" + shaderSyntax,
-			"FileSystem", true);
-		Ogre::HlmsPbs *hlmsPbs = OGRE_NEW Ogre::HlmsPbs(archivePbs, &library);
-		Ogre::Root::getSingleton().getHlmsManager()->registerHlms(hlmsPbs);
-
-	
 			//loading
 			//GpuProgramManager::getSingleton().setSaveMicrocodesToCache(true); //Make sure it's enabled.
 			//DataStreamPtr shaderCacheFile = mRoot->openFileStream("F:/Projekte/coop/XGame/data/MyCache.cache");
 			//GpuProgramManager::getSingleton().loadMicrocodeCache(shaderCacheFile);
-	
-	});
+
+		});
 	}
 
 	RenderTask& GraphicsManager::GetRenderTask(RenderTaskID id)
@@ -180,7 +214,7 @@ namespace XE
 	{
 		my_QueueManager.TriggerAllHandler();
 
-		my_FromRSQueueManager.push([this](){
+		my_FromRSQueueManager.push([this]() {
 			const Ogre::FrameStats*  stats = mRoot->getFrameStats();
 
 			m_FrameStats.Fps = stats->getFps();
@@ -188,16 +222,16 @@ namespace XE
 			m_FrameStats.BestTime = stats->getBestTime();
 			m_FrameStats.WorstTime = stats->getWorstTime();
 
-			_renderTasks[RenderTaskID::AnimationTimes].isDone = true; 
+			_renderTasks[RenderTaskID::AnimationTimes].isDone = true;
 			//_renderTasks[RenderTaskID::DebugLines].isDone = true;
 		//	_renderTasks[RenderTaskID::RenderBody].isDone = true;
 			_renderTasks[RenderTaskID::Camera].isDone = true;
-			
+
 			// ->>> old Vers. -> in pass
 			mEngine->getGraphicsManager().getGUIRenderer().update();
 		});
-		
-		if(mRoot->isInitialised())
+
+		if (mRoot->isInitialised())
 			mRoot->renderOneFrame();
 	}
 
@@ -215,8 +249,8 @@ namespace XE
 	//	if (mRoot->restoreConfig() || mRoot->showConfigDialog())
 //		{
 			// initialise root
-			mRoot->initialise(false);	
-	//	}
+		mRoot->initialise(false);
+		//	}
 	}
 
 	void GraphicsManager::RenderThread(GraphicsManager* graphicsMgr, XE::XEngine* engine)

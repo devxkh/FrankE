@@ -40,9 +40,8 @@ namespace XE
 
 	};
 
-	XEngine::XEngine(const std::string& ressFile, const std::string& title, bool isEditor) :
+	XEngine::XEngine() :
 		m_initialized(false)
-		, m_ressFile(ressFile)
 		, m_resume(false)
 		, m_running(true)
 		//	mControllerThread(ControllerThread, this),
@@ -51,11 +50,24 @@ namespace XE
 		, m_NetworkManager()
 		, _lua(*this)
 		, _soundMgr()
-
+		, mIDAL(*this)
 		, m_OgreSceneManager(mGraphicsManager)
-	{
+	{		
 
 		el::Loggers::reconfigureAllLoggers(el::ConfigurationType::Format, "%datetime %level ,tid: %thread msg: %msg");
+
+		PhysFS::init(""); // init PhysFS system
+	}
+
+	XEngine::~XEngine()
+	{
+
+	}
+
+	void XEngine::init()
+	{
+		LOG(INFO) << "XEngine():init";
+
 
 		//singlethreaded renderer	engine->getGraphicsManager().updateRenderer();
 		//		engine->getGraphicsManager().updateRenderer();
@@ -63,16 +75,16 @@ namespace XE
 		//texturemanager initialized in createrenderwindow!!!
 		//renderwindow is create from current rendersystem!
 		//Step 1 - RenderWindow
-		mGraphicsManager.createRenderWindow(title);// controller->getCameraController().getOgreCamera().__OgreCameraPtr);
+		mGraphicsManager.createRenderWindow(settings.FBSettings()->windowTitle()->c_str());// controller->getCameraController().getOgreCamera().__OgreCameraPtr);
 
-		//Step 1 Hlms
+												   //Step 1 Hlms
 		mGraphicsManager.registerHlms(); //needs initialized root and renderwindow from rendersytem for vaomanager
 
-		//Step 2 Init Resourcesystem - needs hlms
+										 //Step 2 Init Resourcesystem - needs hlms
 		initResourceSystem();
 
 		//Step 3 atlas
-	//	mGraphicsManager.getGUIRenderer().loadAtlas("UI/TestAtlas.fbbin"); // ("XEngine", "General"); //texturemanager initialized in createrenderwindow!!!
+		//	mGraphicsManager.getGUIRenderer().loadAtlas("UI/TestAtlas.fbbin"); // ("XEngine", "General"); //texturemanager initialized in createrenderwindow!!!
 
 		//Step 4 scene
 		m_OgreSceneManager.create();
@@ -80,11 +92,8 @@ namespace XE
 		registerObject(_lua.state);
 		m_NetworkManager.registerObject(_lua.state);
 
-		LOG(INFO) << "XEngine() finished";
-	}
 
-	XEngine::~XEngine()
-	{
+		mIDAL.open();
 
 	}
 
@@ -227,56 +236,51 @@ namespace XE
 	//needs Hlms !
 	void XEngine::initResourceSystem()
 	{
-		// init PhysFS system
-		PhysFS::init(""); // set the searchpath
-		PhysFS::addToSearchPath("F:/Projekte/coop/XGame/data/dbData", true);
-		PhysFS::addToSearchPath("F:/Projekte/coop/XGame/data/assets", true);
+		//PhysFS::addToSearchPath(settings.FBSettings()->resourceData()->dbDataFolder()->c_str(), true);// set the searchpath
 
+		
 		mGraphicsManager.getIntoRendererQueue().push([this]() {
 
+		//	Ogre::ArchiveFactory *fac = new PhysFS::PhysFSArchiveFactory;
 
-			//	PhysFS::addToSearchPath("F:/Projekte/coop/XGame/data/assets", true);
+	//		Ogre::ArchiveManager::getSingleton().addArchiveFactory(fac);
 
-			Ogre::ArchiveFactory *fac = new PhysFS::PhysFSArchiveFactory;
-			//PhysFS::PhysFSArchiveFactory *archive = (PhysFS::PhysFSArchiveFactory*)fac->createInstance("");
+			//Ogre::ConfigFile cf;
+			//std::stringstream ss;
+			//ss << settings.FBSettings()->resourceData()->assetsFolder()->c_str() << "\\resources.cfg";
 
-			//	mControllerThread.join();
-			//	//   archive->exists("file");
-			//	//   archive->remove("file");
-			////	Ogre::LogManager::getSingleton().logMessage("");
-			Ogre::ArchiveManager::getSingleton().addArchiveFactory(fac);
+			//cf.load(ss.str() , "\t:=", true);
 
-			Ogre::ConfigFile cf;
-			cf.load(m_ressFile, "\t:=", true);
+			//Ogre::ConfigFile::SectionIterator seci = cf.getSectionIterator();
+			//Ogre::String secName, typeName, archName;
+			//Ogre::String sec, type, arch;
 
-			Ogre::ConfigFile::SectionIterator seci = cf.getSectionIterator();
-			Ogre::String secName, typeName, archName;
-			Ogre::String sec, type, arch;
+			//// go through all specified resource groups
+			//while (seci.hasMoreElements())
+			//{
+			//	sec = seci.peekNextKey();
+			//	Ogre::ConfigFile::SettingsMultiMap* settings = seci.getNext();
+			//	Ogre::ConfigFile::SettingsMultiMap::iterator i;
 
-			// go through all specified resource groups
-			while (seci.hasMoreElements())
-			{
-				sec = seci.peekNextKey();
-				Ogre::ConfigFile::SettingsMultiMap* settings = seci.getNext();
-				Ogre::ConfigFile::SettingsMultiMap::iterator i;
+			//	// go through all resource paths
+			//	for (i = settings->begin(); i != settings->end(); i++)
+			//	{
+			//		type = i->first;
+			//		arch = i->second;
 
-				// go through all resource paths
-				for (i = settings->begin(); i != settings->end(); i++)
-				{
-					type = i->first;
-					arch = i->second;
+			//		//#if XE_PLATFORM == XE_PLATFORM_APPLE || XE_PLATFORM == XE_PLATFORM_APPLE_IOS
+			//		//				// OS X does not set the working directory relative to the app,
+			//		//				// In order to make things portable on OS X we need to provide
+			//		//				// the loading with it's own bundle path location
+			//		//				if (!Ogre::StringUtil::startsWith(arch, "/", false)) // only adjust relative dirs
+			//		//					arch = Ogre::String(Ogre::macBundlePath() + "/" + arch);
+			//		//#endif
 
-					//#if XE_PLATFORM == XE_PLATFORM_APPLE || XE_PLATFORM == XE_PLATFORM_APPLE_IOS
-					//				// OS X does not set the working directory relative to the app,
-					//				// In order to make things portable on OS X we need to provide
-					//				// the loading with it's own bundle path location
-					//				if (!Ogre::StringUtil::startsWith(arch, "/", false)) // only adjust relative dirs
-					//					arch = Ogre::String(Ogre::macBundlePath() + "/" + arch);
-					//#endif
+			//		Ogre::ResourceGroupManager::getSingleton().addResourceLocation(arch, type, sec, true);
+			//	}
+			//}
+			Ogre::ResourceGroupManager::getSingleton().addResourceLocation("F:/Projekte/coop/XGame/data/assets","FileSystem", "General", true, true);
 
-					Ogre::ResourceGroupManager::getSingleton().addResourceLocation(arch, type, sec, true);
-				}
-			}
 
 			//initialise for gorilla shaders intitialization
 			std::string lNameOfResourceGroup = "General";

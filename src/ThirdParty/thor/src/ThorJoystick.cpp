@@ -29,58 +29,58 @@
 namespace thor
 {
 
-JoystickButton::JoystickButton(unsigned int joystickId, unsigned int button)
-: joystickId(joystickId)
-, button(button)
-{
-}
-
-JoystickAxis::JoystickAxis(unsigned int joystickId, sf::Joystick::Axis axis, float threshold, bool above)
-: joystickId(joystickId)
-, axis(axis)
-, threshold(threshold)
-, above(above)
-{
-}
-
-detail::JoystickBuilder joystick(unsigned int joystickId)
-{
-	return detail::JoystickBuilder(joystickId);
-}
-
-// ---------------------------------------------------------------------------------------------------------------------------
-
-
-namespace detail
-{
-
-	JoystickAxis JoystickBuilder::Axis::above(float threshold)
-	{
-		return JoystickAxis(joystickId, axis, threshold, true);
-	}
-
-	JoystickAxis JoystickBuilder::Axis::below(float threshold)
-	{
-		return JoystickAxis(joystickId, axis, threshold, false);
-	}
-
-	JoystickBuilder::JoystickBuilder(unsigned int joystickId)
-	: joystickId(joystickId)
-	{
-	}
-
-	JoystickButton JoystickBuilder::button(unsigned int button)
-	{
-		return JoystickButton(joystickId, button);
-	}
-
-	JoystickBuilder::Axis JoystickBuilder::axis(sf::Joystick::Axis axis)
-	{
-		Axis a;
-		a.joystickId = joystickId;
-		a.axis = axis;
-		return a;
-	}
-
-} // namespace detail
+//JoystickButton::JoystickButton(unsigned int joystickId, unsigned int button)
+//: joystickId(joystickId)
+//, button(button)
+//{
+//}
+//
+//JoystickAxis::JoystickAxis(unsigned int joystickId, SDL_JoyAxisEvent axis, float threshold, bool above)
+//: joystickId(joystickId)
+//, axis(axis)
+//, threshold(threshold)
+//, above(above)
+//{
+//}
+//
+//detail::JoystickBuilder joystick(unsigned int joystickId)
+//{
+//	return detail::JoystickBuilder(joystickId);
+//}
+//
+//// ---------------------------------------------------------------------------------------------------------------------------
+//
+//
+//namespace detail
+//{
+//
+//	JoystickAxis JoystickBuilder::Axis::above(float threshold)
+//	{
+//		return JoystickAxis(joystickId, axis, threshold, true);
+//	}
+//
+//	JoystickAxis JoystickBuilder::Axis::below(float threshold)
+//	{
+//		return JoystickAxis(joystickId, axis, threshold, false);
+//	}
+//
+//	JoystickBuilder::JoystickBuilder(unsigned int joystickId)
+//	: joystickId(joystickId)
+//	{
+//	}
+//
+//	JoystickButton JoystickBuilder::button(unsigned int button)
+//	{
+//		return JoystickButton(joystickId, button);
+//	}
+//
+//	JoystickBuilder::Axis JoystickBuilder::axis(SDL_JoyAxisEvent axis)
+//	{
+//		Axis a;
+//		a.joystickId = joystickId;
+//		a.axis = axis;
+//		return a;
+//	}
+//
+//} // namespace detail
 } // namespace thor

@@ -1,0 +1,33 @@
+2.1 Cleanup
+
+Components/Overlay  		-> replace with imgui? i would try to make a pull request , as an imgui component
+Components/Paging  		-> 1.1 only -> remove it
+Components/Property 		-> who is using it? -> remove it
+Components/RTShaderSystem 	-> 1.1 only? -> remove it
+Components/Terrain		-> 1.1 only? -> remove it
+Components/Volume		-> 1.1 only? -> remove it
+RenderSystems/Direct3D9		-> 1.1 only? -> remove it
+RenderSystems/GLES2		-> in dev?
+Plugins/BSPSceneManager		-> 1.1 only? -> remove it
+Plugins/CgProgramManager	-> 1.1 only? -> remove it
+Plugins/OctreeSceneManager	-> 1.1 only? -> remove it
+Plugins/OctreeZone		-> 1.1 only? -> remove it
+Plugins/PCZSceneManager		-> 1.1 only? -> remove it
+Plugins/ParticleFX		-> add a warning. its working but not ported...
+
+Tools:  remove all and add only the 2.1 compatibles one
+
+cmake Buildsystem:
+add thirdparty dependecies for download source/click compile and it works ...:
+- SDL2
+- Freetype
+- set stbimage as default codec not freeimage
+- set samples2 as default
+- OIS 				-> 1.1 only? -> remove it
+- all old Samples		-> 1.1 only? -> remove it
+- add folders for windows like this pullrequests: 
+	-> https://bitbucket.org/sinbad/ogre/commits/fc84c2f673c026f4381a00cd2ff5dd60eb94b9d5?at=default
+	-> https://bitbucket.org/sinbad/ogre/commits/377ea9c5ffe77a54e12fe51a1cd327a361ffd410?at=default
+	-> https://bitbucket.org/sinbad/ogre/commits/83eb7ea798baa85c88581ab5b91ab25690641d6a?at=default
+-  add Cotire as an option?
+	-> http://www.ogre3d.org/forums/viewtopic.php?f=4&t=84895

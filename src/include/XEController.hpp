@@ -7,6 +7,7 @@
 
 
 //#include <XEngine/Controller/ControllerManager.hpp>
+#include <XEngine/Controller/SDLInputHandler.hpp>
 #include <XEngine/Controller/InputCmd.hpp>
 
 

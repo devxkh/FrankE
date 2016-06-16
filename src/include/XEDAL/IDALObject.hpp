@@ -8,8 +8,8 @@ namespace XE {
 	class IDALObject
 	{
 	public:
-		virtual void create(XE::Uint16 id, char* fbData = nullptr) = 0;
-		virtual void reload(char* fbData = nullptr) = 0;
+		virtual void create(XE::Uint16 id, void* fbData = nullptr) = 0;
+		virtual void reload(void* fbData = nullptr) = 0;
 	};
 
 } // ns XE

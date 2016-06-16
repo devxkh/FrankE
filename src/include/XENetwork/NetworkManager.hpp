@@ -78,7 +78,7 @@ namespace XE
 		void* data;
 
 		//enet event peerId
-		uint16_t peerID;
+		ENetPeer* peer;
 	};
 
 	struct PeerInfo {
@@ -106,7 +106,7 @@ namespace XE
 
 
 	//typedef std::map<std::string, PeerInfo> PeerMap;
-	typedef std::map<enet_uint16, ENetPeer*> PeerMap;
+	//typedef std::map<enet_uint16, ENetPeer*> PeerMap;
 
 //	typedef std::map<uint16_t, entityx::Entity> NetEntityMap; //list of all network related objects
 
@@ -123,7 +123,7 @@ namespace XE
 
 		void attach(NetObserver *obs);
 
-		void sendMessage(NetIdComponent& netComponent, const void * data, size_t dataLength, _ENetPacketFlag flag = ENET_PACKET_FLAG_RELIABLE);
+		void sendMessage(ENetPeer* peer, const void * data, size_t dataLength, _ENetPacketFlag flag = ENET_PACKET_FLAG_RELIABLE);
 
 
 		void registerObject(sol::state& lua);
@@ -159,6 +159,8 @@ namespace XE
 
 		sf::Uint32 NetIDPool() { return _increment; }
 
+	//	std::unordered_map<uint16_t, entityx::Entity > _peers;
+
 	private:
 
 		bool receivedMessage(NWMessage& event);
@@ -172,7 +174,7 @@ namespace XE
 		ENetPeer * peer = 0;
 		ENetAddress address;
 
-		PeerMap m_peers;
+	//	PeerMap m_peers;
 
 		//NetEntityMap m_entities;
 

@@ -3,6 +3,12 @@ cmake_minimum_required (VERSION 2.8)
 
 #--------------------------- START SFML -----------------------------------
 
+
+message("ProjectsourceDir- start " ${PROJECT_SOURCE_DIR})
+
+# include XEngine commons
+include(cmake/Common.cmake)
+
 # define a macro that helps defining an option
 macro(sfml_set_option var default type docstring)
     if(NOT DEFINED ${var})
@@ -20,7 +26,7 @@ endmacro()
 # as Visual Studio projects (.vcproj)
 project (XEngineSln)
 
-
+ 
 # include the configuration file
 include(${PROJECT_SOURCE_DIR}/cmake/Config.cmake)
 

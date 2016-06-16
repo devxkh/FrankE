@@ -12,7 +12,8 @@
 */
 
 #include <Ogre/OgreMain/include/Ogre.h>
-#include <sfml/Window/Keyboard.hpp>
+//#include <sfml/Window/Keyboard.hpp>
+#include <SDL.h>
 #include <XEUI/Widget.hpp>
 #include <XERenderer/GUI/WRectangle.hpp>
 #include <XERenderer/GUI/WMarkup.hpp>
@@ -66,14 +67,14 @@ protected:
 	//virtual void HandleRequisitionChange() override;
 	//virtual void HandleSizeChange() override;
 
-	virtual void HandleEvent(const sf::Event& event);
+	virtual void HandleEvent(const SDL_Event& event);
 
 	void _actualize();
 
  private:
 
 	 void onTextEntered(const  unsigned char  &text);
-	 void onKeyPressed(const sf::Keyboard::Key &arg);
+	 void onKeyPressed(const SDL_KeyboardEvent &arg);
 
     
     void  updateConsole();

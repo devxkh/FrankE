@@ -5,13 +5,11 @@
 
 #include "Netmsg_generated.h"
 
-namespace sf { class Window; }
-
 namespace XET
 {
 	struct  TestControllerComponent : public XE::ControllerComponent
 	{
-		TestControllerComponent(XE::Uint16 id, XE::XEngine& engine, sf::Window* window, bool defaultCtrl = false);
+		TestControllerComponent(XE::Uint16 id, XE::XEngine& engine, SDL_Window* window, bool defaultCtrl = false);
 
 		void setActionMap(XE::ControllerComponent& controller);
 	};

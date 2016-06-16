@@ -7,6 +7,8 @@
 #include <SFML/System/String.hpp>
 #include <memory>
 
+#include <SDL.h>
+
 #include <XERenderer/GUI/WRectangle.hpp>
 #include <XERenderer/GUI/WCaption.hpp>
 
@@ -49,7 +51,7 @@ namespace XE {
 		/** Get client area.
 		* @return Rect.
 		*/
-		sf::FloatRect GetClientRect() const;
+		SDL_Rect GetClientRect() const;
 
 		/** Set window style.
 		* Can be a combination of UIWindow::Style values.
@@ -86,7 +88,7 @@ namespace XE {
 
 	private:
 	//	void HandleSizeChange() override;
-		void HandleMouseButtonEvent(sf::Mouse::Button button, bool press, int x, int y) override;
+		void HandleMouseButtonEvent(bool press, int x, int y) override;
 		void HandleMouseMoveEvent(int x, int y) override;
 	//	bool HandleAdd(Widget::Ptr child) override;
 

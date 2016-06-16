@@ -32,6 +32,7 @@ source_group("src\\PhysFSArchive" FILES ${XEDAL_PhysFSArchive_SOURCES})
 # ----------------------- XEDAL_Objects_SOURCES -------------------------------
 set(XEDAL_Objects_SOURCES
 	 ${INCROOT}/Objects/FBEngineTypes_generated.h
+	${INCROOT}/Objects/FB_Settings_generated.h
 	# ${SRCROOT}/Objects/ProtoType.pb.h
 )
 source_group("include\\Objects" FILES ${XEDAL_Objects_SOURCES})
@@ -40,7 +41,7 @@ source_group("include\\Objects" FILES ${XEDAL_Objects_SOURCES})
 # ----------------------- SQLITE_SOURCES -------------------------------
 set(SQLITEROOT ${PROJECT_SOURCE_DIR}/src/ThirdParty/sqlite)
 set(SQLITE_SOURCES
-     ${SQLITEROOT}/shell.c
+  #   ${SQLITEROOT}/shell.c
 	 ${SQLITEROOT}/sqlite3.c
 	 ${SQLITEROOT}/sqlite3.h
 	 ${SQLITEROOT}/sqlite3ext.h
@@ -87,6 +88,7 @@ set(FlatBuffers_Compiler_SRCS
   ${INCFBROOT}/include/flatbuffers/flatbuffers.h
   ${INCFBROOT}/include/flatbuffers/idl.h
   ${INCFBROOT}/include/flatbuffers/util.h
+  ${INCFBROOT}/src/util.cpp
   ${INCFBROOT}/src/idl_parser.cpp
   ${INCFBROOT}/src/idl_gen_cpp.cpp
   ${INCFBROOT}/src/idl_gen_general.cpp

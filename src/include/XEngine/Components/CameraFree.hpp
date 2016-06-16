@@ -11,7 +11,7 @@ namespace XE
 	struct CameraFreeComponent  {
 
 	public:
-		CameraFreeComponent(CameraRenderable& cameraRenderable);
+		CameraFreeComponent(CameraRenderable& cameraRenderable, BodyComponent& bodyComponent);
 		
 		~CameraFreeComponent();
 	
@@ -32,8 +32,8 @@ namespace XE
 	private:
 		bool _isDirty;
 
-		CameraRenderable& _cameraRenderable;
-		XE::BodyComponent _cameraBodyNode;
+		CameraRenderable&	_cameraRenderable;
+		BodyComponent&		_cameraBodyNode;
 
 
 		bool AutoTracking;

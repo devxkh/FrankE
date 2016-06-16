@@ -1,10 +1,11 @@
 #ifndef __CONTROLLERCOMPONENT_HPP__
 #define __CONTROLLERCOMPONENT_HPP__
 
+#include <XESystem/SystemConfig.hpp>
 #include <Thor/Input/EventSystem.hpp>
 #include <Thor/Input/ActionMap.hpp>
 
-namespace sf { class Window; }
+class SDL_Window;
 
 namespace XE
 {
@@ -15,8 +16,8 @@ namespace XE
 	struct WindowState
 	{
 	public:
-		sf::Uint32 width;
-		sf::Uint32 height;
+		Int32 width;
+		Int32 height;
 		bool isDirty;
 	};
 
@@ -33,14 +34,14 @@ namespace XE
 
 	struct  ControllerComponent
 	{
-		ControllerComponent(sf::Uint16 id, XEngine& engine, sf::Window* window, bool defaultCtrl = false);
+		ControllerComponent(Uint16 id, XEngine& engine, SDL_Window* window, bool defaultCtrl = false);
 
 		DeviceType m_deviceType;
 		thor::ActionMap<std::size_t>::CallbackSystem system;
 		thor::ActionMap<std::size_t> actionmap;
 		bool isActive;
-		sf::Window* m_window;
-		sf::Uint16 mID;
+		SDL_Window* m_window;
+		Uint16 mID;
 
 		WindowState _windowState;
 		XEngine& engine;

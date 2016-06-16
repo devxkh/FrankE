@@ -1,15 +1,13 @@
 #ifndef __SCREENCOMPONENT_HPP__
 #define __SCREENCOMPONENT_HPP__
-//
-//#include <sfml/System/Vector3.hpp>
-//#include <XESystem/TransportData.hpp>
-//#include <XEDAL/Objects/FBEngineTypes_generated.h>
+
+#include <XESystem/SystemConfig.hpp>
 #include <XEUI/UIStateManager.hpp>
 #include <XEUI/Desktop.hpp>
 
 #include <XERenderer/GUI/WLayer.hpp>
 
-namespace sf { class Window; }
+class SDL_Window;
 
 namespace XE
 {
@@ -18,7 +16,9 @@ namespace XE
 	struct ScreenComponent
 	{
 	public:
-		ScreenComponent(CameraRenderable& camRenderable, sf::Uint32 width, sf::Uint32 height, const XE::Uint16 atlasId = 0);
+		ScreenComponent(CameraRenderable& camRenderable, Uint32 width, Uint32 height, const Uint16 atlasId = 0);
+	
+		ScreenComponent(CameraRenderable& camRenderable, SDL_Window* window, const Uint16 atlasId = 0);
 
 		inline Desktop::Ptr getDesktop(){ return m_Desktop; }
 
@@ -51,8 +51,8 @@ namespace XE
 		UIStateManager		mUIStateManager;
 		bool isActive;
 
-		sf::Uint32 width;
-		sf::Uint32 height;
+		Int32 width;
+		Int32 height;
 	};
 
 } // ns XE

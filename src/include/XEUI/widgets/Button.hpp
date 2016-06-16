@@ -70,7 +70,7 @@ namespace XE {
 	private:
 		void HandleMouseEnter(int x, int y) override;
 		void HandleMouseLeave(int x, int y) override;
-		void HandleMouseButtonEvent(sf::Mouse::Button button, bool press, int x, int y) override;
+		void HandleMouseButtonEvent(bool press, int x, int y) override;
 	//	void AllocateChild();
 
 		//sf::String m_label;

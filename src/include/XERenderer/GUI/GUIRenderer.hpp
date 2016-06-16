@@ -56,7 +56,7 @@ namespace XE
 		
 		void registerObject(sol::state& lua);
 		
-		void loadAtlas(const std::string& fileName);
+		bool loadAtlas(const std::string& fileName);
 
 		XE::Uint16 GetFontLineHeight(XE::Uint16 font_size) const;
 
@@ -103,7 +103,7 @@ namespace XE
 
 		//data for mainthread
 		std::map<std::string, std::unique_ptr<SpriteData>> _sprites;
-		std::map<XE::Uint32, std::unique_ptr<Font>> _fonts;
+		std::map<XE::Uint32, Font> _fonts;
 
 	};
 

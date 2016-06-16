@@ -37,7 +37,7 @@ Action::Action()
 {
 }
 
-Action::Action(sf::Keyboard::Key key, ActionType action)
+Action::Action(SDL_Scancode key, ActionType action)
 : mOperation()
 {
 	switch (action)
@@ -53,7 +53,7 @@ Action::Action(sf::Keyboard::Key key, ActionType action)
 	}
 }
 
-Action::Action(sf::Mouse::Button mouseButton, ActionType action)
+Action::Action(MouseBottonID mouseButton, ActionType action)
 : mOperation()
 {
 	switch (action)
@@ -69,7 +69,13 @@ Action::Action(sf::Mouse::Button mouseButton, ActionType action)
 	}
 }
 
-Action::Action(JoystickButton joystick, ActionType action)
+Action::Action(MouseWheelEvt mouseWheel)
+	: mOperation()
+{
+		mOperation = aurora::makeCopied<detail::EventMouseWheelLeaf>(mouseWheel);
+}
+
+Action::Action(SDL_JoyButtonEvent joystick, ActionType action)
 : mOperation()
 {
 	switch (action)
@@ -85,12 +91,12 @@ Action::Action(JoystickButton joystick, ActionType action)
 	}
 }
 
-Action::Action(JoystickAxis joystickState)
+Action::Action(SDL_JoyAxisEvent joystickState)
 : mOperation(aurora::makeCopied<detail::RealtimeJoystickAxisLeaf>(joystickState))
 {
 }
 
-Action::Action(sf::Event::EventType eventType)
+Action::Action(SDL_EventType eventType)
 : mOperation(aurora::makeCopied<detail::MiscEventLeaf>(eventType))
 {
 }
@@ -126,7 +132,7 @@ Action operator! (const Action& action)
 	return Action( aurora::makeCopied<detail::NotNode>(action.mOperation) );
 }
 
-Action eventAction(std::function<bool(const sf::Event&)> filter)
+Action eventAction(std::function<bool(const SDL_Event&)> filter)
 {
 	return Action( aurora::makeCopied<detail::CustomEventLeaf>(std::move(filter)) );
 }

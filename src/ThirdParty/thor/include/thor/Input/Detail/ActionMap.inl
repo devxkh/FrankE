@@ -48,14 +48,14 @@ ActionMap<ActionId>& ActionMap<ActionId>::operator= (ActionMap&& source)
 }
 
 template <typename ActionId>
-void ActionMap<ActionId>::update(sf::Window& window)
+void ActionMap<ActionId>::update()
 {
 	mEventBuffer.clearEvents();
-	mEventBuffer.pollEvents(window);
+	mEventBuffer.pollEvents();
 }
 
 template <typename ActionId>
-void ActionMap<ActionId>::pushEvent(const sf::Event& event)
+void ActionMap<ActionId>::pushEvent(const SDL_Event& event)
 {
 	mEventBuffer.pushEvent(event);
 }
@@ -95,7 +95,7 @@ bool ActionMap<ActionId>::isActive(const ActionId& id) const
 }
 
 template <typename ActionId>
-void ActionMap<ActionId>::invokeCallbacks(CallbackSystem& system, sf::Window* window) const
+void ActionMap<ActionId>::invokeCallbacks(CallbackSystem& system, SDL_Window* window) const
 {
 	AURORA_FOREACH(const auto& actionPair, mActionMap)
 	{
@@ -109,10 +109,9 @@ void ActionMap<ActionId>::invokeCallbacks(CallbackSystem& system, sf::Window* wi
 		//    -> fine, invoke callback multiple times
 		// 2. One action contains multiple events even in a single triggering
 		//    -> ill-formed (logical operators should contain only one event-based action that can be simultaneously active)
-
-	
+			
 		// Invoke callback once for every sf::Event
-		AURORA_FOREACH(const sf::Event& event, result.eventContainer)
+		AURORA_FOREACH(const SDL_Event& event, result.eventContainer)
 			system.triggerEvent(ActionContext<ActionId>(window, &event, actionPair.first));	
 	
 		// If at least one realtime constellation triggers this action and we have not already invoked callbacks because of

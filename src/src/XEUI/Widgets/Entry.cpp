@@ -7,7 +7,7 @@
 
 #include <XEUI/Container.hpp> //needed for  GetParent()
 
-#include <SFML/Graphics/Font.hpp>
+//#include <SFML/Graphics/Font.hpp>
 #include <cmath>
 
 #include <XESystem/Logging.hpp>
@@ -237,27 +237,27 @@ namespace XE {
 		}
 	}
 
-	void Entry::HandleTextEvent(sf::Uint32 character) {
+	void Entry::HandleTextEvent(const char* character) {
 		if (m_max_length > 0 && static_cast<int>(m_string.getSize()) >= m_max_length) {
 			return;
 		}
 
-		if (character > 0x1f && character != 0x7f) {
+	//FIXME	if (character > 0x1f && character != 0x7f) {
 			// not a control character
 			m_string.insert(static_cast<std::size_t>(m_cursor_position), character);
 			MoveCursor(1);
 			
 			GetSignals().Emit(OnTextChanged);
-		}
+//		}
 	}
 
-	void Entry::HandleKeyEvent(sf::Keyboard::Key key, bool press) {
+	void Entry::HandleKeyEvent(const SDL_KeyboardEvent& key, bool press) {
 		if (!press || !HasFocus()) {
 			return;
 		}
 
-		switch (key) {
-		case sf::Keyboard::BackSpace: { // backspace
+		switch (key.keysym.scancode) {
+		case SDL_SCANCODE_BACKSPACE: { // backspace
 			if ((m_string.getSize() > 0) && (m_cursor_position > 0)) {
 				m_string.erase(static_cast<std::size_t>(m_cursor_position - 1));
 
@@ -280,7 +280,7 @@ namespace XE {
 				GetSignals().Emit(OnTextChanged);
 			}
 		} break;
-		case sf::Keyboard::Delete: {
+		case SDL_SCANCODE_DELETE: {
 			if ((m_string.getSize() > 0) && (m_cursor_position < static_cast<int>(m_string.getSize()))) {
 				m_string.erase(static_cast<std::size_t>(m_cursor_position));
 
@@ -302,22 +302,22 @@ namespace XE {
 				GetSignals().Emit(OnTextChanged);
 			}
 		} break;
-		case sf::Keyboard::Home: {
+		case SDL_SCANCODE_HOME: {
 			if (m_string.getSize() > 0) {
 				m_visible_offset = 0;
 				SetCursorPosition(0);
 			}
 		} break;
-		case sf::Keyboard::End: {
+		case SDL_SCANCODE_END: {
 			if (m_string.getSize() > 0) {
 				m_visible_offset = 0;
 				SetCursorPosition(static_cast<int>(m_string.getSize()));
 			}
 		} break;
-		case sf::Keyboard::Left: {
+		case SDL_SCANCODE_LEFT: {
 			MoveCursor(-1);
 		} break;
-		case sf::Keyboard::Right: {
+		case SDL_SCANCODE_RIGHT: {
 			MoveCursor(1);
 		} break;
 		default: break;
@@ -336,15 +336,15 @@ namespace XE {
 		}
 	}
 
-	void Entry::HandleMouseButtonEvent(sf::Mouse::Button button, bool press, int x, int /*y*/) {
+	void Entry::HandleMouseButtonEvent(bool press, int x, int /*y*/) {
 		if (!press || !IsMouseInWidget()) {
 			return;
 		}
 
-		if (button != sf::Mouse::Left) {
-			// TODO: Maybe some more support for right clicking in the future.
-			return;
-		}
+		//if (button != sf::Mouse::Left) {
+		//	// TODO: Maybe some more support for right clicking in the future.
+		//	return;
+		//}
 
 		GrabFocus();
 		SetCursorPosition(GetPositionFromMouseX(x));

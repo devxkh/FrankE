@@ -18,16 +18,16 @@
 #include <SFML/System/ThreadLocalPtr.hpp>
 #include <SFML/System/Utf.hpp>
 
-#include <SFML/Window/Event.hpp>
-#include <SFML/Window/Joystick.hpp>
-#include <SFML/Window/Keyboard.hpp>
-#include <SFML/Window/Mouse.hpp>
-#include <SFML/Window/VideoMode.hpp>
-#include <SFML/Window/Window.hpp>
-#include <SFML/Window/WindowStyle.hpp>
+//#include <SFML/Window/Event.hpp>
+//#include <SFML/Window/Joystick.hpp>
+//#include <SFML/Window/Keyboard.hpp>
+//#include <SFML/Window/Mouse.hpp>
+//#include <SFML/Window/VideoMode.hpp>
+//#include <SFML/Window/Window.hpp>
+//#include <SFML/Window/WindowStyle.hpp>
 
 #include <Thor/Input.hpp>
-#include <XEInput/InputConfigFile.hpp>
+//#include <XEInput/InputConfigFile.hpp>
 
 #endif // XE_INTERFACE_WINDOW_HPP
 

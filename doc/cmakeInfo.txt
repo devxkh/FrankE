@@ -9,3 +9,16 @@ E:/Projekte/coop/XGame_build/XEngine/src/Ogre/sdk/share/doc/RapidJSON
 
 Boost_INCKUDE_DIR
 E:\Projekte\boost_1_60_0
+
+Set cmake settings:
+SDL_STATIC = true
+SDL_SHARED = false
+BUILD_SHARED_LIBS = false
+OGRE_STATIC = true
+SFML_USE_STATIC_STD_LIBS = true
+OGRE_BUILD_COMPONENT_OVERLAY  false
+OGRE_BUILD_TOOLS false
+OGRE_INSTALL_SAMPLES false
+
+zlib lib pfad
+physfs lib pfad

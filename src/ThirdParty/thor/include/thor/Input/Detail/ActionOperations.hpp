@@ -31,67 +31,63 @@
 
 #include <Aurora/SmartPtr/CopiedPtr.hpp>
 
-#include <SFML/Window/Event.hpp>
-#include <SFML/Window/Keyboard.hpp>
-#include <SFML/Window/Mouse.hpp>
-#include <SFML/Window/Joystick.hpp>
+//#include <SFML/Window/Event.hpp>
+//#include <SFML/Window/Keyboard.hpp>
+//#include <SFML/Window/Mouse.hpp>
+//#include <SFML/Window/Joystick.hpp>
+
+#include <SDL.h>
 
 #include <vector>
 #include <functional>
 
 
-namespace sf
-{
-
-	class Window;
-
-} // namespace sf
-
-
 namespace thor
 {
-namespace detail
-{
+	enum MouseBottonID;
+	enum MouseWheelEvt;
 
-	class EventNode;
-
-	// Class that stores events and provides methods for lookup
-	// Note: Since there are at most a few dozens of events per frame (at a decent framerate not even that), std::vector and linear search is fine
-	class THOR_API EventBuffer
+	namespace detail
 	{
+		class EventNode;
+
+		// Class that stores events and provides methods for lookup
+		// Note: Since there are at most a few dozens of events per frame (at a decent framerate not even that), std::vector and linear search is fine
+		class THOR_API EventBuffer
+		{
 		public:
-										EventBuffer();
+			EventBuffer();
 
 			// Modifiers
-			void						pushEvent(const sf::Event& event);
+			void						pushEvent(const SDL_Event& event);
 			void						clearEvents();
-			void						pollEvents(sf::Window& window);
+			void						pollEvents();
 
 			// Accessors
 			bool						containsEvent(const EventNode& filterNode) const;
-			bool						filterEvents(const EventNode& filterNode, std::vector<sf::Event>& out) const;
+			bool						filterEvents(const EventNode& filterNode, std::vector<SDL_Event>& out) const;
 			bool						isRealtimeInputEnabled() const;
 
 		private:
-			std::vector<sf::Event>		mEvents;
+			std::vector<SDL_Event>		mEvents;
 			bool						mRealtimeEnabled;
-	};
+		};
 
-	// Structure to collect the sf::Event instances and number of realtime triggers.
-	struct THOR_API ActionResult
-	{
-									ActionResult();
+		// Structure to collect the SDL_Event instances and number of realtime triggers.
+		struct THOR_API ActionResult
+		{
+			ActionResult();
 
-		std::vector<sf::Event>		eventContainer;
-		unsigned int				nbRealtimeTriggers;
-	};
+			std::vector<SDL_Event>		eventContainer;
+			unsigned int				nbRealtimeTriggers;
+		};
 
-	// ---------------------------------------------------------------------------------------------------------------------------
+		// ---------------------------------------------------------------------------------------------------------------------------
 
 
-	// Operation base class for event actions. The operations are organized in a tree structure.
-	class ActionNode
-	{
+		// Operation base class for event actions. The operations are organized in a tree structure.
+		class ActionNode
+		{
 		public:
 			typedef aurora::CopiedPtr<ActionNode>	CopiedPtr;
 
@@ -99,158 +95,165 @@ namespace detail
 			virtual						~ActionNode();
 			virtual bool				isActionActive(const EventBuffer& buffer) const = 0;
 			virtual bool				isActionActive(const EventBuffer& buffer, ActionResult& out) const = 0;
-	};
+		};
 
-	// Class between ActionNode and concrete Event classes
-	class EventNode : public ActionNode
-	{
+		// Class between ActionNode and concrete Event classes
+		class EventNode : public ActionNode
+		{
 		public:
-										EventNode();
+			EventNode();
 
 			virtual bool				isActionActive(const EventBuffer& buffer) const;
 			virtual bool				isActionActive(const EventBuffer& buffer, ActionResult& out) const;
-			virtual bool				isEventActive(const sf::Event& event) const = 0;
+			virtual bool				isEventActive(const SDL_Event& event) const = 0;
 
 		protected:
-			sf::Event					mEvent;
-	};
+			SDL_Event					mEvent;
+		};
 
-	// Class between ActionNode and concrete Realtime classes
-	class RealtimeNode : public ActionNode
-	{
+		// Class between ActionNode and concrete Realtime classes
+		class RealtimeNode : public ActionNode
+		{
 		public:
 			virtual bool				isActionActive(const EventBuffer& buffer) const;
 			virtual bool				isActionActive(const EventBuffer& buffer, ActionResult& out) const;
 			virtual bool				isRealtimeActive() const = 0;
-	};
+		};
 
-	// Operation node class for keys currently held down
-	class RealtimeKeyLeaf : public RealtimeNode
-	{
+		// Operation node class for keys currently held down
+		class RealtimeKeyLeaf : public RealtimeNode
+		{
 		public:
-			explicit					RealtimeKeyLeaf(sf::Keyboard::Key key);
+			explicit					RealtimeKeyLeaf(SDL_Scancode key);
 			virtual bool				isRealtimeActive() const;
 
 		private:
-			sf::Keyboard::Key			mKey;
-	};
+			SDL_Scancode			mKey;
+		};
 
-	// Operation node class for key events (either pressed or released)
-	class EventKeyLeaf : public EventNode
-	{
+		// Operation node class for key events (either pressed or released)
+		class EventKeyLeaf : public EventNode
+		{
 		public:
-										EventKeyLeaf(sf::Keyboard::Key key, bool pressed);
-			virtual bool				isEventActive(const sf::Event& event) const;
-	};
+			EventKeyLeaf(SDL_Scancode key, bool pressed);
+			virtual bool				isEventActive(const SDL_Event& event) const;
+		};
 
-	// Operation node class for mouse buttons currently held down
-	class RealtimeMouseLeaf : public RealtimeNode
-	{
+		// Operation node class for mouse buttons currently held down
+		class RealtimeMouseLeaf : public RealtimeNode
+		{
 		public:
-			explicit					RealtimeMouseLeaf(sf::Mouse::Button mouseButton);
+			explicit					RealtimeMouseLeaf(MouseBottonID mouseButton);
 			virtual bool				isRealtimeActive() const;
 
 		private:
-			sf::Mouse::Button			mMouseButton;
-	};
+			MouseBottonID			mMouseButton;
+		};
 
-	// Operation node class for mouse button events (either pressed or released)
-	class EventMouseLeaf : public EventNode
-	{
+		// Operation node class for mouse button events (either pressed or released)
+		class EventMouseLeaf : public EventNode
+		{
 		public:
-										EventMouseLeaf(sf::Mouse::Button mouseButton, bool pressed);
-			virtual bool				isEventActive(const sf::Event& event) const;
-	};
+			EventMouseLeaf(MouseBottonID mouseButton, bool pressed);
+			virtual bool				isEventActive(const SDL_Event& event) const;
+		};
 
-	// Operation node class for joystick buttons currently held down
-	class RealtimeJoystickButtonLeaf : public RealtimeNode
-	{
+		class EventMouseWheelLeaf : public EventNode
+		{
 		public:
-			explicit					RealtimeJoystickButtonLeaf(JoystickButton joystick);
+			EventMouseWheelLeaf(MouseWheelEvt mouseWheel);
+			virtual bool				isEventActive(const SDL_Event& event) const;
+		};
+
+		// Operation node class for joystick buttons currently held down
+		class RealtimeJoystickButtonLeaf : public RealtimeNode
+		{
+		public:
+			explicit					RealtimeJoystickButtonLeaf(SDL_JoyButtonEvent joystick);
 			virtual bool				isRealtimeActive() const;
 
 		private:
-			JoystickButton				mJoystick;
-	};
+			SDL_JoyButtonEvent				mJoystick;
+		};
 
-	// Operation node class for joystick axis events (movement of certain axis above threshold)
-	class RealtimeJoystickAxisLeaf : public RealtimeNode
-	{
+		// Operation node class for joystick axis events (movement of certain axis above threshold)
+		class RealtimeJoystickAxisLeaf : public RealtimeNode
+		{
 		public:
-										RealtimeJoystickAxisLeaf(JoystickAxis joystick);
+			RealtimeJoystickAxisLeaf(SDL_JoyAxisEvent joystick);
 			virtual bool				isRealtimeActive() const;
 
 		private:
-			JoystickAxis				mJoystick;
-	};
+			SDL_JoyAxisEvent				mJoystick;
+		};
 
-	// Operation node class for joystick button events (either pressed or released)
-	class EventJoystickLeaf : public EventNode
-	{
+		// Operation node class for joystick button events (either pressed or released)
+		class EventJoystickLeaf : public EventNode
+		{
 		public:
-										EventJoystickLeaf(JoystickButton joystick, bool pressed);
-			virtual bool				isEventActive(const sf::Event& event) const;
-	};
+			EventJoystickLeaf(SDL_JoyButtonEvent joystick, bool pressed);
+			virtual bool				isEventActive(const SDL_Event& event) const;
+		};
 
-	// Operation node class for other SFML events
-	class MiscEventLeaf : public EventNode
-	{
+		// Operation node class for other SFML events
+		class MiscEventLeaf : public EventNode
+		{
 		public:
-			explicit					MiscEventLeaf(sf::Event::EventType eventType);
-			virtual bool				isEventActive(const sf::Event& event) const;
-	};
+			explicit					MiscEventLeaf(SDL_EventType eventType);
+			virtual bool				isEventActive(const SDL_Event& event) const;
+		};
 
-	// Operation node class for user-defined event-based actions
-	class CustomEventLeaf : public EventNode
-	{
+		// Operation node class for user-defined event-based actions
+		class CustomEventLeaf : public EventNode
+		{
 		public:
-			explicit					CustomEventLeaf(std::function<bool(const sf::Event&)> filter);
-			virtual bool				isEventActive(const sf::Event& event) const;
+			explicit					CustomEventLeaf(std::function<bool(const SDL_Event&)> filter);
+			virtual bool				isEventActive(const SDL_Event& event) const;
 
 		private:
-			std::function<bool(const sf::Event&)>	mFilter;
-	};
+			std::function<bool(const SDL_Event&)>	mFilter;
+		};
 
-	// Operation node class for user-defined realtime-based actions
-	class CustomRealtimeLeaf : public RealtimeNode
-	{
+		// Operation node class for user-defined realtime-based actions
+		class CustomRealtimeLeaf : public RealtimeNode
+		{
 		public:
 			explicit					CustomRealtimeLeaf(std::function<bool()> filter);
 			virtual bool				isRealtimeActive() const;
 
 		private:
 			std::function<bool()>		mFilter;
-	};
+		};
 
-	// Logical OR operator
-	class OrNode : public ActionNode
-	{
+		// Logical OR operator
+		class OrNode : public ActionNode
+		{
 		public:
-										OrNode(ActionNode::CopiedPtr lhs, ActionNode::CopiedPtr rhs);
+			OrNode(ActionNode::CopiedPtr lhs, ActionNode::CopiedPtr rhs);
 			virtual bool				isActionActive(const EventBuffer& buffer) const;
 			virtual bool				isActionActive(const EventBuffer& buffer, ActionResult& out) const;
 
 		private:
 			ActionNode::CopiedPtr		mLhs;
 			ActionNode::CopiedPtr		mRhs;
-	};
+		};
 
-	// Logical AND operator
-	class AndNode : public ActionNode
-	{
+		// Logical AND operator
+		class AndNode : public ActionNode
+		{
 		public:
-										AndNode(ActionNode::CopiedPtr lhs, ActionNode::CopiedPtr rhs);
+			AndNode(ActionNode::CopiedPtr lhs, ActionNode::CopiedPtr rhs);
 			virtual	bool				isActionActive(const EventBuffer& buffer) const;
 			virtual bool				isActionActive(const EventBuffer& buffer, ActionResult& out) const;
 
 		private:
 			ActionNode::CopiedPtr		mLhs;
 			ActionNode::CopiedPtr		mRhs;
-	};
+		};
 
-	// Logical NOT operator
-	class NotNode : public ActionNode
-	{
+		// Logical NOT operator
+		class NotNode : public ActionNode
+		{
 		public:
 			explicit					NotNode(ActionNode::CopiedPtr action);
 			virtual	bool				isActionActive(const EventBuffer& buffer) const;
@@ -258,9 +261,9 @@ namespace detail
 
 		private:
 			ActionNode::CopiedPtr		mAction;
-	};
+		};
 
-} // namespace detail
+	} // namespace detail
 } // namespace thor
 
 #endif // THOR_ACTIONOPERATIONS_HPP

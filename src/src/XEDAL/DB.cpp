@@ -1,5 +1,7 @@
 #include <XEDAL/DB.hpp>
 
+#include <XEngine.hpp>
+
 #include <Sqlite/sqlite3.h>
 #include <string>
 #include <stdio.h>
@@ -20,14 +22,18 @@ static int callback(void *NotUsed, int argc, char **argv, char **azColName){
 	return 0;
 }
 
+DB::DB(XEngine& engine)
+	: m_engine(engine)
+{
+
+}
+
 void DB::open()
 {
 	char *zErrMsg = 0;
 
-	std::string dbName = "F:\\Projekte\\coop\\XGame\\data\\dbData.s3db";
-
 	//Attempt to open database. If it does not exist create it.
-	mSQLCode = sqlite3_open(dbName.c_str(), &mDB);
+	mSQLCode = sqlite3_open(m_engine.settings.FBSettings()->resourceData()->dbFileName()->c_str(), &mDB);
 
 	if (mSQLCode){
 		fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(mDB));

@@ -36,8 +36,9 @@
 #include <Aurora/Tools/NonCopyable.hpp>
 #include <Aurora/Tools/ForEach.hpp>
 
-#include <map>
+#include <SDL.h>
 
+#include <map>
 
 namespace thor
 {
@@ -97,12 +98,12 @@ class ActionMap : private aurora::NonCopyable
 		/// while (window.pollEvent(event))
 		///     map.pushEvent(event);
 		/// @endcode
-		void						update(sf::Window& window);
+		void						update();
 
 		/// @brief Feeds the action map with a SFML event, that can be used during the current frame.
 		/// @details When you use the update() method, you needn't invoke pushEvent(). This method exists for more flexibility:
 		///  You can push user-defined events, and you can do something else with the polled events before calling pushEvent().
-		void						pushEvent(const sf::Event& event);
+		void						pushEvent(const SDL_Event& event);
 
 		/// @brief Removes the events that have been temporarily stored.
 		/// @details You only need this function in combination with pushEvent(), if you want to feed the action map manually with events.
@@ -162,7 +163,7 @@ class ActionMap : private aurora::NonCopyable
 		///  do not remove or insert callbacks during the invocation of another callback. If you need to modify the system, delay
 		///  the modifications until invokeCallbacks() returns.
 		/// @see thor::ActionContext
-		void						invokeCallbacks(CallbackSystem& system, sf::Window* window) const;
+		void						invokeCallbacks(CallbackSystem& system, SDL_Window* window) const;
 
 
 	// ---------------------------------------------------------------------------------------------------------------------------
