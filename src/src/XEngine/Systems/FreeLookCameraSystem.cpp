@@ -86,8 +86,11 @@ namespace XE {
 			if (camera->IsDirty())
 			{
 			//	updateCamera(camera.get(), dt);
-				auto camNode = camera->getCameraNode();
+				BodyComponent& camNode = camera->getCameraNode();
 
+				auto debugCamera = camera.get();
+				
+				camNode.setOrientation(Ogre::Quaternion(1,0,0,0));
 				camNode.yaw(Ogre::Radian(camera->m_CameraYaw), TransformSpace::TS_WORLD);
 				camNode.pitch(Ogre::Radian(camera->m_CameraPitch));
 

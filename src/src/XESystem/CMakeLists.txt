@@ -268,8 +268,9 @@ sfml_add_library(XESystem
 #add_definitions(-SFML_SYSTEM_EXPORTS)
 set_target_properties(XESystem PROPERTIES DEFINE_SYMBOL SFML_SYSTEM_EXPORTS)
 
-target_compile_definitions(XEngine PUBLIC ELPP_UNICODE)
-target_compile_definitions(XEngine PUBLIC ELPP_THREAD_SAFE)
+target_compile_definitions(XESystem PUBLIC ELPP_UNICODE)
+target_compile_definitions(XESystem PUBLIC ELPP_THREAD_SAFE)
+target_compile_definitions(XESystem PUBLIC ELPP_THREADING_ENABLED)
 
 # Creates folder "libraries" and adds target project (XEngine.vcproj)
 set_property(TARGET XESystem PROPERTY FOLDER "libraries")

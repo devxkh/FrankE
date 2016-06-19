@@ -37,9 +37,9 @@ namespace XE {
 		, m_currentIndexBufferSize(0)
 		,_initalizied(false)
 	{
-		//set renderqueue
-		sceneMgr->getRenderQueue()->setRenderQueueMode(254, Ogre::RenderQueue::Modes::FAST);
-		this->setRenderQueueGroup(254);
+		//set renderqueue -> opengl error bind buffer after adding item??
+	//	sceneMgr->getRenderQueue()->setRenderQueueMode(254, Ogre::RenderQueue::Modes::FAST);
+//		this->setRenderQueueGroup(254);
 
 		m_sceneNodeLines = sceneMgr->getRootSceneNode(Ogre::SCENE_DYNAMIC)->createChildSceneNode(Ogre::SCENE_DYNAMIC);
 		m_sceneNodeLines->attachObject(this);

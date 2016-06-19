@@ -227,13 +227,13 @@ namespace XET {
 			moveDirection.x = -1.0f;//left
 
 		if (controller->actionmap.isActive(ControllerSettings::ActionType_Forward))
-			moveDirection.z = 1.0f;//forward
+			moveDirection.z = -1.0f;//forward
 
 		if (controller->actionmap.isActive(ControllerSettings::ActionType_StrafeRight))
 			moveDirection.x = 1.0f; //right
 
 		if (controller->actionmap.isActive(ControllerSettings::ActionType_Backward))
-			moveDirection.z = -1.0f;//backward
+			moveDirection.z = 1.0f;//backward
 
 		if (controller->actionmap.isActive(ControllerSettings::ActionType_TurnLeft) && !controller->actionmap.isActive(ControllerSettings::ActionType_StrafeLeft) && !controller->actionmap.isActive(ControllerSettings::ActionType_StrafeRight))
 		{
@@ -269,8 +269,17 @@ namespace XET {
 			if (moveDirection != XE::Vector3::ZERO && entity.has_component<XE::CameraFreeComponent>())
 			{
 				entityx::ComponentHandle<XE::CameraFreeComponent> camera = entity.component<XE::CameraFreeComponent>();
-				moveDirection.normalise();
-				camera->getCameraNode().translate(moveDirection * 0.5);
+
+				// Direction points down -Z by default
+				XE::Vector3 direction = camera->getCameraNode().getOrientation() * moveDirection;//-Ogre::Vector3::UNIT_Z; // get direction from ogre
+
+				direction.normalise();
+				float mSpeedMofifier = 1;
+				direction *= dt * 10.0f * (1 + mSpeedMofifier * 5);
+
+				XE::Vector3 mPosition = camera->getCameraNode().getPosition() + direction; //move from camera
+
+				camera->getCameraNode().setPosition(mPosition);
 
 				//	else
 				//		LOG(INFO) << "camposx:" << camera->getCameraNode().getPosition().x << "camposy:" << camera->getCameraNode().getPosition().y << "camposz:" << camera->getCameraNode().getPosition().z;

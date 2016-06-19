@@ -43,9 +43,9 @@ TransitionSelectNode::TransitionSelectNode()
 , m_timeOutPort( NULL )
 , m_selectedAnimationId( -1 )
 {
-	m_selectedAnimationIdPort = createPort(3);// "select" );
-	m_timeInPort = createPort(4);//"time in" );
-	m_timeOutPort = createPort(5);//"time out" );
+	m_selectedAnimationIdPort = createPort(1);// "select" );
+	m_timeInPort = createPort(2);//"time in" );
+	m_timeOutPort = createPort(3);//"time out" );
 }
 
 TransitionSelectNode::~TransitionSelectNode()
@@ -250,7 +250,7 @@ void TransitionSelectNode::createAnimationPorts( const int animationPortCount )
 	m_transtionInfoList.resize( animationPortCount );
 	for ( unsigned int i = 0; i < m_animationPortList.size(); i++ )
 	{
-		m_animationPortList[ i ] = createPort(i + 100); //port 3-5 already used in this node
+		m_animationPortList[i] = createPort(i + 4);//00); //port 3 already used in this node
 
 		m_transtionInfoList[ i ].transitionIn = false;
 		m_transtionInfoList[ i ].transitionOut = false;

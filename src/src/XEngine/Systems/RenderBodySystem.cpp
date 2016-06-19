@@ -42,7 +42,9 @@ namespace XE
 					_t_renderable->_t_update();
 			}
 
-			_graphicsMgr.GetRenderTask(RenderTaskID::RenderBody).isDone = true;
+			_graphicsMgr.getFromRendererQueue().push([this]() {
+				_graphicsMgr.GetRenderTask(RenderTaskID::RenderBody).isDone = true;
+			});
 		});
 	};
 }

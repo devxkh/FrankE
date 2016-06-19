@@ -72,7 +72,7 @@ void MixNode::createAnimationPorts( const int animationPortCount )
 	{
 		/*std::stringstream portName;
 		portName << "in" << i;*/
-		m_animationPortList[i] = createPort( i + 100);// portName.str() );
+		m_animationPortList[i] = createPort(i + 1);// 00);// portName.str() );
 	}
 }
 

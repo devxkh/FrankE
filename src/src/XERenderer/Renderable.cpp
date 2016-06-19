@@ -237,7 +237,7 @@ namespace XE
 					}
 				}
 
-				//do not use the iterator!!
+				//do not use the iterator, else crash in mainthread ?!!
 				Ogre::SkeletonAnimation* test = _t_OgreItemPtr->getSkeletonInstance()->getAnimation(name);
 		//		m_GraphicsManager.getFromRendererQueue().push([test, name, duration, &animationComponent, boneWeightPtrs, boneWeightList]() {
 			

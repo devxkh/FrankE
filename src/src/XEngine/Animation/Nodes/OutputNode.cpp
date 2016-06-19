@@ -35,7 +35,7 @@ OutputNode::OutputNode()
 : Node()
 , m_animationInPort( NULL )
 {
-	m_animationInPort = createPort(2); //"in" );
+	m_animationInPort = createPort(1); //"in" );
 }
 
 OutputNode::~OutputNode()

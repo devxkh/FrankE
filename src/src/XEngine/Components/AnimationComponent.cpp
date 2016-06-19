@@ -160,6 +160,12 @@ namespace XE
 	{
 		uint16_t animId = animIdMap[name];
 
+		if (animId == 0)
+		{
+			LOG(ERROR) << "No Animation found for: " << name << ", in animIdMap";
+			return;
+		}
+
 		for (auto& animation : _animations)
 		{
 			if (animation->getId() == animId)
