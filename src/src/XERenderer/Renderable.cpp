@@ -19,7 +19,7 @@
 #include <XERenderer/OgreSceneManager.hpp>
 
 #include <XEngine/Components/AnimationComponent.hpp>
-#include <XESystem/Logging.hpp>
+#include <ThirdParty/plog/Log.h>
 #include <XEngine/Scene.hpp>
 
 namespace XE
@@ -111,8 +111,8 @@ namespace XE
 				Ogre::v1::MeshPtr meshV1;
 				Ogre::Item* newItem;
 				//std::cout << "meshes:" << var->Name()->c_str() << std::endl;
-				LOG(INFO) << "Renderable:_t_createItem";
-				LOG(INFO) << "mesh_type:" << EnumNameUMesh(var->mesh_type());
+				LOG(plog::info) << "Renderable:_t_createItem";
+				LOG(plog::info) << "mesh_type:" << EnumNameUMesh(var->mesh_type());
 
 				if (var->mesh_type() == XFBType::UMesh::UMesh_MeshPlane)
 				{

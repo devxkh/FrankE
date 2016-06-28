@@ -7,7 +7,7 @@ class TestScene : public XE::Scene
 public:
 
 	TestScene( XE::XEngine& engine)
-		: XE::Scene(engine, engine.getIDAL(), engine.getGraphicsManager())
+		: XE::Scene(engine, engine.getDAL(), engine.getGraphicsManager())
 		, m_engine(engine)
 	{
 

@@ -376,6 +376,8 @@ set_property(TARGET XEngine PROPERTY FOLDER "libraries")
 target_compile_definitions(XEngine PUBLIC XEANIMATION_EXPORTS)
 target_compile_definitions(XEngine PUBLIC OGRE_STATIC_LIB)
 
+target_compile_definitions(XEngine PUBLIC NOMINMAX) #FIX https://github.com/google/flatbuffers/issues/105
+
 # Adds logic to INSTALL.vcproj to copy XEngine.lib to destination directory
 #install (TARGETS XEngine
 #		ARCHIVE DESTINATION lib

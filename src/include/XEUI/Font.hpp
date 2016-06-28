@@ -4,7 +4,7 @@
 #include <XESystem/SystemConfig.hpp>
 
 #include <XEUI/Glyph.hpp>
-//#include <XESystem/Logging.hpp>
+//#include <ThirdParty/plog/Log.h>
 
 #include <unordered_map>
 #include <memory>

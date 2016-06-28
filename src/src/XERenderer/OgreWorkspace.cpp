@@ -100,7 +100,7 @@ namespace XE {
 			SDL_VERSION(&wmInfo.version);
 
 			if (SDL_GetWindowWMInfo((SDL_Window*)window, &wmInfo) == SDL_FALSE)
-				LOG(ERROR) << "Couldn't get WM Info! (SDL2) - GraphicsSystem::initialize";
+				LOG(plog::error) << "Couldn't get WM Info! (SDL2) - GraphicsSystem::initialize";
 
 			Ogre::String winHandle;
 

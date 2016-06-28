@@ -6,9 +6,9 @@ set(SRCROOT ${PROJECT_SOURCE_DIR}/src/src/XEDAL)
 
 # ----------------------- XEDAL_SOURCES -------------------------------
 set(XEDAL_SOURCES
-    ${SRCROOT}/IDAL.cpp
-	${SRCROOT}/DB.cpp
-	${SRCROOT}/IDALObject.cpp
+   # ${SRCROOT}/IDAL.cpp
+	${SRCROOT}/IDAL.cpp
+	#${SRCROOT}/IDALObject.cpp
 	)
 source_group("src" FILES ${XEDAL_SOURCES})
 
@@ -53,9 +53,9 @@ source_group("src\\Sqlite3" FILES ${SQLITE_SOURCES})
 # ----------------------- header files -------------------------------
 set(XEDAL_HEADER
 #	 ${INCROOT}/Serialize.hpp
-     ${INCROOT}/IDAL.hpp
-     ${INCROOT}/IDALObject.hpp
-     ${INCROOT}/DB.hpp 
+   
+ #    ${INCROOT}/IDALObject.hpp
+     ${INCROOT}/IDAL.hpp 
 )
 source_group("include" FILES ${XEDAL_HEADER}) # Create named folders for the sources within the .vcproj
 

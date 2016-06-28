@@ -231,7 +231,7 @@ set(XESystem_SOURCES
 set(XESystem_HEADER
 ${INC_SYSROOT}/SystemConfig.hpp
     ${INC_SYSROOT}/QueueManager.hpp
-	  ${INC_SYSROOT}/Logging.hpp
+#	  ${INC_SYSROOT}/Logging.hpp
     ${INC_SYSROOT}/TransportData.hpp
 )
 # Create named folders for the sources within the .vcproj
@@ -268,9 +268,9 @@ sfml_add_library(XESystem
 #add_definitions(-SFML_SYSTEM_EXPORTS)
 set_target_properties(XESystem PROPERTIES DEFINE_SYMBOL SFML_SYSTEM_EXPORTS)
 
-target_compile_definitions(XESystem PUBLIC ELPP_UNICODE)
-target_compile_definitions(XESystem PUBLIC ELPP_THREAD_SAFE)
-target_compile_definitions(XESystem PUBLIC ELPP_THREADING_ENABLED)
+#target_compile_definitions(XESystem PUBLIC ELPP_UNICODE)
+#target_compile_definitions(XESystem PUBLIC ELPP_THREAD_SAFE)
+#target_compile_definitions(XESystem PUBLIC ELPP_THREADING_ENABLED)
 
 # Creates folder "libraries" and adds target project (XEngine.vcproj)
 set_property(TARGET XESystem PROPERTY FOLDER "libraries")

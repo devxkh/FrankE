@@ -8,7 +8,7 @@
 namespace XET {
 
 TestScene::TestScene( XE::XEngine& engine)
-	: XE::Scene(engine, engine.getIDAL(), engine.getGraphicsManager())
+	: XE::Scene(engine, engine.getDAL(), engine.getGraphicsManager())
 	, m_engine(engine)
 {
 	//m_engine.getLua().loadFile("Scene/1_Scene.lua");
@@ -28,7 +28,7 @@ bool TestScene::createEntityType(entityx::Entity entity, void* entityData)
 
 		if (var->comp_type() == NetMsg::UComponent::UComponent_RenderableComponent) //message: editor -> server
 		{
-			//	LOG(INFO) << "XFBType::RenderableComponent -> netid: " << entityData->netid();
+			//	LOG(plog::info) << "XFBType::RenderableComponent -> netid: " << entityData->netid();
 
 			if (entity.has_component<XE::Renderable>())
 				updateRenderableComponent(entity, sceneID, var->comp());
@@ -41,7 +41,7 @@ bool TestScene::createEntityType(entityx::Entity entity, void* entityData)
 		{
 			const XFBType::PhysicsComponent* nodeMsg = (const XFBType::PhysicsComponent*)var->comp();
 			
-			//LOG(INFO) << "x: " << nodeMsg->transform()->loc()->x();
+			//LOG(plog::info) << "x: " << nodeMsg->transform()->loc()->x();
 
 			if (entity.has_component<XE::PhysicsComponent>())
 				updatePhysicsComponent(entity, sceneID, var->comp());
@@ -50,10 +50,10 @@ bool TestScene::createEntityType(entityx::Entity entity, void* entityData)
 
 			deleteBufferInRenderThread = true;
 		}
-		else if (var->comp_type() == NetMsg::UComponent::UComponent_Node)  // messages: client <->server
+		else if (var->comp_type() == NetMsg::UComponent::UComponent_BodyComponent)  // messages: client <->server
 		{
-			const XFBType::Node* nodeMsg = (const XFBType::Node*)var->comp();
-			std::cout << "x: " << nodeMsg->transform()->loc()->x() << std::endl;
+			const XFBType::BodyComponent* nodeMsg = (const XFBType::BodyComponent*)var->comp();
+			std::cout << "x: " << nodeMsg->position()->x() << std::endl;
 
 			if (entity.has_component<XE::BodyComponent>())
 				updateBodyComponent(entity, var->comp());

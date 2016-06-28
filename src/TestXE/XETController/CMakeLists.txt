@@ -13,6 +13,7 @@ set(XETCommon_SOURCES
     ${TESTCOMMONROOT}/TestControllerSystem.cpp
     ${TESTCOMMONROOT}/Controllers_generated.h
     ${TESTCOMMONROOT}/Netmsg_generated.h
+	  ${TESTCOMMONROOT}/TestDAL.cpp
 #	${SRCROOT}/GUI.h
 )
 source_group("src\\common" FILES ${XETCommon_SOURCES})
@@ -21,7 +22,9 @@ source_group("src\\common" FILES ${XETCommon_SOURCES})
 set(XETCommon_HEADER
     ${TESTCOMMONROOT}/TestController.hpp
      ${TESTCOMMONROOT}/TestScene.hpp
- ${TESTCOMMONROOT}/TestControllerSystem.hpp
+
+	  ${TESTCOMMONROOT}/TestDAL.hpp
+	${TESTCOMMONROOT}/TestControllerSystem.hpp
 )
 
 # Create named folders for the sources within the .vcproj
@@ -43,7 +46,7 @@ source_group("src" FILES ${XETController_SOURCES})
 # all header files
 set(XETController_HEADER
 	${SRCROOT}/ControllerState.hpp
-	${SRCROOT}/TestScene.h
+#	${SRCROOT}/TestScene.h
 )
 
 # Create named folders for the sources within the .vcproj

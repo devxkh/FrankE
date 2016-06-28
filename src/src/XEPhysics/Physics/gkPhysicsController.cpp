@@ -36,7 +36,7 @@
 #include <XEngine/Components/PhysicsComponents.hpp>
 #include <XEngine/Components/Body.hpp>
 #include <XESystem/TransportData.hpp>
-#include <XESystem/Logging.hpp>
+#include <ThirdParty/plog/Log.h>
 
 gkPhysicsController::gkPhysicsController(gkDynamicsWorld* owner)
 	:    m_owner(owner),

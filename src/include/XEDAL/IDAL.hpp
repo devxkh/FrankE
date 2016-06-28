@@ -1,23 +1,24 @@
-#ifndef __IDAL_H__
-#define __IDAL_H__
+#ifndef __DB_H__
+#define __DB_H__
 
-#include <XEDAL/DB.hpp>
-#include <sfml/Config.hpp>
-#include <XEDAL/Objects/FBEngineTypes_generated.h>
+#include <XESystem/SystemConfig.hpp>
+#include <string>
 
+typedef struct sqlite3 sqlite3;
 
 namespace XE {
 
 	class XEngine;
 	class Scene;
 
+	typedef int(*sceneNodes_callback)(XE::Scene& scenePointer, XE::Int32 entID, char* entityData, bool replicateEntity);
 
-	typedef int(*sceneNodes_callback)(Scene& scenePointer, sf::Int32 entID, char* entityData, bool replicateEntity);
+	class XEngine;
 
-	class IDAL : public DB
+	class IDAL
 	{
-
 	public:
+
 		struct BinaryResult
 		{
 		public:
@@ -26,25 +27,29 @@ namespace XE {
 		};
 
 		IDAL(XEngine& engine);
-		~IDAL();
 
 		void open();
-		
-		//void setGameEntityProperties(Ogre::uint16 id, GameEntityProperties& props);
-		//void setPhysicProperties(Ogre::uint16 id, gkPhysicsProperties& props);
-		//void  getPhysicsProperties(Ogre::uint16 id, gkPhysicsProperties& props);
-		//void getGameEntityProperties(Ogre::uint16 id, GameEntityProperties& props);
-		void LoadFBJson(const std::string& schemafilePath, const std::string& jsonfilePath, BinaryResult& result);
-		
-		const void* getState(const char* name, int namelen);
-		//void getRaceData(Ogre::uint16 sceneID, RaceMap& raceMap);
-		void getSceneNodes(Scene& scene, sf::Uint16 sceneID, sceneNodes_callback xCallback);
-		char*  getScene(sf::Uint16 id);
-		char*  getEntity(sf::Uint16 id);
+		void close();
 
-	
+		virtual const void* getState(const char* name, int namelen) = 0;
+		virtual char* getScene(XE::Uint16 id) = 0;
+		virtual char* getEntity(XE::Uint16 id) = 0;
+		virtual void getSceneNodes(XE::Scene& scene, XE::Uint16 sceneID, sceneNodes_callback xCallback) = 0;
+
+	protected:
+		
+		void execute(std::string sql);
+	protected:
+		sqlite3* mDB;
+
+	private:
+
+		XEngine& m_engine;
+		int mSQLCode;
+		std::string mQuery = "";
+		char* mErrMsg = 0;
 	};
 
 } // ns XE
 
-#endif // __DBI_H__
+#endif // __DB_H__

@@ -1,5 +1,4 @@
-#ifndef __TestMenuState_HPP__
-#define __TestMenuState_HPP__
+#pragma once
 
 #include <XEngine.hpp>
 
@@ -21,5 +20,3 @@ public:
 	void cleanup();
 
 }; // namespace XE
-
-#endif // __WindowSTATE_HPP__

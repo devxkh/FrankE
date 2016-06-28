@@ -1,6 +1,38 @@
 
 # XETServer
 
+# --------------------------- Common Files for Testproject ----------------
+set(TESTCOMMONROOT ${PROJECT_SOURCE_DIR}/src/TestXE/XETCommon)
+
+set(INCROOT ${PROJECT_SOURCE_DIR}/src/include)
+set(SRCROOT ${PROJECT_SOURCE_DIR}/src/TestXE/XETUI)
+
+set(XETCommon_SOURCES
+    ${TESTCOMMONROOT}/TestController.cpp
+	 ${TESTCOMMONROOT}/TestDAL.cpp
+     ${TESTCOMMONROOT}/TestScene.cpp
+    ${TESTCOMMONROOT}/TestControllerSystem.cpp
+    ${TESTCOMMONROOT}/Controllers_generated.h
+    ${TESTCOMMONROOT}/Netmsg_generated.h
+#	${SRCROOT}/GUI.h
+)
+source_group("src\\common" FILES ${XETCommon_SOURCES})
+
+# all header files
+set(XETCommon_HEADER
+    ${TESTCOMMONROOT}/TestController.hpp
+     ${TESTCOMMONROOT}/TestScene.hpp
+	  ${TESTCOMMONROOT}/TestDAL.hpp
+	${TESTCOMMONROOT}/TestControllerSystem.hpp
+)
+
+# Create named folders for the sources within the .vcproj
+# Empty name lists them directly under the .vcproj
+source_group("include\\common" FILES ${XETCommon_HEADER})
+
+# --------------------------- End Common Files for Testproject ----------------
+
+
 set(INCROOT ${PROJECT_SOURCE_DIR}/src/include)
 set(SRCROOT ${PROJECT_SOURCE_DIR}/src/TestXE/XETServer)
 
@@ -84,7 +116,7 @@ include_directories (${PROJECT_BINARY_DIR}/src/Ogre/include)
 
 # define the opengl target
 sfml_add_example(XETServer GUI_APP
-                 SOURCES ${XETServer_SOURCES} ${XETServer_HEADER}
+                 SOURCES ${XETServer_SOURCES} ${XETServer_HEADER} ${XETCommon_HEADER} ${XETCommon_SOURCES}
                  DEPENDS XEngine ${ADDITIONAL_LIBRARIES})
 
 # Creates a folder "executables" and adds target 

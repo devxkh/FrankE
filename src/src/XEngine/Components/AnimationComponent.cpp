@@ -12,7 +12,7 @@
 #include <XEngine/Animation/Nodes/TransitionSelectNode.h>
 #include <XEDAL/Objects/FBEngineTypes_generated.h>
 
-#include <XESystem/Logging.hpp>
+#include <ThirdParty/plog/Log.h>
 
 namespace XE
 {
@@ -99,18 +99,18 @@ namespace XE
 
 				if (nodeIn == NULL)
 				{
-					LOG(ERROR) << "Connection with invalid node_in: " << connection->nodeIn();
+					LOG(plog::error) << "Connection with invalid node_in: " << connection->nodeIn();
 				}
 
 				if (nodeOut == NULL)
 				{
-					LOG(ERROR) << "Connection with invalid node_out: " << connection->nodeOut();
+					LOG(plog::error) << "Connection with invalid node_out: " << connection->nodeOut();
 				}
 
 				Port* port = nodeIn->getPort(connection->portIn());
 				if (port == NULL)
 				{
-					LOG(ERROR) << "Connection with invalid port: " << connection->portIn() << " for node " << connection->nodeIn();
+					LOG(plog::error) << "Connection with invalid port: " << connection->portIn() << " for node " << connection->nodeIn();
 				}
 
 				port->setConnectedNode(nodeOut);
@@ -130,14 +130,14 @@ namespace XE
 
 				if (node == NULL)
 				{
-					LOG(ERROR) << "Connection with invalid node_id: " << constant->nodeId();
+					LOG(plog::error) << "Connection with invalid node_id: " << constant->nodeId();
 				}
 
 				bool validPort = node->hasPort(constant->portId());
 				
 				if (!validPort)
 				{
-					LOG(ERROR) << "Constant with invalid port " << constant->portId() << " for node " << constant->nodeId();
+					LOG(plog::error) << "Constant with invalid port " << constant->portId() << " for node " << constant->nodeId();
 				}
 				else
 				{
@@ -162,7 +162,7 @@ namespace XE
 
 		if (animId == 0)
 		{
-			LOG(ERROR) << "No Animation found for: " << name << ", in animIdMap";
+			LOG(plog::error) << "No Animation found for: " << name << ", in animIdMap";
 			return;
 		}
 

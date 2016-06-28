@@ -10,7 +10,7 @@ UIState_2::UIState_2(const XE::uint16& id, entityx::Entity entity, bool replace 
 	: UIState(id, replace)
 	, m_entity(entity)
 {
-	LOG(INFO) << "UIState_2 Init";
+	LOG(plog::info) << "UIState_2 Init";
 
 	XE::WLayer& layer = entity.component<XE::ScreenComponent>()->wLayer;
 

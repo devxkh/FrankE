@@ -6,7 +6,7 @@
 
 #include <XEDAL/PhysFS/PhysFsStream.hpp>
 
-#include <XESystem/Logging.hpp>
+#include <ThirdParty/plog/Log.h>
 
 #include <fmod/fmod_errors.h>
 
@@ -32,19 +32,19 @@ namespace XE {
 		// Create the main system object.
 		result = FMOD::System_Create(&_system);
 		if (result != FMOD_OK)
-			LOG(FATAL) << "FMOD error! (" << result << "): " << FMOD_ErrorString(result) << ",SoundManager::Initialize";
+			LOG(plog::fatal) << "FMOD error! (" << result << "): " << FMOD_ErrorString(result) << ",SoundManager::Initialize";
 
 
 		result = _system->init(MAX_SOUND_CHANNELS, FMOD_INIT_NORMAL, 0);	// Initialize FMOD.
 		if (result != FMOD_OK)
-			LOG(FATAL) << "FMOD error! (" << result << "): " << FMOD_ErrorString(result) << ",SoundManager::Initialize";
+			LOG(plog::fatal) << "FMOD error! (" << result << "): " << FMOD_ErrorString(result) << ",SoundManager::Initialize";
 
 
 		_system->set3DSettings(DOPPLER_SCALE, DISTANCE_FACTOR, ROLLOFF_SCALE);
 
 		result = _system->setFileSystem(&fmodFileOpenCallback, &fmodFileCloseCallback, &fmodFileReadCallback, &fmodFileSeekCallback, NULL, NULL, 2048);
 		if (result != FMOD_OK)
-			LOG(FATAL) << "FMOD error! (" << result << "): " << FMOD_ErrorString(result) << ",SoundManager::Initialize";
+			LOG(plog::fatal) << "FMOD error! (" << result << "): " << FMOD_ErrorString(result) << ",SoundManager::Initialize";
 	}
 
 	/*/////////////////////////////////////////////////////////////////*/
@@ -53,12 +53,12 @@ namespace XE {
 		FMOD_RESULT result = _system->close();
 		
 		if (result != FMOD_OK)
-			LOG(FATAL) << "FMOD error! (" << result << "): " << FMOD_ErrorString(result) << ",SoundManager::~SoundManager";
+			LOG(plog::fatal) << "FMOD error! (" << result << "): " << FMOD_ErrorString(result) << ",SoundManager::~SoundManager";
 		
 		result = _system->release();
 		
 		if (result != FMOD_OK)
-			LOG(FATAL) << "FMOD error! (" << result << "): " << FMOD_ErrorString(result) << ",SoundManager::~SoundManager";
+			LOG(plog::fatal) << "FMOD error! (" << result << "): " << FMOD_ErrorString(result) << ",SoundManager::~SoundManager";
 	}
 
 	void SoundManager::playSound(SoundHandle& sound)
@@ -75,7 +75,7 @@ namespace XE {
 			FMOD_RESULT result = sound._channel->isPlaying(&playing);
 			if ((result != FMOD_OK) && (result != FMOD_ERR_INVALID_HANDLE) && (result != FMOD_ERR_CHANNEL_STOLEN))
 			{
-				LOG(ERROR) << "FMOD error! (" << result << "): " << FMOD_ErrorString(result) << ",SoundManager::PlayStream";
+				LOG(plog::error) << "FMOD error! (" << result << "): " << FMOD_ErrorString(result) << ",SoundManager::PlayStream";
 			}
 
 			if (playing)
@@ -97,19 +97,19 @@ namespace XE {
 			FMOD_RESULT result = sound._channel->isPlaying(&playing);
 			if ((result != FMOD_OK) && (result != FMOD_ERR_INVALID_HANDLE) && (result != FMOD_ERR_CHANNEL_STOLEN))
 			{
-				LOG(ERROR) << "FMOD error! (" << result << "): " << FMOD_ErrorString(result) << ",SoundManager::PlayStream";
+				LOG(plog::error) << "FMOD error! (" << result << "): " << FMOD_ErrorString(result) << ",SoundManager::PlayStream";
 			}
 
 			result = sound._channel->getPaused(&paused);
 			if ((result != FMOD_OK) && (result != FMOD_ERR_INVALID_HANDLE) && (result != FMOD_ERR_CHANNEL_STOLEN))
 			{
-				LOG(ERROR) << "FMOD error! (" << result << "): " << FMOD_ErrorString(result) << ",SoundManager::PlayStream";
+				LOG(plog::error) << "FMOD error! (" << result << "): " << FMOD_ErrorString(result) << ",SoundManager::PlayStream";
 			}
 
 			result = sound._channel->getPosition(&ms, FMOD_TIMEUNIT_MS);
 			if ((result != FMOD_OK) && (result != FMOD_ERR_INVALID_HANDLE) && (result != FMOD_ERR_CHANNEL_STOLEN))
 			{
-				LOG(ERROR) << "FMOD error! (" << result << "): " << FMOD_ErrorString(result) << ",SoundManager::PlayStream";
+				LOG(plog::error) << "FMOD error! (" << result << "): " << FMOD_ErrorString(result) << ",SoundManager::PlayStream";
 			}
 
 			//sound._channel->getCurrentSound(&currentsound);
@@ -118,7 +118,7 @@ namespace XE {
 			//	result = currentsound->getLength(&lenms, FMOD_TIMEUNIT_MS);
 			//	if ((result != FMOD_OK) && (result != FMOD_ERR_INVALID_HANDLE) && (result != FMOD_ERR_CHANNEL_STOLEN))
 			//	{
-			//		LOG(ERROR) << "FMOD error! (" << result << "): " << FMOD_ErrorString(result) << ",SoundManager::PlayStream";
+			//		LOG(plog::error) << "FMOD error! (" << result << "): " << FMOD_ErrorString(result) << ",SoundManager::PlayStream";
 			//	}
 			//	else
 			//	{
@@ -127,7 +127,7 @@ namespace XE {
 				FMOD_RESULT result = _system->playSound(sound._soundPtr, 0, false, &sound._channel); //play sound
 				if ((result != FMOD_OK) && (result != FMOD_ERR_INVALID_HANDLE) && (result != FMOD_ERR_CHANNEL_STOLEN))
 				{
-					LOG(ERROR) << "FMOD error! (" << result << "): " << FMOD_ErrorString(result) << ",SoundManager::PlayStream";
+					LOG(plog::error) << "FMOD error! (" << result << "): " << FMOD_ErrorString(result) << ",SoundManager::PlayStream";
 				}
 			}
 
@@ -138,7 +138,7 @@ namespace XE {
 			FMOD_RESULT result = _system->playSound(sound._soundPtr, 0, false, &sound._channel); //sets the channel first time
 			if ((result != FMOD_OK) && (result != FMOD_ERR_INVALID_HANDLE) && (result != FMOD_ERR_CHANNEL_STOLEN))
 			{
-				LOG(ERROR) << "FMOD error! (" << result << "): " << FMOD_ErrorString(result) << ",SoundManager::PlayStream";
+				LOG(plog::error) << "FMOD error! (" << result << "): " << FMOD_ErrorString(result) << ",SoundManager::PlayStream";
 			}
 		}
 

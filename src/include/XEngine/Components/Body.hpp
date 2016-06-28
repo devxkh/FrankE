@@ -24,7 +24,7 @@ namespace XE
 
 		BodyComponent();
 
-		BodyComponent(const XFBType::TransformStateData* transform);
+		BodyComponent(const XFBType::BodyComponent* transform);
 		
 		/// set parent scene node. Retains the world transform.
 		void setParent(BodyComponent* parent) { m_parent = parent; }

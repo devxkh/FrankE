@@ -52,7 +52,7 @@ namespace XE
 		_renderTasks.push_back(RenderTask(RenderTaskID::RenderGUI));
 
 		if (SDL_Init(SDL_INIT_EVERYTHING) != 0)
-			LOG(ERROR) << "Cannot initialize SDL2! - GraphicsSystem::initialize";
+			LOG(plog::error) << "Cannot initialize SDL2! - GraphicsSystem::initialize";
 
 		createRenderer();
 

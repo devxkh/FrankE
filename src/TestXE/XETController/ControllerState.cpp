@@ -4,20 +4,14 @@
 #include "../XETCommon/TestControllerSystem.hpp"
 #include "../XETCommon/TestController.hpp"
 
-#include <memory>
-#include <iostream>
-
-#include "TestScene.h"
-
 ControllerState::ControllerState(XE::XEngine& engine, bool replace)
 	: XE::XEState(engine, replace)
 {
-	LOG(INFO) << "InitState - Initialization";
+	LOG(XE::info) << "InitState - Initialization";
 
 	auto ctrlSystem = engine.getScene().systems.add<XET::TestControllerSystem>(engine);
 
 	engine.getScene().create(1);
-
 
 	engine.getGraphicsManager().getGUIRenderer().loadAtlas("dbData/UI/TestAtlas.fbbin"); // ("XEngine", "General"); //texturemanager initialized in createrenderwindow!!!
 
@@ -36,7 +30,7 @@ ControllerState::ControllerState(XE::XEngine& engine, bool replace)
 	ctrlSystem->setBasicInputEvents(*ctrl);
 	ctrl->setActionMap(*ctrl);
 
-	LOG(INFO) << "InitState - Initialized";
+	LOG(XE::info) << "InitState - Initialized";
 }
 
 ControllerState::~ControllerState()

@@ -141,7 +141,7 @@ namespace XET {
 			screen->m_Desktop->onPointDown(context.event->button.x, context.event->button.y);
 		}
 
-		_lastMousePos = sf::Vector2i(context.event->button.x, context.event->button.y);
+		_lastMousePos = XE::Vector2(context.event->button.x, context.event->button.y);
 		_mousePressed = true;
 	}
 
@@ -282,7 +282,7 @@ namespace XET {
 				camera->getCameraNode().setPosition(mPosition);
 
 				//	else
-				//		LOG(INFO) << "camposx:" << camera->getCameraNode().getPosition().x << "camposy:" << camera->getCameraNode().getPosition().y << "camposz:" << camera->getCameraNode().getPosition().z;
+				//		LOG(plog::info) << "camposx:" << camera->getCameraNode().getPosition().x << "camposy:" << camera->getCameraNode().getPosition().y << "camposz:" << camera->getCameraNode().getPosition().z;
 			}
 
 			moveDirection = XE::Vector3(0, 0, 0);

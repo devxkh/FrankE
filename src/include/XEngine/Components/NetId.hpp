@@ -15,16 +15,12 @@ namespace XE
 	public:
 		NetIdComponent()
 			: id (0)
-			, peer(0)
-			, peerId(0)
 		{
 
 		}
 
 		NetIdComponent(Uint16 id)
 			: id(id)
-			, peer(0)
-			, peerId(0)
 		{
 
 		}
@@ -32,16 +28,32 @@ namespace XE
 		/// unique network objectid
 		Uint16 id;
 
-		///enet peerID
-		ENetPeer* peer;
-		
-		Uint16 peerId;
-
 		Uint8 sceneId;
 
 		///entityID 
 		Uint32 entityID;
 
+	};
+
+	struct NetPeerComponent {
+
+	public:
+		NetPeerComponent()
+			: peerId(0)
+		{
+
+		}
+
+		NetPeerComponent(Uint16 peerId)
+			: peer(0)
+			, peerId(peerId)
+		{
+
+		}
+		///enet peerID
+		ENetPeer* peer;
+
+		Uint16 peerId;
 	};
 
 }

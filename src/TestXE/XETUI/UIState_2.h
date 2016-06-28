@@ -1,5 +1,4 @@
-#ifndef __UISTATE_2_HPP__
-#define __UISTATE_2_HPP__
+#pragma once
 
 #include <XEngine.hpp>
 
@@ -11,7 +10,6 @@ public:
 
 	UIState_2(const XE::uint16& id, entityx::Entity entity, bool replace);
 	~UIState_2();
-
 
 	void pause();
 	void resume();
@@ -32,7 +30,6 @@ private:
 
 	entityx::Entity m_entity;
 
-
 	//initialization order!
 	XE::Button::Ptr m_btnTest;
 	XE::Box::Ptr  m_Box;
@@ -41,5 +38,3 @@ private:
 	bool m_running;
 	bool m_resume;
 };
-
-#endif // __UISTATE_2_HPP__

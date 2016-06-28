@@ -53,12 +53,12 @@ public:
 		//GK_ASSERT(!isNaN() && "Invalid vector supplied as parameter");
 	}
 	
-	TransformState(const XFBType::TransformStateData&  tvs)
+	TransformState(const XFBType::BodyComponent&  tvs)
 	{
-		rot.w = tvs.rot()->w();
-		rot.x = tvs.rot()->x(); rot.y = tvs.rot()->y(); rot.z = tvs.rot()->z();
-		loc.x = tvs.loc()->x(); loc.y = tvs.loc()->y(); loc.z = tvs.loc()->z();
-		scl.x = tvs.scl()->x(); scl.y = tvs.scl()->y(); scl.z = tvs.scl()->z();
+		rot.w = tvs.rotation()->w();
+		rot.x = tvs.rotation()->x(); rot.y = tvs.rotation()->y(); rot.z = tvs.rotation()->z();
+		loc.x = tvs.position()->x(); loc.y = tvs.position()->y(); loc.z = tvs.position()->z();
+		scl.x = tvs.scale()->x(); scl.y = tvs.scale()->y(); scl.z = tvs.scale()->z();
 
 		//GK_ASSERT(!isNaN() && "Invalid vector supplied as parameter");
 	}

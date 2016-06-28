@@ -4,7 +4,7 @@
 #include <XERenderer/GraphicsManager.hpp>
 #include <XERenderer/GUI/RenderableShape.hpp>
 
-#include <XESystem/Logging.hpp>
+#include <ThirdParty/plog/Log.h>
 
 namespace XE
 {

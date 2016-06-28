@@ -1,5 +1,4 @@
-#ifndef __INITSTATE_HPP__
-#define __INITSTATE_HPP__
+#pragma once
 
 #include <XEngine.hpp>
 
@@ -23,5 +22,3 @@ protected:
 };
 
 // namespace XG
-
-#endif // __INITSTATE_HPP__

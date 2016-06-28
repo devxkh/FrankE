@@ -1122,6 +1122,7 @@ FLATBUFFERS_FINAL_CLASS
 
   bool force_defaults_;  // Serialize values equal to their defaults anyway.
 
+
   struct StringOffsetCompare {
     StringOffsetCompare(const vector_downward &buf) : buf_(&buf) {}
     bool operator() (const Offset<String> &a, const Offset<String> &b) const {

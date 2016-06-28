@@ -6,7 +6,7 @@
 
 #include <algorithm>
 
-INITIALIZE_EASYLOGGINGPP
+//INITIALIZE_EASYLOGGINGPP
 
 void ControllerThread(XE::XEngine* engine)
 {
@@ -50,11 +50,10 @@ namespace XE
 		, m_NetworkManager()
 		, _lua(*this)
 		, _soundMgr()
-		, mIDAL(*this)
 		, m_OgreSceneManager(mGraphicsManager)
 	{		
-
-		el::Loggers::reconfigureAllLoggers(el::ConfigurationType::Format, "%datetime %level ,tid: %thread msg: %msg");
+		plog::init(plog::debug, "HelloLog.txt"); // Step2: initialize the logger.
+		//el::Loggers::reconfigureAllLoggers(el::ConfigurationType::Format, "%datetime %level ,tid: %thread msg: %msg");
 
 		PhysFS::init(""); // init PhysFS system
 	}
@@ -66,7 +65,7 @@ namespace XE
 
 	void XEngine::init()
 	{
-		LOG(INFO) << "XEngine():init";
+		LOG(plog::info) << "XEngine():init";
 
 
 		//singlethreaded renderer	engine->getGraphicsManager().updateRenderer();
@@ -91,10 +90,8 @@ namespace XE
 
 		registerObject(_lua.state);
 		m_NetworkManager.registerObject(_lua.state);
-
-
-		mIDAL.open();
-
+		
+		m_IDAL->open();
 	}
 
 	void XEngine::registerObject(sol::state& lua)
@@ -107,7 +104,7 @@ namespace XE
 			"ogreSceneMgr", sol::property(&XEngine::getOgreSceneManager),
 			"soundMgr", sol::property(&XEngine::getSoundMgr),
 			"scene", sol::property(&XEngine::getScene),
-			"idal", sol::property(&XEngine::getIDAL),
+			"dal", sol::property(&XEngine::getDAL),
 			"lua", sol::property(&XEngine::getLua),
 			"isInitialized", sol::property(&XEngine::isInitialized),
 
@@ -121,14 +118,20 @@ namespace XE
 		auto stateView = lua.set("XEngine", this); //set object instance
 	}
 
+	void XEngine::quit()
+	{
+		m_running = false;
+	}
+
+
 	void XEngine::setScene(std::unique_ptr<Scene> scene)
 	{
 		m_scene = std::move(scene);
 	}
 
-	void XEngine::quit()
+	void XEngine::setDAL(std::unique_ptr<IDAL> idal)
 	{
-		m_running = false;
+		m_IDAL = std::move(idal);
 	}
 
 	void XEngine::setNextState(std::unique_ptr<XEState> state)

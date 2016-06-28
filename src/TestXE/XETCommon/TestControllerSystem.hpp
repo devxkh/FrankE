@@ -1,5 +1,4 @@
-#ifndef __TestControllerSystem_HPP__
-#define __TestControllerSystem_HPP__
+#pragma once
 
 #include <XEngine.hpp>
 
@@ -22,8 +21,6 @@ namespace XET {
 
 		~TestControllerSystem();
 
-		void createConsole();
-		
 		void setBasicInputEvents(TestControllerComponent& controller);
 
 		virtual void onPointMoved(XE::ActionContext context);
@@ -42,21 +39,16 @@ namespace XET {
 
 		inline XE::XEngine& getEngine() { return mEngine; }
 
-		void createRayLine();
-
 	private:
 
 		float _turn_speed;
 		float _zoom_speed;
 		XE::XEngine& mEngine;
 		bool mDecalDestroy;
-		sf::Vector2i mMousePos;
-		sf::Vector2i _lastMousePos;
+		XE::Vector2 mMousePos;
+		XE::Vector2 _lastMousePos;
 		bool _mousePressed;
 		XE::Vector3 moveDirection; // set to null per frame
 	};
 
 } // namespace XET
-
-#endif //__TestControllerSystem_HPP__
-

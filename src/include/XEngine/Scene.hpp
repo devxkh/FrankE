@@ -5,7 +5,7 @@
 #include <XEEffect/Decal/OgreDecal.hpp>
 //#include <XEEffect/Decal/BulletMesh.hpp>
 //#include <ThirdParty/selene/selene.h>
-#include <XEDAL/IDALObject.hpp>
+//#include <XEDAL/IDALObject.hpp>
 
 #include <XESystem/Entityx/entityx.h>
 
@@ -32,7 +32,7 @@ namespace XE {
 	class SceneListener;
 	class OgreSceneManager;
 
-	class Scene : IDALObject, public  entityx::EntityX
+	class Scene : public  entityx::EntityX
 {
 
 public:

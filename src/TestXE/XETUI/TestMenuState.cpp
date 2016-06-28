@@ -12,7 +12,7 @@
 TestMenuState::TestMenuState(XE::XEngine& engine, bool replace)
 	: XE::XEState(engine, replace)
 {
-	LOG(INFO) << "InitState - Initialization";
+	LOG(plog::info) << "InitState - Initialization";
 
 	auto ctrlSystem = engine.getScene().systems.add<XET::TestControllerSystem>(engine);
 	
@@ -40,7 +40,7 @@ TestMenuState::TestMenuState(XE::XEngine& engine, bool replace)
 	ctrlSystem->setBasicInputEvents(*ctrl);
 	ctrl->setActionMap(*ctrl);
 
-	LOG(INFO) << "InitState - Initialized";
+	LOG(XE::info) << "InitState - Initialized";
 }
 
 TestMenuState::~TestMenuState()

@@ -175,7 +175,7 @@ namespace XE {
 
 	int Scene::callbackNewNode(Scene& scenePointer, Int32 entityID, char* entityData, bool replicateEntity)
 	{
-		std::cout << "callbackNewNode entID:" << entityID << std::endl;// << gameEntity.getName();
+		LOG(plog::info) << "callbackNewNode entID:" << entityID;// << gameEntity.getName();
 
 		scenePointer.createEntity(entityID, entityData, replicateEntity);
 
@@ -325,9 +325,9 @@ namespace XE {
 
 	void Scene::createBodyComponent(entityx::Entity entity, const void* fbData)
 	{
-		const XFBType::Node* node = (const XFBType::Node*)fbData;
+		const XFBType::BodyComponent* node = (const XFBType::BodyComponent*)fbData;
 
-		entityx::ComponentHandle<BodyComponent> body = entity.assign<BodyComponent>(node->transform());// , scene->getNodeMemoryMgr());
+		entityx::ComponentHandle<BodyComponent> body = entity.assign<BodyComponent>(node);// , scene->getNodeMemoryMgr());
 		auto netID = entity.component<NetIdComponent>();
 		netID->id = m_engine.getNetworkManager().newNetID();
 
@@ -351,8 +351,8 @@ namespace XE {
 
 	void Scene::updateBodyComponent( entityx::Entity entity, const void* fbData)
 	{
-		const XFBType::Node* node = (const XFBType::Node*)fbData;
-		entity.component<BodyComponent>()->setPosition(node->transform()->loc()->x(), node->transform()->loc()->y(), node->transform()->loc()->z());
+		const XFBType::BodyComponent* node = (const XFBType::BodyComponent*)fbData;
+		entity.component<BodyComponent>()->setPosition(node->position()->x(), node->position()->y(), node->position()->z());
 	}
 
 	void Scene::updateScene(Uint16 scendId, const void* fbData)

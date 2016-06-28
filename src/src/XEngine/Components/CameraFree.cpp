@@ -1,5 +1,8 @@
 #include <XEngine/Components/CameraFree.hpp>
 
+#include <XEngine/Components/Body.hpp>
+#include <XERenderer/CameraRenderable.hpp>
+
 namespace XE
 {
 	CameraFreeComponent::CameraFreeComponent(CameraRenderable& cameraRenderable, BodyComponent& bodyComponent)

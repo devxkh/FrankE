@@ -11,7 +11,6 @@
 namespace XFBType {
 struct Vec3f;
 struct Quat4f;
-struct TransformStateData;
 struct Colour;
 struct Clipping;
 struct PhysicsConstraint;
@@ -32,7 +31,6 @@ struct PhysicsComponent;
 struct SoundListener;
 struct Light;
 struct Camera;
-struct Node;
 struct System;
 struct Scene;
 struct Connection;
@@ -71,10 +69,9 @@ struct Chatmessage;
 struct Login;
 struct ReturnStatus;
 struct PlayerComponent;
-struct EntityCmdMsg;
+struct Entity;
 struct InputEvent;
 struct Component;
-struct Entity;
 struct MessageRoot;
 
 enum MsgStatus {
@@ -208,31 +205,19 @@ enum ComponentType {
   ComponentType_CT_None = 0,
   ComponentType_CT_NetId = 1,
   ComponentType_CT_Body = 2,
-  ComponentType_CT_Controller = 3,
-  ComponentType_CT_Player = 4,
-  ComponentType_CT_Spell = 5,
-  ComponentType_CT_Static = 6
+  ComponentType_CT_Renderable = 3,
+  ComponentType_CT_Controller = 4,
+  ComponentType_CT_Player = 5,
+  ComponentType_CT_Spell = 6,
+  ComponentType_CT_Static = 7
 };
 
 inline const char **EnumNamesComponentType() {
-  static const char *names[] = { "CT_None", "CT_NetId", "CT_Body", "CT_Controller", "CT_Player", "CT_Spell", "CT_Static", nullptr };
+  static const char *names[] = { "CT_None", "CT_NetId", "CT_Body", "CT_Renderable", "CT_Controller", "CT_Player", "CT_Spell", "CT_Static", nullptr };
   return names;
 }
 
 inline const char *EnumNameComponentType(ComponentType e) { return EnumNamesComponentType()[static_cast<int>(e)]; }
-
-enum EnityCmd {
-  EnityCmd_EC_None = 0,
-  EnityCmd_EC_RemoveComponent = 1,
-  EnityCmd_EC_DeleteEntity = 2
-};
-
-inline const char **EnumNamesEnityCmd() {
-  static const char *names[] = { "EC_None", "EC_RemoveComponent", "EC_DeleteEntity", nullptr };
-  return names;
-}
-
-inline const char *EnumNameEnityCmd(EnityCmd e) { return EnumNamesEnityCmd()[static_cast<int>(e)]; }
 
 enum UComponent {
   UComponent_NONE = 0,
@@ -244,16 +229,15 @@ enum UComponent {
   UComponent_SpellComponent = 6,
   UComponent_RenderableComponent = 7,
   UComponent_StaticComponent = 8,
-  UComponent_Node = 9,
-  UComponent_Camera = 10,
-  UComponent_Light = 11,
-  UComponent_SoundListener = 12,
-  UComponent_PhysicsComponent = 13,
-  UComponent_SoundComponent = 14
+  UComponent_Camera = 9,
+  UComponent_Light = 10,
+  UComponent_SoundListener = 11,
+  UComponent_PhysicsComponent = 12,
+  UComponent_SoundComponent = 13
 };
 
 inline const char **EnumNamesUComponent() {
-  static const char *names[] = { "NONE", "CharacterComponent", "SpawnPointComponent", "AnimationComponent", "BodyComponent", "PlayerComponent", "SpellComponent", "RenderableComponent", "StaticComponent", "Node", "Camera", "Light", "SoundListener", "PhysicsComponent", "SoundComponent", nullptr };
+  static const char *names[] = { "NONE", "CharacterComponent", "SpawnPointComponent", "AnimationComponent", "BodyComponent", "PlayerComponent", "SpellComponent", "RenderableComponent", "StaticComponent", "Camera", "Light", "SoundListener", "PhysicsComponent", "SoundComponent", nullptr };
   return names;
 }
 
@@ -268,13 +252,12 @@ enum Data {
   Data_Login = 3,
   Data_ReturnStatus = 4,
   Data_InputEvent = 5,
-  Data_EntityCmdMsg = 6,
-  Data_GameState = 7,
-  Data_Entity = 8
+  Data_Entity = 6,
+  Data_GameState = 7
 };
 
 inline const char **EnumNamesData() {
-  static const char *names[] = { "NONE", "Chatmessage", "Scene", "Login", "ReturnStatus", "InputEvent", "EntityCmdMsg", "GameState", "Entity", nullptr };
+  static const char *names[] = { "NONE", "Chatmessage", "Scene", "Login", "ReturnStatus", "InputEvent", "Entity", "GameState", nullptr };
   return names;
 }
 
@@ -505,36 +488,50 @@ inline flatbuffers::Offset<PlayerComponent> CreatePlayerComponent(flatbuffers::F
   return builder_.Finish();
 }
 
-struct EntityCmdMsg FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  EnityCmd cmd() const { return static_cast<EnityCmd>(GetField<uint16_t>(4, 0)); }
-  ComponentType componentType() const { return static_cast<ComponentType>(GetField<uint16_t>(6, 0)); }
+struct Entity FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+  uint32_t entityID() const { return GetField<uint32_t>(4, 0); }
+  uint8_t deleteEntity() const { return GetField<uint8_t>(6, 0); }
+  const flatbuffers::Vector<flatbuffers::Offset<Component>> *components() const { return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<Component>> *>(8); }
+  const flatbuffers::Vector<flatbuffers::Offset<Component>> *deleteComponents() const { return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<Component>> *>(10); }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
-           VerifyField<uint16_t>(verifier, 4 /* cmd */) &&
-           VerifyField<uint16_t>(verifier, 6 /* componentType */) &&
+           VerifyField<uint32_t>(verifier, 4 /* entityID */) &&
+           VerifyField<uint8_t>(verifier, 6 /* deleteEntity */) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, 8 /* components */) &&
+           verifier.Verify(components()) &&
+           verifier.VerifyVectorOfTables(components()) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, 10 /* deleteComponents */) &&
+           verifier.Verify(deleteComponents()) &&
+           verifier.VerifyVectorOfTables(deleteComponents()) &&
            verifier.EndTable();
   }
 };
 
-struct EntityCmdMsgBuilder {
+struct EntityBuilder {
   flatbuffers::FlatBufferBuilder &fbb_;
   flatbuffers::uoffset_t start_;
-  void add_cmd(EnityCmd cmd) { fbb_.AddElement<uint16_t>(4, static_cast<uint16_t>(cmd), 0); }
-  void add_componentType(ComponentType componentType) { fbb_.AddElement<uint16_t>(6, static_cast<uint16_t>(componentType), 0); }
-  EntityCmdMsgBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
-  EntityCmdMsgBuilder &operator=(const EntityCmdMsgBuilder &);
-  flatbuffers::Offset<EntityCmdMsg> Finish() {
-    auto o = flatbuffers::Offset<EntityCmdMsg>(fbb_.EndTable(start_, 2));
+  void add_entityID(uint32_t entityID) { fbb_.AddElement<uint32_t>(4, entityID, 0); }
+  void add_deleteEntity(uint8_t deleteEntity) { fbb_.AddElement<uint8_t>(6, deleteEntity, 0); }
+  void add_components(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Component>>> components) { fbb_.AddOffset(8, components); }
+  void add_deleteComponents(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Component>>> deleteComponents) { fbb_.AddOffset(10, deleteComponents); }
+  EntityBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
+  EntityBuilder &operator=(const EntityBuilder &);
+  flatbuffers::Offset<Entity> Finish() {
+    auto o = flatbuffers::Offset<Entity>(fbb_.EndTable(start_, 4));
     return o;
   }
 };
 
-inline flatbuffers::Offset<EntityCmdMsg> CreateEntityCmdMsg(flatbuffers::FlatBufferBuilder &_fbb,
-   EnityCmd cmd = EnityCmd_EC_None,
-   ComponentType componentType = ComponentType_CT_None) {
-  EntityCmdMsgBuilder builder_(_fbb);
-  builder_.add_componentType(componentType);
-  builder_.add_cmd(cmd);
+inline flatbuffers::Offset<Entity> CreateEntity(flatbuffers::FlatBufferBuilder &_fbb,
+   uint32_t entityID = 0,
+   uint8_t deleteEntity = 0,
+   flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Component>>> components = 0,
+   flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Component>>> deleteComponents = 0) {
+  EntityBuilder builder_(_fbb);
+  builder_.add_deleteComponents(deleteComponents);
+  builder_.add_components(components);
+  builder_.add_entityID(entityID);
+  builder_.add_deleteEntity(deleteEntity);
   return builder_.Finish();
 }
 
@@ -605,41 +602,6 @@ inline flatbuffers::Offset<Component> CreateComponent(flatbuffers::FlatBufferBui
   return builder_.Finish();
 }
 
-struct Entity FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  uint32_t entityID() const { return GetField<uint32_t>(4, 0); }
-  const flatbuffers::Vector<flatbuffers::Offset<Component>> *components() const { return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<Component>> *>(6); }
-  bool Verify(flatbuffers::Verifier &verifier) const {
-    return VerifyTableStart(verifier) &&
-           VerifyField<uint32_t>(verifier, 4 /* entityID */) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, 6 /* components */) &&
-           verifier.Verify(components()) &&
-           verifier.VerifyVectorOfTables(components()) &&
-           verifier.EndTable();
-  }
-};
-
-struct EntityBuilder {
-  flatbuffers::FlatBufferBuilder &fbb_;
-  flatbuffers::uoffset_t start_;
-  void add_entityID(uint32_t entityID) { fbb_.AddElement<uint32_t>(4, entityID, 0); }
-  void add_components(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Component>>> components) { fbb_.AddOffset(6, components); }
-  EntityBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
-  EntityBuilder &operator=(const EntityBuilder &);
-  flatbuffers::Offset<Entity> Finish() {
-    auto o = flatbuffers::Offset<Entity>(fbb_.EndTable(start_, 2));
-    return o;
-  }
-};
-
-inline flatbuffers::Offset<Entity> CreateEntity(flatbuffers::FlatBufferBuilder &_fbb,
-   uint32_t entityID = 0,
-   flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Component>>> components = 0) {
-  EntityBuilder builder_(_fbb);
-  builder_.add_components(components);
-  builder_.add_entityID(entityID);
-  return builder_.Finish();
-}
-
 struct MessageRoot FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   uint32_t netid() const { return GetField<uint32_t>(4, 0); }
   uint32_t scene() const { return GetField<uint32_t>(6, 0); }
@@ -695,7 +657,6 @@ inline bool VerifyUComponent(flatbuffers::Verifier &verifier, const void *union_
     case UComponent_SpellComponent: return verifier.VerifyTable(reinterpret_cast<const SpellComponent *>(union_obj));
     case UComponent_RenderableComponent: return verifier.VerifyTable(reinterpret_cast<const XFBType::RenderableComponent *>(union_obj));
     case UComponent_StaticComponent: return verifier.VerifyTable(reinterpret_cast<const StaticComponent *>(union_obj));
-    case UComponent_Node: return verifier.VerifyTable(reinterpret_cast<const XFBType::Node *>(union_obj));
     case UComponent_Camera: return verifier.VerifyTable(reinterpret_cast<const XFBType::Camera *>(union_obj));
     case UComponent_Light: return verifier.VerifyTable(reinterpret_cast<const XFBType::Light *>(union_obj));
     case UComponent_SoundListener: return verifier.VerifyTable(reinterpret_cast<const XFBType::SoundListener *>(union_obj));
@@ -713,9 +674,8 @@ inline bool VerifyData(flatbuffers::Verifier &verifier, const void *union_obj, D
     case Data_Login: return verifier.VerifyTable(reinterpret_cast<const Login *>(union_obj));
     case Data_ReturnStatus: return verifier.VerifyTable(reinterpret_cast<const ReturnStatus *>(union_obj));
     case Data_InputEvent: return verifier.VerifyTable(reinterpret_cast<const InputEvent *>(union_obj));
-    case Data_EntityCmdMsg: return verifier.VerifyTable(reinterpret_cast<const EntityCmdMsg *>(union_obj));
-    case Data_GameState: return verifier.VerifyTable(reinterpret_cast<const GameState *>(union_obj));
     case Data_Entity: return verifier.VerifyTable(reinterpret_cast<const Entity *>(union_obj));
+    case Data_GameState: return verifier.VerifyTable(reinterpret_cast<const GameState *>(union_obj));
     default: return false;
   }
 }

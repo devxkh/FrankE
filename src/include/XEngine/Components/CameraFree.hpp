@@ -1,14 +1,14 @@
-#ifndef __CAMERAFREECOMPONENT_HPP__
-#define __CAMERAFREECOMPONENT_HPP__
+#pragma once
 
 #include <XESystem/SystemConfig.hpp>
 #include <XESystem/TransportData.hpp>
-#include <XEngine/Components/Body.hpp>
-#include <XERenderer/CameraRenderable.hpp>
 
 namespace XE
 {
-	struct CameraFreeComponent  {
+	struct BodyComponent;
+	class CameraRenderable;
+
+	struct XE_API CameraFreeComponent  {
 
 	public:
 		CameraFreeComponent(CameraRenderable& cameraRenderable, BodyComponent& bodyComponent);
@@ -46,5 +46,3 @@ namespace XE
 		bool mFastMove;
 	};
 }
-
-#endif // __CAMERAFREECOMPONENT_HPP__

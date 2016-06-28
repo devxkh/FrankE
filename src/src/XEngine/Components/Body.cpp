@@ -24,7 +24,7 @@ namespace XE
 	{
 	}
 
-	BodyComponent::BodyComponent(const XFBType::TransformStateData* transform)
+	BodyComponent::BodyComponent(const XFBType::BodyComponent* transform)
 		:
 		m_bodyDirection(0, 0, 0)
 		, m_bodyGoalDirection(1, 0, 0, 0)
@@ -44,11 +44,11 @@ namespace XE
 		, _isNetIDDirty(true)
 		, m_parent(nullptr)
 	{
-		setPosition(transform->loc()->x(), transform->loc()->y(), transform->loc()->z());
+		setPosition(transform->position()->x(), transform->position()->y(), transform->position()->z());
 
-		setScale(transform->scl()->x(), transform->scl()->y(), transform->scl()->z());
+		setScale(transform->scale()->x(), transform->scale()->y(), transform->scale()->z());
 
-		setOrientation(transform->rot()->w(), transform->rot()->x(), transform->rot()->y(), transform->rot()->z());
+		setOrientation(transform->rotation()->w(), transform->rotation()->x(), transform->rotation()->y(), transform->rotation()->z());
 	}
 
 

@@ -10,7 +10,6 @@ namespace XFBType {
 
 struct Vec3f;
 struct Quat4f;
-struct TransformStateData;
 struct Colour;
 struct Clipping;
 struct PhysicsConstraint;
@@ -31,7 +30,6 @@ struct PhysicsComponent;
 struct SoundListener;
 struct Light;
 struct Camera;
-struct Node;
 struct System;
 struct Scene;
 struct Connection;
@@ -317,44 +315,6 @@ MANUALLY_ALIGNED_STRUCT(4) AnimTrigger FLATBUFFERS_FINAL_CLASS {
   float minWeightThreshold() const { return flatbuffers::EndianScalar(minWeightThreshold_); }
 };
 STRUCT_END(AnimTrigger, 16);
-
-struct TransformStateData FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  const Quat4f *rot() const { return GetStruct<const Quat4f *>(4); }
-  const Vec3f *loc() const { return GetStruct<const Vec3f *>(6); }
-  const Vec3f *scl() const { return GetStruct<const Vec3f *>(8); }
-  bool Verify(flatbuffers::Verifier &verifier) const {
-    return VerifyTableStart(verifier) &&
-           VerifyField<Quat4f>(verifier, 4 /* rot */) &&
-           VerifyField<Vec3f>(verifier, 6 /* loc */) &&
-           VerifyField<Vec3f>(verifier, 8 /* scl */) &&
-           verifier.EndTable();
-  }
-};
-
-struct TransformStateDataBuilder {
-  flatbuffers::FlatBufferBuilder &fbb_;
-  flatbuffers::uoffset_t start_;
-  void add_rot(const Quat4f *rot) { fbb_.AddStruct(4, rot); }
-  void add_loc(const Vec3f *loc) { fbb_.AddStruct(6, loc); }
-  void add_scl(const Vec3f *scl) { fbb_.AddStruct(8, scl); }
-  TransformStateDataBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
-  TransformStateDataBuilder &operator=(const TransformStateDataBuilder &);
-  flatbuffers::Offset<TransformStateData> Finish() {
-    auto o = flatbuffers::Offset<TransformStateData>(fbb_.EndTable(start_, 3));
-    return o;
-  }
-};
-
-inline flatbuffers::Offset<TransformStateData> CreateTransformStateData(flatbuffers::FlatBufferBuilder &_fbb,
-   const Quat4f *rot = 0,
-   const Vec3f *loc = 0,
-   const Vec3f *scl = 0) {
-  TransformStateDataBuilder builder_(_fbb);
-  builder_.add_scl(scl);
-  builder_.add_loc(loc);
-  builder_.add_rot(rot);
-  return builder_.Finish();
-}
 
 struct Clipping FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   float nearClip() const { return GetField<float>(4, 0); }
@@ -1263,50 +1223,6 @@ inline flatbuffers::Offset<Camera> CreateCamera(flatbuffers::FlatBufferBuilder &
   return builder_.Finish();
 }
 
-struct Node FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  const TransformStateData *transform() const { return GetPointer<const TransformStateData *>(4); }
-  uint8_t visible() const { return GetField<uint8_t>(6, 0); }
-  uint8_t enabled() const { return GetField<uint8_t>(8, 0); }
-  uint32_t group() const { return GetField<uint32_t>(10, 0); }
-  bool Verify(flatbuffers::Verifier &verifier) const {
-    return VerifyTableStart(verifier) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, 4 /* transform */) &&
-           verifier.VerifyTable(transform()) &&
-           VerifyField<uint8_t>(verifier, 6 /* visible */) &&
-           VerifyField<uint8_t>(verifier, 8 /* enabled */) &&
-           VerifyField<uint32_t>(verifier, 10 /* group */) &&
-           verifier.EndTable();
-  }
-};
-
-struct NodeBuilder {
-  flatbuffers::FlatBufferBuilder &fbb_;
-  flatbuffers::uoffset_t start_;
-  void add_transform(flatbuffers::Offset<TransformStateData> transform) { fbb_.AddOffset(4, transform); }
-  void add_visible(uint8_t visible) { fbb_.AddElement<uint8_t>(6, visible, 0); }
-  void add_enabled(uint8_t enabled) { fbb_.AddElement<uint8_t>(8, enabled, 0); }
-  void add_group(uint32_t group) { fbb_.AddElement<uint32_t>(10, group, 0); }
-  NodeBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
-  NodeBuilder &operator=(const NodeBuilder &);
-  flatbuffers::Offset<Node> Finish() {
-    auto o = flatbuffers::Offset<Node>(fbb_.EndTable(start_, 4));
-    return o;
-  }
-};
-
-inline flatbuffers::Offset<Node> CreateNode(flatbuffers::FlatBufferBuilder &_fbb,
-   flatbuffers::Offset<TransformStateData> transform = 0,
-   uint8_t visible = 0,
-   uint8_t enabled = 0,
-   uint32_t group = 0) {
-  NodeBuilder builder_(_fbb);
-  builder_.add_group(group);
-  builder_.add_transform(transform);
-  builder_.add_enabled(enabled);
-  builder_.add_visible(visible);
-  return builder_.Finish();
-}
-
 struct System FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   const flatbuffers::String *name() const { return GetPointer<const flatbuffers::String *>(4); }
   bool Verify(flatbuffers::Verifier &verifier) const {
@@ -1728,11 +1644,17 @@ struct BodyComponent FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   const Vec3f *position() const { return GetStruct<const Vec3f *>(4); }
   const Quat4f *rotation() const { return GetStruct<const Quat4f *>(6); }
   const Vec3f *scale() const { return GetStruct<const Vec3f *>(8); }
+  uint8_t visible() const { return GetField<uint8_t>(10, 0); }
+  uint8_t enabled() const { return GetField<uint8_t>(12, 0); }
+  uint32_t group() const { return GetField<uint32_t>(14, 0); }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
            VerifyField<Vec3f>(verifier, 4 /* position */) &&
            VerifyField<Quat4f>(verifier, 6 /* rotation */) &&
            VerifyField<Vec3f>(verifier, 8 /* scale */) &&
+           VerifyField<uint8_t>(verifier, 10 /* visible */) &&
+           VerifyField<uint8_t>(verifier, 12 /* enabled */) &&
+           VerifyField<uint32_t>(verifier, 14 /* group */) &&
            verifier.EndTable();
   }
 };
@@ -1743,10 +1665,13 @@ struct BodyComponentBuilder {
   void add_position(const Vec3f *position) { fbb_.AddStruct(4, position); }
   void add_rotation(const Quat4f *rotation) { fbb_.AddStruct(6, rotation); }
   void add_scale(const Vec3f *scale) { fbb_.AddStruct(8, scale); }
+  void add_visible(uint8_t visible) { fbb_.AddElement<uint8_t>(10, visible, 0); }
+  void add_enabled(uint8_t enabled) { fbb_.AddElement<uint8_t>(12, enabled, 0); }
+  void add_group(uint32_t group) { fbb_.AddElement<uint32_t>(14, group, 0); }
   BodyComponentBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
   BodyComponentBuilder &operator=(const BodyComponentBuilder &);
   flatbuffers::Offset<BodyComponent> Finish() {
-    auto o = flatbuffers::Offset<BodyComponent>(fbb_.EndTable(start_, 3));
+    auto o = flatbuffers::Offset<BodyComponent>(fbb_.EndTable(start_, 6));
     return o;
   }
 };
@@ -1754,11 +1679,17 @@ struct BodyComponentBuilder {
 inline flatbuffers::Offset<BodyComponent> CreateBodyComponent(flatbuffers::FlatBufferBuilder &_fbb,
    const Vec3f *position = 0,
    const Quat4f *rotation = 0,
-   const Vec3f *scale = 0) {
+   const Vec3f *scale = 0,
+   uint8_t visible = 0,
+   uint8_t enabled = 0,
+   uint32_t group = 0) {
   BodyComponentBuilder builder_(_fbb);
+  builder_.add_group(group);
   builder_.add_scale(scale);
   builder_.add_rotation(rotation);
   builder_.add_position(position);
+  builder_.add_enabled(enabled);
+  builder_.add_visible(visible);
   return builder_.Finish();
 }
 

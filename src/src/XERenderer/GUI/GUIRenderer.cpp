@@ -12,7 +12,7 @@
 
 #include <XEUI/DAL/FB_UI_Atlas_generated.h>
 
-#include <XESystem/Logging.hpp>
+#include <ThirdParty/plog/Log.h>
 
 #include <XEDAL/PhysFS/PhysFsStream.hpp>
 
@@ -71,7 +71,7 @@ namespace XE
 	const SpriteData* GUIRenderer::getSprite(const std::string& spriteName)
 	{
 		if (_sprites.find(spriteName) == _sprites.end());
-		LOG(ERROR) << "sprite not found: " << spriteName;
+		LOG(plog::error) << "sprite not found: " << spriteName;
 
 		return _sprites[spriteName].get();
 	}
@@ -106,7 +106,7 @@ namespace XE
 				std::string atlasName = atlas->name()->c_str();
 				addAtlas(atlasName, atlas->texture()->c_str(), Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
 
-				LOG(INFO) << "load sprite data";
+				LOG(plog::info) << "load sprite data";
 
 				//sprites
 				for (auto it = atlas->sprites()->begin(); it != atlas->sprites()->end(); ++it)
@@ -130,8 +130,8 @@ namespace XE
 					//glyphs
 					for (auto itGlyph = (*it)->glyphs()->begin(); itGlyph != (*it)->glyphs()->end(); ++itGlyph)
 					{
-						//LOG(INFO) << "Glyph:";
-					//	LOG(INFO) << "code:" << (*itGlyph)->code(); //->> Attention!! causing sometimes a memory crash??
+						//LOG(plog::info) << "Glyph:";
+					//	LOG(plog::info) << "code:" << (*itGlyph)->code(); //->> Attention!! causing sometimes a memory crash??
 
 						FontGlyph newGlyph;
 						newGlyph.glyphAdvance = (*itGlyph)->glyphAdvance();
@@ -175,7 +175,7 @@ namespace XE
 		}
 		else
 		{
-			LOG(ERROR) << "GUIRenderer::loadAtlas -> atlasfile not found: " << fileName;
+			LOG(plog::error) << "GUIRenderer::loadAtlas -> atlasfile not found: " << fileName;
 			return false;
 		}
 	}
@@ -303,7 +303,7 @@ namespace XE
 		std::map<XE::Uint32, Font>::const_iterator it = _fonts.find(fontId);
 		if (it == _fonts.end())
 		{
-			LOG(ERROR) << "Glyph not found: " << fontId;
+			LOG(plog::error) << "Glyph not found: " << fontId;
 			return 0;
 		}
 		else

@@ -10,7 +10,7 @@
 //#include <SFML/Graphics/Font.hpp>
 #include <cmath>
 
-#include <XESystem/Logging.hpp>
+#include <ThirdParty/plog/Log.h>
 
 
 namespace XE {
@@ -44,7 +44,7 @@ namespace XE {
 
 	void Entry::draw()  {
 		
-	//	LOG(INFO) << "ä";
+	//	LOG(plog::info) << "ä";
 
 		XE::Uint16 font_size(14);
 		XE::Uint16 cursor_thickness(4);
@@ -71,9 +71,9 @@ namespace XE {
 	
 
 
-		//LOG(INFO) << "Text:";
+		//LOG(plog::info) << "Text:";
 		//std::cout << m_string.toAnsiString();
-		//LOG(INFO) << "wText:";
+		//LOG(plog::info) << "wText:";
 		//std::wcout << GetVisibleText().toWideString();
 
 		m_pane.setPosition(Widget::getPosition()); // sf::Vector2f(parentAllocation.left + req.left, parentAllocation.top + req.top));

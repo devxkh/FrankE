@@ -8,7 +8,7 @@
 #include <SFML/Window.hpp>
 #include <limits>
 
-#include <XESystem/Logging.hpp>
+#include <ThirdParty/plog/Log.h>
 
 namespace XE {
 
@@ -186,14 +186,14 @@ namespace XE {
 	//		//else if (event.type == sf::Event::KeyPressed)
 	//		//{
 	//		//	widget->HandleEvent(event);
-	//		//	LOG(INFO) << "KeyPressed";
+	//		//	LOG(plog::info) << "KeyPressed";
 	//		//}
 	//		//else if (event.type == sf::Event::KeyReleased)
 	//		//{
-	//		//	LOG(INFO) << "KeyReleased";
+	//		//	LOG(plog::info) << "KeyReleased";
 	//		//}
 	//		//else if (event.type == sf::Event::TextEntered) {
-	//		//	LOG(INFO) << "TextEntered";
+	//		//	LOG(plog::info) << "TextEntered";
 	//		//	widget->HandleEvent(event);
 	//		//}
 

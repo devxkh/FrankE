@@ -6,7 +6,7 @@
 ////////////////////////////////////////////////////////////
 //#include <XESystem/gkDebugger.h>
 #include <XESystem/SystemConfig.hpp>
-//#include <XESystem/Logging.hpp>
+//#include <ThirdParty/plog/Log.h>
 //
 //INITIALIZE_EASYLOGGINGPP
 

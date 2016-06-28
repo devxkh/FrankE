@@ -5,7 +5,7 @@
 
 #include <Ogre/OgreMain/include/OgreAxisAlignedBox.h>
 
-#include <XESystem/Logging.hpp>
+#include <ThirdParty/plog/Log.h>
 
 #include <fmod/fmod.hpp>
 #include <fmod/fmod_common.h>
@@ -26,7 +26,7 @@ namespace XE {
 
 		FMOD_RESULT result = _soundPtr->release();  /* Release the parent, not the sound that was retrieved with getSubSound. */
 		if (result != FMOD_OK)
-			LOG(FATAL) << "FMOD error! (" << result << "): " << FMOD_ErrorString(result) << ",SoundManager::PlayStream";
+			LOG(plog::fatal) << "FMOD error! (" << result << "): " << FMOD_ErrorString(result) << ",SoundManager::PlayStream";
 	}
 	
 	void SoundHandle::create(SoundManager& soundMgr, SOUND_TYPE soundType)
@@ -62,7 +62,7 @@ namespace XE {
 		//FMOD_RESULT result = soundMgr._system->createStream("F:/Projekte/coop/XGame/data/assets/Explosion2.ogg", FMOD_OPENUSER, &exinfo, &_soundPtr);
 
 		//if (result != FMOD_OK)
-		//	LOG(FATAL) << "FMOD error! (" << result << "): " << FMOD_ErrorString(result) << ",SoundManager::PlayStream";
+		//	LOG(plog::fatal) << "FMOD error! (" << result << "): " << FMOD_ErrorString(result) << ",SoundManager::PlayStream";
 
 
 	//	if (_fileStream.open("Explosion2.ogg"))
@@ -85,7 +85,7 @@ namespace XE {
 	//			FMOD_RESULT result = soundMgr._system->createStream(&buffer[0], FMOD_OPENMEMORY , &exinfo, &_soundPtr);
 
 	//			if (result != FMOD_OK)
-	//				LOG(FATAL) << "FMOD error! (" << result << "): " << FMOD_ErrorString(result) << ",SoundManager::PlayStream";
+	//				LOG(plog::fatal) << "FMOD error! (" << result << "): " << FMOD_ErrorString(result) << ",SoundManager::PlayStream";
 
 	//		}
 	//	}

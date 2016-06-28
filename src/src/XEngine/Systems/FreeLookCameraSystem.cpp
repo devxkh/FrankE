@@ -1,6 +1,5 @@
 #include <XEngine/Systems/FreeLookCameraSystem.hpp>
 
-
 #include <bullet/BulletCollision/CollisionShapes/btSphereShape.h>
 #include <bullet/BulletCollision/CollisionDispatch/btCollisionWorld.h>
 #include <XEngine/Components/ScreenComponent.hpp>
@@ -10,6 +9,10 @@
 #include <XEngine/Components/Body.hpp>
 #include <XEngine/Components/CameraFree.hpp>
 #include <XEPhysics/Util/gkMathUtils.hpp>
+
+
+#include <XEngine/Components/CameraFree.hpp>
+#include <XERenderer/CameraRenderable.hpp>
 
 namespace XE {
 

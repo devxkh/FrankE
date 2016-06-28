@@ -1,5 +1,4 @@
-#ifndef __UIInitGame_HPP__
-#define __UIInitGame_HPP__
+#pragma once
 
 #include <XEngine.hpp>
 
@@ -45,5 +44,3 @@ private:
 	XE::Entry::Ptr m_entry;
 	XE::UIWindow::Ptr m_window;
 };
-
-#endif // __UIInitGame_HPP__

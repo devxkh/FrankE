@@ -33,7 +33,7 @@
 #include <XESystem/TransportData.hpp>
 
 #include <XESystem/Entityx/Entity.h>
-#include <XESystem/Logging.hpp>
+#include <ThirdParty/plog/Log.h>
 
 
 gkRigidBody::gkRigidBody(gkDynamicsWorld* owner)

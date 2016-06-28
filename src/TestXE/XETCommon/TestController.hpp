@@ -1,9 +1,6 @@
-#ifndef __TESTCONTROLLERCOMPONENT_HPP__
-#define __TESTCONTROLLERCOMPONENT_HPP__
+#pragma once
 
 #include <XEngine.hpp>
-
-#include "Netmsg_generated.h"
 
 namespace XET
 {
@@ -15,5 +12,3 @@ namespace XET
 	};
 
 } // ns XET
-
-#endif // __CONTROLLERCOMPONENT_HPP__

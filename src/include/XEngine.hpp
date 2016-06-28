@@ -1,6 +1,4 @@
-
-#ifndef XENGINE_HPP
-#define XENGINE_HPP
+#pragma once
 
 //Componentsytem comparison
 //https://tilemapkit.com/2015/10/entity-component-systems-compared-benchmarked-entityx-anax-artemis/
@@ -17,7 +15,8 @@
 #include <XESystem.hpp>
 #include <XESystem/Entityx/entityx.h>
 #include <XENetwork.hpp>
-#include <XESystem/Logging.hpp> // add here for winsock conflict from XENetwork!
+
+#include <ThirdParty/plog/Log.h>  ////<XESystem/Logging.hpp> // add here for winsock conflict from XENetwork!
 
 #include <Ogre/OgreMain/include/OgreVector3.h>
 
@@ -83,6 +82,7 @@ namespace XE
 	using namespace Ogre;
 	//using namespace sfn;
 	using namespace XFBType;
+	using namespace plog;
 
 	struct StateData;
 
@@ -93,7 +93,6 @@ namespace XE
 		XEngine();
 		~XEngine();
 
-		void setScene(std::unique_ptr<Scene> scene);
 		void run(std::unique_ptr< XEState > state);
 		void setNextState(std::unique_ptr<XEState> state);
 
@@ -120,9 +119,6 @@ namespace XE
 			return m_initialized;
 		}
 		
-		inline IDAL& getIDAL() {
-			return mIDAL;
-		}
 		inline LuaEngine& getLua() {
 			return _lua;
 		}
@@ -138,9 +134,19 @@ namespace XE
 		SoundManager& getSoundMgr() {
 			return _soundMgr;
 		};
-		Scene& getScene() {
+		
+		void setScene(std::unique_ptr<Scene> scene);
+		
+		inline Scene& getScene() {
 			return *m_scene.get();
 		}
+
+		void setDAL(std::unique_ptr<IDAL> idal);
+
+		inline IDAL& getDAL() {
+			return *m_IDAL.get();
+		}
+
 
 		Settings settings;
 
@@ -166,7 +172,7 @@ namespace XE
 		GraphicsManager   mGraphicsManager;
 		OgreSceneManager m_OgreSceneManager;
 
-		IDAL				mIDAL;
+		std::unique_ptr<IDAL>	m_IDAL;
 		std::unique_ptr<Scene>	m_scene;
 
 		NetworkManager		m_NetworkManager;
@@ -182,4 +188,3 @@ namespace XE
 		return std::move(std::unique_ptr< T >(new T(engine, replace)));
 	}
 }
-#endif 

@@ -27,6 +27,8 @@
 //#include <SFML/Window/WindowStyle.hpp>
 
 #include <Thor/Input.hpp>
+#include <XEngine/Controller/SDLInputHandler.hpp>
+
 //#include <XEInput/InputConfigFile.hpp>
 
 #endif // XE_INTERFACE_WINDOW_HPP
