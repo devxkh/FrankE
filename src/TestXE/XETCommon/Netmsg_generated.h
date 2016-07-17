@@ -32,6 +32,7 @@ struct SoundListener;
 struct Light;
 struct Camera;
 struct System;
+struct AmbientLight;
 struct Scene;
 struct Connection;
 struct Parameter;

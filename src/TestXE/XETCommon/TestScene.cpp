@@ -78,7 +78,7 @@ bool TestScene::createEntityType(entityx::Entity entity, void* entityData)
 			if (entity.has_component<XE::LightRenderable>())
 				updateLightComponent(entity, var->comp());
 			else
-				createLightComponent(entity, sceneID, var->comp());
+				createLightComponent(entity, var->comp());
 
 			deleteBufferInRenderThread = true;
 		}

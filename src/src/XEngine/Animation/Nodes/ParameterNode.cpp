@@ -51,7 +51,7 @@ void ParameterNode::setValue(const float value)
 	_value = value;
 }
 
-float ParameterNode::evaluateValue()
+float ParameterNode::evaluateValue(double deltaTime)
 {
 	return getFloatValue();
 }

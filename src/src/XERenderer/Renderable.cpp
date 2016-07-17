@@ -45,6 +45,7 @@ namespace XE
 		m_GraphicsManager.getIntoRendererQueue().push([this,fbData]()
 		{
 			Ogre::LogManager::getSingleton().logMessage("RQ -> Renderable::StaticRenderable");
+			
 
 			_t_OgreEntitySceneNodePtr = m_Scene.getOgreSceneManager().__OgreSceneMgrPtr->getRootSceneNode()->createChildSceneNode();
 				
@@ -137,7 +138,7 @@ namespace XE
 					newItem = m_Scene.getOgreSceneManager().__OgreSceneMgrPtr->createItem(manual, (Ogre::SceneMemoryMgrTypes)Ogre::SCENE_DYNAMIC); //renderable->memType()); //Ogre::SCENE_DYNAMIC);
 					
 					Ogre::HlmsManager *hlmsManager = m_GraphicsManager.getRoot()->getHlmsManager();
-					Ogre::HlmsDatablock *datablock = hlmsManager->getDatablock("HlmsUnlit1");
+					Ogre::HlmsDatablock *datablock = hlmsManager->getDatablock("StonesPbs");
 					newItem->setDatablock(datablock); //todo multiple materials per mesh	
 												   //floor->setMaterialName("Examples/Rockwall", "General");
 												   //floor->setCastShadows(false);

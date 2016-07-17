@@ -14,6 +14,9 @@
 #include <Ogre/OgreMain/include/OgreLog.h>
 #include <Ogre/OgreMain/include/OgreLogManager.h>
 
+
+#include <plog/Appenders/ConsoleAppender.h>
+
 namespace XE
 {
 	//#define GRAPHICS_THREAD 1  //compile with graphics render thread
@@ -33,7 +36,9 @@ namespace XE
 		, m_SdlWindow(0)
 		, m_ogreLog()
 	{
-		
+	//	static plog::ConsoleAppender<plog::TxtFormatter> consoleAppender; 
+		plog::init(plog::debug, "HelloLog.txt", 1000000);// .addAppender(&consoleAppender); // Step2: initialize the logger.
+	
 		new Ogre::LogManager();// Creating the manager. This may only be called once!
 		auto m_pLog = LogManager::getSingleton().createLog("log.txt", true, true);
 		m_pLog->setDebugOutputEnabled(false);

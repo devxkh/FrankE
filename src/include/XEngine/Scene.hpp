@@ -89,7 +89,7 @@ public:
 	void createSpawnPointComponent( entityx::Entity entity, const void* fbData);
 	void updateSpawnPointComponent( entityx::Entity entity, const void* fbData);
 
-	void createLightComponent( entityx::Entity entity, Uint16 scendId, const void* fbData);
+	void createLightComponent( entityx::Entity entity, const void* fbData);
 	void updateLightComponent( entityx::Entity entity, const void* fbData);
 
 	void createAnimationComponent( entityx::Entity entity, const void* fbData);

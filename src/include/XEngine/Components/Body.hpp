@@ -477,6 +477,9 @@ namespace XE
 
 		mutable bool _isNetIDDirty;
 
+		///original sceneid of the entity
+		Uint16 sceneId;
+
 	protected:
 		/// Whether to yaw around a fixed axis.
 		bool mYawFixed;

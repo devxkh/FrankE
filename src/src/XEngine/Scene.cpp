@@ -109,34 +109,19 @@ namespace XE {
 
 			if (fbData)
 			{
-				auto sceneObj = flatbuffers::GetRoot<XFBType::Scene>(fbData);
+			//	auto sceneObj = flatbuffers::GetRoot<XFBType::Scene>(fbData);
 
-				if (sceneObj->colourAmbient())
-				{
-					ambientColor = Ogre::ColourValue(sceneObj->colourAmbient()->r(), sceneObj->colourAmbient()->g(), sceneObj->colourAmbient()->b(), sceneObj->colourAmbient()->a());
-					m_OgreSceneManager.setAmbientLight(ambientColor);
-				}
+			//	if (sceneObj->ambientLight())
+			//	{
+			//		//ambientColor = Ogre::ColourValue(sceneObj->colourAmbient()->r(), sceneObj->colourAmbient()->g(), sceneObj->colourAmbient()->b(), sceneObj->colourAmbient()->a());
+			//		//m_OgreSceneManager.setAmbientLight(ambientColor);
+			//	}
 				delete fbData;
 			}
 		}
 
 		//SceneNode Data
 		m_IDAL.getSceneNodes(*this, m_sceneID, callbackNewNode);
-
-		//--------------------------------------------------------
-		//------------------ Light -------------------------------
-		//--------------------------------------------------------
-		mGraphicsManager.getIntoRendererQueue().push([this]() {
-			Ogre::Light *light = m_OgreSceneManager.__OgreSceneMgrPtr->createLight();
-			Ogre::SceneNode *rootNode = m_OgreSceneManager.__OgreSceneMgrPtr->getRootSceneNode();
-
-			Ogre::SceneNode *lightNode = rootNode->createChildSceneNode();
-			lightNode->attachObject(light);
-			light->setPowerScale(1.0f);
-			light->setType(Ogre::Light::LT_DIRECTIONAL);
-			light->setDirection(Ogre::Vector3(-1, -1, -1).normalisedCopy());
-
-		});
 	}
 
 	void Scene::reload(void* fbData)
@@ -330,6 +315,7 @@ namespace XE {
 		entityx::ComponentHandle<BodyComponent> body = entity.assign<BodyComponent>(node);// , scene->getNodeMemoryMgr());
 		auto netID = entity.component<NetIdComponent>();
 		netID->id = m_engine.getNetworkManager().newNetID();
+		body->sceneId = node->sceneId();
 
 		//set body for physics
 		if (entity.has_component<PhysicsComponent>())
@@ -353,17 +339,18 @@ namespace XE {
 	{
 		const XFBType::BodyComponent* node = (const XFBType::BodyComponent*)fbData;
 		entity.component<BodyComponent>()->setPosition(node->position()->x(), node->position()->y(), node->position()->z());
+		entity.component<BodyComponent>()->sceneId = node->sceneId();
 	}
 
 	void Scene::updateScene(Uint16 scendId, const void* fbData)
 	{
 		const XFBType::Scene* sceneData = (const XFBType::Scene*)fbData;
 
-		if (sceneData->colourAmbient())
+		/*if (sceneData->colourAmbient())
 		{
 			ambientColor = Ogre::ColourValue(sceneData->colourAmbient()->r(), sceneData->colourAmbient()->g(), sceneData->colourAmbient()->b(), sceneData->colourAmbient()->a());
 			m_OgreSceneManager.setAmbientLight(ambientColor);
-		}
+		}*/
 	}
 
 	void Scene::createSpawnPointComponent(entityx::Entity entity, const void* fbData)
@@ -383,7 +370,7 @@ namespace XE {
 		sp->m_group = fbSPoint->SPGroup();
 	}
 
-	void Scene::createLightComponent(entityx::Entity entity, Uint16 scendId, const void* fbData)
+	void Scene::createLightComponent(entityx::Entity entity, const void* fbData)
 	{
 		const XFBType::Light* characterComp = (const XFBType::Light*)fbData;
 
@@ -393,7 +380,7 @@ namespace XE {
 	void Scene::updateLightComponent(entityx::Entity entity, const void* fbData)
 	{
 		const XFBType::Light* characterComp = (const XFBType::Light*)fbData;
-		//	entity.component<LightComponent>()->setTransform(node->transform());
+		entity.component<LightRenderable>()->setLightData(fbData);
 	}
 
 	void Scene::createAnimationComponent(entityx::Entity entity, const void* fbData)

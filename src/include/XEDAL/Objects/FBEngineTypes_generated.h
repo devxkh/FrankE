@@ -31,6 +31,7 @@ struct SoundListener;
 struct Light;
 struct Camera;
 struct System;
+struct AmbientLight;
 struct Scene;
 struct Connection;
 struct Parameter;
@@ -163,6 +164,19 @@ inline const char **EnumNamesMemoryMgrType() {
 }
 
 inline const char *EnumNameMemoryMgrType(MemoryMgrType e) { return EnumNamesMemoryMgrType()[static_cast<int>(e)]; }
+
+enum LightType {
+  LightType_LT_DIRECTIONAL = 0,
+  LightType_LT_POINT = 1,
+  LightType_LT_SPOTLIGHT = 2
+};
+
+inline const char **EnumNamesLightType() {
+  static const char *names[] = { "LT_DIRECTIONAL", "LT_POINT", "LT_SPOTLIGHT", nullptr };
+  return names;
+}
+
+inline const char *EnumNameLightType(LightType e) { return EnumNamesLightType()[static_cast<int>(e)]; }
 
 enum TimeType {
   TimeType_absolute = 0,
@@ -1148,13 +1162,20 @@ struct Light FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   const Colour *colourDiffuse() const { return GetStruct<const Colour *>(4); }
   const Colour *colourSpecular() const { return GetStruct<const Colour *>(6); }
   const Vec3f *directionVector() const { return GetStruct<const Vec3f *>(8); }
-  const flatbuffers::String *name() const { return GetPointer<const flatbuffers::String *>(10); }
+  LightType lightType() const { return static_cast<LightType>(GetField<uint8_t>(10, 0)); }
+  float powerScale() const { return GetField<float>(12, 0); }
+  const AmbientLight *ambientLight() const { return GetPointer<const AmbientLight *>(14); }
+  const flatbuffers::String *name() const { return GetPointer<const flatbuffers::String *>(16); }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
            VerifyField<Colour>(verifier, 4 /* colourDiffuse */) &&
            VerifyField<Colour>(verifier, 6 /* colourSpecular */) &&
            VerifyField<Vec3f>(verifier, 8 /* directionVector */) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, 10 /* name */) &&
+           VerifyField<uint8_t>(verifier, 10 /* lightType */) &&
+           VerifyField<float>(verifier, 12 /* powerScale */) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, 14 /* ambientLight */) &&
+           verifier.VerifyTable(ambientLight()) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, 16 /* name */) &&
            verifier.Verify(name()) &&
            verifier.EndTable();
   }
@@ -1166,11 +1187,14 @@ struct LightBuilder {
   void add_colourDiffuse(const Colour *colourDiffuse) { fbb_.AddStruct(4, colourDiffuse); }
   void add_colourSpecular(const Colour *colourSpecular) { fbb_.AddStruct(6, colourSpecular); }
   void add_directionVector(const Vec3f *directionVector) { fbb_.AddStruct(8, directionVector); }
-  void add_name(flatbuffers::Offset<flatbuffers::String> name) { fbb_.AddOffset(10, name); }
+  void add_lightType(LightType lightType) { fbb_.AddElement<uint8_t>(10, static_cast<uint8_t>(lightType), 0); }
+  void add_powerScale(float powerScale) { fbb_.AddElement<float>(12, powerScale, 0); }
+  void add_ambientLight(flatbuffers::Offset<AmbientLight> ambientLight) { fbb_.AddOffset(14, ambientLight); }
+  void add_name(flatbuffers::Offset<flatbuffers::String> name) { fbb_.AddOffset(16, name); }
   LightBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
   LightBuilder &operator=(const LightBuilder &);
   flatbuffers::Offset<Light> Finish() {
-    auto o = flatbuffers::Offset<Light>(fbb_.EndTable(start_, 4));
+    auto o = flatbuffers::Offset<Light>(fbb_.EndTable(start_, 7));
     return o;
   }
 };
@@ -1179,12 +1203,18 @@ inline flatbuffers::Offset<Light> CreateLight(flatbuffers::FlatBufferBuilder &_f
    const Colour *colourDiffuse = 0,
    const Colour *colourSpecular = 0,
    const Vec3f *directionVector = 0,
+   LightType lightType = LightType_LT_DIRECTIONAL,
+   float powerScale = 0,
+   flatbuffers::Offset<AmbientLight> ambientLight = 0,
    flatbuffers::Offset<flatbuffers::String> name = 0) {
   LightBuilder builder_(_fbb);
   builder_.add_name(name);
+  builder_.add_ambientLight(ambientLight);
+  builder_.add_powerScale(powerScale);
   builder_.add_directionVector(directionVector);
   builder_.add_colourSpecular(colourSpecular);
   builder_.add_colourDiffuse(colourDiffuse);
+  builder_.add_lightType(lightType);
   return builder_.Finish();
 }
 
@@ -1252,11 +1282,53 @@ inline flatbuffers::Offset<System> CreateSystem(flatbuffers::FlatBufferBuilder &
   return builder_.Finish();
 }
 
+struct AmbientLight FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+  const Colour *upperHemisphere() const { return GetStruct<const Colour *>(4); }
+  const Colour *lowerHemisphere() const { return GetStruct<const Colour *>(6); }
+  const Vec3f *hemisphereDir() const { return GetStruct<const Vec3f *>(8); }
+  float envmapScale() const { return GetField<float>(10, 0); }
+  bool Verify(flatbuffers::Verifier &verifier) const {
+    return VerifyTableStart(verifier) &&
+           VerifyField<Colour>(verifier, 4 /* upperHemisphere */) &&
+           VerifyField<Colour>(verifier, 6 /* lowerHemisphere */) &&
+           VerifyField<Vec3f>(verifier, 8 /* hemisphereDir */) &&
+           VerifyField<float>(verifier, 10 /* envmapScale */) &&
+           verifier.EndTable();
+  }
+};
+
+struct AmbientLightBuilder {
+  flatbuffers::FlatBufferBuilder &fbb_;
+  flatbuffers::uoffset_t start_;
+  void add_upperHemisphere(const Colour *upperHemisphere) { fbb_.AddStruct(4, upperHemisphere); }
+  void add_lowerHemisphere(const Colour *lowerHemisphere) { fbb_.AddStruct(6, lowerHemisphere); }
+  void add_hemisphereDir(const Vec3f *hemisphereDir) { fbb_.AddStruct(8, hemisphereDir); }
+  void add_envmapScale(float envmapScale) { fbb_.AddElement<float>(10, envmapScale, 0); }
+  AmbientLightBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
+  AmbientLightBuilder &operator=(const AmbientLightBuilder &);
+  flatbuffers::Offset<AmbientLight> Finish() {
+    auto o = flatbuffers::Offset<AmbientLight>(fbb_.EndTable(start_, 4));
+    return o;
+  }
+};
+
+inline flatbuffers::Offset<AmbientLight> CreateAmbientLight(flatbuffers::FlatBufferBuilder &_fbb,
+   const Colour *upperHemisphere = 0,
+   const Colour *lowerHemisphere = 0,
+   const Vec3f *hemisphereDir = 0,
+   float envmapScale = 0) {
+  AmbientLightBuilder builder_(_fbb);
+  builder_.add_envmapScale(envmapScale);
+  builder_.add_hemisphereDir(hemisphereDir);
+  builder_.add_lowerHemisphere(lowerHemisphere);
+  builder_.add_upperHemisphere(upperHemisphere);
+  return builder_.Finish();
+}
+
 struct Scene FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   uint16_t sceneid() const { return GetField<uint16_t>(4, 0); }
   const flatbuffers::Vector<flatbuffers::Offset<System>> *systems() const { return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<System>> *>(6); }
   const flatbuffers::String *type() const { return GetPointer<const flatbuffers::String *>(8); }
-  const Colour *colourAmbient() const { return GetStruct<const Colour *>(10); }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
            VerifyField<uint16_t>(verifier, 4 /* sceneid */) &&
@@ -1265,7 +1337,6 @@ struct Scene FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
            verifier.VerifyVectorOfTables(systems()) &&
            VerifyField<flatbuffers::uoffset_t>(verifier, 8 /* type */) &&
            verifier.Verify(type()) &&
-           VerifyField<Colour>(verifier, 10 /* colourAmbient */) &&
            verifier.EndTable();
   }
 };
@@ -1276,11 +1347,10 @@ struct SceneBuilder {
   void add_sceneid(uint16_t sceneid) { fbb_.AddElement<uint16_t>(4, sceneid, 0); }
   void add_systems(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<System>>> systems) { fbb_.AddOffset(6, systems); }
   void add_type(flatbuffers::Offset<flatbuffers::String> type) { fbb_.AddOffset(8, type); }
-  void add_colourAmbient(const Colour *colourAmbient) { fbb_.AddStruct(10, colourAmbient); }
   SceneBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
   SceneBuilder &operator=(const SceneBuilder &);
   flatbuffers::Offset<Scene> Finish() {
-    auto o = flatbuffers::Offset<Scene>(fbb_.EndTable(start_, 4));
+    auto o = flatbuffers::Offset<Scene>(fbb_.EndTable(start_, 3));
     return o;
   }
 };
@@ -1288,10 +1358,8 @@ struct SceneBuilder {
 inline flatbuffers::Offset<Scene> CreateScene(flatbuffers::FlatBufferBuilder &_fbb,
    uint16_t sceneid = 0,
    flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<System>>> systems = 0,
-   flatbuffers::Offset<flatbuffers::String> type = 0,
-   const Colour *colourAmbient = 0) {
+   flatbuffers::Offset<flatbuffers::String> type = 0) {
   SceneBuilder builder_(_fbb);
-  builder_.add_colourAmbient(colourAmbient);
   builder_.add_type(type);
   builder_.add_systems(systems);
   builder_.add_sceneid(sceneid);
@@ -1644,17 +1712,19 @@ struct BodyComponent FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   const Vec3f *position() const { return GetStruct<const Vec3f *>(4); }
   const Quat4f *rotation() const { return GetStruct<const Quat4f *>(6); }
   const Vec3f *scale() const { return GetStruct<const Vec3f *>(8); }
-  uint8_t visible() const { return GetField<uint8_t>(10, 0); }
-  uint8_t enabled() const { return GetField<uint8_t>(12, 0); }
-  uint32_t group() const { return GetField<uint32_t>(14, 0); }
+  uint32_t sceneId() const { return GetField<uint32_t>(10, 0); }
+  uint8_t visible() const { return GetField<uint8_t>(12, 1); }
+  uint8_t enabled() const { return GetField<uint8_t>(14, 1); }
+  uint32_t group() const { return GetField<uint32_t>(16, 0); }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
            VerifyField<Vec3f>(verifier, 4 /* position */) &&
            VerifyField<Quat4f>(verifier, 6 /* rotation */) &&
            VerifyField<Vec3f>(verifier, 8 /* scale */) &&
-           VerifyField<uint8_t>(verifier, 10 /* visible */) &&
-           VerifyField<uint8_t>(verifier, 12 /* enabled */) &&
-           VerifyField<uint32_t>(verifier, 14 /* group */) &&
+           VerifyField<uint32_t>(verifier, 10 /* sceneId */) &&
+           VerifyField<uint8_t>(verifier, 12 /* visible */) &&
+           VerifyField<uint8_t>(verifier, 14 /* enabled */) &&
+           VerifyField<uint32_t>(verifier, 16 /* group */) &&
            verifier.EndTable();
   }
 };
@@ -1665,13 +1735,14 @@ struct BodyComponentBuilder {
   void add_position(const Vec3f *position) { fbb_.AddStruct(4, position); }
   void add_rotation(const Quat4f *rotation) { fbb_.AddStruct(6, rotation); }
   void add_scale(const Vec3f *scale) { fbb_.AddStruct(8, scale); }
-  void add_visible(uint8_t visible) { fbb_.AddElement<uint8_t>(10, visible, 0); }
-  void add_enabled(uint8_t enabled) { fbb_.AddElement<uint8_t>(12, enabled, 0); }
-  void add_group(uint32_t group) { fbb_.AddElement<uint32_t>(14, group, 0); }
+  void add_sceneId(uint32_t sceneId) { fbb_.AddElement<uint32_t>(10, sceneId, 0); }
+  void add_visible(uint8_t visible) { fbb_.AddElement<uint8_t>(12, visible, 1); }
+  void add_enabled(uint8_t enabled) { fbb_.AddElement<uint8_t>(14, enabled, 1); }
+  void add_group(uint32_t group) { fbb_.AddElement<uint32_t>(16, group, 0); }
   BodyComponentBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
   BodyComponentBuilder &operator=(const BodyComponentBuilder &);
   flatbuffers::Offset<BodyComponent> Finish() {
-    auto o = flatbuffers::Offset<BodyComponent>(fbb_.EndTable(start_, 6));
+    auto o = flatbuffers::Offset<BodyComponent>(fbb_.EndTable(start_, 7));
     return o;
   }
 };
@@ -1680,11 +1751,13 @@ inline flatbuffers::Offset<BodyComponent> CreateBodyComponent(flatbuffers::FlatB
    const Vec3f *position = 0,
    const Quat4f *rotation = 0,
    const Vec3f *scale = 0,
-   uint8_t visible = 0,
-   uint8_t enabled = 0,
+   uint32_t sceneId = 0,
+   uint8_t visible = 1,
+   uint8_t enabled = 1,
    uint32_t group = 0) {
   BodyComponentBuilder builder_(_fbb);
   builder_.add_group(group);
+  builder_.add_sceneId(sceneId);
   builder_.add_scale(scale);
   builder_.add_rotation(rotation);
   builder_.add_position(position);

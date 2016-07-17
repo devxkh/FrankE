@@ -25,6 +25,7 @@ namespace XE
 
 			__OgreSceneMgrPtr = mGraphicsManager.getRoot()->createSceneManager(Ogre::ST_GENERIC, 1, Ogre::INSTANCING_CULLING_SINGLETHREAD, "MyFirstSceneManager");
 
+
 			//Set sane defaults for proper shadow mapping
 			__OgreSceneMgrPtr->setShadowDirectionalLightExtrusionDistance(500.0f);
 			__OgreSceneMgrPtr->setShadowFarDistance(500.0f);

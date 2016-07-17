@@ -52,7 +52,7 @@ namespace XE
 		, _soundMgr()
 		, m_OgreSceneManager(mGraphicsManager)
 	{		
-		plog::init(plog::debug, "HelloLog.txt"); // Step2: initialize the logger.
+		//plog::init(plog::debug, "HelloLog.txt"); // Step2: initialize the logger.
 		//el::Loggers::reconfigureAllLoggers(el::ConfigurationType::Format, "%datetime %level ,tid: %thread msg: %msg");
 
 		PhysFS::init(""); // init PhysFS system

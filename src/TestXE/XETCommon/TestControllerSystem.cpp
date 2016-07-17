@@ -71,29 +71,28 @@ namespace XET {
 		if (m_wantRelative && !m_windowHasFocus)
 			return;
 
-		sf::Vector2i mousePosition = sf::Vector2i(context.event->button.x, context.event->button.y);//;sf::Mouse::getPosition(*controller.m_window);
-
-		std::cout << "onPointMoved! x:" << mousePosition.x << ",y:" << mousePosition.y << std::endl;
-
 		entityx::ComponentHandle<TestControllerComponent> controller;
 		entityx::ComponentHandle<XE::ScreenComponent> screen;
 
 		for (entityx::Entity entity : mEngine.getScene().entities.entities_with_components(controller, screen)) {
 
-			screen->m_Desktop->onPointMoved(mousePosition.x, mousePosition.y);
+			if (_mousePressed)
+				screen->m_Desktop->onPointMoved(_lastMousePos.x, _lastMousePos.y);
+			else
+				screen->m_Desktop->onPointMoved(context.event->button.x, context.event->button.y);
 
 			if (!_mousePressed)
 				continue;
 
 			//-----------------------------------------------
-			//TODO only if no Interface active!!!!
+			//TODO nur wenn kein User Interface aktiv!!!!
 			float tx = controller->_windowState.width;
 			float ty = controller->_windowState.height;
 
 			float deltax = -context.event->motion.xrel / tx;
 			float deltay = -context.event->motion.yrel / ty;
 
-			//	std::cout << "delta! x:" << deltax << ",y:" << deltay << std::endl;
+			std::cout << "delta! x:" << deltax << ",y:" << deltay << std::endl;
 
 			if (entity.has_component<XE::CameraFreeComponent>())
 			{
@@ -130,6 +129,7 @@ namespace XET {
 	{
 		std::cout << "onPointSelectStart! " << context.event->button.button << std::endl;
 
+
 		setGrabMousePointer(true, context.window);
 		setMouseVisible(false, context.window);
 
@@ -149,18 +149,27 @@ namespace XET {
 	{
 		std::cout << "onPointSelectEnd! " << context.event->button.button << std::endl;
 
+		setGrabMousePointer(false, context.window);
+
+
+		setMouseVisible(true, context.window);
+
 		entityx::ComponentHandle<TestControllerComponent> controller;
 		entityx::ComponentHandle<XE::ScreenComponent> screen;
 
-		//todo !!! check all scenes for controllers or handle all controllers in a separat list?
 		for (entityx::Entity entity : mEngine.getScene().entities.entities_with_components(controller, screen)) {
 
-			screen->m_Desktop->onPointUp(context.event->button.x, context.event->button.y);
+			if (_mousePressed)
+				screen->m_Desktop->onPointUp(_lastMousePos.x, _lastMousePos.y);
+			else
+				screen->m_Desktop->onPointUp(context.event->button.x, context.event->button.y);
 		}
 
-		setGrabMousePointer(false, context.window);
-		setMouseVisible(true, context.window);
-		_mousePressed = false;
+		if (_mousePressed)
+		{
+			warpMouse(_lastMousePos.x, _lastMousePos.y, context.window);
+			_mousePressed = false;
+		}
 	}
 
 	void TestControllerSystem::onResized(XE::ActionContext context)
@@ -251,11 +260,39 @@ namespace XET {
 		}
 	}
 
+	bool joined;
+
 	void TestControllerSystem::update(entityx::EntityManager &es, entityx::EventManager &events, entityx::TimeDelta dt)
 	{
+		XE::Vector3 startPos;
+		
+		if (!joined)
+		{
+			entityx::ComponentHandle<XE::SpawnPointComponent>  spawnpoint;
+			entityx::ComponentHandle<XE::BodyComponent>  spBody;
+
+		
+			//get all spawnpoints
+			for (entityx::Entity spEntity : es.entities_with_components(spawnpoint, spBody)) {
+
+				if (spawnpoint->m_group == 0) //todo condition!?
+				{
+					startPos = spBody->getPosition();	//spawnpoint selection position
+					break;
+				}
+			}
+		}
+
 		entityx::ComponentHandle<TestControllerComponent> controller;
 
 		for (entityx::Entity entity : es.entities_with_components(controller)) {
+			
+			//set entity position to the spawnpoint position
+			if (!joined)
+			{
+				entity.component<XE::BodyComponent>()->setPosition(startPos);
+				joined = true;
+			}
 
 			if (controller->m_window)
 				controller->actionmap.update(); //clearing events !!

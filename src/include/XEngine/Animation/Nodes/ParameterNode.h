@@ -46,7 +46,7 @@ public:
 	virtual float getFloatValue() const;
 	virtual void setValue(const float value);
 
-	virtual float evaluateValue();
+	virtual float evaluateValue(double deltaTime);
 
 	virtual void init(const void* nodeData);
 private:
