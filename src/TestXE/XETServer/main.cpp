@@ -9,7 +9,7 @@ int main()
 	// leaving the scope of 'game' will cleanup the engine
 	XE::XEngine game;
 
-	game.settings.load("F:/Projekte/coop/XGame/data/");
+	game.settings.load("F:/Projekte/coop/FrankE/data/");
 	game.setDAL(std::unique_ptr<XET::TestDAL>(new XET::TestDAL(game)));
 	game.init();
 	game.run(game.build<ServerState>(game, true));

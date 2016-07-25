@@ -10,7 +10,29 @@ namespace XE {
 		: m_engine(engine)
 		, state()
 	{
-		state.open_libraries(sol::lib::base, sol::lib::package);
+		state.open_libraries(sol::lib::base, sol::lib::package, sol::lib::math);
+
+		state.new_usertype< Ogre::Vector3>("Vector3",
+
+			// 3 constructors
+			//sol::constructors<sol::types<>, sol::types<int>, sol::types<int, int>>(),
+			sol::constructors<sol::types<>, sol::types<float, float, float>>(),
+
+			// typical member function that returns a variable
+
+			"x", &Ogre::Vector3::x,
+			// typical member function
+			"y", &Ogre::Vector3::y,
+			"z", &Ogre::Vector3::z
+
+			// gets or set the value using member variable syntax
+			//"hp", sol::property(&player::get_hp, &player::set_hp),
+
+			//// read and write variable
+			//"speed", &player::speed,
+			//// can only read from, not write to
+			//"bullets", sol::readonly(&player::bullets)
+			);
 	}
 
 	//void LuaEngine::init()

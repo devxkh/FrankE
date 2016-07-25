@@ -4,7 +4,8 @@
 #include <XEDAL/Objects/FBEngineTypes_generated.h>
 
 #include <XEngine/Components/PhysicsComponents.hpp>
-#include <XEngine/Components/SpawnPoint.hpp>
+#include <XEngine/Components/SpawnPointComponent.hpp>
+#include <XEngine/Components/SpawnComponent.hpp>
 
 #include <XEngine/Systems/RenderBodySystem.hpp>
 #include <XEngine/Systems/PhysicsSystem.hpp>
@@ -49,7 +50,8 @@ namespace XE {
 		//	"create", sol::property(&XEngine::getGraphicsManager),
 
 			//functions
-			"create", &Scene::create
+			"create", &Scene::create,
+			"createEntity", &Scene::createEntityWithId
 			);
 
 		auto stateView = lua.set("Scene", this); //set object instance
@@ -126,6 +128,13 @@ namespace XE {
 
 	void Scene::reload(void* fbData)
 	{
+
+	}
+
+	entityx::Entity Scene::createEntityWithId(Uint16 entityID, bool replicateEntity)
+	{
+		void* fbEntityData = m_IDAL.getEntity(entityID);
+		return createEntity(entityID, fbEntityData, replicateEntity);
 	}
 
 	entityx::Entity Scene::createEntity(Int32 entityID, void* entityData, bool replicateEntity)
@@ -353,13 +362,33 @@ namespace XE {
 		}*/
 	}
 
+	void Scene::createSpawnComponent(entityx::Entity entity, const void* fbData)
+	{
+		const XFBType::SpawnComponent* fbSPoint = (const XFBType::SpawnComponent*)fbData;
+
+		auto sp = entity.assign<SpawnComponent>();
+
+		sp->spawnPointId = fbSPoint->spawnPointId();
+		sp->group = fbSPoint->SPGroup();
+		sp->type = fbSPoint->spawnType();
+	}
+
+	void Scene::updateSpawnComponent(entityx::Entity entity, const void* fbData)
+	{
+		const XFBType::SpawnComponent* fbSPoint = (const XFBType::SpawnComponent*)fbData;
+		auto sp = entity.component<SpawnComponent>();
+		sp->spawnPointId = fbSPoint->spawnPointId();
+		sp->group = fbSPoint->SPGroup();
+		sp->type = fbSPoint->spawnType();
+	}
+
 	void Scene::createSpawnPointComponent(entityx::Entity entity, const void* fbData)
 	{
 		const XFBType::SpawnPointComponent* fbSPoint = (const XFBType::SpawnPointComponent*)fbData;
 
 		auto sp = entity.assign<SpawnPointComponent>();
 		sp->id = fbSPoint->id();
-		sp->m_group = fbSPoint->SPGroup();
+		sp->group = fbSPoint->SPGroup();;
 	}
 
 	void Scene::updateSpawnPointComponent(entityx::Entity entity, const void* fbData)
@@ -367,7 +396,7 @@ namespace XE {
 		const XFBType::SpawnPointComponent* fbSPoint = (const XFBType::SpawnPointComponent*)fbData;
 		auto sp = entity.component<SpawnPointComponent>();
 		sp->id = fbSPoint->id();
-		sp->m_group = fbSPoint->SPGroup();
+		sp->group = fbSPoint->SPGroup();
 	}
 
 	void Scene::createLightComponent(entityx::Entity entity, const void* fbData)

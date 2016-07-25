@@ -1,0 +1,190 @@
+include "FBEngineTypes.fbs";
+include "Controllers.fbs";
+
+namespace NetMsg;
+
+table SpellComponent {
+}
+
+table StaticComponent {
+
+}
+
+table GameState {
+	scene:XFBType.Scene;
+}
+
+table CharacterComponent {
+
+}
+
+table AIComponent {
+	script:string;
+}
+
+//net msg type
+table Chatmessage{
+	group:ushort;
+	text:string;
+}
+
+table Login{
+
+	identity:string; 
+}
+
+enum MsgStatus : ushort
+{
+	S_Unknown,
+	S_LoginSuccess,
+	S_AlreadyLoggedIn,
+	S_AccessDenied,
+}
+
+table ReturnStatus{
+
+	status:MsgStatus; 
+}
+
+enum PlayerState : ushort
+{
+	PlayerState_Idling,
+	PlayerState_Joining,
+	PlayerState_Dead,
+	PlayerState_Running,
+	PlayerState_Jumping,
+	PlayerState_OnMenu,
+	PlayerState_IsSpawned,
+	PlayerState_Spectating,
+	PlayerState_Attack_1,
+	PlayerState_Attack_2,
+	PlayerState_Attack_3,
+	PlayerState_Attack_4,
+	PlayerState_Attack_5,
+	PlayerState_Attack_6,
+	PlayerState_Hitted_1,
+	PlayerState_Hitted_2,
+	PlayerState_Hitted_3,
+	PlayerState_Hitted_4,
+	PlayerState_Hitted_5,
+	PlayerState_Hitted_6,
+	
+	PlayerState_Count // Must be last
+}
+
+//Parameterid is equal the node id
+enum AnimationParameterId : uint
+{
+	AnimationState,
+	LookDirectionHorizontal,
+	LookDirectionVertical,
+	JumpPost,
+}
+
+enum AnimationTriggerId : uint
+{
+	attack_end = 1,
+	attack_start = 2,
+}
+
+enum AnimPortId : uint
+{
+	Speed = 0, // used by engine
+	Synch = 1, // used by engine
+	In = 2, // used by engine
+	select = 3, // used by engine
+	timeIn = 4, // used by engine
+	timeOut = 5, // used by engine
+	in0 = 6, // used by engine
+	in1 = 7, // used by engine
+	weight = 8, // used by engine
+	value = 9, // used by engine
+	smoothTime = 10, // used by engine
+	horizontalAmount = 11, // used by engine
+	verticalAmount = 12, // used by engine
+	left= 13, // used by engine
+	right= 14, // used by engine
+	up= 15, // used by engine
+	down= 16, // used by engine
+	min = 17, // used by engine
+	max= 18, // used by engine
+//	value= 19, // used by engine
+	minIn=20, // used by engine
+	maxIn=21, // used by engine
+	minOut=22, // used by engine
+	maxOut=23, // used by engine
+
+//ports > 100 autogenrated
+}
+
+enum AnimationId : uint
+{
+	SliceHorizontal = 0,
+	SliceVertical = 1,
+	JumpStart = 2,
+	JumpLoop =3,
+	RunTop =4,
+	JumpEnd =5 ,
+	RunBase= 6,
+	IdleTop = 7,
+	IdleBase = 8,
+	HandsRelaxed = 9,
+	HandsClosed = 10,
+	Dance = 11,
+	DrawSwords = 12,
+}
+
+table PlayerComponent 
+{
+	playerState:PlayerState;
+}
+
+enum ComponentType : ushort
+{
+	CT_None,
+	CT_NetId,
+	CT_Body,
+	CT_Renderable,
+	CT_Controller,
+	CT_Player,
+	CT_Spell,
+	CT_Static
+}
+
+table Entity
+{
+	entityID:uint;
+	deleteEntity:bool;
+	components:[Component];
+	deleteComponents:[Component];
+}
+
+table InputEvent{
+
+	actionType:ControllerSettings.ActionType;
+	actionData:XFBType.Vec3f; 
+}
+
+//possible Components
+union UComponent {
+	CharacterComponent,AIComponent,XFBType.SpawnPointComponent,XFBType.SpawnComponent,XFBType.AnimationComponent,XFBType.BodyComponent, PlayerComponent,
+ SpellComponent,XFBType.RenderableComponent,StaticComponent, XFBType.Camera, XFBType.Light, XFBType.SoundListener
+, XFBType.PhysicsComponent, XFBType.SoundComponent
+}
+
+table Component  { comp:UComponent; }
+
+
+// Union containing all message types.
+union Data { Chatmessage, XFBType.Scene, Login, ReturnStatus, InputEvent, Entity,  GameState }
+
+// All multiplayer messages are of type "MessageRoot", which contains the
+// specific message in "Data".
+table MessageRoot {
+	netid:uint;
+	scene:uint;
+    data:Data;
+}
+
+root_type MessageRoot;
+

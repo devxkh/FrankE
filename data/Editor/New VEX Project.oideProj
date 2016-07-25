@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="utf-8"?>
+<VEXProjectData xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Items>
+    <IItem AssemblyQualifiedName="VEX.Core.Model.Project.VEXDBFileModel, VEX.Core.WPF, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <VEXDBFileModel>
+        <Visible>false</Visible>
+        <TypeImgSrc>pack://application:,,,/Wide;component/Core/Icons/Textfile.png</TypeImgSrc>
+        <Name>DBFile</Name>
+        <IsExpanded>true</IsExpanded>
+        <IsSelected>false</IsSelected>
+        <Items>
+          <IItem AssemblyQualifiedName="VEF.IDAL.DBTableModel, VEX.Core.WPF, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+            <DBTableModel>
+              <Visible>false</Visible>
+              <TypeImgSrc>pack://application:,,,/Wide;component/Core/Icons/Textfile.png</TypeImgSrc>
+              <Name>Entities</Name>
+              <IsExpanded>true</IsExpanded>
+              <IsSelected>false</IsSelected>
+              <Items>
+                <IItem AssemblyQualifiedName="VEX.Model.Scene.EntityCategoyModel, VEX.Core.WPF, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+                  <EntityCategoyModel>
+                    <Visible>false</Visible>
+                    <TypeImgSrc>pack://application:,,,/Wide;component/Core/Icons/Textfile.png</TypeImgSrc>
+                    <Name>EntityCategory</Name>
+                    <IsExpanded>false</IsExpanded>
+                    <IsSelected>false</IsSelected>
+                    <Items>
+                      <IItem AssemblyQualifiedName="VEX.Service.Scene.EntityX, VEX.Core.WPF, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+                        <EntityX>
+                          <Visible>false</Visible>
+                          <TypeImgSrc>pack://application:,,,/Wide;component/Core/Icons/Textfile.png</TypeImgSrc>
+                          <Name>New Entity</Name>
+                          <IsExpanded>false</IsExpanded>
+                          <IsSelected>false</IsSelected>
+                          <Items />
+                          <Watch>false</Watch>
+                          <EntityID>0</EntityID>
+                          <Components>
+                            <ComponentX xsi:type="BodyComponent">
+                              <Visible>false</Visible>
+                              <TypeImgSrc>pack://application:,,,/Wide;component/Core/Icons/Textfile.png</TypeImgSrc>
+                              <Name>BodyComponent</Name>
+                              <IsExpanded>false</IsExpanded>
+                              <IsSelected>false</IsSelected>
+                              <Items />
+                              <SceneNodeID>0</SceneNodeID>
+                              <Watch>false</Watch>
+                              <FB_SceneNode>
+                                <IsVisible>false</IsVisible>
+                                <IsEnabled>false</IsEnabled>
+                                <Rotation>
+                                  <W>0</W>
+                                  <X>0</X>
+                                  <Y>0</Y>
+                                  <Z>0</Z>
+                                </Rotation>
+                                <Location>
+                                  <X>5</X>
+                                  <Y>-13</Y>
+                                  <Z>0</Z>
+                                </Location>
+                                <Scale>
+                                  <X>0</X>
+                                  <Y>0</Y>
+                                  <Z>0</Z>
+                                </Scale>
+                              </FB_SceneNode>
+                              <IsVisible>false</IsVisible>
+                              <Rotation>
+                                <W>0</W>
+                                <X>0</X>
+                                <Y>0</Y>
+                                <Z>0</Z>
+                              </Rotation>
+                              <Position>
+                                <X>5</X>
+                                <Y>-13</Y>
+                                <Z>0</Z>
+                              </Position>
+                              <Scale>
+                                <X>0</X>
+                                <Y>0</Y>
+                                <Z>0</Z>
+                              </Scale>
+                            </ComponentX>
+                            <ComponentX xsi:type="RenderableComponent">
+                              <Visible>false</Visible>
+                              <TypeImgSrc>pack://application:,,,/Wide;component/Core/Icons/Textfile.png</TypeImgSrc>
+                              <Name>RenderableComponent</Name>
+                              <IsExpanded>false</IsExpanded>
+                              <IsSelected>false</IsSelected>
+                              <Items />
+                              <Watch>false</Watch>
+                              <FB_StaticObjectModel>
+                                <CastShadows>false</CastShadows>
+                                <Renderqueue>0</Renderqueue>
+                                <EntType>NT_Unkown</EntType>
+                                <Mode>0</Mode>
+                                <ShowDebug>false</ShowDebug>
+                                <ShowAABB>false</ShowAABB>
+                                <Group>0</Group>
+                                <Meshes />
+                                <Materials />
+                                <Physics />
+                                <Sounds />
+                              </FB_StaticObjectModel>
+                            </ComponentX>
+                          </Components>
+                        </EntityX>
+                      </IItem>
+                    </Items>
+                  </EntityCategoyModel>
+                </IItem>
+              </Items>
+              <IncID>1</IncID>
+            </DBTableModel>
+          </IItem>
+          <IItem AssemblyQualifiedName="VEX.Model.Scene.SceneCategoryModel, VEX.Core.WPF, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+            <SceneCategoryModel>
+              <Visible>false</Visible>
+              <TypeImgSrc>pack://application:,,,/Wide;component/Core/Icons/Textfile.png</TypeImgSrc>
+              <Name>Scenes</Name>
+              <IsExpanded>true</IsExpanded>
+              <IsSelected>false</IsSelected>
+              <Items>
+                <IItem AssemblyQualifiedName="VEX.Model.Scene.Model.SceneDataModel, VEX.Core.WPF, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+                  <SceneDataModel>
+                    <Visible>false</Visible>
+                    <Location xsi:type="xsd:string">SceneID:##:1</Location>
+                    <TypeImgSrc>pack://application:,,,/Wide;component/Core/Icons/Textfile.png</TypeImgSrc>
+                    <Name>Scene Obj NEW</Name>
+                    <ContentID>SceneID:##:1</ContentID>
+                    <IsExpanded>false</IsExpanded>
+                    <IsSelected>false</IsSelected>
+                    <Items />
+                    <Entities>
+                      <EntityX>
+                        <Visible>false</Visible>
+                        <TypeImgSrc>pack://application:,,,/Wide;component/Core/Icons/Textfile.png</TypeImgSrc>
+                        <Name>New Entity</Name>
+                        <IsExpanded>false</IsExpanded>
+                        <IsSelected>false</IsSelected>
+                        <Items />
+                        <Watch>false</Watch>
+                        <EntityID>0</EntityID>
+                        <Components>
+                          <ComponentX xsi:type="BodyComponent">
+                            <Visible>false</Visible>
+                            <TypeImgSrc>pack://application:,,,/Wide;component/Core/Icons/Textfile.png</TypeImgSrc>
+                            <Name>BodyComponent</Name>
+                            <IsExpanded>false</IsExpanded>
+                            <IsSelected>false</IsSelected>
+                            <Items />
+                            <SceneNodeID>0</SceneNodeID>
+                            <Watch>false</Watch>
+                            <FB_SceneNode>
+                              <IsVisible>false</IsVisible>
+                              <IsEnabled>false</IsEnabled>
+                              <Rotation>
+                                <W>0</W>
+                                <X>0</X>
+                                <Y>0</Y>
+                                <Z>0</Z>
+                              </Rotation>
+                              <Location>
+                                <X>5</X>
+                                <Y>-13</Y>
+                                <Z>0</Z>
+                              </Location>
+                              <Scale>
+                                <X>0</X>
+                                <Y>0</Y>
+                                <Z>0</Z>
+                              </Scale>
+                            </FB_SceneNode>
+                            <IsVisible>false</IsVisible>
+                            <Rotation>
+                              <W>0</W>
+                              <X>0</X>
+                              <Y>0</Y>
+                              <Z>0</Z>
+                            </Rotation>
+                            <Position>
+                              <X>5</X>
+                              <Y>-13</Y>
+                              <Z>0</Z>
+                            </Position>
+                            <Scale>
+                              <X>0</X>
+                              <Y>0</Y>
+                              <Z>0</Z>
+                            </Scale>
+                          </ComponentX>
+                          <ComponentX xsi:type="RenderableComponent">
+                            <Visible>false</Visible>
+                            <TypeImgSrc>pack://application:,,,/Wide;component/Core/Icons/Textfile.png</TypeImgSrc>
+                            <Name>RenderableComponent</Name>
+                            <IsExpanded>false</IsExpanded>
+                            <IsSelected>false</IsSelected>
+                            <Items />
+                            <Watch>false</Watch>
+                            <FB_StaticObjectModel>
+                              <CastShadows>false</CastShadows>
+                              <Renderqueue>0</Renderqueue>
+                              <EntType>NT_Unkown</EntType>
+                              <Mode>0</Mode>
+                              <ShowDebug>false</ShowDebug>
+                              <ShowAABB>false</ShowAABB>
+                              <Group>0</Group>
+                              <Meshes />
+                              <Materials />
+                              <Physics />
+                              <Sounds />
+                            </FB_StaticObjectModel>
+                          </ComponentX>
+                        </Components>
+                      </EntityX>
+                    </Entities>
+                    <FB_Scene>
+                      <ColourAmbient>
+                        <A>0</A>
+                        <R>0</R>
+                        <G>0</G>
+                        <B>0</B>
+                        <ScA>0</ScA>
+                        <ScR>0</ScR>
+                        <ScG>0</ScG>
+                        <ScB>0</ScB>
+                      </ColourAmbient>
+                    </FB_Scene>
+                    <SceneID>1</SceneID>
+                  </SceneDataModel>
+                </IItem>
+              </Items>
+              <IncID>1</IncID>
+            </SceneCategoryModel>
+          </IItem>
+        </Items>
+        <DBFilePath>E:\Projekte\coop\XGame\data\dbData.s3db</DBFilePath>
+      </VEXDBFileModel>
+    </IItem>
+  </Items>
+  <IsExpanded>true</IsExpanded>
+  <GameStates />
+</VEXProjectData>

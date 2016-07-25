@@ -153,7 +153,12 @@ namespace XE
 	{
 		auto it = _nodes.find(nodeId);
 		if (it != _nodes.end())
-			return static_cast<ParameterNode&>(*it->second.get()); // geht das???
+			return static_cast<ParameterNode&>(*it->second.get());
+		else
+		{
+			LOG(plog::fatal) << "No Parameter found for id : " << nodeId << ", in _nodes";
+			return *(new ParameterNode()); //dummy -> else crash
+		}
 	}
 
 	void AnimationComponent::_MT_setAnimationStatePtr(Ogre::SkeletonAnimation* animationPtr, const std::string& name, float length, std::vector< float* >* boneWeightPtrs, std::vector< float >* boneWeightList)

@@ -30,7 +30,7 @@ namespace XE
 	{
 		character->setRotation(axis, scalar);
 	}
-
+	
 	void CharacterPhysics::collided(entityx::Entity collider, const Ogre::Vector3& positionWorldOnB, const Ogre::Vector3& normalWorldOnB, float distance1, float appliedImpulse)
 	{
 		auto netid = collider.component<NetIdComponent>();

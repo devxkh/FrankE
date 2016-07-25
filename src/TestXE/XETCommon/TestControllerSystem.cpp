@@ -260,40 +260,12 @@ namespace XET {
 		}
 	}
 
-	bool joined;
-
 	void TestControllerSystem::update(entityx::EntityManager &es, entityx::EventManager &events, entityx::TimeDelta dt)
 	{
-		XE::Vector3 startPos;
-		
-		if (!joined)
-		{
-			entityx::ComponentHandle<XE::SpawnPointComponent>  spawnpoint;
-			entityx::ComponentHandle<XE::BodyComponent>  spBody;
-
-		
-			//get all spawnpoints
-			for (entityx::Entity spEntity : es.entities_with_components(spawnpoint, spBody)) {
-
-				if (spawnpoint->m_group == 0) //todo condition!?
-				{
-					startPos = spBody->getPosition();	//spawnpoint selection position
-					break;
-				}
-			}
-		}
-
 		entityx::ComponentHandle<TestControllerComponent> controller;
 
 		for (entityx::Entity entity : es.entities_with_components(controller)) {
 			
-			//set entity position to the spawnpoint position
-			if (!joined)
-			{
-				entity.component<XE::BodyComponent>()->setPosition(startPos);
-				joined = true;
-			}
-
 			if (controller->m_window)
 				controller->actionmap.update(); //clearing events !!
 

@@ -23,7 +23,7 @@ struct MeshSphere;
 struct Mesh;
 struct RenderableComponent;
 struct Sound;
-struct AI;
+struct SpawnComponent;
 struct SpawnPointComponent;
 struct Trigger;
 struct PhysicsComponent;
@@ -164,6 +164,18 @@ inline const char **EnumNamesMemoryMgrType() {
 }
 
 inline const char *EnumNameMemoryMgrType(MemoryMgrType e) { return EnumNamesMemoryMgrType()[static_cast<int>(e)]; }
+
+enum SpawnType {
+  SpawnType_STYPE_RANDOM = 0,
+  SpawnType_STYPE_ROUND_ROBIN = 1
+};
+
+inline const char **EnumNamesSpawnType() {
+  static const char *names[] = { "STYPE_RANDOM", "STYPE_ROUND_ROBIN", nullptr };
+  return names;
+}
+
+inline const char *EnumNameSpawnType(SpawnType e) { return EnumNamesSpawnType()[static_cast<int>(e)]; }
 
 enum LightType {
   LightType_LT_DIRECTIONAL = 0,
@@ -1008,32 +1020,41 @@ inline flatbuffers::Offset<Sound> CreateSound(flatbuffers::FlatBufferBuilder &_f
   return builder_.Finish();
 }
 
-struct AI FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  const LocalFile *scriptfile() const { return GetPointer<const LocalFile *>(4); }
+struct SpawnComponent FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+  uint32_t SPGroup() const { return GetField<uint32_t>(4, 0); }
+  uint32_t spawnPointId() const { return GetField<uint32_t>(6, 0); }
+  SpawnType spawnType() const { return static_cast<SpawnType>(GetField<uint8_t>(8, 0)); }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, 4 /* scriptfile */) &&
-           verifier.VerifyTable(scriptfile()) &&
+           VerifyField<uint32_t>(verifier, 4 /* SPGroup */) &&
+           VerifyField<uint32_t>(verifier, 6 /* spawnPointId */) &&
+           VerifyField<uint8_t>(verifier, 8 /* spawnType */) &&
            verifier.EndTable();
   }
 };
 
-struct AIBuilder {
+struct SpawnComponentBuilder {
   flatbuffers::FlatBufferBuilder &fbb_;
   flatbuffers::uoffset_t start_;
-  void add_scriptfile(flatbuffers::Offset<LocalFile> scriptfile) { fbb_.AddOffset(4, scriptfile); }
-  AIBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
-  AIBuilder &operator=(const AIBuilder &);
-  flatbuffers::Offset<AI> Finish() {
-    auto o = flatbuffers::Offset<AI>(fbb_.EndTable(start_, 1));
+  void add_SPGroup(uint32_t SPGroup) { fbb_.AddElement<uint32_t>(4, SPGroup, 0); }
+  void add_spawnPointId(uint32_t spawnPointId) { fbb_.AddElement<uint32_t>(6, spawnPointId, 0); }
+  void add_spawnType(SpawnType spawnType) { fbb_.AddElement<uint8_t>(8, static_cast<uint8_t>(spawnType), 0); }
+  SpawnComponentBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
+  SpawnComponentBuilder &operator=(const SpawnComponentBuilder &);
+  flatbuffers::Offset<SpawnComponent> Finish() {
+    auto o = flatbuffers::Offset<SpawnComponent>(fbb_.EndTable(start_, 3));
     return o;
   }
 };
 
-inline flatbuffers::Offset<AI> CreateAI(flatbuffers::FlatBufferBuilder &_fbb,
-   flatbuffers::Offset<LocalFile> scriptfile = 0) {
-  AIBuilder builder_(_fbb);
-  builder_.add_scriptfile(scriptfile);
+inline flatbuffers::Offset<SpawnComponent> CreateSpawnComponent(flatbuffers::FlatBufferBuilder &_fbb,
+   uint32_t SPGroup = 0,
+   uint32_t spawnPointId = 0,
+   SpawnType spawnType = SpawnType_STYPE_RANDOM) {
+  SpawnComponentBuilder builder_(_fbb);
+  builder_.add_spawnPointId(spawnPointId);
+  builder_.add_SPGroup(SPGroup);
+  builder_.add_spawnType(spawnType);
   return builder_.Finish();
 }
 

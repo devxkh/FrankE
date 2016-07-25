@@ -101,7 +101,7 @@ void gkDynamicsWorld::createInstanceImpl(void)
 	m_dynamicsWorld->setInternalTickCallback(substepCallback, static_cast<void*>(this));
 
 	
-	//enableDebugPhysics(true, false);//gkEngine::getSingleton().getUserDefs().debugPhysics, gkEngine::getSingleton().getUserDefs().debugPhysicsAabb);
+	enableDebugPhysics(true, false);//gkEngine::getSingleton().getUserDefs().debugPhysics, gkEngine::getSingleton().getUserDefs().debugPhysicsAabb);
 
 	//if (gkEngine::getSingleton().getUserDefs().useBulletDbvt)
 	//	m_dbvt = new gkDbvt();

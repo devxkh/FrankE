@@ -10,6 +10,7 @@ ControllerState::ControllerState(XE::XEngine& engine, bool replace)
 	LOG(XE::info) << "InitState - Initialization";
 
 	auto ctrlSystem = engine.getScene().systems.add<XET::TestControllerSystem>(engine);
+	auto spawnSystem = engine.getScene().systems.add<XE::SpawnSystem>(engine.getScene());
 
 	engine.getScene().create(1);
 

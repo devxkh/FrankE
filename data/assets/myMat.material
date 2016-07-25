@@ -1,0 +1,6 @@
+
+hlms HlmsUnlit1 unlit
+{
+	diffuse_map				TestAtlas.png	
+	scene_blend			alpha_blend
+}

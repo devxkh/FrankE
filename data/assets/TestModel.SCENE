@@ -1,0 +1,15 @@
+<scene formatVersion="1.0" minOgreVersion="1.4" author="FxOgreFBX">
+    <nodes>
+        <node name="SceneTransform" id="-858993460" isTarget="false">
+            <position x="0" y="0" z="0"/>
+            <rotation qx="0" qy="0" qz="0" qw="1"/>
+            <scale x="1.9146731" y="1.9146731" z="1.9146731"/>
+            <node name="TestModel" id="1" isTarget="false">
+                <position x="0" y="0" z="0"/>
+                <rotation qx="0" qy="0" qz="0" qw="1"/>
+                <scale x="1" y="1" z="1"/>
+                <entity name="TestModel" id="1" meshFile="TestModel.MESH" castShadows="true" receiveShadows="true"/>
+            </node>
+        </node>
+    </nodes>
+</scene>

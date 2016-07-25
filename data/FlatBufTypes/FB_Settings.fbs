@@ -1,0 +1,37 @@
+namespace FBSettings;
+
+enum FSAA : ushort
+{
+	none = 0,
+	x8 = 8,
+	x16 = 16,
+	x32 = 32
+}
+
+table Graphics
+{
+	fullscreen:bool;
+	fsaa:FSAA;
+}
+
+///resource folders
+table ResourceData
+{
+	hlmsDataFolder:string; // folder for hlms shader script files
+	dbDataFolder:string; // folder contains lua scripts/flatbuffer files
+	assetsFolder:string; //folder contains 3d assets used in renderthread
+	dbFileName:string; //sqlite dbfilename contains scene, entity, node data
+}
+
+
+table Settings {
+	graphics:Graphics;
+	resourceData:ResourceData;
+
+	windowTitle:string; // window title 
+	inputMapFilename:string; //fb binary filepath with input mappings
+}
+
+
+
+root_type Settings;

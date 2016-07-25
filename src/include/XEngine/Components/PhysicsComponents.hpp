@@ -17,7 +17,7 @@ namespace XE
 		virtual void setTransformState(const TransformState& state) = 0;
 
 		virtual void setRotation(const Ogre::Vector3& axis, float scalar) = 0;
-
+	
 		virtual void collided(entityx::Entity collider, const Ogre::Vector3& positionWorldOnB, const Ogre::Vector3& normalWorldOnB, float distance1, float appliedImpulse) = 0;
 
 		sf::Uint16 Id;
@@ -84,7 +84,7 @@ namespace XE
 		void setTransformState(const TransformState& state);
 
 		void setEntityWithBody(entityx::Entity object);
-
+				
 		void setRotation(const Ogre::Vector3& axis, float scalar);
 
 		void collided(entityx::Entity collider, const Ogre::Vector3& positionWorldOnB, const Ogre::Vector3& normalWorldOnB, float distance1, float appliedImpulse);
@@ -116,9 +116,9 @@ namespace XE
 
 		void setTransformState(const TransformState& state)
 		{
-			rigidBody->forceWorldTransform(state.toTransform());
+			rigidBody->forceWorldTransform(state.toTransform());	
 		}
-
+		
 		void setEntityWithBody(entityx::Entity object)
 		{
 			rigidBody->setEntityWithBody(object);

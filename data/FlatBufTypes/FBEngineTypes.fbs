@@ -1,0 +1,408 @@
+namespace XFBType;
+
+struct Vec3f {
+   x:float = 0;
+   y:float = 0;
+   z:float = 0;
+}
+
+struct Quat4f {
+   w:float = 0;
+   x:float = 0;
+   y:float = 0;
+   z:float = 0;
+}
+
+struct Colour {
+   r:float = 0;
+   g:float = 0;
+   b:float = 0;
+   a:float = 0;
+}
+
+table Clipping {
+   nearClip:float = 0; // near and far preserved in c++
+   farClip:float = 0;
+}
+
+///optional filtering to cull potential collisions
+	enum CollisionFilterGroups : byte
+	{
+	        AllFilter = -1, //all bits sets: DefaultFilter | StaticFilter | KinematicFilter | DebrisFilter | SensorTrigger
+	        DefaultFilter = 1,
+	        StaticFilter = 2,
+	        KinematicFilter = 4,
+	        DebrisFilter = 8,
+			SensorTrigger = 16,
+			CharacterFilter = 32
+	}
+
+enum PhysicsType : byte
+{
+	PT_NO_COLLISION,
+	PT_STATIC,
+	PT_DYNAMIC,
+	PT_RIGID,
+	PT_SOFT	,
+	PT_SENSOR,
+	PT_NAVMESH,
+	PT_CHARACTER
+}
+
+enum PhysicsShape : byte
+{
+	SH_BOX,
+	SH_CONE,
+	SH_CYLINDER,
+	SH_SPHERE,
+	SH_CONVEX_TRIMESH,
+	SH_GIMPACT_MESH,
+	SH_BVH_MESH,
+	SH_CAPSULE,
+	SH_PLANE,
+}
+
+enum PCType : byte
+{
+	GK_BALL_CONSTRAINT,
+	GK_HINGE_CONSTRAINT,
+	GK_CONETWIST_CONSTRAINT,
+	GK_VEHICLE_CONSTRAINT,
+	GK_D6_CONSTRAINT,
+	GK_SLIDER_CONSTRAINT,
+	GK_CONTACT_CONSTRAINT
+}
+
+table PhysicsConstraint
+{
+	target:string;
+
+	type:PCType;
+	pivot:Vec3f;
+	axis:Vec3f;
+	flag:short;
+	minLimit:[float];
+	maxLimit:[float];
+	disableLinkedCollision:bool;
+	
+	name:string;	
+}
+
+table PhysicsObject {
+	id:ushort;
+	colMask:short;
+	type:PhysicsType;
+    mode:uint;
+	shape:PhysicsShape;
+	mass:float;
+	margin:float;
+	radius:float;
+	angularDamp:float;
+	linearDamp:float;
+	formFactor:float;
+	minVel:float;
+	maxVel:float;
+	restitution:float;
+	friction:float;
+	colGroupMask:short;
+	charStepHeight:float;
+	charJumpSpeed:float;
+	charFallSpeed:float;
+	boneparent:string;
+	collMeshName:string;
+	size:Vec3f;
+	scale:Vec3f;	
+	offset:Vec3f;
+	parentIsNode:bool;
+
+	physicsConstraints:[PhysicsConstraint];	
+	name:string;	
+	file:LocalFile;	
+}
+
+enum FileLocation : byte
+{
+	FILELOC_Asset,
+	FILELOC_DBDataFile
+}
+
+table LocalFile
+{
+	fileLocation:FileLocation;
+	fileName:string;	
+	filePath:string;	
+	resourceGrp:string;	
+}
+
+
+table Material
+{
+	file:LocalFile;	
+	//todo all material properties, not only from ogre material file		
+}
+
+table MeshFile
+{
+	file:LocalFile;		
+	materials:[Material];
+}
+
+table MeshCube
+{
+	Name:string;	
+	material:Material;
+	width:float;
+}
+
+table MeshPlane
+{
+	Name:string;	
+	material:Material;
+	normal:Vec3f;
+	constant:float;
+	width:float;
+	height:float;
+	xsegments:uint;
+	ysegments:uint;
+	normals:bool;
+	numTexCoordSets:uint;
+	xTile:float;
+	yTile:float;
+	upVector:Vec3f;
+}
+
+table MeshSphere
+{
+	Name:string;	
+	material:Material;
+	rad:float;
+}
+
+//possible Meshes
+union UMesh {
+	MeshFile,MeshCube,MeshPlane,MeshSphere
+}
+
+table Mesh
+{
+	mesh:UMesh;
+}
+
+enum MemoryMgrType : ubyte
+{
+  SCENE_DYNAMIC = 0,
+  SCENE_STATIC
+}
+
+table RenderableComponent {
+	memType:MemoryMgrType;
+	renderqueue:uint;	
+	meshes:[Mesh];
+	castShadows:bool;
+	mode:uint;
+	showAABB:bool;
+	group:uint; // e.g. static grouping
+}
+
+table Sound
+{
+	file:LocalFile;	
+}
+
+enum SpawnType : ubyte
+{
+	STYPE_RANDOM, //will use a random spawn point from the available spawnpoint in a group
+	STYPE_ROUND_ROBIN //will cycle through all of the available spawn positions  in a group before reusing them
+}
+
+table SpawnComponent {
+	SPGroup:uint;	// > 0 -> spawn at a spawnpoint in this group
+	spawnPointId:uint; // > 0 ->  spawn at a spawnpoint with this id
+	spawnType:SpawnType;		
+}
+
+table SpawnPointComponent {
+	SPGroup:uint;
+	id:uint;
+	name:string;			
+}
+
+table Trigger {
+	name:string;	
+}
+
+table PhysicsComponent
+{
+	physics:[PhysicsObject];
+}
+
+table SoundListener {
+}
+
+
+enum LightType : ubyte
+{
+  LT_DIRECTIONAL = 0,
+  LT_POINT = 1,
+  LT_SPOTLIGHT = 2
+}
+
+table Light {
+	colourDiffuse:Colour;
+	colourSpecular:Colour;
+    directionVector:Vec3f;
+	lightType:LightType;
+	powerScale:float;
+	ambientLight:AmbientLight;
+	name:string;	
+}
+
+table Camera {
+	clipping:Clipping;
+	name:string;		
+}
+
+table System
+{
+	name:string;
+}
+
+table AmbientLight
+{
+	upperHemisphere:Colour;
+	lowerHemisphere:Colour;
+    hemisphereDir:Vec3f;
+	envmapScale:float;
+}
+
+table Scene {
+	sceneid:ushort;	
+	systems:[System];
+	type:string; //combatscene, normal etc.
+}
+
+struct Connection
+{
+	nodeIn:uint = 0; //node id
+	nodeOut:uint = 0;//node id
+	portIn:uint = 0; //portid within a node
+}
+
+struct Parameter
+{
+	value:float;	
+}
+
+struct Constant
+{	
+	id:uint = 0;
+	nodeId:uint = 0;
+	portId:uint = 0;
+	value:float = 0;
+}
+
+enum TimeType : ubyte
+{
+	absolute,
+	relative
+}
+
+struct AnimTrigger
+{
+	id:uint;
+	time:float;
+	timeType:TimeType;
+	minWeightThreshold:float;
+}
+
+table Animation
+{
+	id:uint;
+	loop:bool;
+	triggers:[AnimTrigger];	
+	name:string;
+}
+
+table AnimationNode
+{
+	animation:Animation;	
+}
+
+table ParameterNode
+{
+	param:Parameter;
+}
+
+table TransitionSelectNode
+{
+	select:ushort;
+	timeIn:float;
+	timeOut:float;
+	size:ushort;
+}
+
+table AverageNode
+{
+	size:ushort;
+}
+
+table MaskAddNode
+{
+}
+
+table SmoothValueNode
+{
+	initial_value:float;
+}
+
+table LookAtNode
+{
+}
+table RandomSelectNode
+{
+	size:ushort;
+}
+table MixNode
+{
+	size:ushort;
+}
+
+//possible Animation Nodes
+union UAnimationNode {
+	AnimationNode,TransitionSelectNode,LookAtNode,MixNode,ParameterNode
+,AverageNode,MaskAddNode,RandomSelectNode, SmoothValueNode
+}
+
+table AnimNode  { 
+	id:uint;
+	node:UAnimationNode ;
+}
+
+table BodyComponent
+{
+	position:Vec3f;
+	rotation:Quat4f;
+	scale:Vec3f;
+				
+	sceneId:uint; // original sceneId
+	visible:bool = 1;	
+	enabled:bool = 1;
+	group:uint; // e.g. static grouping	
+
+}
+
+table AnimationComponent
+{
+	animationTree:string;
+	animationInfo:string;
+	nodes:[AnimNode];
+	connections:[Connection];
+	constants:[Constant];
+	boneparent:string;
+	output:uint; //node id
+}
+
+table SoundComponent
+{
+	sounds:[Sound];
+}

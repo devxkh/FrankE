@@ -1,0 +1,155 @@
+{
+  "ctrlList": [
+    {
+      "type": "DT_KeyMouse",
+      "actionMap": [
+       {
+          "actionType": "CamRotate",
+          "events": [
+            {
+               "mouseBtn": 0
+            }
+          ]
+        },
+        {
+          "actionType": "Forward",
+          "events": [
+            {
+              "kCode": "SDL_SCANCODE_W"
+            },
+            {
+              "mouseBtn": 1
+            }
+          ]
+        },
+        {
+          "actionType": "Backward",
+          "events": [
+            {
+              "kCode": "SDL_SCANCODE_S"
+            }
+          ]
+        },
+        {
+          "actionType": "TurnLeft",
+          "events": [
+            {
+              "kCode": "SDL_SCANCODE_A"
+            }
+          ]
+        },
+        {
+          "actionType": "TurnRight",
+          "events": [
+            {
+              "kCode": "SDL_SCANCODE_D"
+            }
+          ]
+        },
+        {
+          "actionType": "StrafeLeft",
+          "events": [
+            {
+              "kCode": "SDL_SCANCODE_LSHIFT"
+            },
+            {
+              "actionOperator": "And",
+              "kCode": "SDL_SCANCODE_A"
+            }
+          ]
+        },
+        {
+          "actionType": "StrafeRight",
+          "events": [
+            {
+              "kCode": "SDL_SCANCODE_LSHIFT"
+            },
+            {
+              "actionOperator": "And",
+              "kCode": "SDL_SCANCODE_D"
+            }
+          ]
+        },
+        {
+          "actionType": "Jump",
+          "events": [
+            {
+              "kCode": "SDL_SCANCODE_SPACE"
+            }
+          ]
+        },
+        {
+          "actionType": "Run",
+          "events": [
+            {
+              "kCode": "SDL_SCANCODE_R"
+            }
+          ]
+        },
+        {
+          "actionType": "Spell1",
+          "events": [
+            {
+              "kCode": "SDL_SCANCODE_KP_3"
+            }
+          ]
+        },
+        {
+          "actionType": "Action1",
+          "events": [
+            {
+              "kCode": "SDL_SCANCODE_KP_1"
+            }
+          ]
+        },
+        {
+          "actionType": "ZoomIn",
+          "events": [
+            {
+              "kCode": "SDL_SCANCODE_KP_PLUS"
+            },
+             {
+              "actionOperator": "Or",
+              "mWheel": "MW_UP"
+            }
+          ]
+        },
+        {
+          "actionType": "ZoomOut",
+          "events": [
+            {
+              "kCode": "SDL_SCANCODE_KP_MINUS"
+            },
+            {
+              "actionOperator": "Or",
+              "mWheel": "MW_DOWN"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "DT_KeyMouse",
+      "actionMap": [
+        {
+          "actionType": "Action2",
+          "events": [
+            {
+              "kCode": "SDL_SCANCODE_K"
+            },
+            {
+              "actionOperator": "And",
+              "kCode": "SDL_SCANCODE_B",
+              "mouseBtn": 3,
+              "mWheel": "MW_UP",
+              "joyBtn": 3
+            }
+          ]
+        },
+        {
+          "actionType": "Action2"
+        }
+      ]
+    }
+  ]
+}

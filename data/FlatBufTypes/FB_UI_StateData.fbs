@@ -1,0 +1,332 @@
+namespace XFB_UI;
+
+struct Vec3f {
+   x:float = 0;
+   y:float = 0;
+   z:float = 0;
+}
+
+struct Vec2f {
+   x:float = 0;
+   y:float = 0;
+}
+
+
+//----------------------- Style data ----------------------
+
+struct Align
+{
+	vertical:float = 0;		// 0.0(top) - 1.0(bottom) 
+	horizontal:float = 0;		// 0.0(left) - 1.0(right) 
+} 
+
+struct Scale
+{
+	vertical:float = 0;		// 0.0(minreq) - 1.0(stretch) 
+	horizontal:float = 0;		// 0.0(minreq) - 1.0(stretch) 
+} 
+
+struct Colour {
+   r:float = 0;
+   g:float = 0;
+   b:float = 0;
+   a:float = 0;
+}
+
+table ResourceLocation {
+   name:string;
+   locType:string;
+   resGroup:string;
+   recursive:bool;
+   readOnly:bool;
+}
+
+enum ElementState : byte
+{
+	ES_NORMAL = 0,			// Normal
+	ES_ACTIVE,				// Active, e.g. when a button is pressed./
+	ES_PRELIGHT,			// Prelight, e.g. when the mouse moves over a widget. 
+	ES_SELECTED,			// Selected, e.g. when a list item in a list is selected. 
+	ES_INSENSITIVE			// Insensitive, disabled widget. 
+}
+
+enum StyleType : byte
+{
+	ST_DEFAULT,
+	ST_WINDOW, 
+	ST_PANEL2D, 
+	ST_MENU,
+	ST_MENUITEM,
+	ST_NAVIGATION,
+	ST_NAVITEM,
+	ST_LISTBOX,
+	ST_COMBOBOX,
+	ST_LABEL,
+	ST_BUTTON,
+	ST_PANEL3D,
+	ST_CONSOLE
+}
+
+enum GradientType : byte
+{
+  GT_NorthSouth,
+  GT_WestEast,
+  GT_Diagonal
+}
+
+table GradientParam
+{
+	color:Colour;
+	offset:ushort;
+}
+
+table Gradient
+{
+	type:GradientType;
+	sart:GradientParam;
+	stop:GradientParam;
+}
+
+table Padding {
+   l:ushort = 0;
+   t:ushort = 0;
+   r:ushort = 0;
+   b:ushort = 0;
+}
+
+table Margin {
+   l:ushort = 0;
+   t:ushort = 0;
+   r:ushort = 0;
+   b:ushort = 0;
+}
+
+table Thickness {
+   l:ushort = 0;
+   t:ushort = 0;
+   r:ushort = 0;
+   b:ushort = 0;
+}
+
+table Border
+{
+	padding:Padding;
+	thickness:Thickness;
+	brush:Colour;
+}
+
+table WidgetState
+{
+	bgImage:string;				//image name from atlas
+	bgGradient:Gradient;
+	bgAnimated:bool;
+	bgColour:Colour;
+	colour:Colour;
+	border:Padding;
+	fontsize:uint;	
+}
+
+table Style
+{	
+	name:string;					//style name -> for specific styles e.g. exit button is red
+	type:StyleType;					//tyle type -> sets all elements from this type automaticly
+	normalState:WidgetState;		// Normal
+	activeState:WidgetState;		// Active, e.g. when a button is pressed
+	prelightState:WidgetState;		// Prelight, e.g. when the mouse moves over a widget. 
+	selectedState:WidgetState;		// Selected, e.g. when a list item in a list is selected. 
+	insensitiveState:WidgetState;	// Insensitive, disabled widget. 
+	scale:Scale;					// width,height,stretched
+	margin:Margin;
+}
+
+//-------------- Base for all widgets ------------------
+
+table Element
+{
+	name:string;
+	id:ushort;
+	align:Align;
+	scale:Scale;
+	positon:Vec2f;			//overrides alignment
+	width:uint;
+	height:uint;
+	rotation:ushort;
+	tooltip:string;
+	atlas:string;
+	group:ushort;
+	isEnabled:bool;
+	style:Style;			//explicit style setting
+}
+
+//-------------- Widgets ------------------
+
+table Label
+{
+	base:Element;
+	fontSize:ushort;
+}
+
+
+table Image
+{
+	base:Element;
+}
+
+table Button
+{
+	base:Element;
+	image:string;
+	itemsource:string;		//Splitbutton -> binding to list in c++
+	onclicked:string;
+	onhover:string;
+}
+
+
+table CheckBox
+{
+	base:Element;
+}
+
+table ComboBox
+{
+	base:Element;
+	items:[ListItem];
+}
+
+
+union ListItemType
+{
+  Label,
+  Button,
+  Image
+}
+
+
+table ListItem
+{
+  listItemType: ListItemType;
+}
+
+enum MenuType : byte
+{
+	MT_LIST,			//no interaction
+	MT_SINGLE,			//single selection
+	MT_MULTI,			//multi selection
+}
+
+//list with selectable items
+table Menu
+{
+	base:Element;
+	displayedElements:ushort;
+	type:MenuType;
+	items:[ListItem];		//binding to list in c++
+	itemWidth:uint;
+	itemHeight:uint;
+	onSelectionChanged:string;
+}
+
+//list with step progress
+table Navigation
+{
+	base:Element;
+	type:MenuType;
+	items:[ListItem];		//binding to list in c++
+	itemWidth:uint;
+	itemHeight:uint;
+	onSelectionChanged:string;
+}
+
+table Console
+{
+	base:Element;
+	fontsize:uint;			//console textinput height
+}
+
+table ProgressBar
+{
+	base:Element;
+}
+
+table UIWindow
+{
+	base:Element;	
+	panel:Panel2D;
+	showHead:bool;
+}
+
+//------------------------ Layout Container ---------------------
+
+enum Orientation : byte
+{
+	horizontal,
+	vertical
+}
+
+//layouts
+//box = stackpanel
+table Box
+{
+	base:Element;	
+	components: [ComponentList];
+	orientation:Orientation;
+}
+
+table Panel2D
+{
+	base:Element;	
+	components: [ComponentList];
+	//menus:[Menu];
+	//navs:[Navigation];
+	//console:Console;
+	//elements:[Element];
+}
+
+
+//-------------------- Base Data ---------------------
+
+//possible UI Components
+union UComponent {
+	Label,
+  Menu,
+  Navigation,
+  Console,
+  Element,
+  Button,
+  Image,
+  ProgressBar
+}
+
+table ComponentList
+{
+  componentType: UComponent;
+}
+
+
+
+//load from ressource filesystem
+table StyleData
+{
+	//name:string; db column or filename
+	styles:[Style];					//Style for all components
+}
+
+//screen is set in controller
+//table Screen
+//{
+//	locations:[ResourceLocation];
+//name:string; db column or filename
+//	atlas:string;
+//	styles:[Style];					//Style for all components
+//}
+
+
+table StateData
+{
+	//name:string; db column or filename
+	atlas:string;					//load atlas on demand -> only if not already loaded
+	autoDeleteAtlas:bool;			//true = delete atlas if state is destructed, else atlas won't be deleted
+	locations:[ResourceLocation];
+	components: [ComponentList];
+	panels2D:[Panel2D];
+}

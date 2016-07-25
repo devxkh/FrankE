@@ -47,6 +47,9 @@ public:
 
 	void createT(Uint16 sceneID) {}
 
+	entityx::Entity  createEntityWithId(Uint16 entityID, bool replicateEntity);
+
+
 	Uint16 getSceneID() {return m_sceneID;}
 
 //KH	inline void setTerrain(Ogre::TerrainGroup* terrainGrp) { mTerrainGrp = terrainGrp; }
@@ -88,6 +91,9 @@ public:
 
 	void createSpawnPointComponent( entityx::Entity entity, const void* fbData);
 	void updateSpawnPointComponent( entityx::Entity entity, const void* fbData);
+	
+	void createSpawnComponent(entityx::Entity entity, const void* fbData);
+	void updateSpawnComponent(entityx::Entity entity, const void* fbData);
 
 	void createLightComponent( entityx::Entity entity, const void* fbData);
 	void updateLightComponent( entityx::Entity entity, const void* fbData);

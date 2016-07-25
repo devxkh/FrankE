@@ -21,6 +21,10 @@ bool TestScene::createEntityType(entityx::Entity entity, void* entityData)
 	XE::Uint16 sceneID = 0; //TODO use as section ?? for large world
 
 	const NetMsg::Entity* ent = flatbuffers::GetRoot< NetMsg::Entity>(entityData);
+
+	if (!ent->components())
+		return false;
+
 	//const NetMsg::Entity* ent = (const NetMsg::Entity*)entityData;
 	for each (auto var in *ent->components())
 	{
@@ -70,6 +74,15 @@ bool TestScene::createEntityType(entityx::Entity entity, void* entityData)
 				updateSpawnPointComponent(entity, var->comp());
 			else
 				createSpawnPointComponent(entity, var->comp());
+		}
+		else if (var->comp_type() == NetMsg::UComponent::UComponent_SpawnComponent)  // messages: client <->server
+		{
+			const XFBType::SpawnComponent* nodeMsg = (const XFBType::SpawnComponent*)var->comp();
+
+			if (entity.has_component<XE::SpawnComponent>())
+				updateSpawnComponent(entity, var->comp());
+			else
+				createSpawnComponent(entity, var->comp());
 		}
 		else if (var->comp_type() == NetMsg::UComponent::UComponent_Light)  // messages: client <->server
 		{

@@ -1,0 +1,13 @@
+{
+  "scene": {
+    "sceneid": 1,
+    "systems": [
+      {
+        "name": "PlayerControllerSystem"
+      },
+      {
+        "name": "CharacterCameraSystem"
+      }
+    ]
+  }
+}

@@ -24,7 +24,7 @@ struct MeshSphere;
 struct Mesh;
 struct RenderableComponent;
 struct Sound;
-struct AI;
+struct SpawnComponent;
 struct SpawnPointComponent;
 struct Trigger;
 struct PhysicsComponent;
@@ -66,6 +66,7 @@ struct SpellComponent;
 struct StaticComponent;
 struct GameState;
 struct CharacterComponent;
+struct AIComponent;
 struct Chatmessage;
 struct Login;
 struct ReturnStatus;
@@ -223,22 +224,24 @@ inline const char *EnumNameComponentType(ComponentType e) { return EnumNamesComp
 enum UComponent {
   UComponent_NONE = 0,
   UComponent_CharacterComponent = 1,
-  UComponent_SpawnPointComponent = 2,
-  UComponent_AnimationComponent = 3,
-  UComponent_BodyComponent = 4,
-  UComponent_PlayerComponent = 5,
-  UComponent_SpellComponent = 6,
-  UComponent_RenderableComponent = 7,
-  UComponent_StaticComponent = 8,
-  UComponent_Camera = 9,
-  UComponent_Light = 10,
-  UComponent_SoundListener = 11,
-  UComponent_PhysicsComponent = 12,
-  UComponent_SoundComponent = 13
+  UComponent_AIComponent = 2,
+  UComponent_SpawnPointComponent = 3,
+  UComponent_SpawnComponent = 4,
+  UComponent_AnimationComponent = 5,
+  UComponent_BodyComponent = 6,
+  UComponent_PlayerComponent = 7,
+  UComponent_SpellComponent = 8,
+  UComponent_RenderableComponent = 9,
+  UComponent_StaticComponent = 10,
+  UComponent_Camera = 11,
+  UComponent_Light = 12,
+  UComponent_SoundListener = 13,
+  UComponent_PhysicsComponent = 14,
+  UComponent_SoundComponent = 15
 };
 
 inline const char **EnumNamesUComponent() {
-  static const char *names[] = { "NONE", "CharacterComponent", "SpawnPointComponent", "AnimationComponent", "BodyComponent", "PlayerComponent", "SpellComponent", "RenderableComponent", "StaticComponent", "Camera", "Light", "SoundListener", "PhysicsComponent", "SoundComponent", nullptr };
+  static const char *names[] = { "NONE", "CharacterComponent", "AIComponent", "SpawnPointComponent", "SpawnComponent", "AnimationComponent", "BodyComponent", "PlayerComponent", "SpellComponent", "RenderableComponent", "StaticComponent", "Camera", "Light", "SoundListener", "PhysicsComponent", "SoundComponent", nullptr };
   return names;
 }
 
@@ -342,11 +345,8 @@ inline flatbuffers::Offset<GameState> CreateGameState(flatbuffers::FlatBufferBui
 }
 
 struct CharacterComponent FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  const XFBType::AI *ai() const { return GetPointer<const XFBType::AI *>(4); }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, 4 /* ai */) &&
-           verifier.VerifyTable(ai()) &&
            verifier.EndTable();
   }
 };
@@ -354,19 +354,45 @@ struct CharacterComponent FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
 struct CharacterComponentBuilder {
   flatbuffers::FlatBufferBuilder &fbb_;
   flatbuffers::uoffset_t start_;
-  void add_ai(flatbuffers::Offset<XFBType::AI> ai) { fbb_.AddOffset(4, ai); }
   CharacterComponentBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
   CharacterComponentBuilder &operator=(const CharacterComponentBuilder &);
   flatbuffers::Offset<CharacterComponent> Finish() {
-    auto o = flatbuffers::Offset<CharacterComponent>(fbb_.EndTable(start_, 1));
+    auto o = flatbuffers::Offset<CharacterComponent>(fbb_.EndTable(start_, 0));
     return o;
   }
 };
 
-inline flatbuffers::Offset<CharacterComponent> CreateCharacterComponent(flatbuffers::FlatBufferBuilder &_fbb,
-   flatbuffers::Offset<XFBType::AI> ai = 0) {
+inline flatbuffers::Offset<CharacterComponent> CreateCharacterComponent(flatbuffers::FlatBufferBuilder &_fbb) {
   CharacterComponentBuilder builder_(_fbb);
-  builder_.add_ai(ai);
+  return builder_.Finish();
+}
+
+struct AIComponent FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+  const flatbuffers::String *script() const { return GetPointer<const flatbuffers::String *>(4); }
+  bool Verify(flatbuffers::Verifier &verifier) const {
+    return VerifyTableStart(verifier) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, 4 /* script */) &&
+           verifier.Verify(script()) &&
+           verifier.EndTable();
+  }
+};
+
+struct AIComponentBuilder {
+  flatbuffers::FlatBufferBuilder &fbb_;
+  flatbuffers::uoffset_t start_;
+  void add_script(flatbuffers::Offset<flatbuffers::String> script) { fbb_.AddOffset(4, script); }
+  AIComponentBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
+  AIComponentBuilder &operator=(const AIComponentBuilder &);
+  flatbuffers::Offset<AIComponent> Finish() {
+    auto o = flatbuffers::Offset<AIComponent>(fbb_.EndTable(start_, 1));
+    return o;
+  }
+};
+
+inline flatbuffers::Offset<AIComponent> CreateAIComponent(flatbuffers::FlatBufferBuilder &_fbb,
+   flatbuffers::Offset<flatbuffers::String> script = 0) {
+  AIComponentBuilder builder_(_fbb);
+  builder_.add_script(script);
   return builder_.Finish();
 }
 
@@ -651,7 +677,9 @@ inline bool VerifyUComponent(flatbuffers::Verifier &verifier, const void *union_
   switch (type) {
     case UComponent_NONE: return true;
     case UComponent_CharacterComponent: return verifier.VerifyTable(reinterpret_cast<const CharacterComponent *>(union_obj));
+    case UComponent_AIComponent: return verifier.VerifyTable(reinterpret_cast<const AIComponent *>(union_obj));
     case UComponent_SpawnPointComponent: return verifier.VerifyTable(reinterpret_cast<const XFBType::SpawnPointComponent *>(union_obj));
+    case UComponent_SpawnComponent: return verifier.VerifyTable(reinterpret_cast<const XFBType::SpawnComponent *>(union_obj));
     case UComponent_AnimationComponent: return verifier.VerifyTable(reinterpret_cast<const XFBType::AnimationComponent *>(union_obj));
     case UComponent_BodyComponent: return verifier.VerifyTable(reinterpret_cast<const XFBType::BodyComponent *>(union_obj));
     case UComponent_PlayerComponent: return verifier.VerifyTable(reinterpret_cast<const PlayerComponent *>(union_obj));

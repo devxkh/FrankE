@@ -1,0 +1,115 @@
+// example IDL file
+
+
+namespace GORILLA_GUI_STATE;
+
+attribute "priority";
+
+enum Color : byte { Red = 1, Green, Blue }
+
+union Any { Monster, Weapon, Pickup }
+
+struct Vec3 {
+  x:float;
+  y:float;
+  z:float;
+}
+
+struct Margin {
+  l:short;
+  t:short;
+  r:short;
+  b:short;
+}
+
+
+struct Padding {
+  l:short;
+  t:short;
+  r:short;
+  b:short;
+}
+
+
+  pos:Vec3;
+  mana:short = 150;
+  hp:short = 100;
+  name:string;
+  friendly:bool = false (deprecated, priority: 1);
+  inventory:[ubyte];
+  color:Color = Blue;
+  test:Any;
+
+
+//---------------------- Style ---------------------
+table Style
+{
+
+}
+
+
+//---------------------- Rectangle ---------------------
+
+
+
+//---------------------- Menu Item ---------------------
+
+//---------------------- Menu ---------------------
+
+
+
+//---------------------- Navbar Item ---------------------
+
+//---------------------- Navbar ---------------------
+
+
+//---------------------- Stackpanel ---------------------
+
+
+
+//---------------------- Wrappanel ---------------------
+
+
+//---------------------- Button ---------------------
+
+
+
+//---------------------- Image ---------------------
+table Image
+{
+	name:string;
+	atlas:string;
+}
+
+
+//---------------------- Panel2D ---------------------
+table Panel2D
+{
+	name:string;
+	
+	//following values overwrites default style
+	width:short; 	
+	height:short; 	
+	style:string;   
+	margin:Margin;	
+	padding:Padding;
+	bgimage:string;
+}
+
+
+//---------------------- Panel3D ---------------------
+
+//---------------------- State ---------------------
+struct State {
+  name:string (priority: 1);;
+  panels2D:[Panel2D] (priority: 2);
+  panels3D:[Panel3D] (priority: 3);
+  rectangles:[Rectangle] (priority: 4);
+  polygons:[Polygon] (priority: 5);
+  menus:[Menu](priority: 6);
+  navbars:[Navbar];
+  buttons:[Button];
+  images:[Image];  
+}
+
+root_type State;

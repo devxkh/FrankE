@@ -168,36 +168,36 @@ set(XESystems_SOURCES
 	  ${SRCROOT}/XEngine/Systems/FreeLookCameraSystem.cpp
 	  ${SRCROOT}/XEngine/Systems/PhysicsSystem.cpp
 	  ${SRCROOT}/XEngine/Systems/RenderBodySystem.cpp
-	
-
+	  ${SRCROOT}/XEngine/Systems/SpawnSystem.cpp
 )
 source_group("src\\systems" FILES ${XESystems_SOURCES})
 
 
 # all header files
 set(XEComponents_HEADER
-#	 ${INCROOT}/XEngine/Components/Player.hpp
-	 ${INCROOT}/XEngine/Components/NetId.hpp
-#	 ${INCROOT}/XEngine/Components/Character.hpp
-	 ${INCROOT}/XEngine/Components/SpawnPoint.hpp
-     ${INCROOT}/XEngine/Components/Controller.hpp
-     ${INCROOT}/XEngine/Components/CameraFree.hpp
-	   ${INCROOT}/XEngine/Components/CameraFix.hpp
- ${INCROOT}/XEngine/Components/Body.hpp
+	${INCROOT}/XEngine/Components/NetId.hpp
+	${INCROOT}/XEngine/Components/SpawnPointComponent.hpp
+    ${INCROOT}/XEngine/Components/SpawnComponent.hpp
+	${INCROOT}/XEngine/Components/Controller.hpp
+    ${INCROOT}/XEngine/Components/CameraFree.hpp
+	${INCROOT}/XEngine/Components/CameraFix.hpp
+	${INCROOT}/XEngine/Components/Body.hpp
 	${INCROOT}/XEngine/Components/AnimationComponent.hpp
 	${INCROOT}/XEngine/Components/ScreenComponent.hpp
-		${INCROOT}/XEngine/Components/PhysicsComponents.hpp
+	${INCROOT}/XEngine/Components/PhysicsComponents.hpp
 )
 source_group("include\\components" FILES ${XEComponents_HEADER})
 
 set(XEComponents_SOURCES
-	 ${SRCROOT}/XEngine/Components/Controller.cpp
-		 ${SRCROOT}/XEngine/Components/Body.cpp
-		 ${SRCROOT}/XEngine/Components/CameraFree.cpp
-			 ${SRCROOT}/XEngine/Components/CameraFix.cpp
- ${SRCROOT}/XEngine/Components/AnimationComponent.cpp
-	 ${SRCROOT}/XEngine/Components/ScreenComponent.cpp 
+	${SRCROOT}/XEngine/Components/Controller.cpp
+	${SRCROOT}/XEngine/Components/Body.cpp
+	${SRCROOT}/XEngine/Components/CameraFree.cpp
+	${SRCROOT}/XEngine/Components/CameraFix.cpp
+	${SRCROOT}/XEngine/Components/AnimationComponent.cpp
+	${SRCROOT}/XEngine/Components/ScreenComponent.cpp 
 	${SRCROOT}/XEngine/Components/PhysicsComponent.cpp
+	${SRCROOT}/XEngine/Components/SpawnPointComponent.cpp
+	${SRCROOT}/XEngine/Components/SpawnComponent.cpp
 )
 source_group("src\\components" FILES ${XEComponents_SOURCES})
 

@@ -1,0 +1,56 @@
+namespace XFBType;
+
+table Sprite {
+	width:float;
+	height:float;
+	posX:float;	
+	posY:float;		
+	name:string;		
+}
+
+///Distances between two characters next to each other.
+table KerningData
+{
+	character:uint;
+	kerning:float;
+}
+
+///Texture and size information about a single character loaded from a TextureAtlas.
+table Glyph {
+	code:uint;
+	uvTop:float;
+	uvBottom:float;
+	uvWidth:float;
+	uvHeight:float;
+	uvLeft:float; 
+	uvRight:float;
+	glyphWidth:float;
+	glyphHeight:float;
+	glyphAdvance:float;
+	verticalOffset:float;
+	kerningList:[KerningData];
+}
+
+table Font
+{
+	id:ushort;
+	glyphs:[Glyph];
+	rangeBegin:float; 
+	rangeEnd:float;
+	spaceLength:float;
+	lineHeight:float;
+	baseline:float;
+	lineSpacing:float;
+	letterSpacing:float;
+	monoWidth:float;
+}
+
+table Atlas
+{
+	name:string; //atlasname
+	sprites:[Sprite];
+	fonts:[Font];
+	texture:string; //texturename
+}
+
+root_type Atlas;

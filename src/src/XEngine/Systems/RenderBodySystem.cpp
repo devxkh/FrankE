@@ -25,6 +25,8 @@ namespace XE
 
 		for (entityx::Entity entity : es.entities_with_components(body, renderable)) {
 			
+			auto debug =  body->getPosition();
+
 			if (body->isDirty())
 			{
 				//TODO use transformation for performance?

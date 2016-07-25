@@ -1,0 +1,156 @@
+// example IDL file
+
+
+//http://www.ogre3d.org/tikiwiki/tiki-index.php?page=Compositor#Script_Manual
+
+namespace OgreCompositor;
+
+attribute "priority";
+
+enum Color : byte { Red = 1, Green, Blue }
+
+union Any { Monster, Weapon, Pickup }
+
+struct Vec3 {
+  x:float;
+  y:float;
+  z:float;
+}
+
+
+  pos:Vec3;
+  mana:short = 150;
+  hp:short = 100;
+  name:string;
+  friendly:bool = false (deprecated, priority: 1);
+  inventory:[ubyte];
+  color:Color = Blue;
+  test:Any;
+
+
+enum PixelFormat 
+{
+	PF_A8R8G8B8,
+	PF_R8G8B8A8,
+	PF_R8G8B8,
+	PF_FLOAT16_RGBA,
+	PF_FLOAT16_RGB,
+	PF_FLOAT16_R,
+	PF_FLOAT32_RGBA,
+	PF_FLOAT32_RGB,
+	PF_FLOAT32_R'
+}
+//---------------------- Pass ---------------------
+enum PassTypes
+{
+	render_quad,
+	clear,
+	stencil,
+	render_scene
+}
+
+table PassMaterial
+{
+	material:string;
+}
+
+table PassInput
+{
+	id:short;
+	input:string;
+}
+
+enum ClearOptions
+{
+	Buffers,
+	ColourValue,
+	DepthValue,
+	StencilValue
+}
+
+table ClearSection
+{
+
+}
+
+table StencilSection
+{
+
+}
+
+table Pass
+{
+	PassType:PassTypes;
+	//Pass - Options
+	PassMaterial:PassMaterial;
+	PassInput:PassInput;
+	ClearSection:ClearSection;
+	StencilSection:StencilSection;
+}
+
+
+//---------------------- Target ---------------------
+enum TargetInputOptions
+{
+	none,
+	previous
+}
+
+table TargetInput
+{
+	TargetInputOptions:TargetInputOptions;
+}
+
+
+table VisibilityMask
+{
+	mask:string;
+}
+
+table LodBias
+{
+	lod_bias:string;
+}
+
+table MaterialScheme
+{
+	material_scheme:string;
+}
+
+table TargetOutput
+{
+array ...	TargetInput:TargetInput;
+	Pass:Pass;
+}
+
+table Target
+{
+	TargetInput:TargetInput;
+	OnlyInitial:bool = false;
+	VisibilityMask:VisibilityMask;
+	LodBias:LodBias;
+	MaterialScheme:MaterialScheme;
+}
+
+
+//---------------------- Technique ---------------------
+table Technique {
+  texture:Texture;
+  target:Target;
+  target_output:TargetOutput;
+}
+
+table Texture {
+  name:string;
+  widthoption:string = target_width;
+  heightoption:string = target_height;
+}
+
+
+//---------------------- Compositor ---------------------
+struct Compositor {
+  name:string;
+  Technique:Technique;
+}
+
+root_type Compositor;

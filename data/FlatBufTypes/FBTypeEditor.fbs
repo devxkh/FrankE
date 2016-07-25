@@ -1,0 +1,25 @@
+namespace FBEditorType;
+
+table UIState	
+{
+	name:string;
+	triggers:Trigger;
+}
+
+table Trigger
+{
+	name:string;
+	luascript:string;
+}
+
+table StateData {
+	name:string;
+	triggers:Trigger;
+	UIStates:UIState;
+}
+
+table States
+{
+	states:StateData;
+}
+

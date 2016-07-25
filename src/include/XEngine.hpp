@@ -31,11 +31,11 @@
 
 
 #include <XEngine/Systems/RenderBodySystem.hpp>
-#include <XEngine/Components/SpawnPoint.hpp>
 #include <XEngine/Systems/EntityRenderSystem.hpp>
 #include <XEngine/Systems/FreeLookCameraSystem.hpp>
 //#include <XEngine/Systems/ControllerSystem.hpp>
 #include <XEngine/Systems/AnimationSystem.hpp>
+#include <XEngine/Systems/SpawnSystem.hpp>
 #include <XEngine/Components/CameraFree.hpp>
 #include <XEngine/Components/CameraFix.hpp>
 #include <XEngine/Components/Controller.hpp>
@@ -45,7 +45,8 @@
 //#include <XEngine/Components/Light.hpp>
 
 #include <XEngine/Components/PhysicsComponents.hpp>
-#include <XEngine/Components/SpawnPoint.hpp>
+#include <XEngine/Components/SpawnComponent.hpp>
+#include <XEngine/Components/SpawnPointComponent.hpp>
 
 #include <XERenderer/CameraRenderable.hpp>
 #include <XEngine/Systems/PhysicsSystem.hpp>
