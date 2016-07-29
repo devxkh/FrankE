@@ -1,5 +1,4 @@
-#ifndef XE_INTERFACE_SCRIPTS_HPP
-#define XE_INTERFACE_SCRIPTS_HPP
+#pragma once
 
 ////////////////////////////////////////////////////////////
 // Headers
@@ -7,8 +6,6 @@
 
 #include <XEScripts/LUAEngine.h> 
 
-
-#endif // XE_INTERFACE_SCRIPTS_HPP
 
 ////////////////////////////////////////////////////////////
 /// \defgroup audio Audio module

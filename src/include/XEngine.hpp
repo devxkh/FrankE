@@ -29,7 +29,6 @@
 #include <XEController.hpp>
 #include <XEAnimation.hpp>
 
-
 #include <XEngine/Systems/RenderBodySystem.hpp>
 #include <XEngine/Systems/EntityRenderSystem.hpp>
 #include <XEngine/Systems/FreeLookCameraSystem.hpp>
@@ -41,6 +40,7 @@
 #include <XEngine/Components/Controller.hpp>
 #include <XEngine/Components/ScreenComponent.hpp>
 #include <XEngine/Components/NetId.hpp>
+#include <XEngine/Components/Body.hpp>
 #include <XEngine/Components/AnimationComponent.hpp>
 //#include <XEngine/Components/Light.hpp>
 

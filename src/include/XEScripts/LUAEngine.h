@@ -1,5 +1,4 @@
-#ifndef _LUAENGINE_h_
-#define _LUAENGINE_h_
+#pragma once
 
 #include <iostream>
 
@@ -52,5 +51,3 @@ private:
 };
 
 } // ns XE
-
-#endif

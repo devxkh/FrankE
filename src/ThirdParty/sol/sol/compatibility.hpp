@@ -26,7 +26,11 @@
 // comes from https://github.com/keplerproject/lua-compat-5.2
 // but has been modified in many places for use with Sol and luajit,
 // though the core abstractions remain the same
+
 #include "compatibility/version.hpp"
+
+#ifndef SOL_NO_COMPAT
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -37,5 +41,7 @@ extern "C" {
 #ifdef __cplusplus
 }
 #endif
+
+#endif // SOL_NO_COMPAT
 
 #endif // SOL_COMPATIBILITY_HPP

@@ -19,37 +19,41 @@
 // IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-#ifndef SOL_ERROR_HPP
-#define SOL_ERROR_HPP
+#ifndef SOL_FUNCTION_TYPES_OVERLOAD_HPP
+#define SOL_FUNCTION_TYPES_OVERLOAD_HPP
 
-#include <stdexcept>
-#include <string>
+#include "overload.hpp"
+#include "call.hpp"
+#include "function_types_core.hpp"
 
 namespace sol {
-	namespace detail {
-		struct direct_error_tag {};
-		const auto direct_error = direct_error_tag{};
-	} // detail
-	
-	class error : public std::runtime_error {
-	private:
-		// Because VC++ is a fuccboi
-		std::string w;
-	public:
-		error(const std::string& str) : error(detail::direct_error, "lua: error: " + str) {}
-		error(detail::direct_error_tag, const std::string& str) : std::runtime_error(""), w(str) {}
-		error(detail::direct_error_tag, std::string&& str) : std::runtime_error(""), w(std::move(str)) {}
+	namespace function_detail {
+		template <typename... Functions>
+		struct overloaded_function {
+			typedef std::tuple<Functions...> overload_list;
+			typedef std::make_index_sequence<sizeof...(Functions)> indices;
+			overload_list overloads;
 
-		error(const error& e) = default;
-		error(error&& e) = default;
-		error& operator=(const error& e) = default;
-		error& operator=(error&& e) = default;
+			overloaded_function(overload_list set)
+				: overloads(std::move(set)) {}
 
-		virtual const char* what() const noexcept override {
-			return w.c_str();
-		}
-	};
+			overloaded_function(Functions... fxs)
+				: overloads(fxs...) {
 
+			}
+
+			template <typename Fx, std::size_t I, typename... R, typename... Args>
+			int call(types<Fx>, index_value<I>, types<R...>, types<Args...>, lua_State* L, int, int) {
+				auto& func = std::get<I>(overloads);
+				return call_detail::call_wrapped<void, true, false>(L, func);
+			}
+
+			int operator()(lua_State* L) {
+				auto mfx = [&](auto&&... args) { return this->call(std::forward<decltype(args)>(args)...); };
+				return call_detail::overload_match<Functions...>(mfx, L, 1);
+			}
+		};
+	} // function_detail
 } // sol
 
-#endif // SOL_ERROR_HPP
+#endif // SOL_FUNCTION_TYPES_OVERLOAD_HPP

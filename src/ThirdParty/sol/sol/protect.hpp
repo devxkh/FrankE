@@ -19,37 +19,33 @@
 // IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-#ifndef SOL_ERROR_HPP
-#define SOL_ERROR_HPP
+#ifndef SOL_PROTECT_HPP
+#define SOL_PROTECT_HPP
 
-#include <stdexcept>
-#include <string>
+#include "traits.hpp"
+#include <utility>
 
 namespace sol {
-	namespace detail {
-		struct direct_error_tag {};
-		const auto direct_error = direct_error_tag{};
-	} // detail
 	
-	class error : public std::runtime_error {
-	private:
-		// Because VC++ is a fuccboi
-		std::string w;
-	public:
-		error(const std::string& str) : error(detail::direct_error, "lua: error: " + str) {}
-		error(detail::direct_error_tag, const std::string& str) : std::runtime_error(""), w(str) {}
-		error(detail::direct_error_tag, std::string&& str) : std::runtime_error(""), w(std::move(str)) {}
+	template <typename T>
+	struct protect_t {
+		T value;
 
-		error(const error& e) = default;
-		error(error&& e) = default;
-		error& operator=(const error& e) = default;
-		error& operator=(error&& e) = default;
+		template <typename Arg, typename... Args, meta::disable<std::is_same<protect_t, meta::unqualified_t<Arg>>> = meta::enabler>
+		protect_t(Arg&& arg, Args&&... args) : value(std::forward<Arg>(arg), std::forward<Args>(args)...) {}
 
-		virtual const char* what() const noexcept override {
-			return w.c_str();
-		}
+		protect_t(const protect_t&) = default;
+		protect_t(protect_t&&) = default;
+		protect_t& operator=(const protect_t&) = default;
+		protect_t& operator=(protect_t&&) = default;
+
 	};
+
+	template <typename T>
+	auto protect(T&& value) {
+		return protect_t<std::decay_t<T>>(std::forward<T>(value));
+	}
 
 } // sol
 
-#endif // SOL_ERROR_HPP
+#endif // SOL_PROTECT_HPP

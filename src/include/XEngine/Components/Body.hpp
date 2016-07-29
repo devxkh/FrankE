@@ -1,5 +1,4 @@
-#ifndef __BODYCOMPONENT_HPP__
-#define __BODYCOMPONENT_HPP__
+#pragma once
 
 #include <XESystem/SystemConfig.hpp>
 #include <XESystem/TransportData.hpp>
@@ -541,5 +540,3 @@ namespace XE
 	};
 
 }
-
-#endif // __BODYCOMPONENT_HPP__
