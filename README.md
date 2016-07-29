@@ -9,6 +9,7 @@ Frankenstein 3D Engine (MIT) - x64
  - lua scripting (sol2)
  - binary data files (flatbuffer)
  - database (sqlite)
+ - sound (FMOD)
  
  ### Building
 
