@@ -7,6 +7,14 @@ Frankenstein 3D Engine (MIT) - x64
  - entity componentsystem (entityx)
  - simple UI (based on / heavy modified SFGUI)
  - lua scripting (sol2)
+ - binary data files (flatbuffer)
+ - database (sqlite)
+ 
+ ### Building
+
+ use CMakeLists.txt 
+
+ TODO: currently there are still some special [cmake settings](https://github.com/devxkh/FrankE/blob/master/doc/cmakeInfo.txt) necessary
 
 # EDITOR
 - [VEX](https://github.com/devxkh/VEX)  Client/Server Editor(WPF) for FrankE  
