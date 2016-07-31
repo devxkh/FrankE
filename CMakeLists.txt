@@ -4,6 +4,16 @@ cmake_minimum_required (VERSION 2.8)
 #--------------------------- START SFML -----------------------------------
 
 
+# set a default build type if none was provided
+# this has to be done before the project() instruction!
+#KH   sfml_set_option(CMAKE_BUILD_TYPE Release STRING "Choose the type of build (Debug or Release)")
+
+# Maps to Visual Studio solution file (XEngineSln.sln)
+# The solution will have all targets (exe, lib, dll) 
+# as Visual Studio projects (.vcproj)
+project (FrankE)
+
+ 
 message("ProjectsourceDir- start " ${PROJECT_SOURCE_DIR})
 
 # include XEngine commons
@@ -17,16 +27,7 @@ macro(sfml_set_option var default type docstring)
     set(${var} ${${var}} CACHE ${type} ${docstring} FORCE)
 endmacro()
 
-# set a default build type if none was provided
-# this has to be done before the project() instruction!
-#KH   sfml_set_option(CMAKE_BUILD_TYPE Release STRING "Choose the type of build (Debug or Release)")
 
-# Maps to Visual Studio solution file (XEngineSln.sln)
-# The solution will have all targets (exe, lib, dll) 
-# as Visual Studio projects (.vcproj)
-project (XEngineSln)
-
- 
 # include the configuration file
 include(${PROJECT_SOURCE_DIR}/cmake/Config.cmake)
 

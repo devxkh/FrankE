@@ -3,6 +3,8 @@
 
 #include_directories (F:/Projekte/boost_1_60_0)
 
+#message("${PROJECT_SOURCE_DIR}:"  ${PROJECT_SOURCE_DIR})
+
 include_directories (${PROJECT_SOURCE_DIR})
 include_directories (${PROJECT_SOURCE_DIR}/src)
 include_directories (${PROJECT_SOURCE_DIR}/src/include)
@@ -45,6 +47,8 @@ include_directories(${PROJECT_SOURCE_DIR}/../FrankE/extlibs/headers)
 #include_directories (${PROJECT_SOURCE_DIR}/../FrankE/extlibs/headers/fmod)
 
 # ogre buildsettings
-include_directories (${PROJECT_BINARY_DIR}/FrankE/src/Ogre/include)
+include_directories (${PROJECT_BINARY_DIR}/src/Ogre/include)
 
-include_directories (${PROJECT_BINARY_DIR}/FrankE/src/ThirdParty/SDL/include)
+#sdl build settings
+include_directories (${PROJECT_BINARY_DIR}/src/ThirdParty/SDL/include) 
+include_directories (${PROJECT_SOURCE_DIR}/../FrankE/src/ThirdParty/SDL/include)

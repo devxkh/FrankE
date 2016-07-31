@@ -2,8 +2,8 @@
 
 #include <XEngine.hpp>
 
-#include "../DAL/Controllers_generated.h"
-#include "../DAL/Netmsg_generated.h"
+#include "Controllers_generated.h"
+#include "Netmsg_generated.h"
 
 namespace XET
 {
