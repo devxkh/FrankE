@@ -9,7 +9,6 @@
 namespace FBSettings {
 
 struct Graphics;
-struct ResourceData;
 struct Settings;
 
 enum FSAA {
@@ -53,68 +52,15 @@ inline flatbuffers::Offset<Graphics> CreateGraphics(flatbuffers::FlatBufferBuild
 }
 
 ///resource folders
-struct ResourceData FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  const flatbuffers::String *hlmsDataFolder() const { return GetPointer<const flatbuffers::String *>(4); }
-  const flatbuffers::String *dbDataFolder() const { return GetPointer<const flatbuffers::String *>(6); }
-  const flatbuffers::String *assetsFolder() const { return GetPointer<const flatbuffers::String *>(8); }
-  const flatbuffers::String *dbFileName() const { return GetPointer<const flatbuffers::String *>(10); }
-  bool Verify(flatbuffers::Verifier &verifier) const {
-    return VerifyTableStart(verifier) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, 4 /* hlmsDataFolder */) &&
-           verifier.Verify(hlmsDataFolder()) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, 6 /* dbDataFolder */) &&
-           verifier.Verify(dbDataFolder()) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, 8 /* assetsFolder */) &&
-           verifier.Verify(assetsFolder()) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, 10 /* dbFileName */) &&
-           verifier.Verify(dbFileName()) &&
-           verifier.EndTable();
-  }
-};
-
-struct ResourceDataBuilder {
-  flatbuffers::FlatBufferBuilder &fbb_;
-  flatbuffers::uoffset_t start_;
-  void add_hlmsDataFolder(flatbuffers::Offset<flatbuffers::String> hlmsDataFolder) { fbb_.AddOffset(4, hlmsDataFolder); }
-  void add_dbDataFolder(flatbuffers::Offset<flatbuffers::String> dbDataFolder) { fbb_.AddOffset(6, dbDataFolder); }
-  void add_assetsFolder(flatbuffers::Offset<flatbuffers::String> assetsFolder) { fbb_.AddOffset(8, assetsFolder); }
-  void add_dbFileName(flatbuffers::Offset<flatbuffers::String> dbFileName) { fbb_.AddOffset(10, dbFileName); }
-  ResourceDataBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
-  ResourceDataBuilder &operator=(const ResourceDataBuilder &);
-  flatbuffers::Offset<ResourceData> Finish() {
-    auto o = flatbuffers::Offset<ResourceData>(fbb_.EndTable(start_, 4));
-    return o;
-  }
-};
-
-inline flatbuffers::Offset<ResourceData> CreateResourceData(flatbuffers::FlatBufferBuilder &_fbb,
-   flatbuffers::Offset<flatbuffers::String> hlmsDataFolder = 0,
-   flatbuffers::Offset<flatbuffers::String> dbDataFolder = 0,
-   flatbuffers::Offset<flatbuffers::String> assetsFolder = 0,
-   flatbuffers::Offset<flatbuffers::String> dbFileName = 0) {
-  ResourceDataBuilder builder_(_fbb);
-  builder_.add_dbFileName(dbFileName);
-  builder_.add_assetsFolder(assetsFolder);
-  builder_.add_dbDataFolder(dbDataFolder);
-  builder_.add_hlmsDataFolder(hlmsDataFolder);
-  return builder_.Finish();
-}
-
 struct Settings FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   const Graphics *graphics() const { return GetPointer<const Graphics *>(4); }
-  const ResourceData *resourceData() const { return GetPointer<const ResourceData *>(6); }
-  const flatbuffers::String *windowTitle() const { return GetPointer<const flatbuffers::String *>(8); }
-  const flatbuffers::String *inputMapFilename() const { return GetPointer<const flatbuffers::String *>(10); }
+  const flatbuffers::String *windowTitle() const { return GetPointer<const flatbuffers::String *>(6); }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
            VerifyField<flatbuffers::uoffset_t>(verifier, 4 /* graphics */) &&
            verifier.VerifyTable(graphics()) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, 6 /* resourceData */) &&
-           verifier.VerifyTable(resourceData()) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, 8 /* windowTitle */) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, 6 /* windowTitle */) &&
            verifier.Verify(windowTitle()) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, 10 /* inputMapFilename */) &&
-           verifier.Verify(inputMapFilename()) &&
            verifier.EndTable();
   }
 };
@@ -123,26 +69,20 @@ struct SettingsBuilder {
   flatbuffers::FlatBufferBuilder &fbb_;
   flatbuffers::uoffset_t start_;
   void add_graphics(flatbuffers::Offset<Graphics> graphics) { fbb_.AddOffset(4, graphics); }
-  void add_resourceData(flatbuffers::Offset<ResourceData> resourceData) { fbb_.AddOffset(6, resourceData); }
-  void add_windowTitle(flatbuffers::Offset<flatbuffers::String> windowTitle) { fbb_.AddOffset(8, windowTitle); }
-  void add_inputMapFilename(flatbuffers::Offset<flatbuffers::String> inputMapFilename) { fbb_.AddOffset(10, inputMapFilename); }
+  void add_windowTitle(flatbuffers::Offset<flatbuffers::String> windowTitle) { fbb_.AddOffset(6, windowTitle); }
   SettingsBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
   SettingsBuilder &operator=(const SettingsBuilder &);
   flatbuffers::Offset<Settings> Finish() {
-    auto o = flatbuffers::Offset<Settings>(fbb_.EndTable(start_, 4));
+    auto o = flatbuffers::Offset<Settings>(fbb_.EndTable(start_, 2));
     return o;
   }
 };
 
 inline flatbuffers::Offset<Settings> CreateSettings(flatbuffers::FlatBufferBuilder &_fbb,
    flatbuffers::Offset<Graphics> graphics = 0,
-   flatbuffers::Offset<ResourceData> resourceData = 0,
-   flatbuffers::Offset<flatbuffers::String> windowTitle = 0,
-   flatbuffers::Offset<flatbuffers::String> inputMapFilename = 0) {
+   flatbuffers::Offset<flatbuffers::String> windowTitle = 0) {
   SettingsBuilder builder_(_fbb);
-  builder_.add_inputMapFilename(inputMapFilename);
   builder_.add_windowTitle(windowTitle);
-  builder_.add_resourceData(resourceData);
   builder_.add_graphics(graphics);
   return builder_.Finish();
 }

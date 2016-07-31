@@ -282,7 +282,8 @@ namespace XE
 			//		Ogre::ResourceGroupManager::getSingleton().addResourceLocation(arch, type, sec, true);
 			//	}
 			//}
-			Ogre::ResourceGroupManager::getSingleton().addResourceLocation("F:/Projekte/coop/XGame/data/assets","FileSystem", "General", true, true);
+			//Ogre::ResourceGroupManager::getSingleton().addResourceLocation("F:/Projekte/coop/XGame/data/assets","FileSystem", "General", true, true);
+			Ogre::ResourceGroupManager::getSingleton().addResourceLocation(settings.dataRootFolder + "/assets", "FileSystem", "General", true, true);
 
 
 			//initialise for gorilla shaders intitialization

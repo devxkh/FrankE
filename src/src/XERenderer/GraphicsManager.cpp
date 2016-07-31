@@ -177,7 +177,7 @@ namespace XE
 	{
 		getIntoRendererQueue().push([this]() {
 
-			Ogre::String dataFolder = mEngine->settings.FBSettings()->resourceData()->hlmsDataFolder()->c_str();
+			Ogre::String dataFolder = mEngine->settings.dataRootFolder + "/Hlms";
 
 			if (dataFolder.empty())
 				dataFolder = "./";

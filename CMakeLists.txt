@@ -16,6 +16,8 @@ project (FrankE)
  
 message("ProjectsourceDir- start " ${PROJECT_SOURCE_DIR})
 
+set(FrankESource ${PROJECT_SOURCE_DIR})
+
 # include XEngine commons
 include(cmake/Common.cmake)
 
