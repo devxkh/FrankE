@@ -22,6 +22,8 @@ ControllerState::ControllerState(XE::XEngine& engine, bool replace)
 	XE::CameraRenderable* camRenderable = entity.assign<XE::CameraRenderable>(0, engine.getGraphicsManager(), engine.getScene()).get();
 	XE::CameraFreeComponent* camera = entity.assign<XE::CameraFreeComponent>(*camRenderable, *body).get();
 
+	body->setPosition(0, 10, 0);
+
 	XET::TestControllerComponent* ctrl = entity.assign<XET::TestControllerComponent>(0, engine, engine.getGraphicsManager().getWindow(), true).get();
 
 	XE::ScreenComponent* screenComp = entity.assign<XE::ScreenComponent>(*camRenderable, engine.getGraphicsManager().getWindow()).get(); //createScreen(); //workspace needed for screen
