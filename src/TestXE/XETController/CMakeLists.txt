@@ -53,38 +53,6 @@ set(XETController_HEADER
 # Empty name lists them directly under the .vcproj
 source_group("include" FILES ${XETController_HEADER})
 
-
-# Properties->C/C++->General->Additional Include Directories
-include_directories (${PROJECT_SOURCE_DIR}/src/TestXE/XETController)
-include_directories (${PROJECT_SOURCE_DIR})
-include_directories (${PROJECT_SOURCE_DIR}/src/include)
-include_directories (${PROJECT_SOURCE_DIR}/../XEngine/src/include/XEDAL/Objects) #flatbuffer file
-include_directories (${PROJECT_SOURCE_DIR}/src)
-include_directories (${PROJECT_SOURCE_DIR}/src/src)
-include_directories (${PROJECT_SOURCE_DIR}/src/ThirdParty)
-include_directories (${PROJECT_SOURCE_DIR}/src/ThirdParty/sfml/include)
-include_directories (${PROJECT_SOURCE_DIR}/src/ThirdParty/thor/include)
-include_directories (${PROJECT_SOURCE_DIR}/src/include/XEAnimation)
-include_directories (${PROJECT_SOURCE_DIR}/src/Ogre/OgreMain/include)
-include_directories (${PROJECT_SOURCE_DIR}/src/Ogre/Components/Terrain/include)
-include_directories (${PROJECT_SOURCE_DIR}/src/ThirdParty/bullet)
-#include_directories (${PROJECT_SOURCE_DIR}/src/ThirdParty/recastnav/Recast/Include)
-#include_directories (${PROJECT_SOURCE_DIR}/src/ThirdParty/recastnav/DebugUtils/Include)
-#include_directories (${PROJECT_SOURCE_DIR}/src/ThirdParty/recastnav/Detour/Include)
-#include_directories (${PROJECT_SOURCE_DIR}/src/ThirdParty/recastnav/DetourCrowd/Include)
-#include_directories (${PROJECT_SOURCE_DIR}/src/ThirdParty/recastnav/DetourTileCache/Include)
-#include_directories (${PROJECT_SOURCE_DIR}/src/ThirdParty/recastnav/OgreCrowd/Include)
-#include_directories (${PROJECT_SOURCE_DIR}/src/ThirdParty/recastnav)
-
-
-include_directories (${PROJECT_SOURCE_DIR}/../XEngine/src/ThirdParty/Lua/src)
-include_directories (${PROJECT_SOURCE_DIR}/../XEngine/src/ThirdParty/LuaJIT/src)
-include_directories (${PROJECT_SOURCE_DIR}/src/ThirdParty/google/flatbuffers/include)
-include_directories(${PROJECT_SOURCE_DIR}/src/ThirdParty/enet/include)
-
-# ogre buildsettings
-include_directories (${PROJECT_BINARY_DIR}/src/Ogre/include)
-
 # Set Properties->General->Configuration Type to Application(.exe)
 # Creates app.exe with the listed sources (main.cxx)
 # Adds sources to the Solution Explorer

@@ -9,6 +9,7 @@ SFML_USE_STATIC_STD_LIBS = true
 OGRE_BUILD_COMPONENT_OVERLAY  false
 OGRE_BUILD_TOOLS false
 OGRE_INSTALL_SAMPLES false
+OGRE_CONFIG_ENABLE_STBI = true
 
 zlib lib  -> path
 physfs lib  -> path
