@@ -32,8 +32,8 @@ namespace XE {
 		, m_text(parentLayer)
 		, m_cursor(parentLayer, 0, 0, 0, 0)
 	{
-		m_pane.setBackground(Ogre::ColourValue::Green); //debug
-		m_pane.setBackgroundImage("quickmenu_restart_hover.png");
+		m_pane.setBackground(Ogre::ColourValue::Black); //debug
+	//	m_pane.setBackgroundImage("quickmenu_restart_hover.png");
 	}
 
 	Entry::Ptr Entry::Create(WLayer& parentLayer, const sf::String& text) {
