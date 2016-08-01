@@ -58,7 +58,6 @@ namespace XE
 	{
 	//	auto test = m_guiRenderer.GetTextStringMetrics(text,20);
 
-
 		m_text = text;
 
 

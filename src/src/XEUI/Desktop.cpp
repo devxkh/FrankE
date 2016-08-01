@@ -108,8 +108,8 @@ namespace XE {
 
 	void Desktop::onTextEvent(const SDL_TextInputEvent& text) {
 		//dont use an iterator here! it's possible widget deletion happens while iterating here
-		for (int index = 0; index < static_cast<int>(m_children.size()); ++index) {
-			Widget::Ptr widget(m_children[static_cast<std::size_t>(index)]);
+		for (int index = 0; index < static_cast<int>(m_entries.size()); ++index) {
+			Widget::Ptr widget(m_entries[static_cast<std::size_t>(index)]);
 
 			// Skip widget if not visible or is insensitive.
 			if (!widget->IsLocallyVisible() || widget->GetState() == Widget::State::INSENSITIVE) {

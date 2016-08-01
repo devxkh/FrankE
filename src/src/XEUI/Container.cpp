@@ -19,6 +19,24 @@ namespace XE {
 			widget->SetParent(Widget::Ptr());
 		}
 	}
+	
+	void Container::AddEntry(Widget::Ptr widget) {
+		if (IsChild(widget))
+			return;
+
+		m_entries.push_back(widget);
+
+		widget->SetParent(shared_from_this());
+	}
+
+	void Container::RemoveEntry(Widget::Ptr widget) {
+		WidgetsList::iterator iter(std::find(m_entries.begin(), m_entries.end(), widget));
+
+		if (iter != m_entries.end()) {
+			m_entries.erase(iter);
+			widget->SetParent(Widget::Ptr());
+		}
+	}
 
 	void Container::RemoveAll() {
 		while (!m_children.empty()) {

@@ -18,6 +18,7 @@ namespace XET
 
 		controller.actionmap[ControllerSettings::ActionType::ActionType_TextEntered] = XE::Action(SDL_TEXTINPUT);
 		controller.actionmap[ControllerSettings::ActionType::ActionType_KeyPressed] = XE::Action(SDL_KEYUP);
+		controller.actionmap[ControllerSettings::ActionType::ActionType_KeyDown] = XE::Action(SDL_KEYDOWN);
 
 		// Resize: Change window size (single event)
 		controller.actionmap[ControllerSettings::ActionType::ActionType_Resized] = XE::Action(SDL_WINDOWEVENT);

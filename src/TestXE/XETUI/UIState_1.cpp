@@ -36,7 +36,8 @@ UIState_1::UIState_1(const XE::Uint16& id, entityx::Entity entity, bool replace 
 	: UIState(id, replace)
 	, m_entity(entity)
 {
-	XE::WLayer& layer = entity.component<XE::ScreenComponent>()->wLayer;
+	auto screen = entity.component<XE::ScreenComponent>();
+	XE::WLayer& layer = screen->wLayer;
 
 	m_Box = XE::Box::Create(layer, XE::Box::Orientation::VERTICAL, 10.f);
 
@@ -46,7 +47,8 @@ UIState_1::UIState_1(const XE::Uint16& id, entityx::Entity entity, bool replace 
 
 	m_entry = XE::Entry::Create(layer);
 	m_entry->size = sf::Vector2f(200.f, 30.f);
-	
+	screen->m_Desktop->AddEntry(m_entry);
+
 	m_imageTest = XE::Image::Create(layer, "item_ball_hover.png");
 	m_imageTest->size = sf::Vector2f(200.f, 100);
 	
@@ -76,6 +78,7 @@ UIState_1::UIState_1(const XE::Uint16& id, entityx::Entity entity, bool replace 
 
 UIState_1::~UIState_1()
 {
+	m_entity.component<XE::ScreenComponent>()->m_Desktop->RemoveEntry(m_entry);
 	m_Box->RemoveAll();
 	m_alignment->Remove(m_Box);
 	m_entity.component<XE::ScreenComponent>()->getDesktop()->Remove(m_alignment);

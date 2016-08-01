@@ -343,13 +343,14 @@ enum ActionType {
   ActionType_NavEnter = 35,
   ActionType_TextEntered = 36,
   ActionType_KeyPressed = 37,
-  ActionType_Shoot = 38,
-  ActionType_Resized = 39,
-  ActionType_Quit = 40
+  ActionType_KeyDown = 38,
+  ActionType_Shoot = 39,
+  ActionType_Resized = 40,
+  ActionType_Quit = 41
 };
 
 inline const char **EnumNamesActionType() {
-  static const char *names[] = { "None", "Forward", "ForwardLeft", "ForwardRight", "Backward", "BackwardLeft", "BackwardRight", "TurnLeft", "TurnRight", "StrafeLeft", "StrafeRight", "Jump", "Run", "Walk", "NextTarget", "PrevTarget", "Punch1", "Kick1", "ObjRotate", "ZoomIn", "ZoomOut", "CamRotate", "PointSelectStart", "PointSelectEnd", "PointMoved", "Spell1", "Spell2", "Spell3", "Action1", "Action2", "NavUp", "NavDown", "NavLeft", "NavRight", "NavSelect", "NavEnter", "TextEntered", "KeyPressed", "Shoot", "Resized", "Quit", nullptr };
+  static const char *names[] = { "None", "Forward", "ForwardLeft", "ForwardRight", "Backward", "BackwardLeft", "BackwardRight", "TurnLeft", "TurnRight", "StrafeLeft", "StrafeRight", "Jump", "Run", "Walk", "NextTarget", "PrevTarget", "Punch1", "Kick1", "ObjRotate", "ZoomIn", "ZoomOut", "CamRotate", "PointSelectStart", "PointSelectEnd", "PointMoved", "Spell1", "Spell2", "Spell3", "Action1", "Action2", "NavUp", "NavDown", "NavLeft", "NavRight", "NavSelect", "NavEnter", "TextEntered", "KeyPressed", "KeyDown", "Shoot", "Resized", "Quit", nullptr };
   return names;
 }
 

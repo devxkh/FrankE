@@ -30,6 +30,7 @@ namespace XET {
 
 		controller.system.connect(ControllerSettings::ActionType_Resized, [this](XE::ActionContext context) { onResized(context); });
 
+		controller.system.connect(ControllerSettings::ActionType_KeyDown, [this](XE::ActionContext context) { onKeyDown(context); });
 		controller.system.connect(ControllerSettings::ActionType_KeyPressed, [this](XE::ActionContext context) { onKeyPressed(context); });
 		controller.system.connect(ControllerSettings::ActionType_TextEntered, [this](XE::ActionContext context) { onTextEntered(context); });
 
@@ -98,6 +99,18 @@ namespace XET {
 			{
 				entity.component<XE::CameraFreeComponent>()->rotate(deltax, deltay);
 			}
+		}
+	}
+	
+	void TestControllerSystem::onKeyDown(XE::ActionContext context)
+	{
+		std::cout << "onKeyDown! " << context.event->key.keysym.scancode << std::endl;
+
+		entityx::ComponentHandle<TestControllerComponent> controller;
+		entityx::ComponentHandle<XE::ScreenComponent> screen;
+
+		for (entityx::Entity entity : mEngine.getScene().entities.entities_with_components(controller, screen)) {
+			screen->m_Desktop->onKeyEvent(context.event->key);
 		}
 	}
 

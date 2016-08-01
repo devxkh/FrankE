@@ -502,6 +502,7 @@ namespace XE {
 		}*/
 
 		//HandleMouseButtonEvent(event.mouseButton.button, true, event.mouseButton.x, event.mouseButton.y);
+		HandleMouseButtonEvent(true, x, y);
 
 		if (IsMouseInWidget()) {
 			//if (event.mouseButton.button == sf::Mouse::Left) {

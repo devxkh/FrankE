@@ -27,6 +27,7 @@ namespace XET {
 		virtual void onPointSelectStart(XE::ActionContext context);
 		virtual void onPointSelectEnd(XE::ActionContext context);
 		virtual void onResized(XE::ActionContext context);
+		virtual void onKeyDown(XE::ActionContext context);
 		virtual void onKeyPressed(XE::ActionContext context);
 		virtual void onTextEntered(XE::ActionContext context);
 		virtual void onQuit();	

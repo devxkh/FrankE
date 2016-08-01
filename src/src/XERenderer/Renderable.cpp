@@ -35,20 +35,20 @@ namespace XE
 		//, m_worldScale(1, 1, 1)
 		//, m_scale(1, 1, 1)
 
-		, m_rotation(1 ,0, 0, 0)
+		, m_rotation(1, 0, 0, 0)
 		//, m_worldOrientation(1 , 0, 0, 0)*/
 		//,m_transform(0, 0, 0)
 		//,m_worldTransform(0, 0, 0)
 	{
 		m_GraphicsManager._t_Renderables.push_back(this);
 
-		m_GraphicsManager.getIntoRendererQueue().push([this,fbData]()
+		m_GraphicsManager.getIntoRendererQueue().push([this, fbData]()
 		{
 			Ogre::LogManager::getSingleton().logMessage("RQ -> Renderable::StaticRenderable");
-			
+
 
 			_t_OgreEntitySceneNodePtr = m_Scene.getOgreSceneManager().__OgreSceneMgrPtr->getRootSceneNode()->createChildSceneNode();
-				
+
 			_t_createItem(fbData);
 		});
 	}
@@ -99,7 +99,7 @@ namespace XE
 	{
 		const XFBType::RenderableComponent* renderable = (const XFBType::RenderableComponent*)fbData;
 
-	//	auto renderable = flatbuffers::GetRoot<XFBType::RenderableComponent>(fbData);
+		//	auto renderable = flatbuffers::GetRoot<XFBType::RenderableComponent>(fbData);
 		auto meshes = renderable->meshes();
 
 		//------------------------------------------------------------------------------
@@ -136,14 +136,14 @@ namespace XE
 					meshV1->unload();
 
 					newItem = m_Scene.getOgreSceneManager().__OgreSceneMgrPtr->createItem(manual, (Ogre::SceneMemoryMgrTypes)Ogre::SCENE_DYNAMIC); //renderable->memType()); //Ogre::SCENE_DYNAMIC);
-					
+
 					Ogre::HlmsManager *hlmsManager = m_GraphicsManager.getRoot()->getHlmsManager();
 					Ogre::HlmsDatablock *datablock = hlmsManager->getDatablock("StonesPbs");
 					newItem->setDatablock(datablock); //todo multiple materials per mesh	
 												   //floor->setMaterialName("Examples/Rockwall", "General");
 												   //floor->setCastShadows(false);
 					newItem->setCastShadows(true);
-			
+
 
 					_t_OgreEntitySceneNodePtr->attachObject(newItem);
 				}
@@ -154,41 +154,54 @@ namespace XE
 
 				else if (var->mesh_type() == XFBType::UMesh::UMesh_MeshFile)
 				{
+					const XFBType::MeshFile * meshFile = static_cast<const XFBType::MeshFile *>(var->mesh());
+
+					
+					if (!meshFile->file() || !meshFile->file()->fileName())
+					{
+						LOG(plog::error) << "mesh filename is empty! , Renderable.create";
+						return;
+					}
+
+					auto test = meshFile->file()->fileName()->c_str();
+
 					bool halfPosition = true;
 					bool halfUVs = true;
 					bool useQtangents = true;
 
 					auto v1Mesh = Ogre::v1::MeshManager::getSingleton().load(
-						"Sinbad.mesh", Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME,
+						meshFile->file()->fileName()->c_str(), Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME,
 						Ogre::v1::HardwareBuffer::HBU_STATIC, Ogre::v1::HardwareBuffer::HBU_STATIC);
-					//Create a v2 mesh to import to, with a different name.
-					auto v2Mesh = Ogre::MeshManager::getSingleton().createManual(
-						"Barrel Imported", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+					/*		auto v1Mesh = Ogre::v1::MeshManager::getSingleton().load(
+							"Sinbad.mesh", Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME,
+							Ogre::v1::HardwareBuffer::HBU_STATIC, Ogre::v1::HardwareBuffer::HBU_STATIC);*/
+							//Create a v2 mesh to import to, with a different name.
+					auto v2Mesh = Ogre::MeshManager::getSingleton().createManual(meshFile->file()->fileName()->c_str(), Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
 
 					v2Mesh->importV1(v1Mesh.get(), halfPosition, halfUVs, useQtangents);
 					v1Mesh->unload();
 
 					_t_OgreItemPtr = m_Scene.getOgreSceneManager().__OgreSceneMgrPtr->createItem(v2Mesh, (Ogre::SceneMemoryMgrTypes)Ogre::SCENE_DYNAMIC);
 					_t_OgreItemPtr->setCastShadows(true);
-				//	_t_OgreItemPtr->setDatablock("BaseWhite");
-					//meshV1 = tmp->getMesh();
-					//Ogre::MeshPtr manual = Ogre::MeshManager::getSingleton().createManual(
-					//	"sindbad",//var->Name()->c_str(), //"Plane",
-					//	Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
-					//manual->importV1(meshV1.get(), true, true, true);
-					////We don't need the v1 mesh. Free CPU memory, get it out of the GPU.
-					////Leave it loaded if you want to use athene with v1 Entity.
-					//meshV1->unload();
+					//	_t_OgreItemPtr->setDatablock("BaseWhite");
+						//meshV1 = tmp->getMesh();
+						//Ogre::MeshPtr manual = Ogre::MeshManager::getSingleton().createManual(
+						//	"sindbad",//var->Name()->c_str(), //"Plane",
+						//	Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+						//manual->importV1(meshV1.get(), true, true, true);
+						////We don't need the v1 mesh. Free CPU memory, get it out of the GPU.
+						////Leave it loaded if you want to use athene with v1 Entity.
+						//meshV1->unload();
 
-				//	newItem = m_Scene.getOgreSceneManager().__OgreSceneMgrPtr->createItem(manual, (Ogre::SceneMemoryMgrTypes)Ogre::SCENE_DYNAMIC); //renderable->memType()); //Ogre::SCENE_DYNAMIC);
-				//	newItem->setDatablock("Marble"); //todo multiple materials per mesh	
-													 //floor->setMaterialName("Examples/Rockwall", "General");
-													 //floor->setCastShadows(false);
+					//	newItem = m_Scene.getOgreSceneManager().__OgreSceneMgrPtr->createItem(manual, (Ogre::SceneMemoryMgrTypes)Ogre::SCENE_DYNAMIC); //renderable->memType()); //Ogre::SCENE_DYNAMIC);
+					//	newItem->setDatablock("Marble"); //todo multiple materials per mesh	
+														 //floor->setMaterialName("Examples/Rockwall", "General");
+														 //floor->setCastShadows(false);
 					_t_OgreEntitySceneNodePtr->attachObject(_t_OgreItemPtr);
 				}
 
-				
-				
+
+
 			}
 		}
 
@@ -212,10 +225,10 @@ namespace XE
 			Ogre::SkeletonAnimationVec::iterator it = animations.begin();
 			while (it != animations.end())
 			{
-			//	auto animationPtr = &*it;
+				//	auto animationPtr = &*it;
 				float duration = it->getDuration();
 				std::string name = it->getDefinition()->getNameStr();
-				
+
 				Ogre::SkeletonAnimation* skeletonAnimationPtr = &*it;
 
 				//attention!! delete in mainthread 
@@ -240,9 +253,9 @@ namespace XE
 
 				//do not use the iterator, else crash in mainthread ?!!
 				Ogre::SkeletonAnimation* test = _t_OgreItemPtr->getSkeletonInstance()->getAnimation(name);
-		//		m_GraphicsManager.getFromRendererQueue().push([test, name, duration, &animationComponent, boneWeightPtrs, boneWeightList]() {
-			
-					animationComponent._MT_setAnimationStatePtr(test, name, duration, boneWeightPtrs, boneWeightList);
+				//		m_GraphicsManager.getFromRendererQueue().push([test, name, duration, &animationComponent, boneWeightPtrs, boneWeightList]() {
+
+				animationComponent._MT_setAnimationStatePtr(test, name, duration, boneWeightPtrs, boneWeightList);
 
 				//	m_t_animation = test;
 		//		});
@@ -274,10 +287,10 @@ namespace XE
 		m_GraphicsManager.getIntoRendererQueue().push([this, fbData]()
 		{
 			Ogre::LogManager::getSingleton().logMessage("RQ -> Renderable::update");
-			
+
 			_t_createItem(fbData);
 
-		//	delete deleteThisBuffer;
+			//	delete deleteThisBuffer;
 		});
 	}
 

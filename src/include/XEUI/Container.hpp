@@ -34,6 +34,11 @@ public:
 	*/
 	virtual void Remove(Widget::Ptr widget);
 
+	virtual void AddEntry(Widget::Ptr widget);
+
+	virtual void RemoveEntry(Widget::Ptr widget);
+
+
 	/** Remove all children from container.
 	*/
 	void RemoveAll();
@@ -69,6 +74,8 @@ protected:
 	
 
 	WidgetsList m_children;
+
+	WidgetsList m_entries;
 
 private:
 
