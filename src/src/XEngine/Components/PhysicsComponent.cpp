@@ -41,7 +41,7 @@ namespace XE
 
 		if (test2->entityID > 1)
 		 {
-			 std::cout << test2->entityID;
+		//	 std::cout << test2->entityID;
 
 		}
 	}

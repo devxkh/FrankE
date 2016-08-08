@@ -305,6 +305,10 @@ namespace Ogre
 
         const T& operator [] ( size_t idx ) const
         {
+			if (idx >= mSize)
+			{
+				return mData[idx];
+			}
             assert( idx < mSize && "Index out of bounds" );
             return mData[idx];
         }

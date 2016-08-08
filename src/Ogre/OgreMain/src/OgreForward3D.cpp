@@ -59,7 +59,8 @@ namespace Ogre
         mInvMaxDistance( 1.0f / mMaxDistance ),
         mVaoManager( 0 ),
         mSceneManager( sceneManager ),
-        mDebugMode( false )
+        mDebugMode( false ),
+        mFadeAttenuationRange( true )
     {
         uint32 sliceWidth   = mWidth;
         uint32 sliceHeight  = mHeight;
@@ -272,7 +273,7 @@ namespace Ogre
 
         assert( mNumSlices < 256 );
 
-        float projSpaceSliceEnd[256];
+        Real projSpaceSliceEnd[256];
         for( uint32 i=0; i<mNumSlices-1; ++i )
         {
             Vector4 r = projMatrix * Vector4( 0, 0, Math::Clamp( mResolutionAtSlice[i].zEnd,
@@ -531,7 +532,7 @@ namespace Ogre
             *lightData++ = attenRange;
             *lightData++ = attenLinear;
             *lightData++ = attenQuadratic;
-            ++lightData;
+            *lightData++ = 1.0f / attenRange;
 
             //vec3 lights[numLights].spotDirection;
             Vector3 spotDir = viewMatrix3 * light->getDerivedDirection();
@@ -573,8 +574,10 @@ namespace Ogre
                 itor->lastFrame = mVaoManager->getFrameCount();
                 *outCachedGrid = &(*itor);
 
-                if( mSceneManager->isCurrentShadowNodeReused() )
-                    upToDate = false; //We can't really be sure the cache is up to date
+                //Not only this causes bugs see http://www.ogre3d.org/forums/viewtopic.php?f=25&t=88776
+                //as far as I can't tell this is not needed anymore.
+                //if( mSceneManager->isCurrentShadowNodeReused() )
+                //    upToDate = false; //We can't really be sure the cache is up to date
 
                 return upToDate;
             }
@@ -668,17 +671,18 @@ namespace Ogre
         *reinterpret_cast<uint32*RESTRICT_ALIAS>(passBufferPtr) = mTableSize;
         ++passBufferPtr;
 
-        float fLightsPerCell = static_cast<float>( mLightsPerCell );
+        const float fLightsPerCell = static_cast<float>( mLightsPerCell );
+
+        const float renderTargetWidth = static_cast<float>( renderTarget->getWidth() );
+        const float renderTargetHeight = static_cast<float>( renderTarget->getHeight() );
 
         //vec4 f3dGridHWW[mNumSlices];
         for( uint32 i=0; i<mNumSlices; ++i )
         {
-            *passBufferPtr++ = static_cast<float>( mResolutionAtSlice[i].width ) /
-                                renderTarget->getWidth();
-            *passBufferPtr++ = static_cast<float>( mResolutionAtSlice[i].height ) /
-                                renderTarget->getHeight();
+            *passBufferPtr++ = static_cast<float>( mResolutionAtSlice[i].width ) / renderTargetWidth;
+            *passBufferPtr++ = static_cast<float>( mResolutionAtSlice[i].height ) / renderTargetHeight;
             *passBufferPtr++ = static_cast<float>( mResolutionAtSlice[i].width * mLightsPerCell );
-            *passBufferPtr++ = fLightsPerCell;
+            *passBufferPtr++ = i < 1u ? fLightsPerCell : renderTargetHeight;
         }
     }
 }

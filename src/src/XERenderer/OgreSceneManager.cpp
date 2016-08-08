@@ -25,10 +25,12 @@ namespace XE
 
 			__OgreSceneMgrPtr = mGraphicsManager.getRoot()->createSceneManager(Ogre::ST_GENERIC, 1, Ogre::INSTANCING_CULLING_SINGLETHREAD, "MyFirstSceneManager");
 
+			//PBS expects gamma correction, otherwise it won't look right.
+			mGraphicsManager.getRoot()->getRenderSystem()->setConfigOption("sRGB Gamma Conversion", "Yes");
 
 			//Set sane defaults for proper shadow mapping
-			__OgreSceneMgrPtr->setShadowDirectionalLightExtrusionDistance(500.0f);
-			__OgreSceneMgrPtr->setShadowFarDistance(500.0f);
+			__OgreSceneMgrPtr->setShadowDirectionalLightExtrusionDistance(250.0f);
+			__OgreSceneMgrPtr->setShadowFarDistance(250.0f);
 
 			__lRootSceneNode = __OgreSceneMgrPtr->getRootSceneNode();
 		});

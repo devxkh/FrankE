@@ -39,7 +39,7 @@ namespace XE {
 	{
 		//set renderqueue -> opengl error bind buffer after adding item??
 	//	sceneMgr->getRenderQueue()->setRenderQueueMode(254, Ogre::RenderQueue::Modes::FAST);
-//		this->setRenderQueueGroup(254);
+	//	this->setRenderQueueGroup(254);
 
 		m_sceneNodeLines = sceneMgr->getRootSceneNode(Ogre::SCENE_DYNAMIC)->createChildSceneNode(Ogre::SCENE_DYNAMIC);
 		m_sceneNodeLines->attachObject(this);
@@ -53,12 +53,15 @@ namespace XE {
 		mObjectData.mLocalRadius[mObjectData.mIndex] = std::numeric_limits<Ogre::Real>::max();
 		mObjectData.mWorldRadius[mObjectData.mIndex] = std::numeric_limits<Ogre::Real>::max();
 
+		// default overlays to preserve their own detail level
+		mPolygonModeOverrideable = false;
 
 		//>>>>>-------------- 2D --------------------
 		// use identity projection and view matrices
 		mUseIdentityProjection = true;
 		mUseIdentityView = true;
 		//<<<<<-------------- 2D --------------------
+
 	}
 	
 	void RenderableLayer::getRenderOperation(Ogre::v1::RenderOperation& op, bool casterPass) {
@@ -103,10 +106,12 @@ namespace XE {
 			m_Vao = m_VaoManager->createVertexArrayObject(vertexBuffers, m_indexBuffer, Ogre::v1::RenderOperation::OT_TRIANGLE_LIST);
 
 			mVaoPerLod[0].push_back(m_Vao);
+			//mVaoPerLod[1].push_back(m_Vao); //needed for shadow caster Node!
 
 			if (!_initalizied)
 			{
 				setDatablock("HlmsUnlit1"); // set this after  createVertexArrayObject  and mVaoPerLod[0].push_back(vao) ?? or else crash in renderable
+				setCastShadows(false);
 
 				mRenderables.push_back(this);
 				_initalizied = true;

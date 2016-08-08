@@ -13,6 +13,7 @@ namespace XE
 {
 	class GraphicsManager;
 	class Scene;
+	class CLightVisualHelper;
 
 	struct LightRenderable
 	{
@@ -30,6 +31,8 @@ namespace XE
 		Ogre::Light* m_light;
 		Ogre::SceneNode* m_LightAxisNode;
 		Scene& m_Scene;
+
+		CLightVisualHelper* mCLightVisualHelper;
 	};
 
 }

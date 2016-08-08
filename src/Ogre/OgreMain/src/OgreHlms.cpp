@@ -91,7 +91,10 @@ namespace Ogre
     const IdString HlmsBaseProp::ShadowCaster       = IdString( "hlms_shadowcaster" );
     const IdString HlmsBaseProp::ShadowUsesDepthTexture= IdString( "hlms_shadow_uses_depth_texture" );
     const IdString HlmsBaseProp::Forward3D          = IdString( "hlms_forward3d" );
+    const IdString HlmsBaseProp::Forward3DFlipY     = IdString( "hlms_forward3d_flipY" );
     const IdString HlmsBaseProp::Forward3DDebug     = IdString( "hlms_forward3d_debug" );
+    const IdString HlmsBaseProp::Forward3DFadeAttenRange
+                                                    = IdString( "hlms_forward_fade_attenuation_range" );
     const IdString HlmsBaseProp::VPos               = IdString( "hlms_vpos" );
 
     //Change per material (hash can be cached on the renderable)
@@ -1491,8 +1494,9 @@ namespace Ogre
 
         while( itor != end )
         {
-            //only open piece files with current render system extention
-            if (itor->find(mShaderFileExt) != String::npos)
+            //Only open piece files with current render system extension
+            const String::size_type extPos = itor->find( mShaderFileExt );
+            if( extPos == itor->size() - mShaderFileExt.size() )
             {
                 DataStreamPtr inFile = archive->open(*itor);
 
@@ -1865,7 +1869,19 @@ namespace Ogre
             {
                 setProperty( HlmsBaseProp::Forward3D,       forward3D->getNumSlices() );
                 setProperty( HlmsBaseProp::Forward3DDebug,  forward3D->getDebugMode() );
+                setProperty( HlmsBaseProp::Forward3DFadeAttenRange,
+                             forward3D->getFadeAttenuationRange() );
                 setProperty( HlmsBaseProp::VPos, 1 );
+
+                if( !mShaderTargets[0] ) //Not using D3D11
+                {
+                    //Actually the problem is not texture flipping, but origin. In D3D11,
+                    //we need to always flip because origin is different, but it's consistent
+                    //between texture and render window. In GL, RenderWindows don't need
+                    //to flip, but textures do.
+                    RenderTarget *renderTarget = sceneManager->getCurrentViewport()->getTarget();
+                    setProperty( HlmsBaseProp::Forward3DFlipY, renderTarget->requiresTextureFlipping() );
+                }
             }
 
             uint numLightsPerType[Light::NUM_LIGHT_TYPES];

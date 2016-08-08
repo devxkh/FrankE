@@ -2,6 +2,7 @@
 #include <XENetwork/NetObserver.hpp>
 #include <XEngine/Components/NetId.hpp>
 #include <XEScripts/LUAEngine.h>
+#include <plog/Log.h>
 
 namespace XE 
 {
@@ -148,12 +149,18 @@ namespace XE
 		/* Create a reliable packet of size 7 containing "packet\0" */
 		ENetPacket * packet = enet_packet_create(data,	dataLength , ENET_PACKET_FLAG_RELIABLE);
 
+		if (!packet)
+		{
+			LOG(plog::error) << "SendPacketToPeer. Failed to create ENet packet";
+			return;
+		}
+		
 		/* Send the packet to the peer over channel id 0. */
 		/* One could also broadcast the packet by         */
 		/* enet_host_broadcast (host, 0, packet);         */
 		enet_peer_send(peer, Channel, packet);
 		/* One could just use enet_host_service() instead. */
-		enet_host_flush(host);
+	//	enet_host_flush(host);
 
 	}
 
@@ -316,6 +323,12 @@ namespace XE
 		//	ENET_PACKET_FLAG_RELIABLE);
 		ENetPacket * packet = enet_packet_create(data, dataLength, flag); //ENET_PACKET_FLAG_RELIABLE);
 
+		if (!packet)
+		{
+			LOG(plog::error) << "sendMessage. Failed to create ENet packet";
+			return;
+		}
+
 		/* Send the packet to the peer over channel id 0. */
 		/* One could also broadcast the packet by         */
 		/* enet_host_broadcast (host, 0, packet);         */
@@ -325,9 +338,13 @@ namespace XE
 	// Pick channel for sending and broadcast to all peers
 	//--->>todo 	enet_host_broadcast(host, 0, packet);
 
-		enet_peer_send(peer, 0, packet);
+		if (enet_peer_send(peer, 0, packet) < 0)
+		{
+			LOG(plog::error) << "sendMessage. Failed to send ENet packet to peer";
+			return;
+		}
 
 		/* One could just use enet_host_service() instead. */
-		enet_host_flush(host);
+	//	enet_host_flush(host);
 	}
 }

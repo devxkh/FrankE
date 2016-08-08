@@ -27,8 +27,8 @@
 #include <Ogre/OgreMain/include/OgreSceneNode.h>
 
 #include <Ogre/OgreMain/include/OgreLogManager.h>
-
-#include <XERenderer/private/ManualObject.hpp>
+#include <Ogre/OgreMain/include/OgreManualObject2.h>
+//#include <XERenderer/private/ManualObject.hpp>
 
 
 #include <XERenderer/private/DynamicRenderable.hpp>

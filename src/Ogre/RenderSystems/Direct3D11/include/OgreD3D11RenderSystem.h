@@ -84,6 +84,7 @@ namespace Ogre
         void refreshD3DSettings(void);
         void refreshFSAAOptions(void);
         void freeDevice(void);
+        bool isWindows8OrGreater();
         
         v1::D3D11HardwareBufferManager* mHardwareBufferManager;
         D3D11GpuProgramManager* mGpuProgramManager;
@@ -387,7 +388,7 @@ namespace Ogre
         void determineFSAASettings(uint fsaa, const String& fsaaHint, DXGI_FORMAT format, DXGI_SAMPLE_DESC* outFSAASettings);
 
         /// @copydoc RenderSystem::getDisplayMonitorCount
-        unsigned int getDisplayMonitorCount() const {return 1;} //todo
+        unsigned int getDisplayMonitorCount() const;
 
         /// @copydoc RenderSystem::hasAnisotropicMipMapFilter
         virtual bool hasAnisotropicMipMapFilter() const { return true; }  

@@ -65,16 +65,16 @@ namespace Ogre
     const int RqBits::TextureBits           = 11;
     const int RqBits::DepthBits             = 15;
 
-    const int RqBits::SubRqIdShift          = 64                - SubRqIdBits;      //60
-    const int RqBits::TransparencyShift     = SubRqIdShift      - TransparencyBits; //59
-    const int RqBits::MacroblockShift       = TransparencyShift - MacroblockBits;   //49
+    const int RqBits::SubRqIdShift          = 64                - SubRqIdBits;      //61
+    const int RqBits::TransparencyShift     = SubRqIdShift      - TransparencyBits; //60
+    const int RqBits::MacroblockShift       = TransparencyShift - MacroblockBits;   //50
     const int RqBits::ShaderShift           = MacroblockShift   - ShaderBits;       //40
     const int RqBits::MeshShift             = ShaderShift       - MeshBits;         //26
     const int RqBits::TextureShift          = MeshShift         - TextureBits;      //15
     const int RqBits::DepthShift            = TextureShift      - DepthBits;        //0
 
-    const int RqBits::DepthShiftTransp      = TransparencyShift - DepthBits;        //44
-    const int RqBits::MacroblockShiftTransp = DepthShiftTransp  - MacroblockBits;   //34
+    const int RqBits::DepthShiftTransp      = TransparencyShift - DepthBits;        //45
+    const int RqBits::MacroblockShiftTransp = DepthShiftTransp  - MacroblockBits;   //35
     const int RqBits::ShaderShiftTransp     = MacroblockShiftTransp - ShaderBits;   //25
     const int RqBits::MeshShiftTransp       = ShaderShiftTransp - MeshBits;         //11
     const int RqBits::TextureShiftTransp    = MeshShiftTransp   - TextureBits;      //0
@@ -96,10 +96,7 @@ namespace Ogre
         mCommandBuffer = new CommandBuffer();
 
         for( size_t i=0; i<256; ++i )
-        {
             mRenderQueues[i].mQueuedRenderablesPerThread.resize( sceneManager->getNumWorkerThreads() );
-            mRenderQueuesBackup[i].mQueuedRenderablesPerThread.resize( sceneManager->getNumWorkerThreads() );
-        }
 
         // Set some defaults.
         setRenderQueueMode( 0, FAST );
@@ -253,7 +250,8 @@ namespace Ogre
             uint8 meshLod = pMovableObject->getCurrentMeshLod();
             const VertexArrayObjectArray &vaos = pRend->getVaos( static_cast<VertexPass>(casterPass) );
 
-            VertexArrayObject *vao = vaos[meshLod];
+			assert(vaos.size() -1 == meshLod && "vaos meshlod/shadowlod not set:" + meshLod);
+			VertexArrayObject *vao = vaos[meshLod];
             meshHash = vao->getRenderQueueId();
         }
         //TODO: Account for skeletal animation in any of the hashes (preferently on the material side)
@@ -642,7 +640,7 @@ namespace Ogre
                     drawIndexedPtr->instanceCount   = 1;
                     drawIndexedPtr->firstVertexIndex= vao->mIndexBuffer->_getFinalBufferStart() +
                                                                                     vao->mPrimStart;
-                    drawIndexedPtr->baseVertex      = vao->mVertexBuffers[0]->_getFinalBufferStart();
+                    drawIndexedPtr->baseVertex      = vao->mBaseVertexBuffer->_getFinalBufferStart();
                     drawIndexedPtr->baseInstance    = baseInstance;
 
                     instanceCount = 1;
@@ -655,7 +653,7 @@ namespace Ogre
                     drawCountPtr = drawStripPtr;
                     drawStripPtr->primCount         = vao->mPrimCount;
                     drawStripPtr->instanceCount     = 1;
-                    drawStripPtr->firstVertexIndex  = vao->mVertexBuffers[0]->_getFinalBufferStart() +
+                    drawStripPtr->firstVertexIndex  = vao->mBaseVertexBuffer->_getFinalBufferStart() +
                                                                                         vao->mPrimStart;
                     drawStripPtr->baseInstance      = baseInstance;
 
@@ -767,7 +765,7 @@ namespace Ogre
                     lastRenderOp = renderOp;
                 }
 
-                if( renderOp.indexData )
+                if( renderOp.useIndexes )
                 {
                     v1::CbDrawCallIndexed *drawCall =
                             mCommandBuffer->addCommand<v1::CbDrawCallIndexed>();
@@ -889,16 +887,9 @@ namespace Ogre
         mUsedIndirectBuffers.clear();        
     }
     //-----------------------------------------------------------------------
-    void RenderQueue::_swapQueuesForShadowMapping(void)
-    {
-        for( size_t i=0; i<256; ++i )
-            mRenderQueues[i].swap( mRenderQueuesBackup[i] );
-    }
-    //-----------------------------------------------------------------------
     void RenderQueue::setRenderQueueMode( uint8 rqId, Modes newMode )
     {
-        mRenderQueues[rqId].mMode       = newMode;
-        mRenderQueuesBackup[rqId].mMode = newMode;
+        mRenderQueues[rqId].mMode = newMode;
     }
     //-----------------------------------------------------------------------
     RenderQueue::Modes RenderQueue::getRenderQueueMode( uint8 rqId ) const
@@ -908,8 +899,7 @@ namespace Ogre
     //-----------------------------------------------------------------------
     void RenderQueue::setSortRenderQueue( uint8 rqId, bool bSort )
     {
-        mRenderQueues[rqId].mDoSort         = bSort;
-        mRenderQueuesBackup[rqId].mDoSort   = bSort;
+        mRenderQueues[rqId].mDoSort = bSort;
     }
     //-----------------------------------------------------------------------
     bool RenderQueue::getSortRenderQueue( uint8 rqId ) const

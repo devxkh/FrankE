@@ -41,8 +41,12 @@ THE SOFTWARE.
                 typedef __m128d ArrayReal;
             }
         #else
-            #include <xmmintrin.h>
-            #include <emmintrin.h>  //SSE Math library still needs SSE2
+            #ifndef __MINGW32__
+                #include <xmmintrin.h>
+                #include <emmintrin.h>  //SSE Math library still needs SSE2
+            #else
+                #include <x86intrin.h> //Including separate intrinsics headers under MinGW causes compilation errors
+            #endif
             #define ARRAY_PACKED_REALS 4
             namespace Ogre {
                 typedef __m128 ArrayReal;
@@ -50,6 +54,7 @@ THE SOFTWARE.
 
                 #define ARRAY_REAL_ZERO _mm_setzero_ps()
                 #define ARRAY_INT_ZERO _mm_setzero_si128()
+                #define ARRAY_MASK_ZERO _mm_setzero_ps()
 
                 class ArrayRadian;
             }
@@ -93,6 +98,7 @@ THE SOFTWARE.
 
                 #define ARRAY_REAL_ZERO vdupq_n_f32( 0.0f )
                 #define ARRAY_INT_ZERO vdupq_n_u32( 0 )
+                #define ARRAY_MASK_ZERO vdupq_n_u32( 0 )
 
                 class ArrayRadian;
             }
@@ -167,6 +173,7 @@ THE SOFTWARE.
 
         #define ARRAY_REAL_ZERO 0
         #define ARRAY_INT_ZERO 0
+        #define ARRAY_MASK_ZERO false
 
         /// Input must be 16-byte aligned
         #define CastArrayToReal( outFloatPtr, arraySimd )       (*(outFloatPtr) = arraySimd)

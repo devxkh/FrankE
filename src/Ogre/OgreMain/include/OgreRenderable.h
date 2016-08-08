@@ -425,7 +425,9 @@ namespace Ogre {
         }
 
         const VertexArrayObjectArray& getVaos( VertexPass vertexPass ) const
-                                                { return mVaoPerLod[vertexPass]; }
+                                                { 
+			return mVaoPerLod[vertexPass]; 
+		}
 
         uint32 getHlmsHash(void) const          { return mHlmsHash; }
         uint32 getHlmsCasterHash(void) const    { return mHlmsCasterHash; }

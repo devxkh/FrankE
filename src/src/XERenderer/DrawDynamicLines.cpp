@@ -35,7 +35,7 @@ namespace XE {
 			//_t_ObjectMemoryManager = new Ogre::ObjectMemoryManager();
 			
 			__t_DynamicLines = new DynamicLines(0, &test.__OgreSceneMgrPtr->_getEntityMemoryManager(Ogre::SCENE_DYNAMIC), test.__OgreSceneMgrPtr, Ogre::v1::RenderOperation::OT_LINE_LIST);
-			
+			__t_DynamicLines->setCastShadows(false);
 			node->attachObject(__t_DynamicLines);
 
 			//---------------------------------------------------------------------------------------

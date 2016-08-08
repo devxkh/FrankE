@@ -110,6 +110,7 @@ namespace Ogre
         HlmsPropertyVec mSetProperties;
         PiecesMap       mPieces;
 
+    public:
         struct Library
         {
             Archive         *dataFolder;
@@ -117,6 +118,7 @@ namespace Ogre
         };
 
         typedef vector<Library>::type LibraryVec;
+    protected:
         LibraryVec      mLibrary;
         Archive         *mDataFolder;
         StringVector    mPieceFiles[NumShaderTypes];
@@ -361,6 +363,7 @@ namespace Ogre
         virtual void reloadFrom( Archive *newDataFolder, ArchiveVec *libraryFolders=0 );
 
         Archive* getDataFolder(void)                        { return mDataFolder; }
+        const LibraryVec& getPiecesLibrary(void) const      { return mLibrary; }
 
         /** Creates a unique datablock that can be shared by multiple renderables.
         @remarks
@@ -604,7 +607,9 @@ namespace Ogre
         static const IdString ShadowCaster;
         static const IdString ShadowUsesDepthTexture;
         static const IdString Forward3D;
+        static const IdString Forward3DFlipY;
         static const IdString Forward3DDebug;
+        static const IdString Forward3DFadeAttenRange;
         static const IdString VPos;
 
         //Change per material (hash can be cached on the renderable)

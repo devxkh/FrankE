@@ -149,7 +149,14 @@ namespace XE
 				}
 				else if (var->mesh_type() == XFBType::UMesh::UMesh_MeshCube)
 				{
+					newItem = m_Scene.getOgreSceneManager().__OgreSceneMgrPtr->createItem("Cube_d.mesh",
+																							Ogre::ResourceGroupManager::
+																							AUTODETECT_RESOURCE_GROUP_NAME,
+																							Ogre::SCENE_DYNAMIC);
 
+					newItem->setVisibilityFlags(0x000000001);
+				
+					_t_OgreEntitySceneNodePtr->attachObject(newItem);
 				}
 
 				else if (var->mesh_type() == XFBType::UMesh::UMesh_MeshFile)
@@ -182,7 +189,9 @@ namespace XE
 					v1Mesh->unload();
 
 					_t_OgreItemPtr = m_Scene.getOgreSceneManager().__OgreSceneMgrPtr->createItem(v2Mesh, (Ogre::SceneMemoryMgrTypes)Ogre::SCENE_DYNAMIC);
-					_t_OgreItemPtr->setCastShadows(true);
+					_t_OgreItemPtr->setVisibilityFlags(0x000000001);
+
+					//_t_OgreItemPtr->setCastShadows(true);
 					//	_t_OgreItemPtr->setDatablock("BaseWhite");
 						//meshV1 = tmp->getMesh();
 						//Ogre::MeshPtr manual = Ogre::MeshManager::getSingleton().createManual(

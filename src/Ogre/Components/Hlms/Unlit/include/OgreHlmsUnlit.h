@@ -97,9 +97,12 @@ namespace Ogre
         HlmsUnlit( Archive *dataFolder, ArchiveVec *libraryFolders );
         HlmsUnlit( Archive *dataFolder, ArchiveVec *libraryFolders,
                    HlmsTypes type, const String &typeName );
-        ~HlmsUnlit();
+        virtual ~HlmsUnlit();
 
         virtual void _changeRenderSystem( RenderSystem *newRs );
+
+        /// Not supported
+        virtual void setOptimizationStrategy( OptimizationStrategy optimizationStrategy ) {}
 
         virtual HlmsCache preparePassHash( const Ogre::CompositorShadowNode *shadowNode,
                                            bool casterPass, bool dualParaboloid,
@@ -120,7 +123,18 @@ namespace Ogre
                                          CommandBuffer *commandBuffer );
 
         virtual void frameEnded(void);
-    };
+#if !OGRE_NO_JSON
+		/// @copydoc Hlms::_loadJson
+		virtual void _loadJson(const rapidjson::Value &jsonValue, const HlmsJson::NamedBlocks &blocks,
+			HlmsDatablock *datablock) const;
+		/// @copydoc Hlms::_saveJson
+		virtual void _saveJson(const HlmsDatablock *datablock, String &outString) const;
+
+		/// @copydoc Hlms::_collectSamplerblocks
+		virtual void _collectSamplerblocks(set<const HlmsSamplerblock*>::type &outSamplerblocks,
+			const HlmsDatablock *datablock) const;
+#endif
+	};
 
  
 

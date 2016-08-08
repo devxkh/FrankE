@@ -2,9 +2,14 @@
 
 #include <XEngine.hpp>
 
+#include <Ogre/Components/Hlms/Pbs/include/OgreHlmsPbs.h>
+#include <Ogre/OgreMain/include/OgreDepthBuffer.h>
+#include <Ogre/OgreMain/include/OgreHlmsManager.h>
+
 #include <Ogre/OgreMain/include/Compositor/OgreCompositorManager2.h>
 #include <Ogre/OgreMain/include/Compositor/OgreCompositorWorkspaceDef.h>
 #include <Ogre/OgreMain/include/Compositor/OgreCompositorNodeDef.h>
+#include <Ogre/OgreMain/include/Compositor/OgreCompositorShadowNodeDef.h>
 
 #include <Ogre/OgreMain/include/Compositor/OgreCompositorCommon.h>
 #include <Ogre/OgreMain/include/Compositor/Pass/OgreCompositorPass.h>
@@ -178,6 +183,116 @@ namespace XE {
 		return renderWindow;
 	}
 
+	//http://www.ogre3d.org/forums/viewtopic.php?f=25&t=84734
+	void setShadowMapping(Ogre::CompositorNodeDef *nodeDef, bool shadowsEnabled, uint32 numShadowCastingLights,
+		uint32 resolution = 2048,
+		bool usePssm = true, uint32 numPssmSplits = 3,
+		Ogre::HlmsPbs::ShadowFilter shadowFilter = Ogre::HlmsPbs::PCF_3x3)
+	{
+		size_t numShadowMaps = numShadowCastingLights + (usePssm ? (numPssmSplits - 1) : 0);
+		size_t split = 0;
+		size_t lightIdx = 0;
+
+		CompositorManager2 *compositorManager = Root::getSingleton().getCompositorManager2();
+	//	compositorManager->removeAllShadowNodeDefinitions();
+
+		CompositorShadowNodeDef *shadowNodeDef = compositorManager->addShadowNodeDefinition("myShadowNode");
+
+		shadowNodeDef->setNumLocalTextureDefinitions(numShadowMaps);
+
+		shadowNodeDef->setDefaultTechnique(SHADOWMAP_PSSM);
+
+		for (size_t i = 0; i<numShadowMaps; ++i)
+		{
+			ShadowTextureDefinition *shadowTexDef =shadowNodeDef->addShadowTextureDefinition(lightIdx, split,StringConverter::toString(i), false);
+
+			shadowTexDef->width = resolution;
+			shadowTexDef->height = resolution;
+			shadowTexDef->formatList.push_back(PF_D32_FLOAT);
+			shadowTexDef->depthBufferId = Ogre::DepthBuffer::POOL_NON_SHAREABLE;
+
+			if (usePssm && i < numPssmSplits)
+			{
+				shadowTexDef->shadowMapTechnique = SHADOWMAP_PSSM;
+				shadowTexDef->pssmLambda = 0.95f;
+				shadowTexDef->numSplits = 3;
+				++split;
+
+				if (split >= numPssmSplits)
+				{
+					split = 0;
+					++lightIdx;
+				}
+			}
+			else
+			{
+				shadowNodeDef->setDefaultTechnique(SHADOWMAP_FOCUSED);
+				shadowTexDef->shadowMapTechnique = SHADOWMAP_FOCUSED;
+				split = 0;
+				++lightIdx;
+			}
+		}
+
+		shadowNodeDef->setNumTargetPass(numShadowMaps);
+
+		for (size_t i = 0; i<numShadowMaps; ++i)
+		{
+			CompositorTargetDef *targetPassDef = shadowNodeDef->addTargetPass(StringConverter::toString(i));
+			targetPassDef->setNumPasses(2);
+
+			{
+				CompositorPassClearDef *pass = static_cast<CompositorPassClearDef*>(targetPassDef->addPass(PASS_CLEAR));
+				pass->mClearBufferFlags = FBT_DEPTH | FBT_STENCIL;
+				pass->mShadowMapIdx = i;
+				pass->mIncludeOverlays = false;
+			}
+
+			{
+				CompositorPassSceneDef *pass = static_cast<CompositorPassSceneDef*>(targetPassDef->addPass(PASS_SCENE));
+				pass->mVisibilityMask = 0x00000001;
+				pass->mShadowMapIdx = i;
+				pass->mIncludeOverlays = false;
+			}
+		}
+
+	//	CompositorNodeDef *nodeDef = compositorManager->getNodeDefinitionNonConst("DefaultNode");
+
+		//for (size_t i = 0; i<nodeDef->getNumTargetPasses(); ++i)
+		//{
+		//	CompositorTargetDef *targetDef = nodeDef->getTargetPass(i);
+
+		//	const CompositorPassDefVec &passDefs = targetDef->getCompositorPasses();
+		//	CompositorPassDefVec::const_iterator itor = passDefs.begin();
+		//	CompositorPassDefVec::const_iterator end = passDefs.end();
+
+		//	while (itor != end)
+		//	{
+		//		CompositorPassDef *passDef = *itor;
+
+		//		//if (passDef->mIdentifier == 1000) //We actually flag which passes use a shadow node with an identifier
+		//		//{
+		//		if (passDef->getType() == Ogre::PASS_SCENE) {
+		//		//	assert(passDef->getType() == PASS_SCENE);
+		//			CompositorPassSceneDef *passSceneDef = static_cast<CompositorPassSceneDef*>(passDef);
+		//			passSceneDef->mShadowNode = shadowsEnabled ? IdString("myShadowNode") : IdString();
+		//		}
+		//		/*else
+		//		{
+		//			assert(passDef->getType() != PASS_SCENE);
+		//		}*/
+
+		//		++itor;
+		//	}
+		//}
+
+		Ogre::Root *root = Root::getSingletonPtr();
+		Ogre::HlmsManager *hlmsManager = root->getHlmsManager();
+		Ogre::Hlms *hlms = hlmsManager->getHlms(Ogre::HLMS_PBS);
+
+		Ogre::HlmsPbs *hlmsPbs = static_cast<Ogre::HlmsPbs*>(hlms);
+		hlmsPbs->setShadowSettings(shadowFilter);
+	}
+
 	void OgreWorkspace::_t_createWorkspace(Ogre::RenderWindow* renderWindow, Ogre::Camera* camera)
 	{
 
@@ -232,14 +347,14 @@ namespace XE {
 						}
 						{
 							passScene = static_cast<Ogre::CompositorPassSceneDef*> (targetDef->addPass(Ogre::PASS_SCENE));
-							passScene->mShadowNode = Ogre::IdString();
+							passScene->mShadowNode = IdString("myShadowNode"); // Ogre::IdString();
 							passScene->mVpWidth = 1.0;
 							passScene->mVpHeight = 1.0;
 							passScene->mVpLeft = 0.0f;
 							passScene->mCameraName = camera->getName(); // "LeftCamera";
 
 							// For the MyGUI pass
-							targetDef->addPass(Ogre::PASS_CUSTOM, OgreCompositorPassProvider::mPassId);
+						//	targetDef->addPass(Ogre::PASS_CUSTOM, OgreCompositorPassProvider::mPassId);
 							
 						}
 
@@ -257,11 +372,17 @@ namespace XE {
 				}
 				//----	nodeDef->getTargetPass(0)->getCompositorPasses()->
 				//passScene->
+				
 				Ogre::CompositorWorkspaceDef *workDef = m_compositorManager->addWorkspaceDefinition(std::string("MyOwnWorkspace"));
 				workDef->connectOutput(nodeDef->getName(), 0);
 
+				setShadowMapping(nodeDef, false, 1);
 				//todo!	controller.getControllerView().getCameraController()._t_getOgreCamera();
 				Ogre::CompositorWorkspace*  myworkspace = m_compositorManager->addWorkspace(mEngine.getOgreSceneManager().__OgreSceneMgrPtr, renderWindow, camera, "MyOwnWorkspace", true);
+
+			//	myworkspace->recreateAllNodes();
+			//	myworkspace->reconnectAllNodes();
+			//	myworkspace->validateAllObjects();
 
 				//passScene->
 				//myworkspace->getListener();

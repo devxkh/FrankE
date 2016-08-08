@@ -7,6 +7,8 @@
 #include <XEngine/Scene.hpp>
 #include <ThirdParty/plog/Log.h>
 
+#include <XERenderer/Editor/LightVisualHelper.hpp>
+
 namespace XE
 {
 	LightRenderable::LightRenderable(GraphicsManager& gmanager, Scene& scene, const void* fbData)
@@ -58,6 +60,9 @@ namespace XE
 		LOG(plog::info) << "powerScale:" << lightData->powerScale();
 
 		m_light->setPowerScale(lightData->powerScale()); //Ogre::Math::PI);// 1.0f);
+		m_light->setCastShadows(true);
+
+		m_light->setAttenuationBasedOnRadius(10.0f, 0.01f);
 
 		if (lightData->colourDiffuse())
 		{
@@ -76,6 +81,9 @@ namespace XE
 		if (lightData->directionVector())
 			m_light->setDirection(Ogre::Vector3(lightData->directionVector()->x(), lightData->directionVector()->y(), lightData->directionVector()->z()).normalisedCopy());
 
+
+	///	mCLightVisualHelper = new CLightVisualHelper(m_Scene, m_light);
+	//	mCLightVisualHelper->Show(true);
 		//light->setDirection(Ogre::Vector3(-1, -1, -1).normalisedCopy());
 		//light->setDirection(Ogre::Vector3(0, -1, 0));
 

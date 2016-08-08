@@ -56,7 +56,11 @@ namespace XE
 					newNode = std::unique_ptr<AnimationNode>(new AnimationNode);
 
 					auto fbAnimationNode = reinterpret_cast<const XFBType::AnimationNode*>(var->node());
-										
+				
+					LOG(plog::info) << "UAnimationNode_AnimationNode:";
+					LOG(plog::info) << "animId:" << fbAnimationNode->animation()->id();
+					LOG(plog::info) << "animName:" << fbAnimationNode->animation()->name()->c_str();
+
 					auto tes2 = fbAnimationNode->animation()->id();
 					auto test = fbAnimationNode->animation()->name()->c_str();
 					animIdMap.emplace(test, fbAnimationNode->animation()->id());

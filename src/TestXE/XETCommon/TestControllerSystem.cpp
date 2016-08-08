@@ -118,6 +118,31 @@ namespace XET {
 	{
 		std::cout << "onKeyPressed! " << context.event->key.keysym.scancode << std::endl;
 
+		if (context.event->key.keysym.scancode == SDL_SCANCODE_1)
+		{
+		
+			void* fbEntityData = mEngine.getDAL().getEntity(7);
+			if (fbEntityData)
+			{
+				// Create a large amount of falling physics objects
+				const unsigned NUM_OBJECTS = 1000;
+				for (unsigned i = 0; i < NUM_OBJECTS; ++i)
+				{
+					auto entity = mEngine.getScene().entities.create();
+					mEngine.getScene().createEntity(entity, mEngine.getScene().getSceneID(), 7, fbEntityData, true);
+
+					auto pBody = entity.component<XE::PhysicsComponent>();
+					pBody->objects[0]->setTransformState(TransformState(XE::Vector3(0.0f, i * 2.0f + 100.0f, 0.0f), XE::Quaternion(1, 0, 0, 0), XE::Vector3(1, 1, 1)));
+				}
+
+				mEngine.getGraphicsManager().getIntoRendererQueue().push([fbEntityData]()
+				{
+					if (fbEntityData)
+						delete fbEntityData;
+				});
+			}
+		}
+
 		entityx::ComponentHandle<TestControllerComponent> controller;
 		entityx::ComponentHandle<XE::ScreenComponent> screen;
 

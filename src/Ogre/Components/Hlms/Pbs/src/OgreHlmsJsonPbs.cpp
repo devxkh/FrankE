@@ -166,7 +166,7 @@ namespace Ogre
             HlmsTextureManager::TEXTURE_TYPE_NORMALS,
             HlmsTextureManager::TEXTURE_TYPE_DIFFUSE,
             HlmsTextureManager::TEXTURE_TYPE_MONOCHROME,
-            HlmsTextureManager::TEXTURE_TYPE_DETAIL,
+            HlmsTextureManager::TEXTURE_TYPE_NON_COLOR_DATA,
             HlmsTextureManager::TEXTURE_TYPE_DETAIL,
             HlmsTextureManager::TEXTURE_TYPE_DETAIL,
             HlmsTextureManager::TEXTURE_TYPE_DETAIL,
@@ -190,9 +190,12 @@ namespace Ogre
 
             assert(texLocation.texture->isTextureTypeArray() || textureType == PBSM_REFLECTION);
 
-            //If HLMS texture manager failed to find a reflection texture, have look int standard texture manager
-            //NB we only do this for reflection textures as all other textures must be texture arrays for performance reasons
-            if (textureType == PBSM_REFLECTION && texLocation.texture == hlmsTextureManager->getBlankTexture().texture)
+            //If HLMS texture manager failed to find a reflection
+            //texture, have look in standard texture manager.
+            //NB we only do this for reflection textures as all other
+            //textures must be texture arrays for performance reasons
+            if( textureType == PBSM_REFLECTION &&
+                texLocation.texture == hlmsTextureManager->getBlankTexture().texture )
             {
                 Ogre::TexturePtr tex = Ogre::TextureManager::getSingleton().getByName(textureName);
                 if (tex.isNull() == false)

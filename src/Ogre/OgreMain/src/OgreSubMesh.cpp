@@ -1,4 +1,4 @@
-﻿/*
+/*
 -----------------------------------------------------------------------------
 This source file is part of OGRE
     (Object-oriented Graphics Rendering Engine)
@@ -343,6 +343,10 @@ namespace v1 {
     {
         extremityPoints.clear();
 
+        // Make it possible to remove already existing extremes by calling this method with 0
+        if (0 == count)
+            return;
+
         /* Currently this uses just one criteria: the points must be
          * as far as possible from each other. This at least ensures
          * that the extreme points characterise the submesh as
@@ -503,7 +507,7 @@ namespace v1 {
             newSub->vertexData[VpNormal] = this->vertexData[VpNormal]->clone();
 
             if( this->vertexData[VpNormal] == this->vertexData[VpShadow] )
-                newSub->vertexData[VpNormal] = newSub->vertexData[VpShadow];
+                newSub->vertexData[VpShadow] = newSub->vertexData[VpNormal];
             else
                 newSub->vertexData[VpShadow] = this->vertexData[VpShadow]->clone();
 
@@ -519,7 +523,7 @@ namespace v1 {
         newSub->indexData[VpNormal] = this->indexData[VpNormal]->clone();
 
         if( this->indexData[VpNormal] == this->indexData[VpShadow] )
-            newSub->indexData[VpNormal] = newSub->indexData[VpShadow];
+            newSub->indexData[VpShadow] = newSub->indexData[VpNormal];
         else
             newSub->indexData[VpShadow] = this->indexData[VpShadow]->clone();
 
@@ -641,7 +645,7 @@ namespace v1 {
             }
         }
         mMaterialName = subMesh->getMaterialName();
-        mMatInitialised = false;
+        mMatInitialised = !mMaterialName.empty();
     }
     //---------------------------------------------------------------------
     void SubMesh::arrangeEfficient( bool halfPos, bool halfTexCoords, bool qTangents )

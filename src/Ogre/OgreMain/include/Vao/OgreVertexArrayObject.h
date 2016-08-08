@@ -78,6 +78,8 @@ namespace Ogre
         VertexBufferPackedVec   mVertexBuffers;
         IndexBufferPacked       *mIndexBuffer;
 
+        VertexBufferPacked      *mBaseVertexBuffer;
+
         /// The type of operation to perform
         v1::RenderOperation::OperationType mOperationType;
 
@@ -94,6 +96,9 @@ namespace Ogre
         IndexBufferPacked* getIndexBuffer(void) const                   { return mIndexBuffer; }
 
         v1::RenderOperation::OperationType getOperationType(void) const { return mOperationType; }
+
+        uint32 getPrimitiveStart(void) const                            { return mPrimStart; }
+        uint32 getPrimitiveCount(void) const                            { return mPrimCount; }
 
         /** Limits the range of triangle primitives that is rendered.
             For VAOs with index buffers, this controls the index start & count,
@@ -196,6 +201,10 @@ namespace Ogre
 
         /// Unmaps the buffers mapped via @see mapAsyncTickets
         static void unmapAsyncTickets( ReadRequestsArray &tickets );
+
+        /// When a Vao doesn't have a vertex buffer, a dummy one is assigned for performance
+        /// reasons (avoid checking if pointer is null, avoid crashing inside Ogre)
+        static VertexBufferPacked msDummyVertexBuffer;
     };
 }
 
