@@ -1,5 +1,7 @@
 #include <XEUI/Container.hpp>
 
+//#include <iostream>
+
 namespace XE {
 
 	void Container::Add(Widget::Ptr widget) {
@@ -64,14 +66,23 @@ namespace XE {
 	}
 
 	void Container::onPointMoved(const float& x, const float& y) {
+		
+	//	std::cout << "-container->onPointMoved " << x << ",childs:" << m_children.size() << std::endl;
+	//	if(m_children.size() > 0)
+	//		std::cout << "-container->onPointMoved " << x << ",child[0]:" << m_children[0]->GetName() << std::endl;
+
 		if (!HandleEvent())
 			return;
 
+		
 		// Pass event to children.
 		//dont use an iterator here! it's possible widget deletion happens while iterating here
 		for (int index = 0; index < static_cast<int>(m_children.size()); ++index) {
 			Widget::Ptr child(m_children[static_cast<std::size_t>(index)]);
 			//for (const auto& child : m_children) {
+			
+	//		std::cout << "---child->onPointMoved " << x << std::endl;
+			
 			child->onPointMoved(x, y);
 		}
 
@@ -127,10 +138,16 @@ namespace XE {
 	}
 
 	bool Container::HandleEvent() {
+	
+		
 		// Ignore event when widget is not visible.
-		if (!IsGloballyVisible()) {
-			return false;
-		}
+		//if (!IsGloballyVisible()) {
+		
+		//	std::cout << "-Container->HandleEvent " << IsGloballyVisible() << std::endl;
+			
+			return true;
+		//}
+	//	std::cout << "-Container->HandleEvent, OK "  << std::endl;
 
 		// Create a copy of the event and transform mouse coordinates to local
 		// coordinates if event is a mouse event.

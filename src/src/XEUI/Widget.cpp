@@ -6,6 +6,8 @@
 #include <cmath>
 #include <limits>
 
+//#include <iostream>
+
 namespace XE {
 
 	// Signals.
@@ -166,24 +168,35 @@ namespace XE {
 	}
 
 	bool Widget::HandleEvent() {
+
+	//	std::cout << "-----IsGloballyVisible! " << IsGloballyVisible() << std::endl;
+
 		if (!IsGloballyVisible()) {
 			return false;
 		}
 
+	//	std::cout << "-----GetState! " << std::endl;
+		
 		// Ignore the event if widget is insensitive
 		if (GetState() == State::INSENSITIVE) {
 			return false;
 		}
 
+	//	std::cout << "-----IsActiveWidget! " << std::endl;
+		
 		// Ignore the event if another widget is active.
 		if (!IsActiveWidget() && !IsActiveWidget(PtrConst())) {
 			return false;
 		}
 
+	//	std::cout << "-----HasModal! " << std::endl;
+		
 		// Ignore the event if another widget is modal.
 		if (HasModal() && !IsModal()) {
 			return false;
 		}
+	
+	//	std::cout << "-----ok! " << std::endl;
 
 		auto parent = m_parent.lock();
 
@@ -465,15 +478,26 @@ namespace XE {
 
 	void Widget::onPointMoved(const float& x, const float& y) {
 		
+	//	std::cout << "-----start.onPointMoved! " << x << std::endl;
+
 		if (!HandleEvent())
 			return;
 
 		SDL_Rect rec{ Widget::getPosition().x,Widget::getPosition().y , size.x,size.y };
 		SDL_Point point{x,y};
+
+	//	std::cout << "SDL_Point.onPointMoved! " << x << std::endl;
+
 		// Check if pointer inside of widget's allocation.
 		if (SDL_PointInRect(&point, &rec)) {
+			
+	//		std::cout << "SDL_PointInRect.onPointMoved! " << x << std::endl;
+
 			// Check for enter event.
 			if (!IsMouseInWidget()) {
+
+		//		std::cout << "!IsMouseInWidget.onPointMoved! " << x << std::endl;
+				
 				SetMouseInWidget(true);
 
 				GetSignals().Emit(OnMouseEnter);

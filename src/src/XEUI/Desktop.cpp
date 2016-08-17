@@ -10,6 +10,8 @@
 
 #include <ThirdParty/plog/Log.h>
 
+#include <iostream>
+
 namespace XE {
 
 	Desktop::Desktop(GUIRenderer& guiRenderer, CameraRenderable& camera, const XE::Uint16 atlasId)
