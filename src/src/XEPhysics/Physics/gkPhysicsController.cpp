@@ -738,7 +738,7 @@ btCollisionShape* gkPhysicsController::_createShape(const XFBType::PhysicsObject
 		//else if (axe == Ogre::Vector3f::UNIT_Z)
 		//	mShape = new btCapsuleShapeZ(radius, height);
 
-		shape = new btCapsuleShape(2.2f, 7.6f);
+		shape = new btCapsuleShape(size.x, size.y);//2.2f, 7.6f);
 		break;
 	}
 

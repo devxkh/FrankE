@@ -191,6 +191,11 @@ namespace XE
 					_t_OgreItemPtr = m_Scene.getOgreSceneManager().__OgreSceneMgrPtr->createItem(v2Mesh, (Ogre::SceneMemoryMgrTypes)Ogre::SCENE_DYNAMIC);
 					_t_OgreItemPtr->setVisibilityFlags(0x000000001);
 
+					Ogre::HlmsManager *hlmsManager = m_GraphicsManager.getRoot()->getHlmsManager();
+					Ogre::HlmsDatablock *datablock = hlmsManager->getDatablock("ShadowTest");
+					datablock->mShadowConstantBias = 0.001;
+					_t_OgreItemPtr->setDatablock(datablock);
+
 					//_t_OgreItemPtr->setCastShadows(true);
 					//	_t_OgreItemPtr->setDatablock("BaseWhite");
 						//meshV1 = tmp->getMesh();

@@ -34,6 +34,7 @@
 #include <XESystem/Entityx/Entity.h>
 
 class btCollisionObject;
+class gkDynamicsWorld;
 
 namespace entityx { class Entity; }
 
@@ -59,7 +60,7 @@ public:
 			btCollisionWorld::LocalRayResult& rayResult,bool normalInWorldSpace);
 	};
 	
-	gkRayTest(XE::Scene* scene=0);
+	gkRayTest(gkDynamicsWorld* physicsWorld);
 
 	~gkRayTest();
 
@@ -90,7 +91,7 @@ private:
 
 	float m_hitFraction;
 
-	XE::Scene* m_scene;
+	gkDynamicsWorld* m_physicsWorld;
 };
 
 

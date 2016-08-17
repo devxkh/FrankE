@@ -6,6 +6,7 @@
 //#include <Ogre/OgreMain/include/OgreVector3.h>
 //#include <Ogre/OgreMain/include/OgreQuaternion.h>
 //#include <Ogre/OgreMain/include/OgreNode.h>
+#include <Ogre/OgreMain/include/OgreRay.h>
 
 #include <XERenderer/Renderable.hpp>
 
@@ -18,6 +19,7 @@ namespace Ogre
 	class SceneNode;
 	class OgreWorkspace;
 	class Vector3;
+	class Vector2;
 }
 
 namespace XE {
@@ -36,9 +38,6 @@ namespace XE {
 	
 		inline GraphicsManager& getGraphicsManager() { return m_GraphicsManager; }
 
-		//change only  in Renderthread!!! needed for createworkspace
-		inline Ogre::Camera* getOgreCamera() { return __OgreCameraPtr;	}
-
 		void setSettings();
 		void updateTransform(const Ogre::Vector3& position, const Ogre::Quaternion& rotation);
 		void updateLookAt(const Ogre::Vector3& position, const Ogre::Vector3& lookAt);
@@ -53,13 +52,20 @@ namespace XE {
 		float getFarClipDistance() { return  m_farClipDistance; }
 		bool getAutoAspectRatio() { return  m_autoAspectRatio; }
 
+		const Ogre::Ray& getScreenPointRay()  { return m_screenPointRay; }
+
+		void _t_updateRayFromPoint(const Ogre::Vector2& screenpoint);
+
+
 	private:
+
+		Ogre::Ray m_screenPointRay;
 
 		GraphicsManager& m_GraphicsManager;
 		XE::Uint16 m_ID;
 		Scene& m_Scene;
 
-		Ogre::Camera* __OgreCameraPtr;
+		Ogre::Camera* _t_OgreCameraPtr;
 		XE::OgreWorkspace*			_t_OgreWorkspace;
 
 		

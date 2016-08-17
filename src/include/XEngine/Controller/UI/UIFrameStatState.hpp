@@ -22,7 +22,7 @@ namespace XE {
 	{
 	public:
 
-		UIDebug(const Ogre::uint16& id, entityx::Entity entity, bool replace);
+		UIDebug(const Uint16& id, entityx::Entity entity, bool replace);
 		~UIDebug();
 
 		void pause();

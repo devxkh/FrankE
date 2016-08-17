@@ -51,6 +51,7 @@ namespace XE
 		, _lua(*this)
 		, _soundMgr()
 		, m_OgreSceneManager(mGraphicsManager)
+		, m_mtFrameLimiter()
 	{		
 		//plog::init(plog::debug, "HelloLog.txt"); // Step2: initialize the logger.
 		//el::Loggers::reconfigureAllLoggers(el::ConfigurationType::Format, "%datetime %level ,tid: %thread msg: %msg");
@@ -192,6 +193,7 @@ namespace XE
 		m_resume = true;
 	}
 
+
 	void XEngine::update()
 	{
 		//bool test = false;
@@ -211,12 +213,14 @@ namespace XE
 		//}
 //		sf::Time elapsed1 = m_clock.getElapsedTime();
 
-		sf::Time dt = m_clock.restart();
-		sf::Uint64 time = dt.asMicroseconds();
+		elapsedTimeMainThread = m_clock.restart();
+		sf::Uint64 time = elapsedTimeMainThread.asMicroseconds();
 
 		double timeSinceLast = time / 1000000.0;
 		timeSinceLast = std::min(1.0, timeSinceLast); //Prevent from going haywire.
 
+		//timeSinceLast = m_mtFrameLimiter.ApplyFrameLimit(timeSinceLast);
+		
 		m_scene->update(timeSinceLast);
 
 		m_states.top()->update(timeSinceLast);
@@ -226,6 +230,16 @@ namespace XE
 #endif
 
 		mGraphicsManager.getFromRendererQueue().TriggerAllHandler();
+
+		//bool cap = true;
+
+
+		////If we want to cap the frame rate
+		//if ((cap == true) && (fps.get_ticks() < 1000 / FRAMES_PER_SECOND))
+		//{
+		//	//Sleep the remaining frame time
+		//	SDL_Delay((1000 / FRAMES_PER_SECOND) - fps.get_ticks());
+		//}
 
 		//	XE::WindowEventUtilities::messagePump(); //dont use it or .net wrapper crash!
 	}

@@ -1,9 +1,13 @@
-#ifndef __UI_CONSOLE_STATE_HPP__
-#define __UI_CONSOLE_STATE_HPP__
+#pragma once
 
 #include <XEUI/UIState.hpp>
 #include <XESystem/Entityx/Entity.h>
-#include <XEUI/widgets/OgreConsoleForGorilla.hpp>
+#include <XEUI/Alignment.hpp>
+#include <XEUI/Widgets/Entry.hpp>
+#include <XEUI/Widgets/Label.hpp>
+#include <XEUI/Box.hpp>
+
+//#include <XEUI/widgets/OgreConsoleForGorilla.hpp>
 
 namespace entityx
 {
@@ -37,7 +41,14 @@ namespace XE {
 
 	protected:
 		//UIPanel::Ptr m_ConsolePanel;
-		OgreConsole::Ptr m_Ogreconsole;
+		//OgreConsole::Ptr m_Ogreconsole;
+
+		std::vector<Label::Ptr> m_linesOfText;
+
+		Box::Ptr  m_consoleWidgetContainer;
+		Alignment::Ptr  m_alignment;
+		Entry::Ptr m_entry;
+		
 		entityx::Entity m_entity;
 
 		bool m_running;
@@ -45,5 +56,3 @@ namespace XE {
 	};
 
 } // namespace XE
-
-#endif // __UI_CONSOLE_STATE_HPP__

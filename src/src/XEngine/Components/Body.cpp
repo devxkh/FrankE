@@ -21,6 +21,7 @@ namespace XE
 		mDerivedTransform(),
 		mInheritOrientation(true),
 		mInheritScale(true)
+		, m_hasTargetPosition(false)
 	{
 	}
 
@@ -43,12 +44,46 @@ namespace XE
 		,_isDirty(true)
 		, _isNetIDDirty(true)
 		, m_parent(nullptr)
+		, m_hasTargetPosition(false)
 	{
 		setPosition(transform->position()->x(), transform->position()->y(), transform->position()->z());
 
 		setScale(transform->scale()->x(), transform->scale()->y(), transform->scale()->z());
 
 		setOrientation(transform->rotation()->w(), transform->rotation()->x(), transform->rotation()->y(), transform->rotation()->z());
+	}
+
+	const Ogre::Vector3& BodyComponent::getTargetDirection() {
+		return m_targetDirection;
+	}
+	void BodyComponent::setTargetDirection(const Ogre::Vector3& direction) {
+		m_targetDirection = direction;
+	}
+	 Ogre::Real BodyComponent::getTargetDistance() {
+		return m_targetDistance;
+	}
+	void BodyComponent::setTargetDistance(Ogre::Real distance) {
+		m_targetDistance = distance;
+	}
+	const Ogre::Vector3& BodyComponent::getTargetPosition() {
+		return m_targetPosition;
+	}
+
+	void BodyComponent::setTargetPosition(const Ogre::Vector3& targetPosition) {
+		m_targetPosition = targetPosition;
+
+
+		m_targetDirection = m_targetPosition - getPosition();
+		m_targetDistance = m_targetDirection.normalise();
+
+	}
+
+	bool BodyComponent::hasTargetPosition() {
+		return m_hasTargetPosition;
+	}
+
+	void BodyComponent::setHasTargetPosition(bool hasTargetPosition) {
+		m_hasTargetPosition = hasTargetPosition;
 	}
 
 

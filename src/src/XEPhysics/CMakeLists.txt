@@ -625,7 +625,7 @@ set_property(TARGET XEPhysics PROPERTY LINK_FLAGS "-static-libgcc -static-libstd
 
 
 target_compile_definitions(XEPhysics PUBLIC XEPHYSICS_EXPORTS)
-
+#target_compile_definitions(XEPhysics PUBLIC USE_BRUTEFORCE_RAYBROADPHASE)
 
 # Adds logic to INSTALL.vcproj to copy XEngine.lib to destination directory
 #install (TARGETS XEPhysics

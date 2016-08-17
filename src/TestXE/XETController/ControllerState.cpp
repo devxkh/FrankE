@@ -4,6 +4,8 @@
 #include "../XETCommon/TestControllerSystem.hpp"
 #include "../XETCommon/TestController.hpp"
 
+#include "../DAL/Netmsg_generated.h"
+
 ControllerState::ControllerState(XE::XEngine& engine, bool replace)
 	: XE::XEState(engine, replace)
 {
@@ -27,7 +29,7 @@ ControllerState::ControllerState(XE::XEngine& engine, bool replace)
 	XET::TestControllerComponent* ctrl = entity.assign<XET::TestControllerComponent>(0, engine, engine.getGraphicsManager().getWindow(), true).get();
 
 	XE::ScreenComponent* screenComp = entity.assign<XE::ScreenComponent>(*camRenderable, engine.getGraphicsManager().getWindow()).get(); //createScreen(); //workspace needed for screen
-	screenComp->mUIStateManager.addUIState(screenComp->mUIStateManager.build <XE::UIDebug>(11, entity, true));
+	screenComp->mUIStateManager.addUIState(screenComp->mUIStateManager.build <XE::UIDebug>(NetMsg::UIStateId_Stats, entity, true));
 	//screenComp->mUIStateManager.addUIState(screenComp->mUIStateManager.build <XE::UIConsole>(10, entity, true));//ctrl.createConsole();
 
 	ctrlSystem->setBasicInputEvents(*ctrl);

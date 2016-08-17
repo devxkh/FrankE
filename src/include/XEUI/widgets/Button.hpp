@@ -43,6 +43,9 @@ namespace XE {
 		* @param image Image of the button.
 		*/
 		void SetImage(std::shared_ptr<Image> image);
+	
+
+		void SetImageName(const std::string& imageName);
 
 		/** Get contained Image.
 		* @return Contained Image.
@@ -77,6 +80,8 @@ namespace XE {
 
 		WRectangle m_rectangle;
 		WCaption m_label;
+
+		std::string m_imageName;
 	};
 
 }

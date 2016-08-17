@@ -79,7 +79,7 @@ namespace XE
 		m_light->setType((Ogre::Light::LightTypes)lightData->lightType()); // Ogre::Light::LT_DIRECTIONAL);
 
 		if (lightData->directionVector())
-			m_light->setDirection(Ogre::Vector3(lightData->directionVector()->x(), lightData->directionVector()->y(), lightData->directionVector()->z()).normalisedCopy());
+			m_light->setDirection(Ogre::Vector3(lightData->directionVector()->x(), lightData->directionVector()->y(), lightData->directionVector()->z()));// .normalisedCopy());
 
 
 	///	mCLightVisualHelper = new CLightVisualHelper(m_Scene, m_light);
@@ -100,8 +100,8 @@ namespace XE
 		Ogre::SceneNode *sceneNodeLines = m_Scene.getOgreSceneManager().__OgreSceneMgrPtr->getRootSceneNode(Ogre::SCENE_DYNAMIC)->createChildSceneNode(Ogre::SCENE_DYNAMIC);
 		sceneNodeLines->attachObject(manualObject);*/
 
-		/*m_Scene.getOgreSceneManager().__OgreSceneMgrPtr->setAmbientLight(Ogre::ColourValue(0.3f, 0.5f, 0.7f) * 0.1f * 0.75f,
-		Ogre::ColourValue(0.6f, 0.45f, 0.3f) * 0.065f * 0.75f,
-		-light->getDirection() + Ogre::Vector3::UNIT_Y * 0.2f);*/
+		m_Scene.getOgreSceneManager().__OgreSceneMgrPtr->setAmbientLight(Ogre::ColourValue(1.0f, 1.0f, 1.0f),
+		Ogre::ColourValue(1.0f, 1.0f, 1.0f),
+		-m_light->getDirection() + Ogre::Vector3::UNIT_Y * 0.2f);
 	}
 }

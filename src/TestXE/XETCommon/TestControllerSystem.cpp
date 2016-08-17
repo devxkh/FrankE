@@ -10,6 +10,9 @@
 #include "Controllers_generated.h"
 #include <functional>
 
+
+const float YAW_SENSITIVITY = 0.001f;
+
 namespace XET {
 
 	void TestControllerSystem::onQuit()
@@ -80,14 +83,17 @@ namespace XET {
 			if (_mousePressed)
 				screen->m_Desktop->onPointMoved(_lastMousePos.x, _lastMousePos.y);
 			else
-				screen->m_Desktop->onPointMoved(context.event->button.x, context.event->button.y);
+				screen->m_Desktop->onPointMoved(context.event->motion.x, context.event->motion.y);
 
 			if (!_mousePressed)
 				continue;
 
 			//-----------------------------------------------
 			//TODO nur wenn kein User Interface aktiv!!!!
-			float tx = controller->_windowState.width;
+			m_mouseMove.x -= context.event->motion.xrel;// / tx;
+			m_mouseMove.y -= context.event->motion.yrel;// / ty;
+
+			/*float tx = controller->_windowState.width;
 			float ty = controller->_windowState.height;
 
 			float deltax = -context.event->motion.xrel / tx;
@@ -98,7 +104,7 @@ namespace XET {
 			if (entity.has_component<XE::CameraFreeComponent>())
 			{
 				entity.component<XE::CameraFreeComponent>()->rotate(deltax, deltay);
-			}
+			}*/
 		}
 	}
 	
@@ -125,14 +131,14 @@ namespace XET {
 			if (fbEntityData)
 			{
 				// Create a large amount of falling physics objects
-				const unsigned NUM_OBJECTS = 1000;
+				const unsigned NUM_OBJECTS = 3000;
 				for (unsigned i = 0; i < NUM_OBJECTS; ++i)
 				{
 					auto entity = mEngine.getScene().entities.create();
 					mEngine.getScene().createEntity(entity, mEngine.getScene().getSceneID(), 7, fbEntityData, true);
 
 					auto pBody = entity.component<XE::PhysicsComponent>();
-					pBody->objects[0]->setTransformState(TransformState(XE::Vector3(0.0f, i * 2.0f + 100.0f, 0.0f), XE::Quaternion(1, 0, 0, 0), XE::Vector3(1, 1, 1)));
+					pBody->objects[0]->setTransformState(TransformState(XE::Vector3(0.0f, i * 4.0f + 100.0f, 0.0f), XE::Quaternion(1, 0, 0, 0), XE::Vector3(1, 1, 1)));
 				}
 
 				mEngine.getGraphicsManager().getIntoRendererQueue().push([fbEntityData]()
@@ -265,7 +271,7 @@ namespace XET {
 		//	MyEvent( 5 );
 	}
 
-	void TestControllerSystem::move(entityx::Entity entity)
+	void TestControllerSystem::move(entityx::Entity entity, float dt)
 	{
 		entityx::ComponentHandle<XE::BodyComponent> body = entity.component<XE::BodyComponent>();
 		entityx::ComponentHandle<TestControllerComponent> controller = entity.component<TestControllerComponent>();
@@ -285,14 +291,14 @@ namespace XET {
 		if (controller->actionmap.isActive(ControllerSettings::ActionType_TurnLeft) && !controller->actionmap.isActive(ControllerSettings::ActionType_StrafeLeft) && !controller->actionmap.isActive(ControllerSettings::ActionType_StrafeRight))
 		{
 			if (entity.has_component<XE::BodyComponent>())
-				entity.component<XE::BodyComponent>()->rotate(XE::Vector3::UNIT_Y, XE::Radian(_turn_speed));
+				entity.component<XE::BodyComponent>()->rotate(XE::Vector3::UNIT_Y, XE::Radian(_turn_speed *  dt));
 			else // camera
 				moveDirection.x = -1.0f;//left
 		}
 		else if (controller->actionmap.isActive(ControllerSettings::ActionType_TurnRight) && !controller->actionmap.isActive(ControllerSettings::ActionType_StrafeLeft) && !controller->actionmap.isActive(ControllerSettings::ActionType_StrafeRight))
 		{
 			if (entity.has_component<XE::BodyComponent>())
-				entity.component<XE::BodyComponent>()->rotate(XE::Vector3::UNIT_Y, XE::Radian(-_turn_speed));
+				entity.component<XE::BodyComponent>()->rotate(XE::Vector3::UNIT_Y, XE::Radian(-_turn_speed *  dt));
 			else // camera
 				moveDirection.x = 1.0f; //right
 		}
@@ -310,7 +316,16 @@ namespace XET {
 			// Forward actions to callbacks: Invokes onResize() in case of Event::Resized events
 			controller->actionmap.invokeCallbacks(controller->system, controller->m_window);
 
-			move(entity);
+			if (entity.has_component<XE::CameraFreeComponent>())
+			{
+				if (m_mouseMove != XE::Vector2::ZERO)
+				{
+					entity.component<XE::CameraFreeComponent>()->rotate(m_mouseMove.x * YAW_SENSITIVITY, m_mouseMove.y * YAW_SENSITIVITY);
+					m_mouseMove = XE::Vector2::ZERO;
+				}
+			}
+
+			move(entity, dt);
 
 			////only camera
 			if (moveDirection != XE::Vector3::ZERO && entity.has_component<XE::CameraFreeComponent>())

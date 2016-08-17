@@ -46,11 +46,21 @@ namespace XE {
 		m_rectangle.setSize(sf::Vector2f(size.x, size.y));
 
 		if (GetState() == State::PRELIGHT)
+			m_rectangle.setBackgroundImage("item_unknown.png");
+		else if (GetState() == State::ACTIVE)
+			m_rectangle.setBackgroundImage("messagebox_bg.png");
+		else
+			m_rectangle.setBackgroundImage("itembox.png");
+
+		
+		if (GetState() == State::PRELIGHT)
 			m_rectangle.setBackground(Ogre::ColourValue::Red);
 		else if (GetState() == State::ACTIVE)
 			m_rectangle.setBackground(Ogre::ColourValue::Black);
 		else
 			m_rectangle.setBackground(Ogre::ColourValue::Green);
+		
+		
 		//m_label.setText(GetLabel());
 
 		//todo
@@ -68,7 +78,12 @@ namespace XE {
 		return "todo";// m_label.getText();// m_label;
 	}
 
-	//void Button::SetImage(Image::Ptr image) {
+	void Button::SetImageName(const std::string& imageName) {
+		m_imageName = imageName;
+	}
+
+
+	//void Button::SetImage(std::shared_ptr<Image> image) {
 	//	ClearImage();
 	//	Add(image);
 	//}

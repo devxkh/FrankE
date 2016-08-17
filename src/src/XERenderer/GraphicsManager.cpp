@@ -219,13 +219,15 @@ namespace XE
 	{
 		my_QueueManager.TriggerAllHandler();
 
-		my_FromRSQueueManager.push([this]() {
+		my_FromRSQueueManager.push([this]() { //executed in mainthread
+
 			const Ogre::FrameStats*  stats = mRoot->getFrameStats();
 
 			m_FrameStats.Fps = stats->getFps();
 			m_FrameStats.AvgFps = stats->getAvgFps();
 			m_FrameStats.BestTime = stats->getBestTime();
 			m_FrameStats.WorstTime = stats->getWorstTime();
+
 
 			_renderTasks[RenderTaskID::AnimationTimes].isDone = true;
 			//_renderTasks[RenderTaskID::DebugLines].isDone = true;

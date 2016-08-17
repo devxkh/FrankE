@@ -26,9 +26,14 @@ namespace XE
 		character->setEntityWithBody(object);
 	}
 
-	void CharacterPhysics::setRotation(const Ogre::Vector3& axis, float scalar)
+	void CharacterPhysics::setOrientation(const Ogre::Quaternion& orientation)
 	{
-		character->setRotation(axis, scalar);
+		character->setOrientation(orientation);
+	}
+
+	void CharacterPhysics::rotate(const Ogre::Vector3& axis, float scalar)
+	{
+		character->rotate(axis, scalar);
 	}
 	
 	void CharacterPhysics::collided(entityx::Entity collider, const Ogre::Vector3& positionWorldOnB, const Ogre::Vector3& normalWorldOnB, float distance1, float appliedImpulse)

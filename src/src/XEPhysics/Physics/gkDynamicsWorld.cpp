@@ -62,6 +62,12 @@ gkDynamicsWorld::gkDynamicsWorld(const std::string& name, XE::Scene& scene)
 	        m_constraintSolver(0),
 	        m_debug(0),
 	        m_handleContacts(true)//,
+	,m_fps(60)
+	, m_maxSubSteps(0)
+	,m_timeAcc(0)
+	,m_interpolation(true)
+	,m_simulating(false)
+
 	     //todo   m_dbvt(0)
 {
 	createInstanceImpl();
@@ -401,7 +407,7 @@ void gkDynamicsWorld::localDrawObject(gkPhysicsController* phyCon)
 
 
 
-void gkDynamicsWorld::step(float tick)
+void gkDynamicsWorld::step(float timeStep)
 {
 	assert(m_dynamicsWorld);
 
@@ -413,10 +419,37 @@ void gkDynamicsWorld::step(float tick)
 		mDebugContactPoints->clear();*/
 
 	//uncomment this for better simulation quality (but a little bit less performance)
-//	m_dynamicsWorld->stepSimulation(tick,10,1./240.);
-	m_dynamicsWorld->stepSimulation(0.02); // tick);
+	//m_dynamicsWorld->stepSimulation(tick,10,1./240.);
+	m_dynamicsWorld->stepSimulation(timeStep); // tick);
 
-	
+	//float internalTimeStep = 1.0f / m_fps;
+	//int maxSubSteps = (int)(timeStep * m_fps) + 1;
+	//if (m_maxSubSteps < 0)
+	//{
+	//	internalTimeStep = timeStep;
+	//	maxSubSteps = 1;
+	//}
+	//else if (m_maxSubSteps > 0)
+	//	maxSubSteps = std::min(maxSubSteps, m_maxSubSteps);
+
+	////delayedWorldTransforms_.Clear();
+	//m_simulating = true;
+
+	//if (m_interpolation)
+	//	m_dynamicsWorld->stepSimulation(timeStep, maxSubSteps, internalTimeStep);
+	//else
+	//{
+	//	m_timeAcc += timeStep;
+	//	while (m_timeAcc >= internalTimeStep && maxSubSteps > 0)
+	//	{
+	//		m_dynamicsWorld->stepSimulation(internalTimeStep, 0, internalTimeStep);
+	//		m_timeAcc -= internalTimeStep;
+	//		--maxSubSteps;
+	//	}
+	//}
+
+	//m_simulating = false;
+
 	if (m_handleContacts)
 	{
 		int nr = m_dispatcher->getNumManifolds();

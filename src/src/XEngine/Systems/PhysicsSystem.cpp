@@ -27,19 +27,87 @@ namespace XE
 		for (entityx::Entity entity : es.entities_with_components(physicsComponent, bodyComponent)) {
 
 			for (int i = 0; i < physicsComponent->objects.size(); i++)
-			{
-				
+			{				
+				if (bodyComponent->hasTargetPosition())
+				{
+					float distance = (bodyComponent->getTargetPosition() - bodyComponent->getPosition()).normalise();
+					
+				//	std::cout << "l:" << bodyComponent->getTargetPosition() <<  ",r:" << bodyComponent->getPosition() << ",distance:" << distance << std::endl;
+					
+
+					float mWalkSpd = 20.0f;
+
+					if (bodyComponent->getTargetDirection() == Ogre::Vector3::ZERO)
+					{
+						//if (nextLocation())
+					//	std::cout << ",ry:" << bodyComponent->getPosition().y << ",distance:" << distance << std::endl;
+						bodyComponent->setHasTargetPosition(false); // target reached
+						break;
+					}
+					else
+					{
+						Ogre::Real move = mWalkSpd * dt;
+						//bodyComponent->setTargetDistance(bodyComponent->getTargetDistance() - move);
+
+						auto m_targetDirection = bodyComponent->getTargetPosition() - bodyComponent->getPosition();
+						auto m_targetDistance = m_targetDirection.normalise();
+
+						if (m_targetDistance <= bodyComponent->getPosition().y) //bodyComponent->getTargetDistance() <= 0.0)
+						{
+					//		std::cout << ",ry:" << bodyComponent->getPosition().y << ",distance:" << distance << std::endl;
+							bodyComponent->setHasTargetPosition(false); // target reached
+																		/*	bodyComponent->setPosition(mDestination);
+							mDirection = Ogre::Vector3::ZERO;
+
+							if (nextLocation())
+							{
+								Ogre::Vector3 src = mNode->getOrientation() * Ogre::Vector3::UNIT_X;
+
+								if ((1.0 + src.dotProduct(mDirection)) < 0.0001)
+								{
+									mNode->yaw(Ogre::Degree(180));
+								}
+				4				else
+								{
+									Ogre::Quaternion quat = src.getRotationTo(mDirection);
+									mNode->rotate(quat);
+								}
+							}
+							else
+							{
+								mAnimationState = mEntity->getAnimationState("Idle");
+								mAnimationState->setLoop(true);
+								mAnimationState->setEnabled(true);
+							}*/
+						}
+						else
+						{
+							auto moveDirection = bodyComponent->getTargetDirection();
+							((XE::CharacterPhysics*)entity.component<XE::PhysicsComponent>()->objects[0].get())->character->setVelocity(moveDirection * mWalkSpd, dt);
+							//mNode->translate(move * mDirection);
+						}
+					}
+
+					
+					//Ogre::Vector3 mDirection = bodyComponent->getTargetPosition() - bodyComponent->getPosition();
+					//bodyComponent->lookAt(bodyComponent->getTargetPosition(), XE::TransformSpace::TS_WORLD, Ogre::Vector3::UNIT_Y);
+					
+					//---TransformState transform(bodyComponent->getPosition(), bodyComponent->getOrientation(), bodyComponent->getScale());
+					//---entity.component<XE::PhysicsComponent>()->objects[0]->setTransformState(transform);
+					//---((XE::CharacterPhysics*)entity.component<XE::PhysicsComponent>()->objects[0].get())->character->setVelocity(mDirection, dt);
+						//setTransformState(transform);
+				}
 			//	TransformState tState(bodyComponent->getPosition(), bodyComponent->getOrientation(), bodyComponent->getScale());
 			//	physicsComponent->objects[i]->setTransformState(tState);
 			}
 
 		}
-
+		
 		m_physicsWorld.step(dt);// .asMicroseconds());
 
-		reset();
+		/*reset();
 		collect(es);
-		collide(events);
+		collide(events);*/
 	};
 
 

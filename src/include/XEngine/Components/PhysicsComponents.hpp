@@ -16,7 +16,9 @@ namespace XE
 		
 		virtual void setTransformState(const TransformState& state) = 0;
 
-		virtual void setRotation(const Ogre::Vector3& axis, float scalar) = 0;
+		virtual void setOrientation(const Ogre::Quaternion& orientation) = 0;
+		
+		virtual void rotate(const Ogre::Vector3& axis, float scalar) = 0;
 	
 		virtual void collided(entityx::Entity collider, const Ogre::Vector3& positionWorldOnB, const Ogre::Vector3& normalWorldOnB, float distance1, float appliedImpulse) = 0;
 
@@ -85,7 +87,8 @@ namespace XE
 
 		void setEntityWithBody(entityx::Entity object);
 				
-		void setRotation(const Ogre::Vector3& axis, float scalar);
+		void setOrientation(const Ogre::Quaternion& orientation);
+		void rotate(const Ogre::Vector3& axis, float scalar);
 
 		void collided(entityx::Entity collider, const Ogre::Vector3& positionWorldOnB, const Ogre::Vector3& normalWorldOnB, float distance1, float appliedImpulse);
 		void create(gkDynamicsWorld& dynWorld, const XFBType::PhysicsObject* physicObject);
@@ -109,7 +112,12 @@ namespace XE
 			m_dynWorld->destroyObject(rigidBody);
 		}
 
-		void setRotation(const Ogre::Vector3& axis, float scalar)
+		void setOrientation(const Ogre::Quaternion& orientation)
+		{
+			//todo ?
+		}
+
+		void rotate(const Ogre::Vector3& axis, float scalar)
 		{
 			//todo ?
 		}

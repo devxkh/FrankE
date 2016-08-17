@@ -29,6 +29,8 @@
 #include <XEController.hpp>
 #include <XEAnimation.hpp>
 
+#include <XESystem/FrameLimiter.hpp>
+
 #include <XEngine/Systems/RenderBodySystem.hpp>
 #include <XEngine/Systems/EntityRenderSystem.hpp>
 #include <XEngine/Systems/FreeLookCameraSystem.hpp>
@@ -151,6 +153,8 @@ namespace XE
 
 		Settings settings;
 
+		sf::Time elapsedTimeMainThread;
+
 	protected:
 
 
@@ -181,6 +185,8 @@ namespace XE
 
 		std::mutex			mControllerMutex;// protects mControllerThread
 		std::thread			mControllerThread;
+
+		FrameLimiter m_mtFrameLimiter;
 	};
 
 	template < typename T >

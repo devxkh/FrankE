@@ -140,6 +140,23 @@ public:
 	
 	void addListener(Listener *listener);
 	void removeListener(Listener *listener);
+
+private:
+	/// Simulation substeps per second.
+	unsigned m_fps;
+	
+	/// Maximum number of simulation substeps per frame. 0 (default) unlimited, or negative values for adaptive timestep.
+	int m_maxSubSteps;
+
+	/// Time accumulator for non-interpolated mode.
+	float m_timeAcc;
+
+	/// Interpolation flag.
+	bool m_interpolation;
+
+	/// Simulating flag.
+	bool m_simulating;
+
 };
 
 

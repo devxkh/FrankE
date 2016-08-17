@@ -46,30 +46,58 @@ table ReturnStatus{
 	status:MsgStatus; 
 }
 
+
+enum UIStateId : ushort
+{
+	Console, // uistate from engine
+	Stats, // uistate from engine
+	
+	Settings, 
+	Welcome, 
+	Cusomize, 
+	Game, 
+
+	Count // Must be last
+}
+
 enum PlayerState : ushort
 {
-	PlayerState_Idling,
-	PlayerState_Joining,
-	PlayerState_Dead,
-	PlayerState_Running,
-	PlayerState_Jumping,
-	PlayerState_OnMenu,
-	PlayerState_IsSpawned,
-	PlayerState_Spectating,
-	PlayerState_Attack_1,
-	PlayerState_Attack_2,
-	PlayerState_Attack_3,
-	PlayerState_Attack_4,
-	PlayerState_Attack_5,
-	PlayerState_Attack_6,
-	PlayerState_Hitted_1,
-	PlayerState_Hitted_2,
-	PlayerState_Hitted_3,
-	PlayerState_Hitted_4,
-	PlayerState_Hitted_5,
-	PlayerState_Hitted_6,
+	Idling,
+	Joining,
+	Dying,
+	Dead,
+	Running, // special animationnode for left,right,forward,backward, slide left/right
+	Walking, // special animationnode
+	JumpStart,
+	InAir,
+	JumpLanding,
+	OnMenu,
+	IsSpawning,
+	Spectating,
+	Casting,
+	Emote_1,
+	Emote_2,
+	Emote_3,
+	Dancing_1,
+	Dancing_2,
+	Dancing_3,
+	Blocking_1,
+	Blocking_2,
+	Blocking_3,
+	Attack_1,
+	Attack_2,
+	Attack_3,
+	Attack_4,
+	Attack_5,
+	Attack_6,
+	Hitted_1,
+	Hitted_2,
+	Hitted_3,
+	Hitted_4,
+	Hitted_5,
+	Hitted_6,
 	
-	PlayerState_Count // Must be last
+	Count // Must be last
 }
 
 //Parameterid is equal the node id

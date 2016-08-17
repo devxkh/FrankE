@@ -26,7 +26,7 @@ namespace XE {
 
 static const unsigned char legalchars[]="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890+!\"'#%&/()=?[]\\*-_.:,; ";
 
-OgreConsole::OgreConsole( WLayer& parentLayer)
+OgreConsole::OgreConsole( WLayer& layer)
 	: 
 		mIsVisible(true), 
 		mIsInitialised(false),
@@ -34,13 +34,15 @@ OgreConsole::OgreConsole( WLayer& parentLayer)
 		mUpdatePrompt(false),
 		mStartline(0),
 		mActive(false)
-		,m_layer(parentLayer)
-		, m_rectanglebg(parentLayer, 0, 0, 0, 0)
-		 , m_consoleText(parentLayer)
-		 , m_promptText(parentLayer)
+		,m_layer(layer)
+		, m_rectanglebg(layer, 0, 0, 0, 0)
+		 , m_consoleText(layer)
+		 , m_promptText(layer)
 		 , m_lineheight(15)
+
 {
 	Ogre::LogManager::getSingleton().getDefaultLog()->addListener(this);
+
 
 	//todo from style
 	SetStyle(nullptr,nullptr);
@@ -50,6 +52,10 @@ OgreConsole::OgreConsole( WLayer& parentLayer)
 
 
 	m_promptText.setText("> _");
+
+
+//	m_consoleWidgetContainer->Pack(m_promptText);
+
 }
  
 

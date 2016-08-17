@@ -53,6 +53,7 @@ public:
 		//GK_ASSERT(!isNaN() && "Invalid vector supplied as parameter");
 	}
 	
+
 	TransformState(const XFBType::BodyComponent&  tvs)
 	{
 		rot.w = tvs.rotation()->w();

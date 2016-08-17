@@ -34,7 +34,7 @@ namespace XET {
 		virtual void menuNav(XE::ActionContext context, TestControllerComponent& controller);
 
 		//realtime action
-		virtual void move(entityx::Entity entity);
+		virtual void move(entityx::Entity entity, float dt);
 	
 		void update(entityx::EntityManager &es, entityx::EventManager &events, entityx::TimeDelta dt) override;
 
@@ -50,6 +50,14 @@ namespace XET {
 		XE::Vector2 _lastMousePos;
 		bool _mousePressed;
 		XE::Vector3 moveDirection; // set to null per frame
+
+		/// Mouse movement since last frame.
+		XE::Vector2 m_mouseMove;
+
+		/// Mouse wheel movement since last frame.
+		int m_mouseMoveWheel;
+
+
 	};
 
 } // namespace XET

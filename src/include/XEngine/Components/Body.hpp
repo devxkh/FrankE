@@ -479,6 +479,20 @@ namespace XE
 		///original sceneid of the entity
 		Uint16 sceneId;
 
+		
+		const Ogre::Vector3& getTargetPosition();
+		void setTargetPosition(const Ogre::Vector3& targetPosition);
+
+		bool hasTargetPosition();
+		void setHasTargetPosition(bool hasTargetPosition);
+
+		const Ogre::Vector3& getTargetDirection();
+		void setTargetDirection(const Ogre::Vector3& direction);
+
+		Ogre::Real getTargetDistance();
+		void setTargetDistance(Ogre::Real distance);
+
+
 	protected:
 		/// Whether to yaw around a fixed axis.
 		bool mYawFixed;
@@ -487,6 +501,12 @@ namespace XE
 
 	private:
 		
+		bool				m_hasTargetPosition;
+		Ogre::Vector3       m_targetPosition;
+		Ogre::Vector3       m_targetDirection;
+		Ogre::Real			m_targetDistance;
+
+
 		std::vector<std::shared_ptr<BodyComponent> > m_children;
 
 		/// World transform needs update flag.

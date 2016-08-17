@@ -174,13 +174,13 @@ void Box::AllocateChildren() const {
 
 		if( m_orientation == Orientation::HORIZONTAL ) {
 
-			//FIXME
-			//allocation.x = child.widget->position.x + ( child.expand ? extra : 0.f );
-			//allocation.y = size.x - 2 * gap;
-
-			//child.widget->position = position;
-			////child.widget->size(sf::FloatRect(position.x, position.y, allocation.x - (child.expand && !child.fill ? extra : 0.f), allocation.y));
-			//tmpPosition.x += allocation.x + GetSpacing();
+		/*	allocation.x = child.widget->getPosition().x + ( child.expand ? extra : 0.f );
+			allocation.y = size.y - 2 * gap;
+*/
+			child.widget->setPosition(tmpPosition);
+			//child.widget->size(sf::FloatRect(position.x, position.y, allocation.x - (child.expand && !child.fill ? extra : 0.f), allocation.y));
+		//	tmpPosition.x += allocation.x + GetSpacing();
+			tmpPosition.x += child.widget->size.x + GetSpacing();
 		}
 		else {
 			child.widget->setPosition(tmpPosition);

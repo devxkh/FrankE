@@ -14,7 +14,7 @@ namespace XE
 	}
 
 	void RenderBodySystem::update(entityx::EntityManager &es, entityx::EventManager &events, entityx::TimeDelta dt) {
-	
+
 		if (!_graphicsMgr.GetRenderTask(RenderTaskID::RenderBody).isDone) // wait until render has done all tasks
 			return;
 		

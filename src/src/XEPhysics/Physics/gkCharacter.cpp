@@ -190,7 +190,7 @@ void gkCharacter::destroy(void)
 }
 
 
-void gkCharacter::setWalkDirection(const Ogre::Vector3& wd, float walkSpeed)
+void gkCharacter::setWalkDirection(const Ogre::Vector3& wd, float timeInterval)
 {
 
 
@@ -220,7 +220,10 @@ void gkCharacter::setWalkDirection(const Ogre::Vector3& wd, float walkSpeed)
 	btTransform xform = getGhostObject()->getWorldTransform();
 	Ogre::Vector3 result = MathUtils::get(xform.getRotation()) * wd; ///??????
 
-	m_character->setWalkDirection(MathUtils::get(result)*walkSpeed);
+
+	setVelocity(result, timeInterval);
+
+//----------	m_character->setWalkDirection(MathUtils::get(result)*walkSpeed);
 
 	//m_character->setWalkDirection(btVector3(wd.x, wd.y, wd.z)*walkSpeed);
 	
@@ -315,7 +318,12 @@ void gkCharacter::setGravity(float gravity)
 	m_character->setGravity(btScalar(gravity));
 }
 
-void gkCharacter::setRotation(const Ogre::Vector3& axis, float scalar)
+void gkCharacter::setOrientation(const Ogre::Quaternion& orientation)
+{
+	m_character->getGhostObject()->getWorldTransform().setRotation(MathUtils::get(orientation));
+}
+
+void gkCharacter::rotate(const Ogre::Vector3& axis, float scalar)
 {
 	btMatrix3x3 orn = m_character->getGhostObject()->getWorldTransform().getBasis();
 	orn *= btMatrix3x3(btQuaternion(MathUtils::get(axis), scalar));

@@ -60,7 +60,8 @@ public:
 
 	void setGravity(float gravity);
 
-	void setRotation(const Ogre::Vector3& axis, float scalar);
+	void setOrientation(const Ogre::Quaternion& orientation);
+	void rotate(const Ogre::Vector3& axis, float scalar);
 
 	void setJumpSpeed(float jumpSpeed);
 	void setFallSpeed(float fallSpeed);

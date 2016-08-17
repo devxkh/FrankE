@@ -90,32 +90,63 @@ inline const char **EnumNamesMsgStatus() {
 
 inline const char *EnumNameMsgStatus(MsgStatus e) { return EnumNamesMsgStatus()[static_cast<int>(e)]; }
 
+enum UIStateId {
+  UIStateId_Console = 0,
+  UIStateId_Stats = 1,
+  UIStateId_Settings = 2,
+  UIStateId_Welcome = 3,
+  UIStateId_Cusomize = 4,
+  UIStateId_Game = 5,
+  UIStateId_Count = 6
+};
+
+inline const char **EnumNamesUIStateId() {
+  static const char *names[] = { "Console", "Stats", "Settings", "Welcome", "Cusomize", "Game", "Count", nullptr };
+  return names;
+}
+
+inline const char *EnumNameUIStateId(UIStateId e) { return EnumNamesUIStateId()[static_cast<int>(e)]; }
+
 enum PlayerState {
-  PlayerState_PlayerState_Idling = 0,
-  PlayerState_PlayerState_Joining = 1,
-  PlayerState_PlayerState_Dead = 2,
-  PlayerState_PlayerState_Running = 3,
-  PlayerState_PlayerState_Jumping = 4,
-  PlayerState_PlayerState_OnMenu = 5,
-  PlayerState_PlayerState_IsSpawned = 6,
-  PlayerState_PlayerState_Spectating = 7,
-  PlayerState_PlayerState_Attack_1 = 8,
-  PlayerState_PlayerState_Attack_2 = 9,
-  PlayerState_PlayerState_Attack_3 = 10,
-  PlayerState_PlayerState_Attack_4 = 11,
-  PlayerState_PlayerState_Attack_5 = 12,
-  PlayerState_PlayerState_Attack_6 = 13,
-  PlayerState_PlayerState_Hitted_1 = 14,
-  PlayerState_PlayerState_Hitted_2 = 15,
-  PlayerState_PlayerState_Hitted_3 = 16,
-  PlayerState_PlayerState_Hitted_4 = 17,
-  PlayerState_PlayerState_Hitted_5 = 18,
-  PlayerState_PlayerState_Hitted_6 = 19,
-  PlayerState_PlayerState_Count = 20
+  PlayerState_Idling = 0,
+  PlayerState_Joining = 1,
+  PlayerState_Dying = 2,
+  PlayerState_Dead = 3,
+  PlayerState_Running = 4,
+  PlayerState_Walking = 5,
+  PlayerState_JumpStart = 6,
+  PlayerState_InAir = 7,
+  PlayerState_JumpLanding = 8,
+  PlayerState_OnMenu = 9,
+  PlayerState_IsSpawning = 10,
+  PlayerState_Spectating = 11,
+  PlayerState_Casting = 12,
+  PlayerState_Emote_1 = 13,
+  PlayerState_Emote_2 = 14,
+  PlayerState_Emote_3 = 15,
+  PlayerState_Dancing_1 = 16,
+  PlayerState_Dancing_2 = 17,
+  PlayerState_Dancing_3 = 18,
+  PlayerState_Blocking_1 = 19,
+  PlayerState_Blocking_2 = 20,
+  PlayerState_Blocking_3 = 21,
+  PlayerState_Attack_1 = 22,
+  PlayerState_Attack_2 = 23,
+  PlayerState_Attack_3 = 24,
+  PlayerState_Attack_4 = 25,
+  PlayerState_Attack_5 = 26,
+  PlayerState_Attack_6 = 27,
+  PlayerState_Hitted_1 = 28,
+  PlayerState_Hitted_2 = 29,
+  PlayerState_Hitted_3 = 30,
+  PlayerState_Hitted_4 = 31,
+  PlayerState_Hitted_5 = 32,
+  PlayerState_Hitted_6 = 33,
+  PlayerState_Count = 34
 };
 
 inline const char **EnumNamesPlayerState() {
-  static const char *names[] = { "PlayerState_Idling", "PlayerState_Joining", "PlayerState_Dead", "PlayerState_Running", "PlayerState_Jumping", "PlayerState_OnMenu", "PlayerState_IsSpawned", "PlayerState_Spectating", "PlayerState_Attack_1", "PlayerState_Attack_2", "PlayerState_Attack_3", "PlayerState_Attack_4", "PlayerState_Attack_5", "PlayerState_Attack_6", "PlayerState_Hitted_1", "PlayerState_Hitted_2", "PlayerState_Hitted_3", "PlayerState_Hitted_4", "PlayerState_Hitted_5", "PlayerState_Hitted_6", "PlayerState_Count", nullptr };
+  static const char *names[] = { "Idling", "Joining", "Dying", "Dead", "Running", "Walking", "JumpStart", "InAir", "JumpLanding", "OnMenu", "IsSpawning", "Spectating", "Casting", "Emote_1", "Emote_2", "Emote_3", "Dancing_1", "Dancing_2", "Dancing_3", "Blocking_1", "Blocking_2", "Blocking_3", "Attack_1", "Attack_2", "Attack_3", "Attack_4", "Attack_5", "Attack_6", "Hitted_1", "Hitted_2", "Hitted_3", "Hitted_4", "Hitted_5", "Hitted_6", "Count", nullptr };
   return names;
 }
 
@@ -509,7 +540,7 @@ struct PlayerComponentBuilder {
 };
 
 inline flatbuffers::Offset<PlayerComponent> CreatePlayerComponent(flatbuffers::FlatBufferBuilder &_fbb,
-   PlayerState playerState = PlayerState_PlayerState_Idling) {
+   PlayerState playerState = PlayerState_Idling) {
   PlayerComponentBuilder builder_(_fbb);
   builder_.add_playerState(playerState);
   return builder_.Finish();

@@ -18,6 +18,9 @@
 #include <XERenderer/GUI/WRectangle.hpp>
 #include <XERenderer/GUI/WMarkup.hpp>
 #include <XERenderer/GUI/WCaption.hpp>
+
+#include <XEUI/Box.hpp>
+
 typedef void (*OgreConsoleFunctionPtr)(Ogre::StringVector&);
 
 namespace XE {
