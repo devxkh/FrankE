@@ -49,7 +49,7 @@ namespace XET {
 		, _lastMousePos(0, 0)
 		, _mousePressed(false)
 		, moveDirection(0, 0, 0)
-
+		, m_mouseMove(XE::Vector2::ZERO)
 		, _turn_speed(0)
 		, _zoom_speed(0)
 	{
@@ -90,8 +90,8 @@ namespace XET {
 
 			//-----------------------------------------------
 			//TODO nur wenn kein User Interface aktiv!!!!
-			m_mouseMove.x -= context.event->motion.xrel;// / tx;
-			m_mouseMove.y -= context.event->motion.yrel;// / ty;
+			m_mouseMove.x += context.event->motion.xrel;// / tx;
+			m_mouseMove.y += context.event->motion.yrel;// / ty;
 
 			/*float tx = controller->_windowState.width;
 			float ty = controller->_windowState.height;
@@ -320,7 +320,7 @@ namespace XET {
 			{
 				if (m_mouseMove != XE::Vector2::ZERO)
 				{
-					entity.component<XE::CameraFreeComponent>()->rotate(m_mouseMove.x * YAW_SENSITIVITY, m_mouseMove.y * YAW_SENSITIVITY);
+					entity.component<XE::CameraFreeComponent>()->rotate(-(m_mouseMove.x * YAW_SENSITIVITY), m_mouseMove.y * YAW_SENSITIVITY);
 					m_mouseMove = XE::Vector2::ZERO;
 				}
 			}
