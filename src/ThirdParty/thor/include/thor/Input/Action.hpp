@@ -63,6 +63,7 @@ enum MouseBottonID
 
 enum MouseWheelEvt
 {
+	MW_NONE,
 	MW_UP,
 	MW_DOWN,
 	MW_LEFT,

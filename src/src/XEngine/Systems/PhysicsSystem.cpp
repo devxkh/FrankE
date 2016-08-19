@@ -35,7 +35,7 @@ namespace XE
 				//	std::cout << "l:" << bodyComponent->getTargetPosition() <<  ",r:" << bodyComponent->getPosition() << ",distance:" << distance << std::endl;
 					
 
-					float mWalkSpd = 20.0f;
+					float mWalkSpd = 5.0f;
 
 					if (bodyComponent->getTargetDirection() == Ogre::Vector3::ZERO)
 					{
@@ -46,7 +46,7 @@ namespace XE
 					}
 					else
 					{
-						Ogre::Real move = mWalkSpd * dt;
+					//	Ogre::Real move = mWalkSpd * dt;
 						//bodyComponent->setTargetDistance(bodyComponent->getTargetDistance() - move);
 
 						auto m_targetDirection = bodyComponent->getTargetPosition() - bodyComponent->getPosition();

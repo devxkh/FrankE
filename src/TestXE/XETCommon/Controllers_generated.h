@@ -436,20 +436,22 @@ inline const char **EnumNamesEventType() {
 inline const char *EnumNameEventType(EventType e) { return EnumNamesEventType()[static_cast<int>(e)]; }
 
 struct Event FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  ActionOperator actionOperator() const { return static_cast<ActionOperator>(GetField<uint16_t>(4, 0)); }
-  KeyID kCode() const { return static_cast<KeyID>(GetField<int16_t>(6, 0)); }
-  MouseBottonID mouseBtn() const { return static_cast<MouseBottonID>(GetField<int16_t>(8, 0)); }
-  MouseWheelEvent mWheel() const { return static_cast<MouseWheelEvent>(GetField<int16_t>(10, 0)); }
-  uint16_t joyAxis() const { return GetField<uint16_t>(12, 0); }
-  int16_t joyBtn() const { return GetField<int16_t>(14, -1); }
+  EventType eventType() const { return static_cast<EventType>(GetField<int16_t>(4, 0)); }
+  ActionOperator actionOperator() const { return static_cast<ActionOperator>(GetField<uint16_t>(6, 0)); }
+  KeyID kCode() const { return static_cast<KeyID>(GetField<int16_t>(8, 0)); }
+  MouseBottonID mouseBtn() const { return static_cast<MouseBottonID>(GetField<int16_t>(10, 0)); }
+  MouseWheelEvent mWheel() const { return static_cast<MouseWheelEvent>(GetField<int16_t>(12, 0)); }
+  uint16_t joyAxis() const { return GetField<uint16_t>(14, 0); }
+  int16_t joyBtn() const { return GetField<int16_t>(16, -1); }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
-           VerifyField<uint16_t>(verifier, 4 /* actionOperator */) &&
-           VerifyField<int16_t>(verifier, 6 /* kCode */) &&
-           VerifyField<int16_t>(verifier, 8 /* mouseBtn */) &&
-           VerifyField<int16_t>(verifier, 10 /* mWheel */) &&
-           VerifyField<uint16_t>(verifier, 12 /* joyAxis */) &&
-           VerifyField<int16_t>(verifier, 14 /* joyBtn */) &&
+           VerifyField<int16_t>(verifier, 4 /* eventType */) &&
+           VerifyField<uint16_t>(verifier, 6 /* actionOperator */) &&
+           VerifyField<int16_t>(verifier, 8 /* kCode */) &&
+           VerifyField<int16_t>(verifier, 10 /* mouseBtn */) &&
+           VerifyField<int16_t>(verifier, 12 /* mWheel */) &&
+           VerifyField<uint16_t>(verifier, 14 /* joyAxis */) &&
+           VerifyField<int16_t>(verifier, 16 /* joyBtn */) &&
            verifier.EndTable();
   }
 };
@@ -457,21 +459,23 @@ struct Event FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
 struct EventBuilder {
   flatbuffers::FlatBufferBuilder &fbb_;
   flatbuffers::uoffset_t start_;
-  void add_actionOperator(ActionOperator actionOperator) { fbb_.AddElement<uint16_t>(4, static_cast<uint16_t>(actionOperator), 0); }
-  void add_kCode(KeyID kCode) { fbb_.AddElement<int16_t>(6, static_cast<int16_t>(kCode), 0); }
-  void add_mouseBtn(MouseBottonID mouseBtn) { fbb_.AddElement<int16_t>(8, static_cast<int16_t>(mouseBtn), 0); }
-  void add_mWheel(MouseWheelEvent mWheel) { fbb_.AddElement<int16_t>(10, static_cast<int16_t>(mWheel), 0); }
-  void add_joyAxis(uint16_t joyAxis) { fbb_.AddElement<uint16_t>(12, joyAxis, 0); }
-  void add_joyBtn(int16_t joyBtn) { fbb_.AddElement<int16_t>(14, joyBtn, -1); }
+  void add_eventType(EventType eventType) { fbb_.AddElement<int16_t>(4, static_cast<int16_t>(eventType), 0); }
+  void add_actionOperator(ActionOperator actionOperator) { fbb_.AddElement<uint16_t>(6, static_cast<uint16_t>(actionOperator), 0); }
+  void add_kCode(KeyID kCode) { fbb_.AddElement<int16_t>(8, static_cast<int16_t>(kCode), 0); }
+  void add_mouseBtn(MouseBottonID mouseBtn) { fbb_.AddElement<int16_t>(10, static_cast<int16_t>(mouseBtn), 0); }
+  void add_mWheel(MouseWheelEvent mWheel) { fbb_.AddElement<int16_t>(12, static_cast<int16_t>(mWheel), 0); }
+  void add_joyAxis(uint16_t joyAxis) { fbb_.AddElement<uint16_t>(14, joyAxis, 0); }
+  void add_joyBtn(int16_t joyBtn) { fbb_.AddElement<int16_t>(16, joyBtn, -1); }
   EventBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
   EventBuilder &operator=(const EventBuilder &);
   flatbuffers::Offset<Event> Finish() {
-    auto o = flatbuffers::Offset<Event>(fbb_.EndTable(start_, 6));
+    auto o = flatbuffers::Offset<Event>(fbb_.EndTable(start_, 7));
     return o;
   }
 };
 
 inline flatbuffers::Offset<Event> CreateEvent(flatbuffers::FlatBufferBuilder &_fbb,
+   EventType eventType = EventType_Hold,
    ActionOperator actionOperator = ActionOperator_Or,
    KeyID kCode = KeyID_SDL_SCANCODE_UNKNOWN,
    MouseBottonID mouseBtn = MouseBottonID_NONE,
@@ -485,18 +489,17 @@ inline flatbuffers::Offset<Event> CreateEvent(flatbuffers::FlatBufferBuilder &_f
   builder_.add_mouseBtn(mouseBtn);
   builder_.add_kCode(kCode);
   builder_.add_actionOperator(actionOperator);
+  builder_.add_eventType(eventType);
   return builder_.Finish();
 }
 
 struct Action FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   ActionType actionType() const { return static_cast<ActionType>(GetField<uint16_t>(4, 0)); }
-  EventType eventType() const { return static_cast<EventType>(GetField<int16_t>(6, 0)); }
-  const flatbuffers::Vector<flatbuffers::Offset<Event>> *events() const { return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<Event>> *>(8); }
+  const flatbuffers::Vector<flatbuffers::Offset<Event>> *events() const { return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<Event>> *>(6); }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
            VerifyField<uint16_t>(verifier, 4 /* actionType */) &&
-           VerifyField<int16_t>(verifier, 6 /* eventType */) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, 8 /* events */) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, 6 /* events */) &&
            verifier.Verify(events()) &&
            verifier.VerifyVectorOfTables(events()) &&
            verifier.EndTable();
@@ -507,23 +510,20 @@ struct ActionBuilder {
   flatbuffers::FlatBufferBuilder &fbb_;
   flatbuffers::uoffset_t start_;
   void add_actionType(ActionType actionType) { fbb_.AddElement<uint16_t>(4, static_cast<uint16_t>(actionType), 0); }
-  void add_eventType(EventType eventType) { fbb_.AddElement<int16_t>(6, static_cast<int16_t>(eventType), 0); }
-  void add_events(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Event>>> events) { fbb_.AddOffset(8, events); }
+  void add_events(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Event>>> events) { fbb_.AddOffset(6, events); }
   ActionBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
   ActionBuilder &operator=(const ActionBuilder &);
   flatbuffers::Offset<Action> Finish() {
-    auto o = flatbuffers::Offset<Action>(fbb_.EndTable(start_, 3));
+    auto o = flatbuffers::Offset<Action>(fbb_.EndTable(start_, 2));
     return o;
   }
 };
 
 inline flatbuffers::Offset<Action> CreateAction(flatbuffers::FlatBufferBuilder &_fbb,
    ActionType actionType = ActionType_None,
-   EventType eventType = EventType_Hold,
    flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Event>>> events = 0) {
   ActionBuilder builder_(_fbb);
   builder_.add_events(events);
-  builder_.add_eventType(eventType);
   builder_.add_actionType(actionType);
   return builder_.Finish();
 }

@@ -1,6 +1,5 @@
 #include <XEngine/Components/Body.hpp>
 
-
 namespace XE
 {
 	BodyComponent::BodyComponent()
@@ -70,12 +69,21 @@ namespace XE
 	}
 
 	void BodyComponent::setTargetPosition(const Ogre::Vector3& targetPosition) {
+		
+		setHasTargetPosition(true);
+
 		m_targetPosition = targetPosition;
-
-
+		
 		m_targetDirection = m_targetPosition - getPosition();
 		m_targetDistance = m_targetDirection.normalise();
 
+		Ogre::Vector3 mDirection = getTargetPosition() - getPosition();
+		Ogre::Vector3 src = getOrientation() * Ogre::Vector3::UNIT_Z;
+		src.y = 0;
+		mDirection.y = 0;
+		Ogre::Real mDistance = mDirection.normalise();
+		Ogre::Quaternion quat = src.getRotationTo(mDirection);
+		rotate(quat);
 	}
 
 	bool BodyComponent::hasTargetPosition() {

@@ -71,8 +71,7 @@ namespace XET
 		for (auto it = controller1->actionMap()->begin(); it != controller1->actionMap()->end(); ++it)
 		{
 			int j = 0;
-			XE::Action::ActionType evtType = XE::Action::ActionType((*it)->eventType());
-
+		
 			auto events = (*it)->events();
 			if (!events)
 				continue;
@@ -80,6 +79,8 @@ namespace XET
 			//events
 			for (auto itEvt = events->begin(); itEvt != events->end(); ++itEvt)
 			{
+				XE::Action::ActionType evtType = XE::Action::ActionType((*itEvt)->eventType());
+				
 				XE::Action action;
 
 				std::cout << "joyAxis:" << (*itEvt)->joyAxis() << "|EvtType:" << ControllerSettings::EnumNamesEventType()[evtType] << "|KeyCode:" << ((*itEvt)->kCode() < 0 ? -1 : (*itEvt)->kCode()) << "|name:" << ((*itEvt)->kCode() < 0 ? "-1" : ControllerSettings::EnumNamesKeyID()[(*itEvt)->kCode()]) << "|actionType:" << ControllerSettings::EnumNameActionType((*it)->actionType()) << "|actionOperator:" << ControllerSettings::EnumNameActionOperator((*itEvt)->actionOperator()) << std::endl;

@@ -177,7 +177,7 @@ namespace detail
 	: EventNode()
 	{
 		mEvent.type = pressed ? SDL_KEYDOWN : SDL_KEYUP;
-	//TODO?	mEvent.key = key;
+		mEvent.key.keysym.scancode = key;
 	}
 
 	bool EventKeyLeaf::isEventActive(const SDL_Event& event) const
@@ -235,17 +235,26 @@ namespace detail
 
 		if (event.type == mEvent.type && event.wheel.y != 0)
 		{
-			if (event.wheel.y > 0 && mEvent.wheel.y == 1)
+			if (event.wheel.y > 0 && mEvent.wheel.y == -1)
 			{
 				return true; //UP
 			}
-			else if (event.wheel.y < 0 && mEvent.wheel.y == -1)
+			else if (event.wheel.y < 0 && mEvent.wheel.y == 1)
 			{
 				return true; //DOWN
 			}
 		}
 		else if (event.type == mEvent.type && event.wheel.x != 0)
-			//TODO horizontal scroll ?
+		{	
+			if (event.wheel.x > 0 && mEvent.wheel.x == -1)
+			{
+				return true; //RIGHT
+			}
+			else if (event.wheel.x < 0 && mEvent.wheel.x == 1)
+			{
+				return true; //LEFT
+			}
+		}
 
 		return false; 
 	}

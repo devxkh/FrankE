@@ -320,7 +320,7 @@ namespace XET {
 			{
 				if (m_mouseMove != XE::Vector2::ZERO)
 				{
-					entity.component<XE::CameraFreeComponent>()->rotate(-(m_mouseMove.x * YAW_SENSITIVITY), m_mouseMove.y * YAW_SENSITIVITY);
+					entity.component<XE::CameraFreeComponent>()->rotate(-(m_mouseMove.x * YAW_SENSITIVITY), -(m_mouseMove.y * YAW_SENSITIVITY));
 					m_mouseMove = XE::Vector2::ZERO;
 				}
 			}

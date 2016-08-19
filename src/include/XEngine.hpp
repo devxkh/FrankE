@@ -86,6 +86,7 @@ namespace XE
 	//using namespace sfn;
 	using namespace XFBType;
 	using namespace plog;
+	using namespace entityx;
 
 	struct StateData;
 
