@@ -66,6 +66,7 @@ struct SpellComponent;
 struct StaticComponent;
 struct GameState;
 struct CharacterComponent;
+struct AbilityComponent;
 struct AIComponent;
 struct Chatmessage;
 struct Login;
@@ -267,12 +268,13 @@ enum UComponent {
   UComponent_Camera = 11,
   UComponent_Light = 12,
   UComponent_SoundListener = 13,
-  UComponent_PhysicsComponent = 14,
-  UComponent_SoundComponent = 15
+  UComponent_AbilityComponent = 14,
+  UComponent_PhysicsComponent = 15,
+  UComponent_SoundComponent = 16
 };
 
 inline const char **EnumNamesUComponent() {
-  static const char *names[] = { "NONE", "CharacterComponent", "AIComponent", "SpawnPointComponent", "SpawnComponent", "AnimationComponent", "BodyComponent", "PlayerComponent", "SpellComponent", "RenderableComponent", "StaticComponent", "Camera", "Light", "SoundListener", "PhysicsComponent", "SoundComponent", nullptr };
+  static const char *names[] = { "NONE", "CharacterComponent", "AIComponent", "SpawnPointComponent", "SpawnComponent", "AnimationComponent", "BodyComponent", "PlayerComponent", "SpellComponent", "RenderableComponent", "StaticComponent", "Camera", "Light", "SoundListener", "AbilityComponent", "PhysicsComponent", "SoundComponent", nullptr };
   return names;
 }
 
@@ -376,8 +378,12 @@ inline flatbuffers::Offset<GameState> CreateGameState(flatbuffers::FlatBufferBui
 }
 
 struct CharacterComponent FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+  /// abilitycomponent id
+  const flatbuffers::Vector<uint16_t> *abilities() const { return GetPointer<const flatbuffers::Vector<uint16_t> *>(4); }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, 4 /* abilities */) &&
+           verifier.Verify(abilities()) &&
            verifier.EndTable();
   }
 };
@@ -385,16 +391,68 @@ struct CharacterComponent FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
 struct CharacterComponentBuilder {
   flatbuffers::FlatBufferBuilder &fbb_;
   flatbuffers::uoffset_t start_;
+  void add_abilities(flatbuffers::Offset<flatbuffers::Vector<uint16_t>> abilities) { fbb_.AddOffset(4, abilities); }
   CharacterComponentBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
   CharacterComponentBuilder &operator=(const CharacterComponentBuilder &);
   flatbuffers::Offset<CharacterComponent> Finish() {
-    auto o = flatbuffers::Offset<CharacterComponent>(fbb_.EndTable(start_, 0));
+    auto o = flatbuffers::Offset<CharacterComponent>(fbb_.EndTable(start_, 1));
     return o;
   }
 };
 
-inline flatbuffers::Offset<CharacterComponent> CreateCharacterComponent(flatbuffers::FlatBufferBuilder &_fbb) {
+inline flatbuffers::Offset<CharacterComponent> CreateCharacterComponent(flatbuffers::FlatBufferBuilder &_fbb,
+   flatbuffers::Offset<flatbuffers::Vector<uint16_t>> abilities = 0) {
   CharacterComponentBuilder builder_(_fbb);
+  builder_.add_abilities(abilities);
+  return builder_.Finish();
+}
+
+///per default just a ghost object
+struct AbilityComponent FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+  uint16_t id() const { return GetField<uint16_t>(4, 0); }
+  uint8_t hasPhysics() const { return GetField<uint8_t>(6, 0); }
+  XFBType::PhysicsShape shape() const { return static_cast<XFBType::PhysicsShape>(GetField<int8_t>(8, 0)); }
+  const XFBType::Vec3f *size() const { return GetStruct<const XFBType::Vec3f *>(10); }
+  const XFBType::Vec3f *offset() const { return GetStruct<const XFBType::Vec3f *>(12); }
+  bool Verify(flatbuffers::Verifier &verifier) const {
+    return VerifyTableStart(verifier) &&
+           VerifyField<uint16_t>(verifier, 4 /* id */) &&
+           VerifyField<uint8_t>(verifier, 6 /* hasPhysics */) &&
+           VerifyField<int8_t>(verifier, 8 /* shape */) &&
+           VerifyField<XFBType::Vec3f>(verifier, 10 /* size */) &&
+           VerifyField<XFBType::Vec3f>(verifier, 12 /* offset */) &&
+           verifier.EndTable();
+  }
+};
+
+struct AbilityComponentBuilder {
+  flatbuffers::FlatBufferBuilder &fbb_;
+  flatbuffers::uoffset_t start_;
+  void add_id(uint16_t id) { fbb_.AddElement<uint16_t>(4, id, 0); }
+  void add_hasPhysics(uint8_t hasPhysics) { fbb_.AddElement<uint8_t>(6, hasPhysics, 0); }
+  void add_shape(XFBType::PhysicsShape shape) { fbb_.AddElement<int8_t>(8, static_cast<int8_t>(shape), 0); }
+  void add_size(const XFBType::Vec3f *size) { fbb_.AddStruct(10, size); }
+  void add_offset(const XFBType::Vec3f *offset) { fbb_.AddStruct(12, offset); }
+  AbilityComponentBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
+  AbilityComponentBuilder &operator=(const AbilityComponentBuilder &);
+  flatbuffers::Offset<AbilityComponent> Finish() {
+    auto o = flatbuffers::Offset<AbilityComponent>(fbb_.EndTable(start_, 5));
+    return o;
+  }
+};
+
+inline flatbuffers::Offset<AbilityComponent> CreateAbilityComponent(flatbuffers::FlatBufferBuilder &_fbb,
+   uint16_t id = 0,
+   uint8_t hasPhysics = 0,
+   XFBType::PhysicsShape shape = XFBType::PhysicsShape_SH_BOX,
+   const XFBType::Vec3f *size = 0,
+   const XFBType::Vec3f *offset = 0) {
+  AbilityComponentBuilder builder_(_fbb);
+  builder_.add_offset(offset);
+  builder_.add_size(size);
+  builder_.add_id(id);
+  builder_.add_shape(shape);
+  builder_.add_hasPhysics(hasPhysics);
   return builder_.Finish();
 }
 
@@ -720,6 +778,7 @@ inline bool VerifyUComponent(flatbuffers::Verifier &verifier, const void *union_
     case UComponent_Camera: return verifier.VerifyTable(reinterpret_cast<const XFBType::Camera *>(union_obj));
     case UComponent_Light: return verifier.VerifyTable(reinterpret_cast<const XFBType::Light *>(union_obj));
     case UComponent_SoundListener: return verifier.VerifyTable(reinterpret_cast<const XFBType::SoundListener *>(union_obj));
+    case UComponent_AbilityComponent: return verifier.VerifyTable(reinterpret_cast<const AbilityComponent *>(union_obj));
     case UComponent_PhysicsComponent: return verifier.VerifyTable(reinterpret_cast<const XFBType::PhysicsComponent *>(union_obj));
     case UComponent_SoundComponent: return verifier.VerifyTable(reinterpret_cast<const XFBType::SoundComponent *>(union_obj));
     default: return false;

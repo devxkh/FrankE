@@ -53,6 +53,51 @@ namespace XE
 	}
 
 
+
+	Ghost::Ghost()
+		: ghost(nullptr)
+		, m_dynWorld(nullptr)
+	{
+
+	}
+
+	Ghost::~Ghost()
+	{
+		m_dynWorld->destroyObject(ghost);
+	}
+
+	void Ghost::setOrientation(const Ogre::Quaternion& orientation)
+	{
+		//todo ?
+	}
+
+	void Ghost::rotate(const Ogre::Vector3& axis, float scalar)
+	{
+		//todo ?
+	}
+
+	void Ghost::setTransformState(const TransformState& state)
+	{
+		ghost->setTransformState(state);
+	}
+
+	void Ghost::setEntityWithBody(entityx::Entity object)
+	{
+		ghost->setEntityWithBody(object);
+	}
+
+	void Ghost::create(gkDynamicsWorld& dynWorld, const XFBType::PhysicsObject* physicObject)
+	{
+		m_dynWorld = &dynWorld;
+		ghost = dynWorld.createGhost(physicObject);
+	}
+
+	void Ghost::collided(entityx::Entity collider, const Ogre::Vector3& positionWorldOnB, const Ogre::Vector3& normalWorldOnB, float distance1, float appliedImpulse)
+	{
+
+	}
+
+
 	CharacterPhysics::CharacterPhysics() :
 		character(nullptr)
 		, m_dynWorld(nullptr)

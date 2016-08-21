@@ -32,6 +32,29 @@ namespace XE
 		std::vector<std::unique_ptr<IPhysicsObject>> objects;
 	};
 
+	struct Ghost : IPhysicsObject {
+
+		explicit Ghost();
+
+		~Ghost();
+
+		void setOrientation(const Ogre::Quaternion& orientation);
+
+		void rotate(const Ogre::Vector3& axis, float scalar);
+
+		void setTransformState(const TransformState& state);
+
+		void setEntityWithBody(entityx::Entity object);
+
+		void create(gkDynamicsWorld& dynWorld, const XFBType::PhysicsObject* physicObject);
+
+		void collided(entityx::Entity collider, const Ogre::Vector3& positionWorldOnB, const Ogre::Vector3& normalWorldOnB, float distance1, float appliedImpulse);
+
+		gkGhost*      ghost;
+
+	private:
+		gkDynamicsWorld* m_dynWorld;
+	};
 
 	struct CharacterPhysics : IPhysicsObject
 	{

@@ -223,6 +223,7 @@ set(SRC_SYSROOT ${PROJECT_SOURCE_DIR}/src/src/XESystem)
 # all source files
 set(XESystem_SOURCES
     ${SRC_SYSROOT}/QueueManager.cpp 
+	${SRC_SYSROOT}/FrameLimiter.cpp 
 
 	${SRC_SYSROOT}/readerwriterqueue.h
 	${SRC_SYSROOT}/atomicops.h	
@@ -231,6 +232,7 @@ set(XESystem_SOURCES
 set(XESystem_HEADER
 ${INC_SYSROOT}/SystemConfig.hpp
     ${INC_SYSROOT}/QueueManager.hpp
+   ${INC_SYSROOT}/FrameLimiter.hpp
 #	  ${INC_SYSROOT}/Logging.hpp
     ${INC_SYSROOT}/TransportData.hpp
 )
