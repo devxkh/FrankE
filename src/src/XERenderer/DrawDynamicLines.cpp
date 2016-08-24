@@ -41,65 +41,67 @@ namespace XE {
 			//---------------------------------------------------------------------------------------
 			//
 			//---------------------------------------------------------------------------------------
-			Ogre::ManualObject * manualObject = new Ogre::ManualObject(0, &test.__OgreSceneMgrPtr->_getEntityMemoryManager(Ogre::SCENE_DYNAMIC), test.__OgreSceneMgrPtr);
+			//Ogre::ManualObject * manualObject = new Ogre::ManualObject(0, &test.__OgreSceneMgrPtr->_getEntityMemoryManager(Ogre::SCENE_DYNAMIC), test.__OgreSceneMgrPtr);
 
-			manualObject->begin("BaseWhite", Ogre::v1::RenderOperation::OT_LINE_LIST);
+			//manualObject->begin("BaseWhite", Ogre::v1::RenderOperation::OT_LINE_LIST);
 
-			// Back
-			manualObject->position(0.0f, 0.0f, 0.0f);
-			manualObject->position(0.0f, 1.0f, 0.0f);
-			manualObject->line(0, 1);
+			//// Back
+			//manualObject->position(0.0f, 0.0f, 0.0f);
+			//manualObject->position(0.0f, 1.0f, 0.0f);
+			//manualObject->line(0, 1);
 
-			manualObject->position(0.0f, 1.0f, 0.0f);
-			manualObject->position(1.0f, 1.0f, 0.0f);
-			manualObject->line(2, 3);
+			//manualObject->position(0.0f, 1.0f, 0.0f);
+			//manualObject->position(1.0f, 1.0f, 0.0f);
+			//manualObject->line(2, 3);
 
-			manualObject->position(1.0f, 1.0f, 0.0f);
-			manualObject->position(1.0f, 0.0f, 0.0f);
-			manualObject->line(4, 5);
+			//manualObject->position(1.0f, 1.0f, 0.0f);
+			//manualObject->position(1.0f, 0.0f, 0.0f);
+			//manualObject->line(4, 5);
 
-			manualObject->position(1.0f, 0.0f, 0.0f);
-			manualObject->position(0.0f, 0.0f, 0.0f);
-			manualObject->line(6, 7);
+			//manualObject->position(1.0f, 0.0f, 0.0f);
+			//manualObject->position(0.0f, 0.0f, 0.0f);
+			//manualObject->line(6, 7);
 
-			// Front
-			manualObject->position(0.0f, 0.0f, 1.0f);
-			manualObject->position(0.0f, 10.0f, 1.0f);
-			manualObject->line(8, 9);
+			//// Front
+			//manualObject->position(0.0f, 0.0f, 1.0f);
+			//manualObject->position(0.0f, 10.0f, 1.0f);
+			//manualObject->line(8, 9);
 
-			manualObject->position(0.0f, 1.0f, 1.0f);
-			manualObject->position(1.0f, 1.0f, 1.0f);
-			manualObject->line(10, 11);
+			//manualObject->position(0.0f, 1.0f, 1.0f);
+			//manualObject->position(1.0f, 1.0f, 1.0f);
+			//manualObject->line(10, 11);
 
-			manualObject->position(1.0f, 1.0f, 1.0f);
-			manualObject->position(1.0f, 0.0f, 1.0f);
-			manualObject->line(12, 13);
+			//manualObject->position(1.0f, 1.0f, 1.0f);
+			//manualObject->position(1.0f, 0.0f, 1.0f);
+			//manualObject->line(12, 13);
 
-			manualObject->position(1.0f, 0.0f, 1.0f);
-			manualObject->position(0.0f, 0.0f, 1.0f);
-			manualObject->line(14, 15);
+			//manualObject->position(1.0f, 0.0f, 1.0f);
+			//manualObject->position(0.0f, 0.0f, 1.0f);
+			//manualObject->line(14, 15);
 
-			// Sides
-			manualObject->position(0.0f, 0.0f, 0.0f);
-			manualObject->position(0.0f, 0.0f, 1.0f);
-			manualObject->line(16, 17);
+			//// Sides
+			//manualObject->position(0.0f, 0.0f, 0.0f);
+			//manualObject->position(0.0f, 0.0f, 1.0f);
+			//manualObject->line(16, 17);
 
-			manualObject->position(0.0f, 1.0f, 0.0f);
-			manualObject->position(0.0f, 1.0f, 1.0f);
-			manualObject->line(18, 19);
+			//manualObject->position(0.0f, 1.0f, 0.0f);
+			//manualObject->position(0.0f, 1.0f, 1.0f);
+			//manualObject->line(18, 19);
 
-			manualObject->position(1.0f, 0.0f, 0.0f);
-			manualObject->position(1.0f, 0.0f, 1.0f);
-			manualObject->line(20, 21);
+			//manualObject->position(1.0f, 0.0f, 0.0f);
+			//manualObject->position(1.0f, 0.0f, 1.0f);
+			//manualObject->line(20, 21);
 
-			manualObject->position(1.0f, 1.0f, 0.0f);
-			manualObject->position(1.0f, 1.0f, 1.0f);
-			manualObject->line(22, 23);
+			//manualObject->position(1.0f, 1.0f, 0.0f);
+			//manualObject->position(1.0f, 1.0f, 1.0f);
+			//manualObject->line(22, 23);
 
-			manualObject->end();
+			//manualObject->end();
 
-			Ogre::SceneNode *sceneNodeLines = test.__OgreSceneMgrPtr->getRootSceneNode(Ogre::SCENE_DYNAMIC)->createChildSceneNode(Ogre::SCENE_DYNAMIC);
-			sceneNodeLines->attachObject(manualObject);
+			//Ogre::SceneNode *sceneNodeLines = test.__OgreSceneMgrPtr->getRootSceneNode(Ogre::SCENE_DYNAMIC)->createChildSceneNode(Ogre::SCENE_DYNAMIC);
+			//sceneNodeLines->attachObject(manualObject);
+
+
 		//	sceneNodeLines->scale(4.0f, 4.0f, 4.0f);
 		//	sceneNodeLines->translate(-4.5f, -1.5f, 0.0f, Ogre::SceneNode::TS_LOCAL);
 

@@ -12,6 +12,7 @@
 //#include <XEEntity/gkCharacter.h>
 //#include <XEPhysics/gkRigidBody.h>
 //#include <XEPhysics/PhysTerrain.h>
+#include <XEPhysics/Physics/gkContactTest.h>
 #include <XEPhysics/HeightfieldTerrainShape.h>
 
 //#include <XEPhysics/bullet/ogreWrapper/MeshStrider.hpp>

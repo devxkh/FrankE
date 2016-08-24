@@ -138,6 +138,7 @@ namespace XET {
 					mEngine.getScene().createEntity(entity, mEngine.getScene().getSceneID(), 7, fbEntityData, true);
 
 					auto pBody = entity.component<XE::PhysicsComponent>();
+					
 					pBody->objects[0]->setTransformState(TransformState(XE::Vector3(0.0f, i * 4.0f + 100.0f, 0.0f), XE::Quaternion(1, 0, 0, 0), XE::Vector3(1, 1, 1)));
 				}
 
@@ -175,6 +176,7 @@ namespace XET {
 
 
 		setGrabMousePointer(true, context.window);
+		setMouseRelative(true, context.window);
 		setMouseVisible(false, context.window);
 
 		entityx::ComponentHandle<TestControllerComponent> controller;
@@ -194,8 +196,7 @@ namespace XET {
 		std::cout << "onPointSelectEnd! " << context.event->button.button << std::endl;
 
 		setGrabMousePointer(false, context.window);
-
-
+		setMouseRelative(false, context.window);
 		setMouseVisible(true, context.window);
 
 		entityx::ComponentHandle<TestControllerComponent> controller;

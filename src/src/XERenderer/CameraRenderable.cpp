@@ -79,6 +79,9 @@ namespace XE
 
 			_t_OgreCameraPtr->setOrientation(Ogre::Quaternion(rotation.w, rotation.x, rotation.y, rotation.z));
 
+			m_GraphicsManager.getFromRendererQueue().push([this]() {
+				m_GraphicsManager.GetRenderTask(RenderTaskID::Camera).isDone = true;
+			});
 		});
 	}
 

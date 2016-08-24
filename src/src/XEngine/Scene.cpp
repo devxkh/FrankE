@@ -95,9 +95,9 @@ namespace XE {
 
 
 		//	systems.add<ControllerSystem>(0, m_engine);
-		systems.add<PhysicsSystem>(*this);
 		systems.add<FreeLookCameraSystem>(*this);// 0, mGraphicsManager, this);
 		systems.add<RenderBodySystem>(m_engine.getGraphicsManager());
+		systems.add<PhysicsSystem>(*this);
 		systems.add<EntityRenderSystem>();
 		systems.add<AnimationControllerSystem>(m_engine.getGraphicsManager(), *this);
 		//systems.add<UIStateManager>(); // UISystem

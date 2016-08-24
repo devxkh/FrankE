@@ -65,6 +65,7 @@ namespace NetMsg {
 struct SpellComponent;
 struct StaticComponent;
 struct GameState;
+struct AbilityInfo;
 struct CharacterComponent;
 struct AbilityComponent;
 struct AIComponent;
@@ -377,13 +378,54 @@ inline flatbuffers::Offset<GameState> CreateGameState(flatbuffers::FlatBufferBui
   return builder_.Finish();
 }
 
+struct AbilityInfo FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+  ///entityID with the attached abilitycomponent
+  uint32_t abilityId() const { return GetField<uint32_t>(4, 0); }
+  ///instant abilities are loaded at character creation
+  uint8_t instant() const { return GetField<uint8_t>(6, 0); }
+  ///ability is attached to an entity and is not a entity itself
+  uint8_t isAttached() const { return GetField<uint8_t>(8, 0); }
+  bool Verify(flatbuffers::Verifier &verifier) const {
+    return VerifyTableStart(verifier) &&
+           VerifyField<uint32_t>(verifier, 4 /* abilityId */) &&
+           VerifyField<uint8_t>(verifier, 6 /* instant */) &&
+           VerifyField<uint8_t>(verifier, 8 /* isAttached */) &&
+           verifier.EndTable();
+  }
+};
+
+struct AbilityInfoBuilder {
+  flatbuffers::FlatBufferBuilder &fbb_;
+  flatbuffers::uoffset_t start_;
+  void add_abilityId(uint32_t abilityId) { fbb_.AddElement<uint32_t>(4, abilityId, 0); }
+  void add_instant(uint8_t instant) { fbb_.AddElement<uint8_t>(6, instant, 0); }
+  void add_isAttached(uint8_t isAttached) { fbb_.AddElement<uint8_t>(8, isAttached, 0); }
+  AbilityInfoBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
+  AbilityInfoBuilder &operator=(const AbilityInfoBuilder &);
+  flatbuffers::Offset<AbilityInfo> Finish() {
+    auto o = flatbuffers::Offset<AbilityInfo>(fbb_.EndTable(start_, 3));
+    return o;
+  }
+};
+
+inline flatbuffers::Offset<AbilityInfo> CreateAbilityInfo(flatbuffers::FlatBufferBuilder &_fbb,
+   uint32_t abilityId = 0,
+   uint8_t instant = 0,
+   uint8_t isAttached = 0) {
+  AbilityInfoBuilder builder_(_fbb);
+  builder_.add_abilityId(abilityId);
+  builder_.add_isAttached(isAttached);
+  builder_.add_instant(instant);
+  return builder_.Finish();
+}
+
 struct CharacterComponent FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  /// abilitycomponent id
-  const flatbuffers::Vector<uint16_t> *abilities() const { return GetPointer<const flatbuffers::Vector<uint16_t> *>(4); }
+  const flatbuffers::Vector<flatbuffers::Offset<AbilityInfo>> *abilities() const { return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<AbilityInfo>> *>(4); }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
            VerifyField<flatbuffers::uoffset_t>(verifier, 4 /* abilities */) &&
            verifier.Verify(abilities()) &&
+           verifier.VerifyVectorOfTables(abilities()) &&
            verifier.EndTable();
   }
 };
@@ -391,7 +433,7 @@ struct CharacterComponent FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
 struct CharacterComponentBuilder {
   flatbuffers::FlatBufferBuilder &fbb_;
   flatbuffers::uoffset_t start_;
-  void add_abilities(flatbuffers::Offset<flatbuffers::Vector<uint16_t>> abilities) { fbb_.AddOffset(4, abilities); }
+  void add_abilities(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<AbilityInfo>>> abilities) { fbb_.AddOffset(4, abilities); }
   CharacterComponentBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
   CharacterComponentBuilder &operator=(const CharacterComponentBuilder &);
   flatbuffers::Offset<CharacterComponent> Finish() {
@@ -401,7 +443,7 @@ struct CharacterComponentBuilder {
 };
 
 inline flatbuffers::Offset<CharacterComponent> CreateCharacterComponent(flatbuffers::FlatBufferBuilder &_fbb,
-   flatbuffers::Offset<flatbuffers::Vector<uint16_t>> abilities = 0) {
+   flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<AbilityInfo>>> abilities = 0) {
   CharacterComponentBuilder builder_(_fbb);
   builder_.add_abilities(abilities);
   return builder_.Finish();

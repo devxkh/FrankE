@@ -232,7 +232,7 @@ namespace XE
 			_renderTasks[RenderTaskID::AnimationTimes].isDone = true;
 			//_renderTasks[RenderTaskID::DebugLines].isDone = true;
 		//	_renderTasks[RenderTaskID::RenderBody].isDone = true;
-			_renderTasks[RenderTaskID::Camera].isDone = true;
+		//	_renderTasks[RenderTaskID::Camera].isDone = true;
 
 			// ->>> old Vers. -> in pass
 			mEngine->getGraphicsManager().getGUIRenderer().update();
