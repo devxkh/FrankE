@@ -251,6 +251,21 @@ namespace XE {
 //		}
 	}
 
+	void Entry::HandleNavEvent(NavAction navAction)
+	{
+		switch (navAction)
+		{
+		case NavAction::NavAction_NavEnter: {
+			if (HasFocus()) {
+				Widget::GrabFocus(nullptr);
+			}
+			else {
+				GrabFocus();
+			}
+		} break;
+		}
+	}
+
 	void Entry::HandleKeyEvent(const SDL_KeyboardEvent& key, bool press) {
 		if (!press || !HasFocus()) {
 			return;
@@ -350,20 +365,20 @@ namespace XE {
 		SetCursorPosition(GetPositionFromMouseX(x));
 	}
 
-	//void Entry::HandleUpdate(float seconds) {
-	//	if (!HasFocus()) {
-	//		return;
-	//	}
+	void Entry::HandleUpdate(float seconds) {
+		if (!HasFocus()) {
+			return;
+		}
 
-	//	m_elapsed_time += seconds;
+		m_elapsed_time += seconds;
 
-	//	// Toggle cursor state every 0.5 seconds
-	//	if (m_elapsed_time > .5f) {
-	//		m_elapsed_time = 0.f;
-	//		m_cursor_status = !m_cursor_status;
-	//		draw();
-	//	}
-	//}
+		// Toggle cursor state every 0.5 seconds
+		if (m_elapsed_time > .5f) {
+			m_elapsed_time = 0.f;
+			m_cursor_status = !m_cursor_status;
+			draw();
+		}
+	}
 
 	void Entry::HandleFocusChange(Widget::Ptr focused_widget) {
 		if (HasFocus()) {

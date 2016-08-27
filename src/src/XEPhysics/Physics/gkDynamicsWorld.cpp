@@ -420,35 +420,35 @@ void gkDynamicsWorld::step(float timeStep)
 
 	//uncomment this for better simulation quality (but a little bit less performance)
 	//m_dynamicsWorld->stepSimulation(tick,10,1./240.);
-	m_dynamicsWorld->stepSimulation(timeStep); // tick);
+//	m_dynamicsWorld->stepSimulation(timeStep); // tick);
 
-	//float internalTimeStep = 1.0f / m_fps;
-	//int maxSubSteps = (int)(timeStep * m_fps) + 1;
-	//if (m_maxSubSteps < 0)
-	//{
-	//	internalTimeStep = timeStep;
-	//	maxSubSteps = 1;
-	//}
-	//else if (m_maxSubSteps > 0)
-	//	maxSubSteps = std::min(maxSubSteps, m_maxSubSteps);
+	float internalTimeStep = 1.0f / m_fps;
+	int maxSubSteps = (int)(timeStep * m_fps) + 1;
+	if (m_maxSubSteps < 0)
+	{
+		internalTimeStep = timeStep;
+		maxSubSteps = 1;
+	}
+	else if (m_maxSubSteps > 0)
+		maxSubSteps = std::min(maxSubSteps, m_maxSubSteps);
 
-	////delayedWorldTransforms_.Clear();
-	//m_simulating = true;
+	//delayedWorldTransforms_.Clear();
+	m_simulating = true;
 
-	//if (m_interpolation)
-	//	m_dynamicsWorld->stepSimulation(timeStep, maxSubSteps, internalTimeStep);
-	//else
-	//{
-	//	m_timeAcc += timeStep;
-	//	while (m_timeAcc >= internalTimeStep && maxSubSteps > 0)
-	//	{
-	//		m_dynamicsWorld->stepSimulation(internalTimeStep, 0, internalTimeStep);
-	//		m_timeAcc -= internalTimeStep;
-	//		--maxSubSteps;
-	//	}
-	//}
+	if (m_interpolation)
+		m_dynamicsWorld->stepSimulation(timeStep, maxSubSteps, internalTimeStep);
+	else
+	{
+		m_timeAcc += timeStep;
+		while (m_timeAcc >= internalTimeStep && maxSubSteps > 0)
+		{
+			m_dynamicsWorld->stepSimulation(internalTimeStep, 0, internalTimeStep);
+			m_timeAcc -= internalTimeStep;
+			--maxSubSteps;
+		}
+	}
 
-	//m_simulating = false;
+	m_simulating = false;
 
 	if (m_handleContacts)
 	{

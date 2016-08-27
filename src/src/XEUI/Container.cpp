@@ -21,6 +21,22 @@ namespace XE {
 			widget->SetParent(Widget::Ptr());
 		}
 	}
+
+	void Container::HandleUpdate(float seconds) {
+		Widget::HandleUpdate(seconds);
+
+		for (const auto& child : m_children) {
+			child->Update(seconds);
+		}
+	}
+
+	void Container::HandleNavEvent(NavAction navAction) {
+		Widget::HandleNavEvent(navAction);
+
+		for (const auto& child : m_children) {
+			child->HandleNavEvent(navAction);
+		}
+	}
 	
 	void Container::AddEntry(Widget::Ptr widget) {
 		if (IsChild(widget))

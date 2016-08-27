@@ -528,8 +528,7 @@ namespace XE
 		Ogre::Quaternion m_bodyGoalDirection;      // player's local intended direction based on WASD keys
 
 		bool m_hasParent;
-
-
+		
 		Ogre::Vector3        mPosition;
 
 		/// Stores the orientation of a node relative to it's parent.

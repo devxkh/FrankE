@@ -17,6 +17,7 @@ namespace XE {
 	Desktop::Desktop(GUIRenderer& guiRenderer, CameraRenderable& camera, const XE::Uint16 atlasId)
 		: m_guiRenderer(guiRenderer)
 	{
+
 	}
 
 	Desktop::Ptr Desktop::Create(GUIRenderer& guiRenderer, CameraRenderable& camera, const XE::Uint16 atlasId) {
@@ -119,6 +120,20 @@ namespace XE {
 			}
 
 			widget->onTextEvent(text);
+		}
+	}
+
+	void Desktop::onNav(NavAction navAction) {
+		//dont use an iterator here! it's possible widget deletion happens while iterating here
+		for (int index = 0; index < static_cast<int>(m_children.size()); ++index) {
+			Widget::Ptr widget(m_children[static_cast<std::size_t>(index)]);
+
+			// Skip widget if not visible or is insensitive.
+			if (!widget->IsLocallyVisible() || widget->GetState() == Widget::State::INSENSITIVE) {
+				continue;
+			}
+
+			widget->onNav(navAction);
 		}
 	}
 

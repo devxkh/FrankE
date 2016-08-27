@@ -72,6 +72,10 @@ protected:
 	*/
 	void HandleGlobalVisibilityChange() override;
 	
+	/** Handle update. */
+	void HandleUpdate(float seconds) override;
+
+	void HandleNavEvent(NavAction navAction) override;
 
 	WidgetsList m_children;
 

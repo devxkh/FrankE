@@ -35,6 +35,10 @@ namespace XE {
 	Signal::SignalID Widget::OnKeyRelease = 0;
 	Signal::SignalID Widget::OnText = 0;
 
+	Signal::SignalID Widget::OnNav = 0;
+	Signal::SignalID Widget::OnNavSelect = 0;
+	Signal::SignalID Widget::OnNavEnter = 0;
+
 	std::weak_ptr<Widget> Widget::m_focus_widget;
 	std::weak_ptr<Widget> Widget::m_active_widget;
 	std::weak_ptr<Widget> Widget::m_modal_widget;
@@ -164,6 +168,10 @@ namespace XE {
 
 		//	SetHierarchyLevel(0);
 		}
+
+	}
+
+	void Widget::HandleUpdate(float /*seconds*/) {
 
 	}
 
@@ -608,6 +616,20 @@ namespace XE {
 				HandleTextEvent(text.text);// event.text.unicode);
 				GetSignals().Emit(OnText);
 			}	
+	}
+
+	void Widget::onNav(NavAction navAction)
+	{
+		if (!HandleEvent())
+			return;
+
+		HandleNavEvent(navAction);
+		GetSignals().Emit(OnNav);
+	}
+
+	void  Widget::HandleNavEvent(NavAction navAction)
+	{
+
 	}
 
 	//void Widget::HandleMouseButtonEvent(sf::Mouse::Button /*button*/, bool /*press*/, int /*x*/, int /*y*/) {

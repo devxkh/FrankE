@@ -38,19 +38,24 @@ namespace XE {
 	
 		inline GraphicsManager& getGraphicsManager() { return m_GraphicsManager; }
 
-		void setSettings();
+		void moveToTarget(Ogre::Real elapsedTime, Ogre::Vector3& targetPosition, float speed);
+
+		void setFixedYawAxis(bool fixedYawAxis);
 		void updateTransform(const Ogre::Vector3& position, const Ogre::Quaternion& rotation);
 		void updateLookAt(const Ogre::Vector3& position, const Ogre::Vector3& lookAt);
 
 		bool IsSettingDirty() { return m_settingIsDirty; }
 
-		void setAutoTracking(bool autotracking) { m_autoTracking = autotracking;  m_settingIsDirty = true; }
-		void setNearClipDistance(float nearClipDistance) { m_nearClipDistance = nearClipDistance; m_settingIsDirty = true; }
+		void setAutoTracking(bool autotracking, Renderable* target);// { m_autoTracking = autotracking;  m_settingIsDirty = true; }
+		void setNearClipDistance(float nearClipDistance);// { m_nearClipDistance = nearClipDistance; m_settingIsDirty = true; }
 		void setFarClipDistance(float farClipDistance) { m_farClipDistance = farClipDistance; m_settingIsDirty = true; }
 
 		float getNearClipDistance() { return m_nearClipDistance; }
 		float getFarClipDistance() { return  m_farClipDistance; }
 		bool getAutoAspectRatio() { return  m_autoAspectRatio; }
+
+
+		void setPosition(const  Ogre::Vector3& position);
 
 		const Ogre::Ray& getScreenPointRay()  { return m_screenPointRay; }
 

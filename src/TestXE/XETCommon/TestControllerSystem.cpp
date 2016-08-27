@@ -93,6 +93,9 @@ namespace XET {
 			m_mouseMove.x += context.event->motion.xrel;// / tx;
 			m_mouseMove.y += context.event->motion.yrel;// / ty;
 
+			std::cout << "onPointMoved.TestControllerSystem! x:" << m_mouseMove.x << ",y:" << m_mouseMove.y << std::endl;
+
+
 			/*float tx = controller->_windowState.width;
 			float ty = controller->_windowState.height;
 
@@ -175,7 +178,7 @@ namespace XET {
 		std::cout << "onPointSelectStart! " << context.event->button.button << std::endl;
 
 
-		setGrabMousePointer(true, context.window);
+		//setGrabMousePointer(true, context.window);
 		setMouseRelative(true, context.window);
 		setMouseVisible(false, context.window);
 
@@ -195,7 +198,7 @@ namespace XET {
 	{
 		std::cout << "onPointSelectEnd! " << context.event->button.button << std::endl;
 
-		setGrabMousePointer(false, context.window);
+	//	setGrabMousePointer(false, context.window);
 		setMouseRelative(false, context.window);
 		setMouseVisible(true, context.window);
 

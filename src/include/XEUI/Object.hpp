@@ -7,6 +7,21 @@
 
 namespace XE {
 
+	enum NavAction
+	{
+		NavAction_None,
+		NavAction_NavUp,
+		///< Menu NavigationDown 				
+		NavAction_NavDown,
+		///< Menu NavigationLeft 			
+		NavAction_NavLeft,
+		///< Menu NavigationRight 	
+		NavAction_NavRight,
+		///< Menu Navigation selection
+		NavAction_NavSelect,
+		NavAction_NavEnter,
+	};
+
 	/** Base class for all Widget, Adjustment and Tooltip objects.
 	 */
 	class Object : public NonCopyable

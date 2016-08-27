@@ -43,7 +43,7 @@ class XE_API Desktop : public Container  {
 		void setSize(sf::Uint32 width, sf::Uint32 height);
 	//	virtual const std::string& GetName() const override;
 
-		virtual const std::string& GetName() const override;
+		const std::string& GetName() const override;
 
 
 		/** Use a custom engine.
@@ -85,11 +85,12 @@ class XE_API Desktop : public Container  {
 		 */
 		//void HandleEvent( const sf::Event& event );
 
-		virtual void onPointMoved(const float& x, const float& y);
-		virtual void onPointDown(const float& x, const float& y);
-		virtual void onPointUp(const float& x, const float& y);
-		virtual void onKeyEvent(const  SDL_KeyboardEvent& key);
-		virtual void onTextEvent(const SDL_TextInputEvent& text);
+		void onPointMoved(const float& x, const float& y);
+		void onPointDown(const float& x, const float& y);
+		void onPointUp(const float& x, const float& y);
+		void onKeyEvent(const  SDL_KeyboardEvent& key);
+		void onTextEvent(const SDL_TextInputEvent& text);
+		void onNav(NavAction navAction);
 
 //		void HandleSizeChange() override;
 

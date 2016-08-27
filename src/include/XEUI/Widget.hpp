@@ -117,13 +117,15 @@ class Widget : public Object, public std::enable_shared_from_this<Widget> {
 		virtual void onPointUp( const float& x, const float& y);
 		virtual void onKeyEvent(const  SDL_KeyboardEvent& key);
 		virtual void onTextEvent(const SDL_TextInputEvent& text);
-		
+		virtual void onNav(NavAction navAction);
 		/** Handle global visibility changes.
 		 */
 		virtual void HandleGlobalVisibilityChange();
 
 		virtual void Update(float seconds);
 
+
+		virtual void HandleNavEvent(NavAction navAction);
 
 		/** Update position of drawable.
 		 */
@@ -202,6 +204,10 @@ class Widget : public Object, public std::enable_shared_from_this<Widget> {
 		static Signal::SignalID OnKeyRelease; //!< Fired when a key is released while State == Active.
 		static Signal::SignalID OnText; //!< Fired when text is entered while State == Active.
 
+		static Signal::SignalID OnNav; //!< Fired on navigation left,right,top,down
+		static Signal::SignalID OnNavSelect; //!< Fired on navigation select
+		static Signal::SignalID OnNavEnter; //!< Fired on navigation enter
+
 		const sf::Vector2f& getPosition() const;
 
 		virtual void setPosition(const sf::Vector2f& pos);
@@ -259,6 +265,10 @@ class Widget : public Object, public std::enable_shared_from_this<Widget> {
 		 */
 		virtual void HandleMouseButtonEvent( bool press, int x, int y );
 
+		/** Handle update.
+					 */
+		virtual void HandleUpdate(float seconds);
+
 		/** Handle key event.
 		 * @param key Key.
 		 * @param press true if button was pressed, false if released.
@@ -276,6 +286,7 @@ class Widget : public Object, public std::enable_shared_from_this<Widget> {
 		 * @param character Character.
 		 */
 		virtual void HandleTextEvent(const char* character );
+	
 
 		/** Handle mouse enter.
 		 * @param x Mouse X position.
@@ -330,6 +341,8 @@ class Widget : public Object, public std::enable_shared_from_this<Widget> {
 		 * @return true if this widget is the modal widget.
 		 */
 		bool IsModal() const;
+
+		sf::Uint16 tabIdx;
 
 	private:
 		struct ClassId {

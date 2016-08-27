@@ -108,11 +108,14 @@ namespace XE {
 		sf::Vector2f CalculateRequisition();
 
 		void HandleMouseButtonEvent(bool press, int x, int y) override;
-	//	void HandleUpdate(float seconds) override;
+		void HandleUpdate(float seconds) override;
 		void HandleTextEvent(const char* character) override;
 		void HandleKeyEvent(const SDL_KeyboardEvent& key, bool press) override;
 		//void HandleSizeChange() override;
 		void HandleFocusChange(Widget::Ptr focused_widget) override;
+
+		void HandleNavEvent(NavAction navAction) override;
+
 
 	private:
 		/** Get closest cursor position to x coordinate.

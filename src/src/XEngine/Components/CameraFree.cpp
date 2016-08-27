@@ -15,7 +15,7 @@ namespace XE
 		, m_CameraYaw(0)
 		, m_CameraPitch(0)
 	{
-		_cameraRenderable.setAutoTracking(false);
+		//_cameraRenderable.setAutoTracking(false);
 		_cameraBodyNode.setFixedYawAxis(true);
 	}
 

@@ -54,27 +54,73 @@ namespace XE
 		});
 	}
 
-	void CameraRenderable::setSettings()
+	void CameraRenderable::setFixedYawAxis( bool fixedYawAxis)
 	{
-		m_GraphicsManager.getIntoRendererQueue().push([this]() {
-			//_t_OgreCameraPtr->setFixedYawAxis(camera.FixedYawAxis); still needed?
-			//_t_OgreCameraPtr->setAutoTracking(camera.AutoTracking);
+		m_GraphicsManager.getIntoRendererQueue().push([this, fixedYawAxis]() {
+				_t_OgreCameraPtr->setFixedYawAxis(fixedYawAxis); 
+		});
+	}
+
+	void CameraRenderable::moveToTarget(Ogre::Real elapsedTime, Ogre::Vector3& targetPosition,  float speed) {
+	
+		m_GraphicsManager.getIntoRendererQueue().push([this, targetPosition, speed]() {
+			
+			// Handle movement
+			Ogre::Vector3 displacement;
+
+			displacement = (targetPosition - _t_OgreCameraPtr->getPosition()) * speed;
+			_t_OgreCameraPtr->getParentNode()->translate(displacement);
+
+			/*displacement = (targetPosition - mTargetNode->getPosition()) * mTightness;
+			mTargetNode->translate(displacement);*/
+		});
+	}
+
+	
+	void CameraRenderable::setPosition(const  Ogre::Vector3& position)
+	{
+		m_GraphicsManager.getIntoRendererQueue().push([this, position]() {
+			
+			_t_OgreCameraPtr->setPosition(position.x, position.y, position.z);
+
+			m_GraphicsManager.getFromRendererQueue().push([this]() {
+				m_GraphicsManager.GetRenderTask(RenderTaskID::Camera).isDone = true;
+			});
 		});
 	}
 
 	void CameraRenderable::updateLookAt(const  Ogre::Vector3& position, const  Ogre::Vector3& lookAt)
 	{
 		m_GraphicsManager.getIntoRendererQueue().push([this, position, lookAt]() {
-
+			
 			_t_OgreCameraPtr->setPosition(position.x, position.y, position.z);
 			_t_OgreCameraPtr->lookAt(Ogre::Vector3(lookAt.x, lookAt.y, lookAt.z));
+		});
+	}
+
+	void CameraRenderable::setAutoTracking(const bool autoTracking, Renderable* target)
+	{
+		m_nearClipDistance = autoTracking;
+
+		m_GraphicsManager.getIntoRendererQueue().push([this, autoTracking, target]() {
+			_t_OgreCameraPtr->setAutoTracking(autoTracking, target->_t_getNodePtr());
+		});
+	}
+
+	void CameraRenderable::setNearClipDistance(const float nearClipDistance)
+	{
+		m_nearClipDistance = nearClipDistance;
+
+		m_GraphicsManager.getIntoRendererQueue().push([this, nearClipDistance]() {
+
+			_t_OgreCameraPtr->setNearClipDistance(nearClipDistance);
 		});
 	}
 
 	void CameraRenderable::updateTransform(const Ogre::Vector3& position, const Ogre::Quaternion& rotation)
 	{
 		m_GraphicsManager.getIntoRendererQueue().push([this, position, rotation]() {
-
+			
 			_t_OgreCameraPtr->setPosition(position.x, position.y, position.z);
 
 			_t_OgreCameraPtr->setOrientation(Ogre::Quaternion(rotation.w, rotation.x, rotation.y, rotation.z));
