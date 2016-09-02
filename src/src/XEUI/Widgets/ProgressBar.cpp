@@ -87,6 +87,10 @@ namespace XE {
 			m_barPane.setPosition(sf::Vector2f(Widget::getPosition().x + bar_rect.left, Widget::getPosition().y + bar_rect.top));
 			m_barPane.setSize(sf::Vector2f(bar_rect.width, bar_rect.height));
 		}
+		else
+		{
+			m_barPane.setSize(sf::Vector2f(0, 0));
+		}
 	}
 
 	void ProgressBar::SetOrientation(Orientation orientation) {

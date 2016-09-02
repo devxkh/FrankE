@@ -284,61 +284,36 @@ enum ActionType {
   ActionType_BackwardLeft = 5,
   ///< move BackwardRight
   ActionType_BackwardRight = 6,
-  ///< TurnLeft
   ActionType_TurnLeft = 7,
-  ///< TurnRight
   ActionType_TurnRight = 8,
-  ///< StrafeLeft
   ActionType_StrafeLeft = 9,
-  ///< StrafeRight
   ActionType_StrafeRight = 10,
-  ///< Jump
   ActionType_Jump = 11,
-  ///< Run
   ActionType_Run = 12,
-  ///< Walk
   ActionType_Walk = 13,
-  ///< Next Target
   ActionType_NextTarget = 14,
-  ///< Preview Target
   ActionType_PrevTarget = 15,
-  ///< Punch1
   ActionType_Punch1 = 16,
-  ///< Kick1
   ActionType_Kick1 = 17,
-  ///< Entity mit Camera drehen
+  ///rotate Entity
   ActionType_ObjRotate = 18,
-  ///< ZoomIn
+  ///Camera
   ActionType_ZoomIn = 19,
-  ///< ZoomOut
   ActionType_ZoomOut = 20,
   ///< Rotate Camera
   ActionType_CamRotate = 21,
-  ///< Point selection
   ActionType_PointSelectStart = 22,
-  ///< Point selection
   ActionType_PointSelectEnd = 23,
-  ///< Point selection
   ActionType_PointMoved = 24,
-  ///< Spell 1
   ActionType_Spell1 = 25,
-  ///< Spell 2
   ActionType_Spell2 = 26,
-  ///< Spell 3
   ActionType_Spell3 = 27,
-  ///< Aktion 1
   ActionType_Action1 = 28,
-  ///< Aktion 2	
   ActionType_Action2 = 29,
-  ///< Menu NavigationUP 
   ActionType_NavUp = 30,
-  ///< Menu NavigationDown 				
   ActionType_NavDown = 31,
-  ///< Menu NavigationLeft 			
   ActionType_NavLeft = 32,
-  ///< Menu NavigationRight 	
   ActionType_NavRight = 33,
-  ///< Menu Navigation selection
   ActionType_NavSelect = 34,
   ActionType_NavEnter = 35,
   ActionType_TextEntered = 36,

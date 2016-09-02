@@ -50,7 +50,7 @@
 
 //#include <XEDebugger/Physics/OgreBulletCollisionsDebugDrawer.h>
 //#include <XEDebugger/Physics/OgreDebugDrawer.h>
-#include <XEPhysics/Debug/DebugDrawer.hpp>
+#include <XEPhysics/Debug/PhysicsDebugDrawer.hpp>
 
 gkDynamicsWorld::gkDynamicsWorld(const std::string& name, XE::Scene& scene)
 	:       m_scene(scene),
@@ -174,8 +174,8 @@ void gkDynamicsWorld::enableDebugPhysics(bool enable, bool debugAabb)
 			//node->attachObject(static_cast <Ogre::SimpleRenderable *> (m_debug));
 		//	mObjManager = new Ogre::ObjectMemoryManager();
 
-			//achtung: The hardwarebuffermanager of the rendersystem seems to be initialized only once root::createRenderWindow has been called. ???
-			m_debug = new XE::DebugDrawer(m_scene, m_dynamicsWorld);// (this);
+			//attention: The hardwarebuffermanager of the rendersystem seems to be initialized only if root::createRenderWindow has been called. ???
+			m_debug = new XE::PhysicsDebugDrawer(m_scene);// (this);
 			m_dynamicsWorld->setDebugDrawer(m_debug);
 
 		

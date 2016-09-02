@@ -36,7 +36,7 @@
 #include <XEDAL/Objects/FBEngineTypes_generated.h>
 
 namespace entityx { class Entity; }
-namespace XE { class Camera; class Scene; class DebugDrawer; }
+namespace XE { class Camera; class Scene; class PhysicsDebugDrawer; }
 namespace Ogre { class PagedWorldSection; class Page; class TerrainGroup; }
 
 
@@ -86,7 +86,7 @@ protected:
 	btDispatcher*               m_dispatcher;
 	btConstraintSolver*         m_constraintSolver;
 	gkPhysicsControllers        m_objects;
-	XE::DebugDrawer*             m_debug;
+	XE::PhysicsDebugDrawer*             m_debug;
 	bool                        m_handleContacts;
 	//gkDbvt*                     m_dbvt;
 	Listeners                   m_listeners;
@@ -130,7 +130,7 @@ public:
 
 	//void handleDbvt(XE::Camera* cam);
 
-	XE::DebugDrawer* getDebug() const { return m_debug; }
+	XE::PhysicsDebugDrawer* getDebug() const { return m_debug; }
 
 	void DrawDebug();
 	

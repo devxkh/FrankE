@@ -7,12 +7,12 @@ set(SRCROOT ${PROJECT_SOURCE_DIR}/src/src/XERenderer)
 set(XERenderer_SOURCES
    
     ${SRCROOT}/Renderable.cpp
+    ${SRCROOT}/DebugDrawer.cpp
     ${SRCROOT}/LightRenderable.cpp
     ${SRCROOT}/CameraRenderable.cpp
 	${SRCROOT}/OgreSceneManager.cpp
     ${SRCROOT}/GraphicsManager.cpp
 	${SRCROOT}/OgreWorkspace.cpp
-	${SRCROOT}/DrawDynamicLines.cpp
 	${SRCROOT}/DrawDynamicLines.cpp
     ${SRCROOT}/Animation.cpp
 )
@@ -22,6 +22,7 @@ set(XERenderer_HEADER
 	 ${INCROOT}/GraphicsManager.hpp
 	 ${INCROOT}/Animation.h
 	 ${INCROOT}/Renderable.hpp
+	 ${INCROOT}/DebugDrawer.hpp
 	 ${INCROOT}/LightRenderable.hpp
 	 ${INCROOT}/CameraRenderable.hpp
 	 ${INCROOT}/OgreSceneManager.hpp
@@ -47,6 +48,8 @@ source_group("include\\Editor" FILES ${XERenderer_Editor_HEADER})
 
 
 set(XERenderer_private_SOURCES
+		${SRCROOT}/private/DebugRenderer.cpp
+		${SRCROOT}/private/DebugRenderer.hpp
 		${SRCROOT}/private/DynamicLines.cpp
 		${SRCROOT}/private/DynamicRenderable.cpp
 		${SRCROOT}/private/DynamicLines.hpp

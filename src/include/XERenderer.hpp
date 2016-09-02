@@ -9,6 +9,7 @@
 //#include <XEUI/HealthBar.hpp>
 #include <XERenderer/GUI/WScreen.hpp>
 #include <XERenderer/LightRenderable.hpp>
+#include <XERenderer/DebugDrawer.hpp>
 
 #endif // XE_INTERFACE_RENDERER_HPP
 

@@ -17,7 +17,7 @@ namespace XE
 	public:
 		FrameLimiter();
 
-		float ApplyFrameLimit(sf::Clock& clock);
+		void ApplyFrameLimit(sf::Clock& clock, float wanted_fps = 120.0f);
 
 	private:
 

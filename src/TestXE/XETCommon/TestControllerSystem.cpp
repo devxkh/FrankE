@@ -93,7 +93,7 @@ namespace XET {
 			m_mouseMove.x += context.event->motion.xrel;// / tx;
 			m_mouseMove.y += context.event->motion.yrel;// / ty;
 
-			std::cout << "onPointMoved.TestControllerSystem! x:" << m_mouseMove.x << ",y:" << m_mouseMove.y << std::endl;
+		//	std::cout << "onPointMoved.TestControllerSystem! x:" << m_mouseMove.x << ",y:" << m_mouseMove.y << std::endl;
 
 
 			/*float tx = controller->_windowState.width;

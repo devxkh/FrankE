@@ -40,6 +40,7 @@ set(XEUI_Widgets_SOURCES
 	 ${SRCROOT}/Widgets/Label.cpp
 	 ${SRCROOT}/Widgets/Entry.cpp
 	 ${SRCROOT}/Widgets/Button.cpp
+	 ${SRCROOT}/Widgets/ToggleButton.cpp
 	 ${SRCROOT}/Widgets/ProgressBar.cpp
 	 ${SRCROOT}/Widgets/Image.cpp
 	 ${SRCROOT}/Widgets/UIWindow.cpp
@@ -58,6 +59,7 @@ set(XEUI_Widgets_INCLUDES
 	 ${INCROOT}/Widgets/Label.hpp
 	 ${INCROOT}/Widgets/Entry.hpp
 	  ${INCROOT}/Widgets/Button.hpp
+	  ${INCROOT}/Widgets/ToggleButton.hpp
 	  ${INCROOT}/Widgets/ProgressBar.hpp
 	  ${INCROOT}/Widgets/Image.hpp
 	 ${INCROOT}/Widgets/UIWindow.hpp

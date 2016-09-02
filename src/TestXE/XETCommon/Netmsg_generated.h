@@ -96,14 +96,16 @@ enum UIStateId {
   UIStateId_Console = 0,
   UIStateId_Stats = 1,
   UIStateId_Settings = 2,
-  UIStateId_Welcome = 3,
-  UIStateId_Cusomize = 4,
-  UIStateId_Game = 5,
-  UIStateId_Count = 6
+  UIStateId_Controller = 3,
+  UIStateId_Welcome = 4,
+  UIStateId_Cusomize = 5,
+  UIStateId_Game = 6,
+  UIStateId_GameMenu = 7,
+  UIStateId_Count = 8
 };
 
 inline const char **EnumNamesUIStateId() {
-  static const char *names[] = { "Console", "Stats", "Settings", "Welcome", "Cusomize", "Game", "Count", nullptr };
+  static const char *names[] = { "Console", "Stats", "Settings", "Controller", "Welcome", "Cusomize", "Game", "GameMenu", "Count", nullptr };
   return names;
 }
 
@@ -420,10 +422,21 @@ inline flatbuffers::Offset<AbilityInfo> CreateAbilityInfo(flatbuffers::FlatBuffe
 }
 
 struct CharacterComponent FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  const flatbuffers::Vector<flatbuffers::Offset<AbilityInfo>> *abilities() const { return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<AbilityInfo>> *>(4); }
+  const flatbuffers::String *name() const { return GetPointer<const flatbuffers::String *>(4); }
+  float moveSpeed() const { return GetField<float>(6, 0); }
+  uint16_t hp() const { return GetField<uint16_t>(8, 0); }
+  uint16_t resourcePoints() const { return GetField<uint16_t>(10, 0); }
+  const XFBType::Vec3f *offsetPunch() const { return GetStruct<const XFBType::Vec3f *>(12); }
+  const flatbuffers::Vector<flatbuffers::Offset<AbilityInfo>> *abilities() const { return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<AbilityInfo>> *>(14); }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, 4 /* abilities */) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, 4 /* name */) &&
+           verifier.Verify(name()) &&
+           VerifyField<float>(verifier, 6 /* moveSpeed */) &&
+           VerifyField<uint16_t>(verifier, 8 /* hp */) &&
+           VerifyField<uint16_t>(verifier, 10 /* resourcePoints */) &&
+           VerifyField<XFBType::Vec3f>(verifier, 12 /* offsetPunch */) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, 14 /* abilities */) &&
            verifier.Verify(abilities()) &&
            verifier.VerifyVectorOfTables(abilities()) &&
            verifier.EndTable();
@@ -433,19 +446,34 @@ struct CharacterComponent FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
 struct CharacterComponentBuilder {
   flatbuffers::FlatBufferBuilder &fbb_;
   flatbuffers::uoffset_t start_;
-  void add_abilities(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<AbilityInfo>>> abilities) { fbb_.AddOffset(4, abilities); }
+  void add_name(flatbuffers::Offset<flatbuffers::String> name) { fbb_.AddOffset(4, name); }
+  void add_moveSpeed(float moveSpeed) { fbb_.AddElement<float>(6, moveSpeed, 0); }
+  void add_hp(uint16_t hp) { fbb_.AddElement<uint16_t>(8, hp, 0); }
+  void add_resourcePoints(uint16_t resourcePoints) { fbb_.AddElement<uint16_t>(10, resourcePoints, 0); }
+  void add_offsetPunch(const XFBType::Vec3f *offsetPunch) { fbb_.AddStruct(12, offsetPunch); }
+  void add_abilities(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<AbilityInfo>>> abilities) { fbb_.AddOffset(14, abilities); }
   CharacterComponentBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
   CharacterComponentBuilder &operator=(const CharacterComponentBuilder &);
   flatbuffers::Offset<CharacterComponent> Finish() {
-    auto o = flatbuffers::Offset<CharacterComponent>(fbb_.EndTable(start_, 1));
+    auto o = flatbuffers::Offset<CharacterComponent>(fbb_.EndTable(start_, 6));
     return o;
   }
 };
 
 inline flatbuffers::Offset<CharacterComponent> CreateCharacterComponent(flatbuffers::FlatBufferBuilder &_fbb,
+   flatbuffers::Offset<flatbuffers::String> name = 0,
+   float moveSpeed = 0,
+   uint16_t hp = 0,
+   uint16_t resourcePoints = 0,
+   const XFBType::Vec3f *offsetPunch = 0,
    flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<AbilityInfo>>> abilities = 0) {
   CharacterComponentBuilder builder_(_fbb);
   builder_.add_abilities(abilities);
+  builder_.add_offsetPunch(offsetPunch);
+  builder_.add_moveSpeed(moveSpeed);
+  builder_.add_name(name);
+  builder_.add_resourcePoints(resourcePoints);
+  builder_.add_hp(hp);
   return builder_.Finish();
 }
 
@@ -453,16 +481,22 @@ inline flatbuffers::Offset<CharacterComponent> CreateCharacterComponent(flatbuff
 struct AbilityComponent FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   uint16_t id() const { return GetField<uint16_t>(4, 0); }
   uint8_t hasPhysics() const { return GetField<uint8_t>(6, 0); }
-  XFBType::PhysicsShape shape() const { return static_cast<XFBType::PhysicsShape>(GetField<int8_t>(8, 0)); }
-  const XFBType::Vec3f *size() const { return GetStruct<const XFBType::Vec3f *>(10); }
-  const XFBType::Vec3f *offset() const { return GetStruct<const XFBType::Vec3f *>(12); }
+  float duration() const { return GetField<float>(8, 0); }
+  float cooldown() const { return GetField<float>(10, 0); }
+  float power() const { return GetField<float>(12, 0); }
+  XFBType::PhysicsShape shape() const { return static_cast<XFBType::PhysicsShape>(GetField<int8_t>(14, 0)); }
+  const XFBType::Vec3f *size() const { return GetStruct<const XFBType::Vec3f *>(16); }
+  const XFBType::Vec3f *offset() const { return GetStruct<const XFBType::Vec3f *>(18); }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
            VerifyField<uint16_t>(verifier, 4 /* id */) &&
            VerifyField<uint8_t>(verifier, 6 /* hasPhysics */) &&
-           VerifyField<int8_t>(verifier, 8 /* shape */) &&
-           VerifyField<XFBType::Vec3f>(verifier, 10 /* size */) &&
-           VerifyField<XFBType::Vec3f>(verifier, 12 /* offset */) &&
+           VerifyField<float>(verifier, 8 /* duration */) &&
+           VerifyField<float>(verifier, 10 /* cooldown */) &&
+           VerifyField<float>(verifier, 12 /* power */) &&
+           VerifyField<int8_t>(verifier, 14 /* shape */) &&
+           VerifyField<XFBType::Vec3f>(verifier, 16 /* size */) &&
+           VerifyField<XFBType::Vec3f>(verifier, 18 /* offset */) &&
            verifier.EndTable();
   }
 };
@@ -472,13 +506,16 @@ struct AbilityComponentBuilder {
   flatbuffers::uoffset_t start_;
   void add_id(uint16_t id) { fbb_.AddElement<uint16_t>(4, id, 0); }
   void add_hasPhysics(uint8_t hasPhysics) { fbb_.AddElement<uint8_t>(6, hasPhysics, 0); }
-  void add_shape(XFBType::PhysicsShape shape) { fbb_.AddElement<int8_t>(8, static_cast<int8_t>(shape), 0); }
-  void add_size(const XFBType::Vec3f *size) { fbb_.AddStruct(10, size); }
-  void add_offset(const XFBType::Vec3f *offset) { fbb_.AddStruct(12, offset); }
+  void add_duration(float duration) { fbb_.AddElement<float>(8, duration, 0); }
+  void add_cooldown(float cooldown) { fbb_.AddElement<float>(10, cooldown, 0); }
+  void add_power(float power) { fbb_.AddElement<float>(12, power, 0); }
+  void add_shape(XFBType::PhysicsShape shape) { fbb_.AddElement<int8_t>(14, static_cast<int8_t>(shape), 0); }
+  void add_size(const XFBType::Vec3f *size) { fbb_.AddStruct(16, size); }
+  void add_offset(const XFBType::Vec3f *offset) { fbb_.AddStruct(18, offset); }
   AbilityComponentBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
   AbilityComponentBuilder &operator=(const AbilityComponentBuilder &);
   flatbuffers::Offset<AbilityComponent> Finish() {
-    auto o = flatbuffers::Offset<AbilityComponent>(fbb_.EndTable(start_, 5));
+    auto o = flatbuffers::Offset<AbilityComponent>(fbb_.EndTable(start_, 8));
     return o;
   }
 };
@@ -486,12 +523,18 @@ struct AbilityComponentBuilder {
 inline flatbuffers::Offset<AbilityComponent> CreateAbilityComponent(flatbuffers::FlatBufferBuilder &_fbb,
    uint16_t id = 0,
    uint8_t hasPhysics = 0,
+   float duration = 0,
+   float cooldown = 0,
+   float power = 0,
    XFBType::PhysicsShape shape = XFBType::PhysicsShape_SH_BOX,
    const XFBType::Vec3f *size = 0,
    const XFBType::Vec3f *offset = 0) {
   AbilityComponentBuilder builder_(_fbb);
   builder_.add_offset(offset);
   builder_.add_size(size);
+  builder_.add_power(power);
+  builder_.add_cooldown(cooldown);
+  builder_.add_duration(duration);
   builder_.add_id(id);
   builder_.add_shape(shape);
   builder_.add_hasPhysics(hasPhysics);

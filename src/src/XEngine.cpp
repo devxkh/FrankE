@@ -93,6 +93,10 @@ namespace XE
 		m_NetworkManager.registerObject(_lua.state);
 		
 		m_IDAL->open();
+
+
+		//m_DebugDrawer = std::unique_ptr<DebugDrawer>(new DebugDrawer(*m_scene.get(), 1));
+
 	}
 
 	void XEngine::registerObject(sol::state& lua)
@@ -213,14 +217,18 @@ namespace XE
 		//}
 //		sf::Time elapsed1 = m_clock.getElapsedTime();
 
+
+
+		m_mtFrameLimiter.ApplyFrameLimit(m_clock);
+
 		elapsedTimeMainThread = m_clock.restart();
+		
 		sf::Uint64 time = elapsedTimeMainThread.asMicroseconds();
 
 		double timeSinceLast = time / 1000000.0;
 		timeSinceLast = std::min(1.0, timeSinceLast); //Prevent from going haywire.
 
-		//timeSinceLast = m_mtFrameLimiter.ApplyFrameLimit(timeSinceLast);
-		
+				
 		m_scene->update(timeSinceLast);
 
 		m_states.top()->update(timeSinceLast);

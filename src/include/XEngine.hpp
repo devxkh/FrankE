@@ -139,6 +139,10 @@ namespace XE
 			return _soundMgr;
 		};
 		
+		DebugDrawer& getDebugDrawer() {
+			return *m_DebugDrawer.get();
+		}
+
 		void setScene(std::unique_ptr<Scene> scene);
 		
 		inline Scene& getScene() {
@@ -188,6 +192,8 @@ namespace XE
 		std::thread			mControllerThread;
 
 		FrameLimiter m_mtFrameLimiter;
+
+		std::unique_ptr<DebugDrawer> m_DebugDrawer;
 	};
 
 	template < typename T >

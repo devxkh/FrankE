@@ -70,18 +70,20 @@ namespace XE {
 
 		void HandleStateChange(State old_state) override;
 
-	private:
-		void HandleMouseEnter(int x, int y) override;
-		void HandleMouseLeave(int x, int y) override;
 		void HandleMouseButtonEvent(bool press, int x, int y) override;
-	//	void AllocateChild();
-
-		//sf::String m_label;
 
 		WRectangle m_rectangle;
 		WCaption m_label;
 
 		std::string m_imageName;
+
+	private:
+		void HandleMouseEnter(int x, int y) override;
+		void HandleMouseLeave(int x, int y) override;
+	//	void AllocateChild();
+
+		//sf::String m_label;
+
 	};
 
 }

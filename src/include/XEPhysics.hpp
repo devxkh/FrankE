@@ -10,7 +10,7 @@
 
 //#include <gkDynamicsWorld.h>
 //#include <XEEntity/gkCharacter.h>
-//#include <XEPhysics/gkRigidBody.h>
+#include <XEPhysics/Physics/gkRigidBody.h>
 //#include <XEPhysics/PhysTerrain.h>
 #include <XEPhysics/Physics/gkContactTest.h>
 #include <XEPhysics/HeightfieldTerrainShape.h>

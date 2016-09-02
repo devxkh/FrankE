@@ -518,12 +518,12 @@ source_group("include" FILES ${XEPhysics_HEADER}) # Create named folders for the
 
 # ----------------------- XEPhysics_Debug_INCLUDES -------------------------------
 set(XEPhysics_Debug_SRC
-    ${SRCROOT}/Debug/DebugDrawer.cpp
+    ${SRCROOT}/Debug/PhysicsDebugDrawer.cpp
 )
 source_group("src\\debug" FILES ${XEPhysics_Debug_SRC})
 
 set(XEPhysics_Debug_INCLUDE
-    ${INCROOT}/Debug/DebugDrawer.hpp
+    ${INCROOT}/Debug/PhysicsDebugDrawer.hpp
 )
 source_group("include\\debug" FILES ${XEPhysics_Debug_INCLUDE})
 

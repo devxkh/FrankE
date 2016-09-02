@@ -20,6 +20,7 @@
 #include <XEUI/Widgets/Image.hpp>
 #include <XEUI/Widgets/Menu.hpp>
 #include <XEUI/Widgets/MIButton.hpp>
+#include <XEUI/Widgets/ToggleButton.hpp>
 #include <XEUI/Widgets/MenuItem.hpp>
 #include <XEUI/Widgets/OgreConsoleForGorilla.hpp>
 //#include <XEUI/UISerializer.hpp>
