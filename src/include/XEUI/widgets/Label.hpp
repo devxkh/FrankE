@@ -7,7 +7,11 @@
 #include <SFML/System/String.hpp>
 #include <XERenderer/GUI/WCaption.hpp>
 
+#include <XERenderer/GUI/WRectangle.hpp>
+
 namespace XE {
+
+	class Font;
 
 /** Text label.
  */
@@ -20,7 +24,7 @@ class  Label : public Widget, public Misc {
 		 * @param text Text.
 		 * @return Label.
 		 */
-		static Ptr Create(WLayer& parentLayer, const sf::String& text = L"");
+		static Ptr Create(WLayer& parentLayer, const sf::String& text = L"", Uint16 fontId = 14);
 
 		virtual const std::string& GetName() const override;
 
@@ -50,27 +54,38 @@ class  Label : public Widget, public Misc {
 		 */
 		sf::String GetWrappedText() const;
 
+
+		void UpdateAlignment();
+
+		Uint16 fontId;
+
 	protected:
 		/** Ctor.
 		 * @param text Text.
 		 */
-		Label(WLayer& parentLayer, const sf::String& text = "");
+		Label(WLayer& parentLayer, Uint16 fontId, const sf::String& text = "");
 
 		//KH std::unique_ptr<RenderQueue>
-			void draw() override;
+		void draw() override;
+
 		sf::Vector2f CalculateRequisition();
 		//virtual void HandleRequisitionChange() override;
 		//virtual void HandleSizeChange() override;
 
 	private:
+
+
+
 		void WrapText();
 
 		sf::String m_text;
 		sf::String m_wrapped_text;
+		
+
+		WRectangle m_DebugRectangle;
 
 		bool m_wrap;
-
-		WCaption m_Label;
+		WCaption m_wcaption;
 };
 
 }

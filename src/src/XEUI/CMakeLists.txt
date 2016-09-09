@@ -117,8 +117,8 @@ set(XEUI_HEADER
 	 #${INCROOT}/Panel2D.hpp
 #	 ${INCROOT}/Panel3D.hpp
 #${INCROOT}/ElementStyle.hpp
-
-	 ${INCROOT}/Font.hpp
+#
+#	 ${INCROOT}/Font.hpp
 	 ${INCROOT}/Glyph.hpp
 	 ${INCROOT}/Adjustment.hpp
 	 ${INCROOT}/Alignment.hpp

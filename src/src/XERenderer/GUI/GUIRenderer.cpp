@@ -17,8 +17,9 @@
 #include <XEDAL/PhysFS/PhysFsStream.hpp>
 
 #include <XEScripts/LUAEngine.h>
-#include <XEUI/Font.hpp>
 #include <XEUI/Glyph.hpp>
+
+#include <iostream>
 
 namespace XE
 {
@@ -126,12 +127,13 @@ namespace XE
 				for (auto it = atlas->fonts()->begin(); it != atlas->fonts()->end(); ++it)
 				{
 					Font newFont;
+					
 
 					//glyphs
 					for (auto itGlyph = (*it)->glyphs()->begin(); itGlyph != (*it)->glyphs()->end(); ++itGlyph)
 					{
 						//LOG(plog::info) << "Glyph:";
-					//	LOG(plog::info) << "code:" << (*itGlyph)->code(); //->> Attention!! causing sometimes a memory crash??
+					//	std::cout << "code:" << (*itGlyph)->code() << std::endl; //->> Attention!! causing sometimes a memory crash??
 
 						FontGlyph newGlyph;
 						newGlyph.glyphAdvance = (*itGlyph)->glyphAdvance();
@@ -143,6 +145,8 @@ namespace XE
 							//kerning
 							for (auto itKerning = (*itGlyph)->kerningList()->begin(); itKerning != (*itGlyph)->kerningList()->end(); ++itKerning)							
 							{
+							//	std::cout << "itKerning:" << (*itKerning)->character() << std::endl; //->> Attention!! causing sometimes a memory crash??
+								
 								newGlyph.kerning.emplace_back(GlyphKerning((*itKerning)->character(), (*itKerning)->kerning()));
 							}
 						}
@@ -179,12 +183,7 @@ namespace XE
 			return false;
 		}
 	}
-
-	XE::Uint16  GUIRenderer::GetFontLineHeight(XE::Uint16 font_size) const
-	{
-		return 22;
-	}
-
+	
 	void  GUIRenderer::_calculateCoordinates(sf::Vector2f texelOffset, sf::Vector2f inverseTextureSize)
 	{
 		for (std::map<XE::Uint32, Font>::iterator gd_it = _fonts.begin(); gd_it != _fonts.end(); gd_it++)
@@ -247,56 +246,56 @@ namespace XE
 		return glyph->glyphAdvance + kerning;
 	}
 
-	sf::Vector2i GUIRenderer::GetTextStringMetrics(const std::basic_string<XE::Uint32>& string, unsigned int font_size) const
-	{
-		const Font* font = getFont(20); //fontsize 9 = Id
+	//sf::Vector2i GUIRenderer::GetTextStringMetrics(const std::basic_string<XE::Uint32>& string, unsigned int font_size) const
+	//{
+	//	const Font* font = getFont(font_size); //fontsize 9 = Id
 
-		sf::Vector2i retSize;
+	//	sf::Vector2i retSize;
 
-		if (!font)
-			return retSize;
+	//	if (!font)
+	//		return retSize;
 
-		float cursor = 0,
-			kerning = 0;
+	//	float cursor = 0,
+	//		kerning = 0;
 
-		unsigned char thisChar = 0, lastChar = 0;
-		const FontGlyph* glyph = 0;
-		retSize.x = 0;
-		retSize.y = GetFontLineHeight(font_size);// mGlyphData->mLineHeight;
+	//	unsigned char thisChar = 0, lastChar = 0;
+	//	const FontGlyph* glyph = 0;
+	//	retSize.x = 0;
+	//	retSize.y = font->mLineHeight;// GetFontLineHeight(font_size);// mGlyphData->mLineHeight;
 
-		for (size_t i = 0; i < string.length(); i++)
-		{
-			thisChar = string[i];
+	//	for (size_t i = 0; i < string.length(); i++)
+	//	{
+	//		thisChar = string[i];
 
-			if (thisChar == ' ')
-			{
-				lastChar = thisChar;
-				cursor += font->mSpaceLength;
-				continue;
-			}
+	//		if (thisChar == ' ')
+	//		{
+	//			lastChar = thisChar;
+	//			cursor += font->mSpaceLength;
+	//			continue;
+	//		}
 
-			/*if (thisChar < font->mRangeBegin || thisChar > font->mRangeEnd)
-			{
-				lastChar = 0;
-				continue;
-			}*/
+	//		/*if (thisChar < font->mRangeBegin || thisChar > font->mRangeEnd)
+	//		{
+	//			lastChar = 0;
+	//			continue;
+	//		}*/
 
-			glyph = font->getGlyph(thisChar);
-			if (glyph == 0)
-				continue;
-			kerning = glyph->getKerning(lastChar);
-			if (kerning == 0)
-				kerning = font->mLetterSpacing;
+	//		glyph = font->getGlyph(thisChar);
+	//		if (glyph == 0)
+	//			continue;
+	//		kerning = glyph->getKerning(lastChar);
+	//		if (kerning == 0)
+	//			kerning = font->mLetterSpacing;
 
-			cursor += _getAdvance(glyph, kerning);
-			lastChar = thisChar;
+	//		cursor += _getAdvance(glyph, kerning);
+	//		lastChar = thisChar;
 
-		} // for
+	//	} // for
 
-		retSize.x = cursor - kerning;
+	//	retSize.x = cursor - kerning;
 
-		return retSize;
-	}
+	//	return retSize;
+	//}
 
 	const Font* GUIRenderer::getFont(const XE::Uint32 fontId) const
 	{
@@ -310,10 +309,8 @@ namespace XE
 			return &(*it).second;
 	}
 
-	sf::Vector2i GUIRenderer::GetTextStringMetrics(const sf::String& string, unsigned int font_size) const
+	sf::Vector2i GUIRenderer::GetTextStringMetrics(const sf::String& string, const Font* font) const
 	{
-		const Font* font = getFont(20); //fontsize 9 = Id
-
 		sf::Vector2i retSize;
 
 		if (!font)
@@ -324,8 +321,10 @@ namespace XE
 
 		unsigned char thisChar = 0, lastChar = 0;
 		const FontGlyph* glyph = 0;
+		const FontGlyph* lastGlyph = 0;
+		
 		retSize.x = 0;
-		retSize.y = GetFontLineHeight(font_size);// mGlyphData->mLineHeight;
+		retSize.y = font->mLineHeight;
 
 		for (size_t i = 0; i < string.getSize(); i++)
 		{
@@ -334,6 +333,7 @@ namespace XE
 			if (thisChar == ' ')
 			{
 				lastChar = thisChar;
+				lastGlyph = glyph;
 				cursor += font->mSpaceLength;
 				continue;
 			}
@@ -347,12 +347,16 @@ namespace XE
 			glyph = font->getGlyph(thisChar);
 			if (glyph == 0)
 				continue;
-			kerning = glyph->getKerning(lastChar);
+			if (lastGlyph == 0)
+				lastGlyph = glyph;
+
+			kerning = lastGlyph->getKerning(thisChar);
 			if (kerning == 0)
 				kerning = font->mLetterSpacing;
 
 			cursor += _getAdvance(glyph, kerning);
 			lastChar = thisChar;
+			lastGlyph = glyph;
 
 		} // for
 

@@ -8,10 +8,10 @@
 
 namespace XE
 {
-	WCaption::WCaption(WLayer& wLayer)
+	WCaption::WCaption(WLayer& wLayer, Uint16 fontId)
 		: RenderableShape(wLayer)
-		, m_font(20)
-		, m_color(Ogre::ColourValue::Green)
+		, m_color()
+		, m_font(m_guiRenderer.getFont(fontId))
 	{
 
 	}
@@ -20,7 +20,6 @@ namespace XE
 	{
 	
 	}
-
 
 	void  WCaption::_refresh()
 	{
@@ -54,6 +53,11 @@ namespace XE
 		return m_text;
 	}
 
+	sf::Vector2i WCaption::GetTextStringMetrics(const sf::String& string) const
+	{
+		return m_guiRenderer.GetTextStringMetrics(string, m_font);
+	}
+
 	void WCaption::setText(const sf::String& text)
 	{
 	//	auto test = m_guiRenderer.GetTextStringMetrics(text,20);
@@ -76,15 +80,14 @@ namespace XE
 
 		RenderableShape::m_verticesBuffer.clear();
 		
-		auto font = m_guiRenderer.getFont(20); //todo fontsize
-
 		float left = 0, top = 0, right = 0, bottom = 0, cursorX = 0, cursorY = 0, kerning = 0, texelOffsetX = m_layer.atlasData.texelOffset.x, texelOffsetY = m_layer.atlasData.texelOffset.y;
 		Ogre::Vector2 knownSize;
 		const FontGlyph* glyph = 0;
-		
+		const FontGlyph* lastGlyph = 0;
+
 		cursorX = m_position.x;
 	//	cursorY = m_position.y + (m_size.y * 0.5) - (font->mLineHeight * 0.5); //middle?
-		cursorY = m_position.y + m_size.y - font->mLineHeight; //bottom
+		cursorY = m_position.y + m_size.y - m_font->mLineHeight; //bottom
 
 		cursorX = Ogre::Math::Floor(cursorX);
 		cursorY = Ogre::Math::Floor(cursorY);
@@ -98,7 +101,8 @@ namespace XE
 			if (thisChar == ' ')
 			{
 				lastChar = thisChar;
-				cursorX += font->mSpaceLength;
+				lastGlyph = glyph;
+				cursorX += m_font->mSpaceLength;
 				continue;
 			}
 
@@ -111,18 +115,28 @@ namespace XE
 			//if (thisChar == 246 || thisChar == 196 || thisChar == 192)
 			//	top = top;
 
-			glyph = font->getGlyph(thisChar);
+			glyph = m_font->getGlyph(thisChar);
 			if (glyph == 0)
 				continue;
-			kerning = glyph->getKerning(lastChar);
+			if (lastGlyph == 0)
+				lastGlyph = glyph;
+
+			kerning = lastGlyph->getKerning(thisChar);
 			if (kerning == 0)
-				kerning = font->mLetterSpacing;
+				kerning = m_font->mLetterSpacing;
+
+			cursorX += kerning; //cursorX += kerning;
+			lastChar = thisChar;
+			lastGlyph = glyph;
 
 			left = cursorX - texelOffsetX;
 			top = cursorY - texelOffsetY + glyph->verticalOffset;
 			right = left + glyph->glyphWidth + texelOffsetX;
 			bottom = top + glyph->glyphHeight + texelOffsetY;
 		
+			cursorX += _getAdvance(glyph, kerning);
+
+
 		/*	if (fixedWidth())
 			{
 				float offset = std::floor((mGlyphData->mMonoWidth - glyph->glyphWidth) / 2.0f);
@@ -153,10 +167,6 @@ namespace XE
 			PUSH_VERTEX(RenderableShape::m_verticesBuffer, temp, right, top, glyph->texCoords[TopRight], m_color);    // Right/Top    1
 
 
-			cursorX += _getAdvance(glyph, kerning);
-			lastChar = thisChar;
-
-
 			RenderableShape::isDirty = false;
 		} // for
 
@@ -168,7 +178,7 @@ namespace XE
 		/*if (mFixedWidth)
 			return mGlyphData->mMonoWidth;
 		else*/
-			return glyph->glyphAdvance + kerning;
+		return glyph->glyphAdvance + kerning;
 	}
 
 

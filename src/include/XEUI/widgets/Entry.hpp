@@ -22,7 +22,7 @@ namespace XE {
 													   * @param text Text.
 													   * @return Entry.
 													   */
-		static Ptr Create(WLayer& parentLayer, const sf::String& text = L"");
+		static Ptr Create(WLayer& parentLayer, const sf::String& text = L"", Uint16 fontId = 14);
 
 		const std::string& GetName() const override;
 
@@ -97,7 +97,7 @@ namespace XE {
 	protected:
 		/** Ctor.
 		*/
-		Entry(WLayer& parentLayer);
+		Entry(WLayer& parentLayer, Uint16 fontId);
 
 		/** Set right hand side margin that the entry should reserve for derived widgets.
 		* @param margin Margin to reserve.
@@ -157,6 +157,7 @@ namespace XE {
 
 		mutable bool m_cursor_status;
 
+		const Font* m_font;
 
 		WRectangle m_pane;
 		WRectangle m_cursor;

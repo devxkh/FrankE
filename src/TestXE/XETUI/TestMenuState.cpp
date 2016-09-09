@@ -37,7 +37,7 @@ TestMenuState::TestMenuState(XE::XEngine& engine, bool replace)
 	screenComp->mUIStateManager.addUIState(screenComp->mUIStateManager.build <XE::UIDebug>(NetMsg::UIStateId_Stats, entity, true));
 //	screenComp->mUIStateManager.addUIState(screenComp->mUIStateManager.build <XE::UIConsole>(10, entity, true));//ctrl.createConsole();
 
-//	screenComp->mUIStateManager.addUIState(screenComp->mUIStateManager.build <UIState_1>(1, entity, true));//ctrl.createConsole();
+	screenComp->mUIStateManager.addUIState(screenComp->mUIStateManager.build <UIState_1>(99, entity, true));//ctrl.createConsole();
 
 	//XE::ScreenComponent* screenComp = entity.assign<XE::ScreenComponent>(*camRenderable, engine.getGraphicsManager().getWindowManager().getWindow(0)).get(); //createScreen(); //workspace needed for screen
 

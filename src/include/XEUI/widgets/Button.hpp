@@ -23,7 +23,7 @@ namespace XE {
 														* @param label Label.
 														* @return Button.
 														*/
-		static Ptr Create(WLayer& parentLayer, const sf::String& label = L"");
+		static Ptr Create(WLayer& parentLayer, const sf::String& label = L"", Uint16 fontId = 14);
 
 		virtual ~Button();
 
@@ -59,7 +59,7 @@ namespace XE {
 	protected:
 		/** Ctor.
 		*/
-		Button(WLayer& parentLayer);// = default;
+		Button(WLayer& parentLayer, Uint16 fontId);// = default;
 
 		void draw() override;
 		//sf::Vector2f CalculateRequisition() override;
@@ -73,7 +73,7 @@ namespace XE {
 		void HandleMouseButtonEvent(bool press, int x, int y) override;
 
 		WRectangle m_rectangle;
-		WCaption m_label;
+		WCaption m_wcaption;
 
 		std::string m_imageName;
 

@@ -11,7 +11,7 @@
 #include <XESystem/SystemConfig.hpp>
 #include <ThirdParty/sfml/include/sfml/System/String.hpp>
 #include <ThirdParty/sfml/include/sfml/System/Vector2.hpp>
-#include <XEUI/Font.hpp>
+#include <XERenderer/GUI/Font.hpp>
 #include <XERenderer/GUI/LayerRenderer.hpp>
 
 namespace Ogre {
@@ -57,12 +57,10 @@ namespace XE
 		void registerObject(sol::state& lua);
 		
 		bool loadAtlas(const std::string& fileName);
+		
+	//	sf::Vector2i GetTextStringMetrics(const std::basic_string<XE::Uint32>& string, unsigned int font_size) const;
 
-		XE::Uint16 GetFontLineHeight(XE::Uint16 font_size) const;
-
-		sf::Vector2i GetTextStringMetrics(const std::basic_string<XE::Uint32>& string, unsigned int font_size) const;
-
-		sf::Vector2i GetTextStringMetrics(const sf::String& string, unsigned int font_size) const;
+		sf::Vector2i GetTextStringMetrics(const sf::String& string, const Font* font) const;
 
 		const SpriteData* getSprite(const std::string& spriteName);
 

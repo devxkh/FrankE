@@ -26,7 +26,7 @@ namespace XE {
 
 static const unsigned char legalchars[]="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890+!\"'#%&/()=?[]\\*-_.:,; ";
 
-OgreConsole::OgreConsole( WLayer& layer)
+OgreConsole::OgreConsole( WLayer& layer, Uint16 fontId)
 	: 
 		mIsVisible(true), 
 		mIsInitialised(false),
@@ -37,7 +37,7 @@ OgreConsole::OgreConsole( WLayer& layer)
 		,m_layer(layer)
 		, m_rectanglebg(layer, 0, 0, 0, 0)
 		 , m_consoleText(layer)
-		 , m_promptText(layer)
+		 , m_promptText(layer, fontId)
 		 , m_lineheight(15)
 
 {
@@ -59,8 +59,8 @@ OgreConsole::OgreConsole( WLayer& layer)
 }
  
 
-OgreConsole::Ptr OgreConsole::Create(WLayer& parentLayer) {
-	Ptr console(new OgreConsole(parentLayer));
+OgreConsole::Ptr OgreConsole::Create(WLayer& parentLayer, Uint16 fontId) {
+	Ptr console(new OgreConsole(parentLayer, fontId));
 	//console->RequestResize();
 	return console;
 }

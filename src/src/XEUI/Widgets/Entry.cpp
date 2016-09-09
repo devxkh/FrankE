@@ -18,7 +18,7 @@ namespace XE {
 	// Signals.
 	Signal::SignalID Entry::OnTextChanged = 0;
 
-	Entry::Entry(WLayer& parentLayer) :
+	Entry::Entry(WLayer& parentLayer, Uint16 fontId) :
 		m_string(),
 		m_visible_string(),
 		m_visible_offset(0),
@@ -29,15 +29,16 @@ namespace XE {
 		m_text_margin(0.f),
 		m_cursor_status(false)
 		, m_pane(parentLayer, 0, 0, 0, 0)
-		, m_text(parentLayer)
+		, m_text(parentLayer, fontId)
 		, m_cursor(parentLayer, 0, 0, 0, 0)
+		, m_font(parentLayer.m_guiRenderer.getFont(fontId))
 	{
 		m_pane.setBackground(Ogre::ColourValue::Black); //debug
 	//	m_pane.setBackgroundImage("quickmenu_restart_hover.png");
 	}
 
-	Entry::Ptr Entry::Create(WLayer& parentLayer, const sf::String& text) {
-		Ptr ptr(new Entry(parentLayer));
+	Entry::Ptr Entry::Create(WLayer& parentLayer, const sf::String& text, Uint16 fontId) {
+		Ptr ptr(new Entry(parentLayer, fontId));
 		ptr->SetText(text);
 		return ptr;
 	}
@@ -46,26 +47,31 @@ namespace XE {
 		
 	//	LOG(plog::info) << "ä";
 
-		XE::Uint16 font_size(14);
+	//	XE::Uint16 font_size(14);
 		XE::Uint16 cursor_thickness(4);
 		XE::Uint16 text_padding(1);
 
 	/*	sf::FloatRect req(GetAllocation());
 		sf::FloatRect parentAllocation(GetParent()->GetAllocation());*/
 
-		m_pane.setPosition(Widget::getPosition());// sf::Vector2f(parentAllocation.left + req.left, parentAllocation.top + req.top));
-		m_pane.setSize(sf::Vector2f(size.x, size.y)); /// .width, req.height));
+		//m_pane.setPosition(Widget::getPosition());// sf::Vector2f(parentAllocation.left + req.left, parentAllocation.top + req.top));
+	//	m_pane.setSize(sf::Vector2f(size.x, size.y)); /// .width, req.height));
 		//return Context::Get().GetEngine().CreateEntryDrawable(std::dynamic_pointer_cast<const Entry>(shared_from_this()));
 
-		XE::Uint16 line_height = m_pane.getLayer().m_guiRenderer.GetFontLineHeight(font_size);
+		XE::Uint16 line_height = m_font->mLineHeight; //m_pane.getLayer().m_guiRenderer.GetFontLineHeight(font_size);
 		//sf::Text vis_label(entry->GetVisibleText(), *font, font_size);
 		//todo --------- vis_label.setColor(text_color);
 		//vis_label.setPosition(text_padding, entry->GetAllocation().height / 2.f - line_height / 2.f);
 	
-		sf::Vector2f glyphPosition(Widget::getPosition().x, Widget::getPosition().y - 10);
+		//sf::Vector2f glyphPosition(Widget::getPosition().x, Widget::getPosition().y - 10);
+	
+		auto posy = Widget::getPosition().y;
+		auto offsety = (size.y * 0.5f);// -(textSize.y / 2);
+		auto middley = posy - offsety;
 
+		sf::Vector2f textPos(Widget::getPosition().x, middley + (line_height / 2));
 
-		m_text.setPosition(glyphPosition); // sf::Vector2f(parentAllocation.left + req.left, parentAllocation.top + req.top));
+		m_text.setPosition(textPos); // sf::Vector2f(parentAllocation.left + req.left, parentAllocation.top + req.top));
 		m_text.setSize(size.x, size.y);
 		m_text.setText(GetVisibleText());
 	
@@ -88,7 +94,7 @@ namespace XE {
 			}
 
 			// Get metrics.
-			sf::Vector2f metrics(m_pane.getLayer().m_guiRenderer.GetTextStringMetrics(cursor_string, font_size));
+			sf::Vector2f metrics(m_pane.getLayer().m_guiRenderer.GetTextStringMetrics(cursor_string, m_font));
 
 			
 			m_cursor.setPosition(sf::Vector2f(Widget::getPosition().x + metrics.x + text_padding, Widget::getPosition().y +  (size.y / 2.f - line_height / 2.f)));
@@ -165,7 +171,7 @@ namespace XE {
 
 		for (cursor_position = 0; cursor_position < length; cursor_position++) {
 			//auto text_length = Context::Get().GetEngine().GetTextStringMetrics(string.substr(0, static_cast<std::size_t>(cursor_position + 1)), font, font_size).x;
-			auto text_length = m_pane.getLayer().m_guiRenderer.GetTextStringMetrics(string.substr(0, static_cast<std::size_t>(cursor_position + 1)), font_size).x;
+			auto text_length = m_pane.getLayer().m_guiRenderer.GetTextStringMetrics(string.substr(0, static_cast<std::size_t>(cursor_position + 1)), m_font).x;
 			auto new_delta = std::fabs(text_start + text_length - static_cast<float>(mouse_pos_x));
 			if (new_delta < last_delta) {
 				last_delta = new_delta;
@@ -199,7 +205,7 @@ namespace XE {
 		}
 
 		//auto length = Context::Get().GetEngine().GetTextStringMetrics(string, font, font_size).x;
-		auto length = m_pane.getLayer().m_guiRenderer.GetTextStringMetrics(string, font_size).x;
+		auto length = m_pane.getLayer().m_guiRenderer.GetTextStringMetrics(string, m_font).x;
 
 		// While the string is too long for the given space keep chopping off characters
 		// on the right end of the string until the cursor is reached, then start
@@ -214,7 +220,7 @@ namespace XE {
 			}
 
 			//length = Context::Get().GetEngine().GetTextStringMetrics(string, font, font_size).x;
-			length = m_pane.getLayer().m_guiRenderer.GetTextStringMetrics(string, font_size).x;
+			length = m_pane.getLayer().m_guiRenderer.GetTextStringMetrics(string, m_font).x;
 		}
 
 		m_visible_string = string;

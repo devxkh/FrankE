@@ -208,7 +208,9 @@ namespace XE
 		//	DataStreamPtr shaderCacheFileout = mGraphicsManager.getRoot()->createFileStream("F:/Projekte/coop/XGame/data/MyCache.cache", ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, true);
 		//	GpuProgramManager::getSingleton().saveMicrocodeCache(shaderCacheFileout);
 		//
-		//	
+		//	std::ifstream f(tmpShaderCacheFolder.c_str()); // http://www.ogre3d.org/forums/viewtopic.php?f=25&t=88919&p=530493#p530493
+		//if (f.good())
+		//{
 		//		//loading
 		//		//GpuProgramManager::getSingleton().setSaveMicrocodesToCache(true); //Make sure it's enabled.
 		//		//DataStreamPtr shaderCacheFile = mGraphicsManager.getRoot()->openFileStream("F:/Projekte/coop/XGame/data/MyCache.cache");

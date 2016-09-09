@@ -84,6 +84,7 @@ set(XEGraphics_HEADER
 	${INCROOT}/GUI/RenderableShape.hpp
 	${INCROOT}/GUI/LayerRenderer.hpp
 	${INCROOT}/GUI/RenderableLayer.hpp
+	${INCROOT}/GUI/Font.hpp
 )
 source_group("include\\GUI" FILES ${XEGraphics_HEADER})
 

@@ -2,19 +2,25 @@
 
 #include <XEUI/Container.hpp>
 
+#include <XERenderer/GUI/GUIRenderer.hpp>
+#include <XERenderer/GUI/WLayer.hpp>
+
 namespace XE {
 
-	Label::Label(WLayer& parentLayer, const sf::String& text) :
+	Label::Label(WLayer& parentLayer, Uint16 fontId, const sf::String& text) :
 		m_text(text)
 		, m_wrap(false)
-		, m_Label(parentLayer)
+		, m_wcaption(parentLayer,fontId)
+		
+		, m_DebugRectangle(parentLayer, 0, 0, 0, 0)
+
 	{
 		SetAlignment(sf::Vector2f(.5f, .5f));
 		draw();
 	}
 
-	Label::Ptr Label::Create(WLayer& parentLayer, const sf::String& text) {
-		Ptr label(new Label(parentLayer, text));
+	Label::Ptr Label::Create(WLayer& parentLayer, const sf::String& text, Uint16 fontsize) {
+		Ptr label(new Label(parentLayer, fontsize, text));
 		//label->RequestResize();
 		return label;
 	}
@@ -130,16 +136,52 @@ namespace XE {
 		//m_wrapped_text = wrapped_text;
 	}
 
+	void Label::UpdateAlignment() {
+		
+		sf::Vector2i textSize = m_wcaption.GetTextStringMetrics(m_text);
+
+		/*--------
+		xxxx*/
+		auto offsetx = GetAlignment().x == 0 ? 0 : (size.x * GetAlignment().x) - (textSize.x / 2);
+		auto posx = Widget::getPosition().x;
+		
+		auto posy = Widget::getPosition().y;
+		auto offsety = (size.y * 0.5f);// -(textSize.y / 2);
+		auto middley = posy - offsety;
+
+		sf::Vector2f textPos(posx + offsetx, middley + (textSize.y / 2));
+
+		m_wcaption.setPosition(textPos);
+
+		m_DebugRectangle.setBackground(Ogre::ColourValue::White);
+		m_DebugRectangle.setPosition(Widget::getPosition());
+		m_DebugRectangle.setSize(size);
+	}
+
 
 	//std::unique_ptr<RenderQueue>
 	void Label::draw() {
 
 		//sf::FloatRect req(GetAllocation());
 		//sf::FloatRect parentAllocation(GetParent()->GetAllocation());
-		
-		m_Label.setPosition(Widget::getPosition());//  sf::Vector2f(parentAllocation.left + req.left, parentAllocation.top + req.top));
-		m_Label.setSize(size.x, size.y);
-		m_Label.setText(GetText());
+		/*
+		m_alignment.x
+		*/
+		//sf::Vector2i textSize = m_wcaption.GetTextStringMetrics(m_text);
+		///*--------
+		//xxxx*/
+		//auto offsetx = (size.x * GetAlignment().x) - (textSize.x / 2);
+		//
+		//auto posx = Widget::getPosition().x;
+
+		//sf::Vector2f textPos(posx + offsetx, Widget::getPosition().y);
+
+		m_wcaption.setSize(size.x, size.y);
+		m_wcaption.setText(GetText());
+
+		//m_wcaption.setPosition(textPos);//  sf::Vector2f(parentAllocation.left + req.left, parentAllocation.top + req.top));
+		UpdateAlignment();
+
 		//return Context::Get().GetEngine().CreateLabelDrawable( std::dynamic_pointer_cast<const Label>( shared_from_this() ) );
 	}
 
@@ -177,7 +219,7 @@ namespace XE {
 		metrics.x = 0.f;
 		}*/
 
-		return m_Label.getSize(); // metrics;
+		return m_wcaption.getSize(); // metrics;
 	}
 
 	const std::string& Label::GetName() const {

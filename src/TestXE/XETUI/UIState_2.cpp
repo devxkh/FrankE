@@ -17,7 +17,7 @@ UIState_2::UIState_2(const XE::uint16& id, entityx::Entity entity, bool replace 
 	m_Box = XE::Box::Create(layer, XE::Box::Orientation::VERTICAL, 10.f);
 
 	m_btnTest = XE::Button::Create(layer, "This is UIState 2");
-	m_btnTest->size = sf::Vector2f(200, 30);
+	m_btnTest->size = sf::Vector2f(161, 36);
 
 	m_Box->Pack(m_btnTest);// Add the Button to the Box
 	
@@ -49,8 +49,8 @@ void UIState_2::ButtonClick() {
 	
 	auto sc = m_entity.component<XE::ScreenComponent>();
 
-	sc->mUIStateManager.addUIState(sc->mUIStateManager.build <UIState_1>(1, m_entity, true));
-	sc->mUIStateManager.destroyUIState(2);
+	sc->mUIStateManager.addUIState(sc->mUIStateManager.build <UIState_1>(99, m_entity, true));
+	sc->mUIStateManager.destroyUIState(98);
 }
 
 void UIState_2::create(const char* fbdata)

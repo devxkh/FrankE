@@ -34,7 +34,7 @@ public:
 
 	~OgreConsole();
 
-	static Ptr Create(WLayer& parentLayer);
+	static Ptr Create(WLayer& parentLayer, Uint16 fontId = 14);
 
 	virtual const std::string& GetName() const override;
 
@@ -62,7 +62,7 @@ public:
     void messageLogged( const Ogre::String& message, Ogre::LogMessageLevel lml, bool maskDebug, const Ogre::String &logName, bool &skip );
 #endif
 protected:
-	OgreConsole( WLayer& parentLayer);
+	OgreConsole( WLayer& parentLayer, Uint16 fontId);
 
 
 	void draw() override;

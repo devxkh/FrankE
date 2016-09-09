@@ -11,6 +11,7 @@
 
 namespace XE {
 
+
 	class XE_API Font
 	{
 	public:

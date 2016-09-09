@@ -24,7 +24,7 @@ namespace XE {
 														* @param label Label.
 														* @return Button.
 														*/
-		static Ptr Create(WLayer& parentLayer, const sf::String& label = L"");
+		static Ptr Create(WLayer& parentLayer, const sf::String& label = L"", Uint16 fontId = 14);
 
 		virtual ~ToggleButton();
 
@@ -46,7 +46,7 @@ namespace XE {
 	protected:
 		/** Ctor.
 		*/
-		ToggleButton(WLayer& parentLayer);// = default;
+		ToggleButton(WLayer& parentLayer, Uint16 fontId);// = default;
 
 		void draw() override;
 

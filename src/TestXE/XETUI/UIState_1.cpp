@@ -22,13 +22,13 @@ void UIState_1::ButtonClick() {
 	
 	auto sc = m_entity.component<XE::ScreenComponent>();
 	
-	sc->mUIStateManager.addUIState(sc->mUIStateManager.build <UIState_2>(2, m_entity, true));
-	sc->mUIStateManager.destroyUIState(1);
+	sc->mUIStateManager.addUIState(sc->mUIStateManager.build <UIState_2>(98, m_entity, true));
+	sc->mUIStateManager.destroyUIState(99);
 }
 
 void UIState_1::MouseEnter() {
 	// When the Button is clicked it's label should change.
-		m_btnTest->SetLabel("Mouse Entered --");
+		m_btnTest->SetLabel("Mouse Entered");
 }
 
 
@@ -41,16 +41,16 @@ UIState_1::UIState_1(const XE::Uint16& id, entityx::Entity entity, bool replace 
 
 	m_Box = XE::Box::Create(layer, XE::Box::Orientation::VERTICAL, 10.f);
 
-	m_btnTest = XE::Button::Create(layer, "Hello World!\nAnother Line");
-	m_btnTest->size = sf::Vector2f(200, 30);
-	m_btnTest->SetLabel("test geht noch nicht mit font size berechnen!!"); 
+	m_btnTest = XE::Button::Create(layer, "Hello World!");
+	m_btnTest->size = sf::Vector2f(161, 36);
+	m_btnTest->SetLabel("all widgets having a fixed width"); 
 
 	m_entry = XE::Entry::Create(layer);
 	m_entry->size = sf::Vector2f(200.f, 30.f);
 	screen->m_Desktop->AddEntry(m_entry);
 
-	m_imageTest = XE::Image::Create(layer, "item_ball_hover.png");
-	m_imageTest->size = sf::Vector2f(200.f, 100);
+	m_imageTest = XE::Image::Create(layer, "OgreHead.png");
+	m_imageTest->size = sf::Vector2f(48.f, 47.f);
 	
 	m_progressbar = XE::ProgressBar::Create(layer);
 	m_progressbar->size = sf::Vector2f(200.f, 40.f);	

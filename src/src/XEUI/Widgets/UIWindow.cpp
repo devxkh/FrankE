@@ -10,18 +10,18 @@ namespace XE {
 	// Signals.
 	Signal::SignalID UIWindow::OnCloseButton = 0;
 
-	UIWindow::UIWindow(WLayer& parentLayer, char style) :
+	UIWindow::UIWindow(WLayer& parentLayer, char style, Uint16 fontId) :
 		m_style(style),
 		m_dragging(false),
 		m_resizing(false)
-		, m_label(parentLayer)
+		, m_label(parentLayer, fontId)
 		, m_rectangle(parentLayer, 0, 0, 0, 0)
 	{
 
 	}
 
-	UIWindow::Ptr UIWindow::Create(WLayer& parentLayer, char style) {
-		UIWindow::Ptr window(new UIWindow(parentLayer, style));
+	UIWindow::Ptr UIWindow::Create(WLayer& parentLayer, char style, Uint16 fontId) {
+		UIWindow::Ptr window(new UIWindow(parentLayer, style, fontId));
 
 		return window;
 	}

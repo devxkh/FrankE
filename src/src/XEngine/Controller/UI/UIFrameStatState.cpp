@@ -19,7 +19,7 @@ namespace XE {
 	{
 		XE::WLayer& layer = entity.component<ScreenComponent>()->wLayer;
 
-		m_Box = Box::Create(layer, Box::Orientation::VERTICAL, 10.f);
+		m_Box = Box::Create(layer, Box::Orientation::VERTICAL, 2.f);
 		m_FpsRendererThread = Label::Create(layer, "Hello World!\nAnother Line");
 		m_FpsMainThread = Label::Create(layer, "Hello World!\nAnother Line");
 		m_FpsAvqThread = Label::Create(layer, "Hello World!\nAnother Line");
@@ -27,9 +27,9 @@ namespace XE {
 
 
 		m_FpsRendererThread->size = sf::Vector2f(200, 15); //todo req per text len
-		m_FpsMainThread->size = sf::Vector2f(120, 15); //todo req per text len
-		m_FpsAvqThread->size = sf::Vector2f(120, 15); //todo req per text len
-		m_BatchCount->size = sf::Vector2f(120, 15); //todo req per text len
+		m_FpsMainThread->size = sf::Vector2f(200, 15); //todo req per text len
+		m_FpsAvqThread->size = sf::Vector2f(200, 15); //todo req per text len
+		m_BatchCount->size = sf::Vector2f(200, 15); //todo req per text len
 		//-------------------------------------------------------------------------------
 
 		m_Box->Pack(m_FpsRendererThread);

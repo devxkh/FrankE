@@ -14,10 +14,9 @@ namespace XE {
 		, m_pane(parentLayer, 0, 0, 0, 0)
 		, m_barPane(parentLayer, 0, 0, 0, 0)
 	{
-
 		m_pane.setBackground(Ogre::ColourValue::Green); //debug
 		m_barPane.setBackground(Ogre::ColourValue::Black); //debug
-		m_barPane.setBackgroundImage("itembox.png");
+		//m_barPane.setBackgroundImage("OgreHead.png");
 	}
 
 	ProgressBar::Ptr ProgressBar::Create(WLayer& parentLayer, Orientation orientation) {
@@ -47,6 +46,8 @@ namespace XE {
 	}
 
 	void ProgressBar::draw() {
+
+
 
 		// Pane.
 		/*sf::FloatRect req(GetAllocation());
@@ -91,6 +92,7 @@ namespace XE {
 		{
 			m_barPane.setSize(sf::Vector2f(0, 0));
 		}
+
 	}
 
 	void ProgressBar::SetOrientation(Orientation orientation) {

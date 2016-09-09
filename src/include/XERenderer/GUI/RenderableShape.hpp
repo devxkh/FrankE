@@ -34,7 +34,6 @@ namespace XE
 
 		virtual void _refresh() = 0;
 
-
 		virtual std::vector<Vertex>& _update() = 0;
 
 		bool isDirty;

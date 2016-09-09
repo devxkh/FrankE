@@ -11,14 +11,14 @@
 
 namespace XE {
 
-	Button::Button(WLayer& parentLayer) :
-		 m_label(parentLayer)
+	Button::Button(WLayer& parentLayer, Uint16 fontId) :
+		m_wcaption(parentLayer, fontId)
 		, m_rectangle(parentLayer, 0, 0, 0, 0)
 	{
 		//SetAlignment(sf::Vector2f(.5f, .5f));
 		//Invalidate();
 
-		m_rectangle.setBackground(Ogre::ColourValue::Green);
+		//m_rectangle.setBackground(Ogre::ColourValue::Green);
 	}
 
 	Button::~Button()
@@ -26,8 +26,8 @@ namespace XE {
 
 	}
 
-	Button::Ptr Button::Create(WLayer& parentLayer, const sf::String& label) {
-		auto ptr = Ptr(new Button(parentLayer));
+	Button::Ptr Button::Create(WLayer& parentLayer, const sf::String& label, Uint16 fontId) {
+		auto ptr = Ptr(new Button(parentLayer, fontId));
 		ptr->SetLabel(label);
 		return ptr;
 	}
@@ -37,28 +37,38 @@ namespace XE {
 		//sf::FloatRect req(GetAllocation());
 		//sf::Vector2f parentPosition(GetParent()->GetAllocation());
 
-		sf::Vector2f glyphPosition(Widget::getPosition().x, Widget::getPosition().y - 10);
+		//sf::Vector2f glyphPosition(Widget::getPosition().x, Widget::getPosition().y - 10);
 
-		m_label.setPosition(glyphPosition); // sf::Vector2f(parentAllocation.left + position.x, parentAllocation.top + position.y));
-		m_label.setSize(size.x, size.y);
+		m_wcaption.setPosition(Widget::getPosition());//glyphPosition); // sf::Vector2f(parentAllocation.left + position.x, parentAllocation.top + position.y));
+		m_wcaption.setSize(size.x, size.y);
+		sf::Vector2i textSize = m_wcaption.GetTextStringMetrics(m_wcaption.getText());
+		/*--------
+		xxxx*/
+		auto offsetx = (size.x * 0.5f) - (textSize.x / 2);
+		auto posx = Widget::getPosition().x;
+		auto offsety = (size.y * 0.5f) - (textSize.y / 2);
+		auto posy = Widget::getPosition().y;
+		sf::Vector2f textPos(posx + offsetx, posy + offsety);
+		m_wcaption.setPosition(textPos);
+		
 
 		m_rectangle.setPosition(Widget::getPosition()); // sf::Vector2f(parentAllocation.left + position.x, parentAllocation.top + position.y));
 		m_rectangle.setSize(sf::Vector2f(size.x, size.y));
 
 		if (GetState() == State::PRELIGHT)
-			m_rectangle.setBackgroundImage("item_unknown.png");
+			m_rectangle.setBackgroundImage("Button_hover.png");
 		else if (GetState() == State::ACTIVE)
-			m_rectangle.setBackgroundImage("messagebox_bg.png");
+			m_rectangle.setBackgroundImage("Button_pressed.png");
 		else
-			m_rectangle.setBackgroundImage("itembox.png");
+			m_rectangle.setBackgroundImage("Button_default.png");
 
 		
-		if (GetState() == State::PRELIGHT)
+	/*	if (GetState() == State::PRELIGHT)
 			m_rectangle.setBackground(Ogre::ColourValue::Red);
 		else if (GetState() == State::ACTIVE)
 			m_rectangle.setBackground(Ogre::ColourValue::Black);
 		else
-			m_rectangle.setBackground(Ogre::ColourValue::Green);
+			m_rectangle.setBackground(Ogre::ColourValue::Green);*/
 		
 		
 		//m_label.setText(GetLabel());
@@ -68,7 +78,7 @@ namespace XE {
 	}
 
 	void Button::SetLabel(const sf::String& label) {
-		m_label.setText(label);
+		m_wcaption.setText(label);
 
 	/*	RequestResize();
 		Invalidate();*/

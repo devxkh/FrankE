@@ -33,12 +33,13 @@ struct Menu;
 struct Navigation;
 struct Console;
 struct ProgressBar;
+struct ToggleButton;
 struct UIWindow;
 struct Box;
-struct Panel2D;
-struct ComponentList;
+struct Alignment;
+struct UIElement;
 struct StyleData;
-struct StateData;
+struct UIStateData;
 
 enum ElementState {
   ElementState_ES_NORMAL = 0,
@@ -58,21 +59,21 @@ inline const char *EnumNameElementState(ElementState e) { return EnumNamesElemen
 enum StyleType {
   StyleType_ST_DEFAULT = 0,
   StyleType_ST_WINDOW = 1,
-  StyleType_ST_PANEL2D = 2,
-  StyleType_ST_MENU = 3,
-  StyleType_ST_MENUITEM = 4,
-  StyleType_ST_NAVIGATION = 5,
-  StyleType_ST_NAVITEM = 6,
-  StyleType_ST_LISTBOX = 7,
-  StyleType_ST_COMBOBOX = 8,
-  StyleType_ST_LABEL = 9,
+  StyleType_ST_MENU = 2,
+  StyleType_ST_MENUITEM = 3,
+  StyleType_ST_NAVIGATION = 4,
+  StyleType_ST_NAVITEM = 5,
+  StyleType_ST_LISTBOX = 6,
+  StyleType_ST_COMBOBOX = 7,
+  StyleType_ST_LABEL = 8,
+  StyleType_ST_TOGGLEBUTTON = 9,
   StyleType_ST_BUTTON = 10,
   StyleType_ST_PANEL3D = 11,
   StyleType_ST_CONSOLE = 12
 };
 
 inline const char **EnumNamesStyleType() {
-  static const char *names[] = { "ST_DEFAULT", "ST_WINDOW", "ST_PANEL2D", "ST_MENU", "ST_MENUITEM", "ST_NAVIGATION", "ST_NAVITEM", "ST_LISTBOX", "ST_COMBOBOX", "ST_LABEL", "ST_BUTTON", "ST_PANEL3D", "ST_CONSOLE", nullptr };
+  static const char *names[] = { "ST_DEFAULT", "ST_WINDOW", "ST_MENU", "ST_MENUITEM", "ST_NAVIGATION", "ST_NAVITEM", "ST_LISTBOX", "ST_COMBOBOX", "ST_LABEL", "ST_TOGGLEBUTTON", "ST_BUTTON", "ST_PANEL3D", "ST_CONSOLE", nullptr };
   return names;
 }
 
@@ -132,26 +133,27 @@ inline const char **EnumNamesOrientation() {
 
 inline const char *EnumNameOrientation(Orientation e) { return EnumNamesOrientation()[static_cast<int>(e)]; }
 
-enum UComponent {
-  UComponent_NONE = 0,
-  UComponent_Label = 1,
-  UComponent_Menu = 2,
-  UComponent_Navigation = 3,
-  UComponent_Console = 4,
-  UComponent_Element = 5,
-  UComponent_Button = 6,
-  UComponent_Image = 7,
-  UComponent_ProgressBar = 8
+enum UUIElement {
+  UUIElement_NONE = 0,
+  UUIElement_Label = 1,
+  UUIElement_Menu = 2,
+  UUIElement_Navigation = 3,
+  UUIElement_Console = 4,
+  UUIElement_Element = 5,
+  UUIElement_Button = 6,
+  UUIElement_ToggleButton = 7,
+  UUIElement_Image = 8,
+  UUIElement_ProgressBar = 9
 };
 
-inline const char **EnumNamesUComponent() {
-  static const char *names[] = { "NONE", "Label", "Menu", "Navigation", "Console", "Element", "Button", "Image", "ProgressBar", nullptr };
+inline const char **EnumNamesUUIElement() {
+  static const char *names[] = { "NONE", "Label", "Menu", "Navigation", "Console", "Element", "Button", "ToggleButton", "Image", "ProgressBar", nullptr };
   return names;
 }
 
-inline const char *EnumNameUComponent(UComponent e) { return EnumNamesUComponent()[static_cast<int>(e)]; }
+inline const char *EnumNameUUIElement(UUIElement e) { return EnumNamesUUIElement()[static_cast<int>(e)]; }
 
-inline bool VerifyUComponent(flatbuffers::Verifier &verifier, const void *union_obj, UComponent type);
+inline bool VerifyUUIElement(flatbuffers::Verifier &verifier, const void *union_obj, UUIElement type);
 
 MANUALLY_ALIGNED_STRUCT(4) Vec3f FLATBUFFERS_FINAL_CLASS {
  private:
@@ -1147,17 +1149,43 @@ inline flatbuffers::Offset<ProgressBar> CreateProgressBar(flatbuffers::FlatBuffe
   return builder_.Finish();
 }
 
-struct UIWindow FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+struct ToggleButton FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   const Element *base() const { return GetPointer<const Element *>(4); }
-  const Panel2D *panel() const { return GetPointer<const Panel2D *>(6); }
-  uint8_t showHead() const { return GetField<uint8_t>(8, 0); }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
            VerifyField<flatbuffers::uoffset_t>(verifier, 4 /* base */) &&
            verifier.VerifyTable(base()) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, 6 /* panel */) &&
-           verifier.VerifyTable(panel()) &&
-           VerifyField<uint8_t>(verifier, 8 /* showHead */) &&
+           verifier.EndTable();
+  }
+};
+
+struct ToggleButtonBuilder {
+  flatbuffers::FlatBufferBuilder &fbb_;
+  flatbuffers::uoffset_t start_;
+  void add_base(flatbuffers::Offset<Element> base) { fbb_.AddOffset(4, base); }
+  ToggleButtonBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
+  ToggleButtonBuilder &operator=(const ToggleButtonBuilder &);
+  flatbuffers::Offset<ToggleButton> Finish() {
+    auto o = flatbuffers::Offset<ToggleButton>(fbb_.EndTable(start_, 1));
+    return o;
+  }
+};
+
+inline flatbuffers::Offset<ToggleButton> CreateToggleButton(flatbuffers::FlatBufferBuilder &_fbb,
+   flatbuffers::Offset<Element> base = 0) {
+  ToggleButtonBuilder builder_(_fbb);
+  builder_.add_base(base);
+  return builder_.Finish();
+}
+
+struct UIWindow FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+  const Element *base() const { return GetPointer<const Element *>(4); }
+  uint8_t showHead() const { return GetField<uint8_t>(6, 0); }
+  bool Verify(flatbuffers::Verifier &verifier) const {
+    return VerifyTableStart(verifier) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, 4 /* base */) &&
+           verifier.VerifyTable(base()) &&
+           VerifyField<uint8_t>(verifier, 6 /* showHead */) &&
            verifier.EndTable();
   }
 };
@@ -1166,22 +1194,19 @@ struct UIWindowBuilder {
   flatbuffers::FlatBufferBuilder &fbb_;
   flatbuffers::uoffset_t start_;
   void add_base(flatbuffers::Offset<Element> base) { fbb_.AddOffset(4, base); }
-  void add_panel(flatbuffers::Offset<Panel2D> panel) { fbb_.AddOffset(6, panel); }
-  void add_showHead(uint8_t showHead) { fbb_.AddElement<uint8_t>(8, showHead, 0); }
+  void add_showHead(uint8_t showHead) { fbb_.AddElement<uint8_t>(6, showHead, 0); }
   UIWindowBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
   UIWindowBuilder &operator=(const UIWindowBuilder &);
   flatbuffers::Offset<UIWindow> Finish() {
-    auto o = flatbuffers::Offset<UIWindow>(fbb_.EndTable(start_, 3));
+    auto o = flatbuffers::Offset<UIWindow>(fbb_.EndTable(start_, 2));
     return o;
   }
 };
 
 inline flatbuffers::Offset<UIWindow> CreateUIWindow(flatbuffers::FlatBufferBuilder &_fbb,
    flatbuffers::Offset<Element> base = 0,
-   flatbuffers::Offset<Panel2D> panel = 0,
    uint8_t showHead = 0) {
   UIWindowBuilder builder_(_fbb);
-  builder_.add_panel(panel);
   builder_.add_base(base);
   builder_.add_showHead(showHead);
   return builder_.Finish();
@@ -1189,15 +1214,15 @@ inline flatbuffers::Offset<UIWindow> CreateUIWindow(flatbuffers::FlatBufferBuild
 
 struct Box FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   const Element *base() const { return GetPointer<const Element *>(4); }
-  const flatbuffers::Vector<flatbuffers::Offset<ComponentList>> *components() const { return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<ComponentList>> *>(6); }
+  const flatbuffers::Vector<flatbuffers::Offset<UIElement>> *uiElements() const { return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<UIElement>> *>(6); }
   Orientation orientation() const { return static_cast<Orientation>(GetField<int8_t>(8, 0)); }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
            VerifyField<flatbuffers::uoffset_t>(verifier, 4 /* base */) &&
            verifier.VerifyTable(base()) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, 6 /* components */) &&
-           verifier.Verify(components()) &&
-           verifier.VerifyVectorOfTables(components()) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, 6 /* uiElements */) &&
+           verifier.Verify(uiElements()) &&
+           verifier.VerifyVectorOfTables(uiElements()) &&
            VerifyField<int8_t>(verifier, 8 /* orientation */) &&
            verifier.EndTable();
   }
@@ -1207,7 +1232,7 @@ struct BoxBuilder {
   flatbuffers::FlatBufferBuilder &fbb_;
   flatbuffers::uoffset_t start_;
   void add_base(flatbuffers::Offset<Element> base) { fbb_.AddOffset(4, base); }
-  void add_components(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<ComponentList>>> components) { fbb_.AddOffset(6, components); }
+  void add_uiElements(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<UIElement>>> uiElements) { fbb_.AddOffset(6, uiElements); }
   void add_orientation(Orientation orientation) { fbb_.AddElement<int8_t>(8, static_cast<int8_t>(orientation), 0); }
   BoxBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
   BoxBuilder &operator=(const BoxBuilder &);
@@ -1219,82 +1244,82 @@ struct BoxBuilder {
 
 inline flatbuffers::Offset<Box> CreateBox(flatbuffers::FlatBufferBuilder &_fbb,
    flatbuffers::Offset<Element> base = 0,
-   flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<ComponentList>>> components = 0,
+   flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<UIElement>>> uiElements = 0,
    Orientation orientation = Orientation_horizontal) {
   BoxBuilder builder_(_fbb);
-  builder_.add_components(components);
+  builder_.add_uiElements(uiElements);
   builder_.add_base(base);
   builder_.add_orientation(orientation);
   return builder_.Finish();
 }
 
-struct Panel2D FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+struct Alignment FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   const Element *base() const { return GetPointer<const Element *>(4); }
-  const flatbuffers::Vector<flatbuffers::Offset<ComponentList>> *components() const { return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<ComponentList>> *>(6); }
+  const flatbuffers::Vector<flatbuffers::Offset<UIElement>> *uiElements() const { return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<UIElement>> *>(6); }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
            VerifyField<flatbuffers::uoffset_t>(verifier, 4 /* base */) &&
            verifier.VerifyTable(base()) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, 6 /* components */) &&
-           verifier.Verify(components()) &&
-           verifier.VerifyVectorOfTables(components()) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, 6 /* uiElements */) &&
+           verifier.Verify(uiElements()) &&
+           verifier.VerifyVectorOfTables(uiElements()) &&
            verifier.EndTable();
   }
 };
 
-struct Panel2DBuilder {
+struct AlignmentBuilder {
   flatbuffers::FlatBufferBuilder &fbb_;
   flatbuffers::uoffset_t start_;
   void add_base(flatbuffers::Offset<Element> base) { fbb_.AddOffset(4, base); }
-  void add_components(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<ComponentList>>> components) { fbb_.AddOffset(6, components); }
-  Panel2DBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
-  Panel2DBuilder &operator=(const Panel2DBuilder &);
-  flatbuffers::Offset<Panel2D> Finish() {
-    auto o = flatbuffers::Offset<Panel2D>(fbb_.EndTable(start_, 2));
+  void add_uiElements(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<UIElement>>> uiElements) { fbb_.AddOffset(6, uiElements); }
+  AlignmentBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
+  AlignmentBuilder &operator=(const AlignmentBuilder &);
+  flatbuffers::Offset<Alignment> Finish() {
+    auto o = flatbuffers::Offset<Alignment>(fbb_.EndTable(start_, 2));
     return o;
   }
 };
 
-inline flatbuffers::Offset<Panel2D> CreatePanel2D(flatbuffers::FlatBufferBuilder &_fbb,
+inline flatbuffers::Offset<Alignment> CreateAlignment(flatbuffers::FlatBufferBuilder &_fbb,
    flatbuffers::Offset<Element> base = 0,
-   flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<ComponentList>>> components = 0) {
-  Panel2DBuilder builder_(_fbb);
-  builder_.add_components(components);
+   flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<UIElement>>> uiElements = 0) {
+  AlignmentBuilder builder_(_fbb);
+  builder_.add_uiElements(uiElements);
   builder_.add_base(base);
   return builder_.Finish();
 }
 
-struct ComponentList FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  UComponent componentType_type() const { return static_cast<UComponent>(GetField<uint8_t>(4, 0)); }
-  const void *componentType() const { return GetPointer<const void *>(6); }
+struct UIElement FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+  UUIElement ele_type() const { return static_cast<UUIElement>(GetField<uint8_t>(4, 0)); }
+  const void *ele() const { return GetPointer<const void *>(6); }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
-           VerifyField<uint8_t>(verifier, 4 /* componentType_type */) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, 6 /* componentType */) &&
-           VerifyUComponent(verifier, componentType(), componentType_type()) &&
+           VerifyField<uint8_t>(verifier, 4 /* ele_type */) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, 6 /* ele */) &&
+           VerifyUUIElement(verifier, ele(), ele_type()) &&
            verifier.EndTable();
   }
 };
 
-struct ComponentListBuilder {
+struct UIElementBuilder {
   flatbuffers::FlatBufferBuilder &fbb_;
   flatbuffers::uoffset_t start_;
-  void add_componentType_type(UComponent componentType_type) { fbb_.AddElement<uint8_t>(4, static_cast<uint8_t>(componentType_type), 0); }
-  void add_componentType(flatbuffers::Offset<void> componentType) { fbb_.AddOffset(6, componentType); }
-  ComponentListBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
-  ComponentListBuilder &operator=(const ComponentListBuilder &);
-  flatbuffers::Offset<ComponentList> Finish() {
-    auto o = flatbuffers::Offset<ComponentList>(fbb_.EndTable(start_, 2));
+  void add_ele_type(UUIElement ele_type) { fbb_.AddElement<uint8_t>(4, static_cast<uint8_t>(ele_type), 0); }
+  void add_ele(flatbuffers::Offset<void> ele) { fbb_.AddOffset(6, ele); }
+  UIElementBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
+  UIElementBuilder &operator=(const UIElementBuilder &);
+  flatbuffers::Offset<UIElement> Finish() {
+    auto o = flatbuffers::Offset<UIElement>(fbb_.EndTable(start_, 2));
     return o;
   }
 };
 
-inline flatbuffers::Offset<ComponentList> CreateComponentList(flatbuffers::FlatBufferBuilder &_fbb,
-   UComponent componentType_type = UComponent_NONE,
-   flatbuffers::Offset<void> componentType = 0) {
-  ComponentListBuilder builder_(_fbb);
-  builder_.add_componentType(componentType);
-  builder_.add_componentType_type(componentType_type);
+inline flatbuffers::Offset<UIElement> CreateUIElement(flatbuffers::FlatBufferBuilder &_fbb,
+   UUIElement ele_type = UUIElement_NONE,
+   flatbuffers::Offset<void> ele = 0) {
+  UIElementBuilder builder_(_fbb);
+  builder_.add_ele(ele);
+  builder_.add_ele_type(ele_type);
   return builder_.Finish();
 }
 
@@ -1328,12 +1353,11 @@ inline flatbuffers::Offset<StyleData> CreateStyleData(flatbuffers::FlatBufferBui
   return builder_.Finish();
 }
 
-struct StateData FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+struct UIStateData FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   const flatbuffers::String *atlas() const { return GetPointer<const flatbuffers::String *>(4); }
   uint8_t autoDeleteAtlas() const { return GetField<uint8_t>(6, 0); }
   const flatbuffers::Vector<flatbuffers::Offset<ResourceLocation>> *locations() const { return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<ResourceLocation>> *>(8); }
-  const flatbuffers::Vector<flatbuffers::Offset<ComponentList>> *components() const { return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<ComponentList>> *>(10); }
-  const flatbuffers::Vector<flatbuffers::Offset<Panel2D>> *panels2D() const { return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<Panel2D>> *>(12); }
+  const flatbuffers::Vector<flatbuffers::Offset<UIElement>> *elements() const { return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<UIElement>> *>(10); }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
            VerifyField<flatbuffers::uoffset_t>(verifier, 4 /* atlas */) &&
@@ -1342,41 +1366,35 @@ struct StateData FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
            VerifyField<flatbuffers::uoffset_t>(verifier, 8 /* locations */) &&
            verifier.Verify(locations()) &&
            verifier.VerifyVectorOfTables(locations()) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, 10 /* components */) &&
-           verifier.Verify(components()) &&
-           verifier.VerifyVectorOfTables(components()) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, 12 /* panels2D */) &&
-           verifier.Verify(panels2D()) &&
-           verifier.VerifyVectorOfTables(panels2D()) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, 10 /* elements */) &&
+           verifier.Verify(elements()) &&
+           verifier.VerifyVectorOfTables(elements()) &&
            verifier.EndTable();
   }
 };
 
-struct StateDataBuilder {
+struct UIStateDataBuilder {
   flatbuffers::FlatBufferBuilder &fbb_;
   flatbuffers::uoffset_t start_;
   void add_atlas(flatbuffers::Offset<flatbuffers::String> atlas) { fbb_.AddOffset(4, atlas); }
   void add_autoDeleteAtlas(uint8_t autoDeleteAtlas) { fbb_.AddElement<uint8_t>(6, autoDeleteAtlas, 0); }
   void add_locations(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<ResourceLocation>>> locations) { fbb_.AddOffset(8, locations); }
-  void add_components(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<ComponentList>>> components) { fbb_.AddOffset(10, components); }
-  void add_panels2D(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Panel2D>>> panels2D) { fbb_.AddOffset(12, panels2D); }
-  StateDataBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
-  StateDataBuilder &operator=(const StateDataBuilder &);
-  flatbuffers::Offset<StateData> Finish() {
-    auto o = flatbuffers::Offset<StateData>(fbb_.EndTable(start_, 5));
+  void add_elements(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<UIElement>>> elements) { fbb_.AddOffset(10, elements); }
+  UIStateDataBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
+  UIStateDataBuilder &operator=(const UIStateDataBuilder &);
+  flatbuffers::Offset<UIStateData> Finish() {
+    auto o = flatbuffers::Offset<UIStateData>(fbb_.EndTable(start_, 4));
     return o;
   }
 };
 
-inline flatbuffers::Offset<StateData> CreateStateData(flatbuffers::FlatBufferBuilder &_fbb,
+inline flatbuffers::Offset<UIStateData> CreateUIStateData(flatbuffers::FlatBufferBuilder &_fbb,
    flatbuffers::Offset<flatbuffers::String> atlas = 0,
    uint8_t autoDeleteAtlas = 0,
    flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<ResourceLocation>>> locations = 0,
-   flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<ComponentList>>> components = 0,
-   flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Panel2D>>> panels2D = 0) {
-  StateDataBuilder builder_(_fbb);
-  builder_.add_panels2D(panels2D);
-  builder_.add_components(components);
+   flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<UIElement>>> elements = 0) {
+  UIStateDataBuilder builder_(_fbb);
+  builder_.add_elements(elements);
   builder_.add_locations(locations);
   builder_.add_atlas(atlas);
   builder_.add_autoDeleteAtlas(autoDeleteAtlas);
@@ -1393,17 +1411,18 @@ inline bool VerifyListItemType(flatbuffers::Verifier &verifier, const void *unio
   }
 }
 
-inline bool VerifyUComponent(flatbuffers::Verifier &verifier, const void *union_obj, UComponent type) {
+inline bool VerifyUUIElement(flatbuffers::Verifier &verifier, const void *union_obj, UUIElement type) {
   switch (type) {
-    case UComponent_NONE: return true;
-    case UComponent_Label: return verifier.VerifyTable(reinterpret_cast<const Label *>(union_obj));
-    case UComponent_Menu: return verifier.VerifyTable(reinterpret_cast<const Menu *>(union_obj));
-    case UComponent_Navigation: return verifier.VerifyTable(reinterpret_cast<const Navigation *>(union_obj));
-    case UComponent_Console: return verifier.VerifyTable(reinterpret_cast<const Console *>(union_obj));
-    case UComponent_Element: return verifier.VerifyTable(reinterpret_cast<const Element *>(union_obj));
-    case UComponent_Button: return verifier.VerifyTable(reinterpret_cast<const Button *>(union_obj));
-    case UComponent_Image: return verifier.VerifyTable(reinterpret_cast<const Image *>(union_obj));
-    case UComponent_ProgressBar: return verifier.VerifyTable(reinterpret_cast<const ProgressBar *>(union_obj));
+    case UUIElement_NONE: return true;
+    case UUIElement_Label: return verifier.VerifyTable(reinterpret_cast<const Label *>(union_obj));
+    case UUIElement_Menu: return verifier.VerifyTable(reinterpret_cast<const Menu *>(union_obj));
+    case UUIElement_Navigation: return verifier.VerifyTable(reinterpret_cast<const Navigation *>(union_obj));
+    case UUIElement_Console: return verifier.VerifyTable(reinterpret_cast<const Console *>(union_obj));
+    case UUIElement_Element: return verifier.VerifyTable(reinterpret_cast<const Element *>(union_obj));
+    case UUIElement_Button: return verifier.VerifyTable(reinterpret_cast<const Button *>(union_obj));
+    case UUIElement_ToggleButton: return verifier.VerifyTable(reinterpret_cast<const ToggleButton *>(union_obj));
+    case UUIElement_Image: return verifier.VerifyTable(reinterpret_cast<const Image *>(union_obj));
+    case UUIElement_ProgressBar: return verifier.VerifyTable(reinterpret_cast<const ProgressBar *>(union_obj));
     default: return false;
   }
 }

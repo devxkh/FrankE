@@ -58,18 +58,24 @@ namespace XE
 		_backgroundColor.b = colour->b();
 		_backgroundColor.a = colour->a();
 
+		_UV[0] = _UV[1] = _UV[2] = _UV[3] = m_guiRenderer._whitePixelPos;
+
 		RenderableShape::isDirty = true;
 	}
 
 	void WRectangle::setBackground(const Colours::Colour& colour)
 	{
 		_backgroundColor = webcolour(colour);
+		_UV[0] = _UV[1] = _UV[2] = _UV[3] = m_guiRenderer._whitePixelPos;
+
 		RenderableShape::isDirty = true;
 	}
 
 	void WRectangle::setBackground(const Ogre::ColourValue& colour)
 	{
 		_backgroundColor = colour;
+		_UV[0] = _UV[1] = _UV[2] = _UV[3] = m_guiRenderer._whitePixelPos;
+
 		RenderableShape::isDirty = true;
 	}
 
@@ -93,8 +99,8 @@ namespace XE
 	{
 		if (sprite == 0 || m_layer.atlasData.textureSize.x == 0 || m_layer.atlasData.textureSize.y == 0)
 		{
-			//auto tmp = m_guiRenderer.getSprite("whitepixel.png");
-			//_UV[0] = _UV[1] = _UV[2] = _UV[3] = Ogre::Vector2(tmp->texCoords().x, tmp->texCoords().y);// m_layer._t_Layer->_getSolidUV();
+		//	auto tmp = m_guiRenderer.getSprite("whitepixel.png");
+			//_UV[0] = _UV[1] = _UV[2] = _UV[3] = tmp->texCoords;// sf::Vector2f(tmp->texCoords, tmp->texCoords().y);// m_layer._t_Layer->_getSolidUV();
 			//_UV[0].x = _UV[3].x = m_guiRenderer._whitePixelPos.x;
 			//_UV[0].y = _UV[1].y = m_guiRenderer._whitePixelPos.y + 1;
 			//_UV[1].x = _UV[2].x = m_guiRenderer._whitePixelPos.x +1;

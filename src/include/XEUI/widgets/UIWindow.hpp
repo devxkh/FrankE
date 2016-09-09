@@ -34,7 +34,7 @@ namespace XE {
 		/** Create window.
 		* @param style Style the UIWindow should have. Defaults to TopLevel.
 		*/
-		static Ptr Create(WLayer& parentLayer, char style = Style::TOPLEVEL);
+		static Ptr Create(WLayer& parentLayer, char style = Style::TOPLEVEL, Uint16 fontId = 14);
 
 		const std::string& GetName() const override;
 
@@ -80,7 +80,7 @@ namespace XE {
 		/** Constructor.
 		* @param style UIWindow style.
 		*/
-		UIWindow(WLayer& parentLayer, char style);
+		UIWindow(WLayer& parentLayer, char style, Uint16 fontId);
 
 		void draw() override;
 

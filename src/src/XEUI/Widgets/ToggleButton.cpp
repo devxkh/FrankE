@@ -7,8 +7,8 @@ namespace XE {
 	// Signals.
 	Signal::SignalID ToggleButton::OnToggle = 0;
 
-	ToggleButton::ToggleButton(WLayer& parentLayer)
-		: Button(parentLayer)
+	ToggleButton::ToggleButton(WLayer& parentLayer, Uint16 fontId)
+		: Button(parentLayer, fontId)
 		, m_active(false)
 	{
 		//SetAlignment(sf::Vector2f(.5f, .5f));
@@ -21,8 +21,8 @@ namespace XE {
 
 	}
 
-	ToggleButton::Ptr ToggleButton::Create(WLayer& parentLayer, const sf::String& label) {
-		auto ptr = Ptr(new ToggleButton(parentLayer));
+	ToggleButton::Ptr ToggleButton::Create(WLayer& parentLayer, const sf::String& label, Uint16 fontId) {
+		auto ptr = Ptr(new ToggleButton(parentLayer, fontId));
 		ptr->SetLabel(label);
 		return ptr;
 	}
@@ -34,18 +34,18 @@ namespace XE {
 
 		sf::Vector2f glyphPosition(Widget::getPosition().x, Widget::getPosition().y - 10);
 
-		m_label.setPosition(glyphPosition); // sf::Vector2f(parentAllocation.left + position.x, parentAllocation.top + position.y));
-		m_label.setSize(size.x, size.y);
+		m_wcaption.setPosition(glyphPosition); // sf::Vector2f(parentAllocation.left + position.x, parentAllocation.top + position.y));
+		m_wcaption.setSize(size.x, size.y);
 
 		m_rectangle.setPosition(Widget::getPosition()); // sf::Vector2f(parentAllocation.left + position.x, parentAllocation.top + position.y));
 		m_rectangle.setSize(sf::Vector2f(size.x, size.y));
 
-		if (GetState() == State::PRELIGHT)
-			m_rectangle.setBackgroundImage("item_unknown.png");
-		else if (GetState() == State::ACTIVE)
-			m_rectangle.setBackgroundImage("messagebox_bg.png");
-		else
-			m_rectangle.setBackgroundImage("itembox.png");
+		//if (GetState() == State::PRELIGHT)
+		//	m_rectangle.setBackgroundImage("item_unknown.png");
+		//else if (GetState() == State::ACTIVE)
+		//	m_rectangle.setBackgroundImage("messagebox_bg.png");
+		//else
+		//	m_rectangle.setBackgroundImage("itembox.png");
 
 		if (GetState() == State::ACTIVE || IsActive())
 			m_rectangle.setBackground(Ogre::ColourValue::Black);
