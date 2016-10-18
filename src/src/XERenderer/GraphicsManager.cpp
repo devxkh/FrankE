@@ -173,6 +173,13 @@ namespace XE
 	//	});
 	//}
 
+
+	void GraphicsManager::setFullScreen(SDL_Window* wnd, bool fullscreen)
+	{
+		SDL_SetWindowFullscreen(wnd, fullscreen);
+	}
+
+
 	void GraphicsManager::registerHlms(void)
 	{
 		getIntoRendererQueue().push([this]() {

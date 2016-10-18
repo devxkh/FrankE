@@ -29,15 +29,21 @@ namespace XE {
 
 	void ToggleButton::draw() {
 		
-		//sf::FloatRect req(GetAllocation());
-		//sf::Vector2f parentPosition(GetParent()->GetAllocation());
-
-		sf::Vector2f glyphPosition(Widget::getPosition().x, Widget::getPosition().y - 10);
-
-		m_wcaption.setPosition(glyphPosition); // sf::Vector2f(parentAllocation.left + position.x, parentAllocation.top + position.y));
+		m_wcaption.setPosition(Widget::getPosition());
 		m_wcaption.setSize(size.x, size.y);
+		
+		sf::Vector2i textSize = m_wcaption.GetTextStringMetrics(m_wcaption.getText());
+		
+		
+		auto offsetx =0;
 
-		m_rectangle.setPosition(Widget::getPosition()); // sf::Vector2f(parentAllocation.left + position.x, parentAllocation.top + position.y));
+		auto posx = Widget::getPosition().x;
+		auto offsety = (size.y * 0.5f) - (textSize.y / 2);
+		auto posy = Widget::getPosition().y;
+		sf::Vector2f textPos(posx + offsetx, posy + offsety + 18);
+		m_wcaption.setPosition(textPos);
+
+		m_rectangle.setPosition(Widget::getPosition());
 		m_rectangle.setSize(sf::Vector2f(size.x, size.y));
 
 		//if (GetState() == State::PRELIGHT)

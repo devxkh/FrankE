@@ -176,10 +176,12 @@ namespace Ogre
         uint8   mUvSource[NUM_PBSM_SOURCES];
         uint8   mBlendModes[4];
         uint8   mFresnelTypeSizeBytes;              //4 if mFresnel is float, 12 if it is vec3
+        bool    mTwoSided;
         bool    mUseAlphaFromTextures;
         uint8	mWorkflow;
         TransparencyModes mTransparencyMode;
 
+        float	mBgDiffuse[4];
         float   mkDr, mkDg, mkDb;                   //kD
         float   _padding0;
         float   mkSr, mkSg, mkSb;                   //kS
@@ -229,6 +231,11 @@ namespace Ogre
                 Specifies the roughness value. Should be in range (0; inf)
                 Note: Values extremely close to zero could cause NaNs and
                 INFs in the pixel shader, also depends on the GPU's precision.
+
+            * background_diffuse <r g b a>
+                Specifies diffuse colour to use as a background when diffuse texture are not present.
+                Does not replace 'diffuse <r g b>'
+                Default: background_diffuse 1 1 1 1
 
             * diffuse <r g b>
                 Specifies the RGB diffuse colour. "kD" in most books about PBS
@@ -303,7 +310,12 @@ namespace Ogre
                           const HlmsParamVec &params );
         virtual ~HlmsPbsDatablock();
 
-        /// Sets the diffuse colour. The colour will be divided by PI for energy conservation.
+        /// Sets the diffuse background colour. When no diffuse texture is present, this
+        /// solid colour replaces it, and can act as a background for the detail maps.
+        void setBackgroundDiffuse( const ColourValue &bgDiffuse );
+        ColourValue getBackgroundDiffuse(void) const;
+
+        /// Sets the diffuse colour (final multiplier). The colour will be divided by PI for energy conservation.
         void setDiffuse( const Vector3 &diffuseColour );
         Vector3 getDiffuse(void) const;
 
@@ -518,6 +530,26 @@ namespace Ogre
         /// Returns the index to mBakedTextures. Returns NUM_PBSM_TEXTURE_TYPES if
         /// there is no texture assigned to texType
         uint8 getBakedTextureIdx( PbsTextureTypes texType ) const;
+
+        /** Allows support for two sided lighting. Disabled by default (faster)
+        @remarks
+            Changing this parameter will cause a flushRenderables
+        @param twoSided
+            Whether to enable or disable.
+        @param changeMacroblock
+            Whether to change the current macroblock for one that has cullingMode = CULL_NONE
+            or set it to false to leave the current macroblock as is.
+        @param oneSidedShadowCast
+            If changeMacroblock == true; this parameter controls the culling mode of the
+            shadow caster (the setting of HlmsManager::setShadowMappingUseBackFaces is ignored!).
+            While oneSidedShadowCast == CULL_NONE is usually the "correct" option, setting
+            oneSidedShadowCast=CULL_ANTICLOCKWISE can prevent ugly self-shadowing on interiors.
+        */
+        void setTwoSidedLighting( bool twoSided, bool changeMacroblock=true,
+                                  CullingMode oneSidedShadowCast=CULL_ANTICLOCKWISE );
+        bool getTwoSidedLighting(void) const;
+
+        virtual bool hasCustomShadowMacroblock(void) const;
 
         /** @see HlmsDatablock::setAlphaTest
         @remarks

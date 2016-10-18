@@ -250,8 +250,11 @@ namespace Ogre
             uint8 meshLod = pMovableObject->getCurrentMeshLod();
             const VertexArrayObjectArray &vaos = pRend->getVaos( static_cast<VertexPass>(casterPass) );
 
-			assert(vaos.size() -1 == meshLod && "vaos meshlod/shadowlod not set:" + meshLod);
-			VertexArrayObject *vao = vaos[meshLod];
+            assert( meshLod < vaos.size() && "Vaos meshLod/shadowLod not set. "
+                    "Note: If this is a v1 object, it is in the wrong RenderQueue ID "
+                    "(or the queue incorrectly set)." );
+
+            VertexArrayObject *vao = vaos[meshLod];
             meshHash = vao->getRenderQueueId();
         }
         //TODO: Account for skeletal animation in any of the hashes (preferently on the material side)

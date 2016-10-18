@@ -45,6 +45,7 @@ namespace XE
 		});
 	}
 
+
 	void CameraRenderable::_t_updateRayFromPoint(const Ogre::Vector2& screenpoint)
 	{
 		auto screenPointRay = _t_OgreCameraPtr->getCameraToViewportRay(screenpoint.x, screenpoint.y);

@@ -37,6 +37,7 @@ protected:
 private:
 	//initialization order!
 	XE::Button::Ptr m_btnTest;
+	XE::CheckButton::Ptr m_checkBoxTest;
 	XE::Image::Ptr m_imageTest;
 	XE::Box::Ptr  m_Box;
 	XE::Alignment::Ptr  m_alignment;

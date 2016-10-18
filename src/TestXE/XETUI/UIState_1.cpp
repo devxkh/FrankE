@@ -45,6 +45,9 @@ UIState_1::UIState_1(const XE::Uint16& id, entityx::Entity entity, bool replace 
 	m_btnTest->size = sf::Vector2f(161, 36);
 	m_btnTest->SetLabel("all widgets having a fixed width"); 
 
+	m_checkBoxTest = XE::CheckButton::Create(layer, "checkboxText");
+	m_checkBoxTest->size = sf::Vector2f(200.f, 20);
+
 	m_entry = XE::Entry::Create(layer);
 	m_entry->size = sf::Vector2f(200.f, 30.f);
 	screen->m_Desktop->AddEntry(m_entry);
@@ -57,6 +60,7 @@ UIState_1::UIState_1(const XE::Uint16& id, entityx::Entity entity, bool replace 
 
 	m_Box->Pack(m_entry);
 	m_Box->Pack(m_progressbar);
+	m_Box->Pack(m_checkBoxTest);
 	m_Box->Pack(m_btnTest);
 	m_Box->Pack(m_imageTest);
 

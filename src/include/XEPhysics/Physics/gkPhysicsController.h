@@ -182,6 +182,7 @@ protected:
 	bool m_suspend;
 	bool m_dbvtMark;
 
+	Ogre::Vector3		m_renderOffset;
 	//gkPhysicsProperties m_props;
 };
 

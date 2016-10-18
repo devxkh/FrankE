@@ -20,7 +20,7 @@ namespace XE
 	}
 
 	void PhysicsSystem::update(entityx::EntityManager &es, entityx::EventManager &events, entityx::TimeDelta dt)  {
-
+	
 		entityx::ComponentHandle<PhysicsComponent> physicsComponent;
 		entityx::ComponentHandle<BodyComponent> bodyComponent;
 
@@ -102,7 +102,7 @@ namespace XE
 			}
 
 		}
-		
+
 		m_physicsWorld.step(dt);// .asMicroseconds());
 
 		/*reset();

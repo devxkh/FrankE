@@ -43,6 +43,7 @@ public:
   void update();
 
 private:
+	bool m_rendererisDone;
 	GraphicsManager& m_GraphicsManager;
 	//modify only in renderthread!
 	DynamicLines* __t_DynamicLines;

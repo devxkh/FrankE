@@ -103,14 +103,13 @@ namespace Ogre
         static void toStr( const ColourValue &value, String &outString );
         static void toStr( const Vector2 &value, String &outString );
         static void toStr( const Vector3 &value, String &outString );
+        static void toStr( const Vector4 &value, String &outString );
 
         String getName( const HlmsMacroblock *macroblock ) const;
         String getName( const HlmsBlendblock *blendblock ) const;
         static String getName( const HlmsSamplerblock *samplerblock );
 
     protected:
-        bool hasCustomShadowMacroblock( const HlmsDatablock *datablock ) const;
-
         void saveSamplerblock( const HlmsSamplerblock *samplerblock, String &outString );
         void saveMacroblock( const HlmsMacroblock *macroblock, String &outString );
         void saveBlendblock( const HlmsBlendblock *blendblock, String &outString );

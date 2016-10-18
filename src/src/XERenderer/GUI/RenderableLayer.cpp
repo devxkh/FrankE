@@ -2,27 +2,21 @@
 
 #include <XERenderer/GUI/GUIRenderer.hpp>
 #include <XERenderer/CameraRenderable.hpp>
+#include <XERenderer/GUI/RenderableShape.hpp>
+#include <XERenderer/GraphicsManager.hpp>
+#include <XERenderer/GUI/GorillaRenderer.hpp>
 
 #include <Ogre/OgreMain/include/OgreSceneManager.h>
-
-#include <XERenderer/GUI/RenderableShape.hpp>
-
-#include <XERenderer/GraphicsManager.hpp>
-
 #include <Ogre/OgreMain/include/OgreRoot.h>
-
 #include "OgreHlmsManager.h"
-
 #include "OgreHlms.h"
 
-
-#include <XERenderer/GUI/GorillaRenderer.hpp>
 
 namespace XE {
 
 
-	RenderableLayer::RenderableLayer(XE::Uint32 id, GUIRenderer& guiRenderer,
-		Ogre::ObjectMemoryManager* objManager, Ogre::SceneManager* sceneMgr, const XE::Uint16 atlasId)
+	RenderableLayer::RenderableLayer(Uint32 id, GUIRenderer& guiRenderer,
+		Ogre::ObjectMemoryManager* objManager, Ogre::SceneManager* sceneMgr, const Uint16 atlasId)
 
 		: //ManualObject(id, objManager, sceneMgr) //renderqueueID
 		MovableObject(id, objManager, sceneMgr, 0)

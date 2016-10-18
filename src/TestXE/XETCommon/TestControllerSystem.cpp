@@ -134,7 +134,7 @@ namespace XET {
 			if (fbEntityData)
 			{
 				// Create a large amount of falling physics objects
-				const unsigned NUM_OBJECTS = 3000;
+				const unsigned NUM_OBJECTS = 1000;
 				for (unsigned i = 0; i < NUM_OBJECTS; ++i)
 				{
 					auto entity = mEngine.getScene().entities.create();

@@ -88,6 +88,10 @@ namespace XE
 
 		inline FrameStats& getFrameStats() { return  m_FrameStats; }
 		
+
+		void setFullScreen(SDL_Window* wnd, bool fullscreen);
+
+
 		Ogre::RenderWindow* _t_getRenderWindow(XE::Uint16 id){ return _t_RenderWindow; }
 
 //		WindowManager& getWindowManager() { return mWindowManager; }

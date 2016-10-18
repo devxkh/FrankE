@@ -116,6 +116,11 @@ Action::Action(detail::ActionNode::CopiedPtr operation)
 	mOperation = std::move(operation);
 }
 
+detail::ActionNode* Action::getOperation()
+{
+	return mOperation.get();
+}
+
 // TODO: Wait until aurora::CopiedPtr implements move derived-to-base more efficiently
 Action operator|| (const Action& lhs, const Action& rhs)
 {

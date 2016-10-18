@@ -46,7 +46,7 @@ namespace Ogre
         "GrainMerge", "Difference"
     };
 
-    const size_t HlmsPbsDatablock::MaterialSizeInGpu          = 52 * 4 + NUM_PBSM_TEXTURE_TYPES * 2 + 4;
+    const size_t HlmsPbsDatablock::MaterialSizeInGpu          = 56 * 4 + NUM_PBSM_TEXTURE_TYPES * 2 + 4;
     const size_t HlmsPbsDatablock::MaterialSizeInGpuAligned   = alignToNextMultiple(
                                                                     HlmsPbsDatablock::MaterialSizeInGpu,
                                                                     4 * 4 );
@@ -58,6 +58,7 @@ namespace Ogre
                                         const HlmsParamVec &params ) :
         HlmsDatablock( name, creator, macroblock, blendblock, params ),
         mFresnelTypeSizeBytes( 4 ),
+        mTwoSided( false ),
         mUseAlphaFromTextures( true ),
         mWorkflow( SpecularWorkflow ),
         mTransparencyMode( None ),
@@ -73,6 +74,8 @@ namespace Ogre
         memset( mUvSource, 0, sizeof( mUvSource ) );
         memset( mBlendModes, 0, sizeof( mBlendModes ) );
 
+        mBgDiffuse[0] = mBgDiffuse[1] = mBgDiffuse[2] = mBgDiffuse[3] = 1.0f;
+
         mDetailNormalWeight[0] = mDetailNormalWeight[1] = 1.0f;
         mDetailNormalWeight[2] = mDetailNormalWeight[3] = 1.0f;
         mDetailWeight[0] = mDetailWeight[1] = mDetailWeight[2] = mDetailWeight[3] = 1.0f;
@@ -86,6 +89,12 @@ namespace Ogre
             mTexToBakedTextureIdx[i] = NUM_PBSM_TEXTURE_TYPES;
 
         String paramVal;
+
+        if( Hlms::findParamInVec( params, "background_diffuse", paramVal ) )
+        {
+            ColourValue val = StringConverter::parseColourValue( paramVal, ColourValue::White );
+            setBackgroundDiffuse( val );
+        }
 
         if( Hlms::findParamInVec( params, "diffuse", paramVal ) )
         {
@@ -357,7 +366,7 @@ namespace Ogre
             mkDb *= mTransparencyValue * mTransparencyValue;
         }
 
-        memcpy( dstPtr, &mkDr, MaterialSizeInGpu );
+        memcpy( dstPtr, &mBgDiffuse[0], MaterialSizeInGpu );
 
         mkDr = oldkDr;
         mkDg = oldkDg;
@@ -460,7 +469,7 @@ namespace Ogre
         //If HLMS texture manager failed to find a reflection texture, have look int standard texture manager
         //NB we only do this for reflection textures as all other textures must be texture arrays for performance reasons
         if (textureType == PBSM_REFLECTION && texLocation.texture == hlmsTextureManager->getBlankTexture().texture)
-        {            
+        {
             Ogre::TexturePtr tex = Ogre::TextureManager::getSingleton().getByName(name);
             if (tex.isNull() == false)
             {
@@ -474,6 +483,21 @@ namespace Ogre
         mTexIndices[textureType] = texLocation.xIdx;
 
         return texLocation.texture;
+    }
+    //-----------------------------------------------------------------------------------
+    void HlmsPbsDatablock::setBackgroundDiffuse( const ColourValue &bgDiffuse )
+    {
+        mBgDiffuse[0] = bgDiffuse.r;
+        mBgDiffuse[1] = bgDiffuse.g;
+        mBgDiffuse[2] = bgDiffuse.b;
+        mBgDiffuse[3] = bgDiffuse.a;
+        scheduleConstBufferUpdate();
+    }
+    //-----------------------------------------------------------------------------------
+    ColourValue HlmsPbsDatablock::getBackgroundDiffuse(void) const
+    {
+        ColourValue retVal( mBgDiffuse[0], mBgDiffuse[1], mBgDiffuse[2], mBgDiffuse[3] );
+        return retVal;
     }
     //-----------------------------------------------------------------------------------
     void HlmsPbsDatablock::setDiffuse( const Vector3 &diffuseColour )
@@ -837,6 +861,46 @@ namespace Ogre
         return mTexToBakedTextureIdx[texType];
     }
     //-----------------------------------------------------------------------------------
+    void HlmsPbsDatablock::setTwoSidedLighting( bool twoSided, bool changeMacroblock,
+                                                CullingMode oneSidedShadowCast )
+    {
+        mTwoSided = twoSided;
+
+        if( twoSided && changeMacroblock )
+        {
+            HlmsMacroblock macroblock = *mMacroblock[0];
+            macroblock.mCullMode = CULL_NONE;
+            setMacroblock( macroblock );
+
+            if( oneSidedShadowCast != CULL_NONE )
+            {
+                macroblock.mCullMode = oneSidedShadowCast;
+                setMacroblock( macroblock, true );
+            }
+        }
+
+        flushRenderables();
+    }
+    //-----------------------------------------------------------------------------------
+    bool HlmsPbsDatablock::getTwoSidedLighting(void) const
+    {
+        return mTwoSided;
+    }
+    //-----------------------------------------------------------------------------------
+    bool HlmsPbsDatablock::hasCustomShadowMacroblock(void) const
+    {
+        if( mTwoSided &&
+            (mMacroblock[0]->mCullMode != CULL_NONE ||
+             mMacroblock[1]->mCullMode != CULL_NONE) )
+        {
+            //Since we may have ignored what HlmsManager::setShadowMappingUseBackFaces
+            //says, we need to treat them as custom.
+            return true;
+        }
+
+        return HlmsDatablock::hasCustomShadowMacroblock();
+    }
+    //-----------------------------------------------------------------------------------
     void HlmsPbsDatablock::setAlphaTestThreshold( float threshold )
     {
         HlmsDatablock::setAlphaTestThreshold( threshold );
@@ -972,11 +1036,11 @@ namespace Ogre
         default:
         case PBSM_DIFFUSE:
         case PBSM_SPECULAR:
-			retVal = HlmsTextureManager::TEXTURE_TYPE_DIFFUSE;
-			break;
+            retVal = HlmsTextureManager::TEXTURE_TYPE_DIFFUSE;
+            break;
         case PBSM_DETAIL_WEIGHT:
             retVal = HlmsTextureManager::TEXTURE_TYPE_NON_COLOR_DATA;
-			break;
+            break;
         case PBSM_DETAIL0:
         case PBSM_DETAIL1:
         case PBSM_DETAIL2:

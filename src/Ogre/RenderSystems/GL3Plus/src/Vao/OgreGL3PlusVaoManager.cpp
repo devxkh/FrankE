@@ -87,11 +87,13 @@ namespace Ogre
 
         mFrameSyncVec.resize( mDynamicBufferMultiplier, 0 );
 
+        //The minimum alignment for these buffers is 16 because some
+        //places of Ogre assume such alignment for SIMD reasons.
         GLint alignment;
         glGetIntegerv( GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &alignment );
         mConstBufferAlignment = alignment;
         glGetIntegerv( GL_TEXTURE_BUFFER_OFFSET_ALIGNMENT, &alignment );
-        mTexBufferAlignment = alignment;
+        mTexBufferAlignment = std::max<uint32>( alignment, 16u );
 
         GLint maxBufferSize;
         glGetIntegerv( GL_MAX_UNIFORM_BLOCK_SIZE, &maxBufferSize );

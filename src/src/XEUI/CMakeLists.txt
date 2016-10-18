@@ -1,25 +1,16 @@
 
 # XEUI
 
-
 set(INCROOT ${PROJECT_SOURCE_DIR}/src/include/XEUI)
 set(SRCROOT ${PROJECT_SOURCE_DIR}/src/src/XEUI)
 
 # -------------------------------- XEUI_SOURCES---------------------------------
 set(XEUI_SOURCES
    
- #    ${SRCROOT}/ElementStyle.cpp
-#	 ${SRCROOT}/HealthBar.cpp
-	# ${SRCROOT}/NonCopyable.cpp
 	 ${SRCROOT}/Object.cpp
-	 #${SRCROOT}/Panel2D.cpp
-	 #${SRCROOT}/Panel3D.cpp
 	 ${SRCROOT}/Widget.cpp
 	 ${SRCROOT}/Signal.cpp
 	 ${SRCROOT}/NonCopyable.cpp
-	# ${SRCROOT}/UIManager.cpp
-#	 ${SRCROOT}/UIPanel.cpp
-#	 ${SRCROOT}/UISerializer.cpp
 	 ${SRCROOT}/UIStateManager.cpp
 
 	 ${SRCROOT}/Desktop.cpp
@@ -27,7 +18,7 @@ set(XEUI_SOURCES
 	 ${SRCROOT}/Alignment.cpp
 	 ${SRCROOT}/Box.cpp
 	 ${SRCROOT}/Container.cpp
-	${SRCROOT}/Bin.cpp
+	 ${SRCROOT}/Bin.cpp
 	 ${SRCROOT}/Misc.cpp
 		
 )
@@ -41,15 +32,10 @@ set(XEUI_Widgets_SOURCES
 	 ${SRCROOT}/Widgets/Entry.cpp
 	 ${SRCROOT}/Widgets/Button.cpp
 	 ${SRCROOT}/Widgets/ToggleButton.cpp
+	 ${SRCROOT}/Widgets/CheckButton.cpp
 	 ${SRCROOT}/Widgets/ProgressBar.cpp
 	 ${SRCROOT}/Widgets/Image.cpp
 	 ${SRCROOT}/Widgets/UIWindow.cpp
-	 #${SRCROOT}/Widgets/Menu.cpp
-	 #${SRCROOT}/Widgets/MenuItem.cpp
-	 #${SRCROOT}/Widgets/MIButton.cpp
-	 #${SRCROOT}/Widgets/MICheckBox.cpp
-	 #${SRCROOT}/Widgets/Navigation.cpp
-	 #${SRCROOT}/Widgets/NavItem.cpp
 )
 source_group("src\\Widgets" FILES ${XEUI_Widgets_SOURCES})
 
@@ -58,25 +44,19 @@ set(XEUI_Widgets_INCLUDES
 	 ${INCROOT}/Widgets/OgreConsoleForGorilla.hpp
 	 ${INCROOT}/Widgets/Label.hpp
 	 ${INCROOT}/Widgets/Entry.hpp
-	  ${INCROOT}/Widgets/Button.hpp
-	  ${INCROOT}/Widgets/ToggleButton.hpp
-	  ${INCROOT}/Widgets/ProgressBar.hpp
-	  ${INCROOT}/Widgets/Image.hpp
+	 ${INCROOT}/Widgets/Button.hpp
+	 ${INCROOT}/Widgets/ToggleButton.hpp
+	 ${INCROOT}/Widgets/CheckButton.hpp
+	 ${INCROOT}/Widgets/ProgressBar.hpp
+	 ${INCROOT}/Widgets/Image.hpp
 	 ${INCROOT}/Widgets/UIWindow.hpp
-	#${INCROOT}/Widgets/Menu.hpp
-	 #${INCROOT}/Widgets/MenuItem.hpp
-	 #${INCROOT}/Widgets/MIButton.hpp
-	 #${INCROOT}/Widgets/MICheckBox.hpp
-	 #${INCROOT}/Widgets/Navigation.hpp
-	 #${INCROOT}/Widgets/NavItem.hpp
 )
 source_group("include\\Widgets" FILES ${XEUI_Widgets_INCLUDES})
 
 # -------------------------------- XEUI_DAL_SOURCES---------------------------------
 set(XEUI_DAL_SOURCES
-#	${SRCROOT}/DAL/FB_UI_StyleData_generated.h
-	 ${SRCROOT}/DAL/FB_UI_StateData_generated.h
- ${SRCROOT}/DAL/FB_UI_Atlas_generated.h
+	${SRCROOT}/DAL/FB_UI_StateData_generated.h
+	${SRCROOT}/DAL/FB_UI_Atlas_generated.h
 )
 source_group("src\\DAL" FILES ${XEUI_DAL_SOURCES})
 
@@ -99,44 +79,26 @@ source_group("src\\Console" FILES ${XEUI_Console_INCLUDE})
 # -------------------------------- XEUI_HEADER ---------------------------------
 set(XEUI_HEADER
 	
-	 ${INCROOT}/Export.hpp
-#	${INCROOT}/UIManager.hpp
-#	${INCROOT}/UIPanel.hpp
+	${INCROOT}/Export.hpp
 	${INCROOT}/Signal.hpp
 	${INCROOT}/NonCopyable.hpp
 	${INCROOT}/Object.hpp
-#	${INCROOT}/FastDelegate.hpp
-#	${INCROOT}/ElementBase.hpp
-#	
 	${INCROOT}/UIStateManager.hpp
-#	${INCROOT}/PanelElementCallback.hpp
-#
 	${INCROOT}/Desktop.hpp
-	
-	 ${INCROOT}/Widget.hpp
-	 #${INCROOT}/Panel2D.hpp
-#	 ${INCROOT}/Panel3D.hpp
-#${INCROOT}/ElementStyle.hpp
-#
-#	 ${INCROOT}/Font.hpp
-	 ${INCROOT}/Glyph.hpp
-	 ${INCROOT}/Adjustment.hpp
-	 ${INCROOT}/Alignment.hpp
-	 ${INCROOT}/Box.hpp
-	 ${INCROOT}/Container.hpp
-		${INCROOT}/Bin.hpp
-	 ${INCROOT}/Misc.hpp
-	
-	#	 ${INCROOT}/ScreenComponent.hpp
+	${INCROOT}/Widget.hpp
+	${INCROOT}/Glyph.hpp
+	${INCROOT}/Adjustment.hpp
+	${INCROOT}/Alignment.hpp
+	${INCROOT}/Box.hpp
+	${INCROOT}/Container.hpp
+	${INCROOT}/Bin.hpp
+	${INCROOT}/Misc.hpp
 )
 
 
 # Create named folders for the sources within the .vcproj
 # Empty name lists them directly under the .vcproj
 source_group("include" FILES ${XEUI_HEADER})
-
-
-
 
 # ----------------------- XEGraphics_SOURCES -------------------------------
 set(XEGraphics_SOURCES
@@ -162,10 +124,8 @@ include_directories (${PROJECT_SOURCE_DIR}/src/Ogre/OgreMain/include)
 include_directories(${PROJECT_SOURCE_DIR}/src/ThirdParty/rapidjson/include)
 include_directories (${PROJECT_SOURCE_DIR}/extlibs/headers/luajit)
 
-
 # Properties->C/C++->General->Additional Include Directories
 #include_directories (.)
-
 
 # Also adds sources to the Solution Explorer ------------------------------
 #add_library(XEUI STATIC ${XEUI_SOURCES} ${XEUI_HEADER} ${XEUI_Widgets_SOURCES} ${XEUI_Console_SOURCES} )

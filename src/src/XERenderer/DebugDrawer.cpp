@@ -1,7 +1,12 @@
 #include <XERenderer/DebugDrawer.hpp>
 
+#include <XEngine/Scene.hpp>
 #include <Ogre/OgreMain/include/OgreVector3.h>
 #include <Ogre/OgreMain/include/OgreManualObject2.h>
+#include <XERenderer/OgreSceneManager.hpp>
+#include <XERenderer/GUI/RenderableShape.hpp>
+
+#include <XERenderer/GraphicsManager.hpp>
 
 #include <Ogre/OgreMain/include/OgreSceneManager.h>
 #include <Ogre/OgreMain/include/OgreRenderQueue.h>
@@ -202,14 +207,14 @@ namespace XE {
 		}
 	}
 
-	int IcoSphere::addToVertices(std::list<VertexPair> *target, const Ogre::Vector3 &position, const Ogre::ColourValue &colour, float scale)
+	int IcoSphere::addToVertices(std::queue<Vertex> *target, const Ogre::Vector3 &position, const Ogre::ColourValue &colour, float scale)
 	{
 		Ogre::Matrix4 transform = Ogre::Matrix4::IDENTITY;
 		transform.setTrans(position);
 		transform.setScale(Ogre::Vector3(scale, scale, scale));
 
 		for (int i = 0; i < (int)vertices.size(); i++)
-			target->push_back(VertexPair(transform * vertices[i], colour));
+			target->push(Vertex(transform * vertices[i], colour));
 
 		return vertices.size();
 	}
@@ -218,22 +223,51 @@ namespace XE {
 
 
 	DebugDrawer::DebugDrawer(Scene& scene, float _fillAlpha)
-		: DebugRenderer(scene, _fillAlpha)
-		 , linesIndex(0)
+		: 
+		  linesIndex(0)
 		, trianglesIndex(0)
+		, _t_DebugRenderer(0)
+		, m_scene(scene)
+		, _swapBuffer(false)
 	{
 		icoSphere.create(DEFAULT_ICOSPHERE_RECURSION_LEVEL);
 
-
+		scene.getGraphicsManager().getIntoRendererQueue().push([this, &scene, _fillAlpha]() {
+			_t_DebugRenderer = new DebugRenderer(0, scene, &scene.getOgreSceneManager().__OgreSceneMgrPtr->_getEntityMemoryManager(Ogre::SCENE_DYNAMIC), _fillAlpha);
+		});
 
 		linesIndex = trianglesIndex = 0;
 	}
 
 	DebugDrawer::~DebugDrawer()
 	{
+		m_scene.getGraphicsManager().getIntoRendererQueue().push([this]() {
+			delete _t_DebugRenderer;
+		});
 		//shutdown();
 	}
 
+
+
+	std::queue<Vertex>& DebugDrawer::getLineVertices()
+	{
+		return _swapBuffer ? lineVertices1 : lineVertices2;
+	}
+
+	std::queue<Vertex>& DebugDrawer::getTriangleVertices()
+	{
+		return _swapBuffer ? triangleVertices1 : triangleVertices2;
+	}
+
+	std::list<int>& DebugDrawer::getLineIndices()
+	{
+		return _swapBuffer ? lineIndices1 : lineIndices2;
+	}
+
+	std::list<int>& DebugDrawer::getTriangleIndices()
+	{
+		return _swapBuffer ? triangleIndices1 : triangleIndices2;
+	}
 	//void DebugDrawer::initialise()
 	//{
 	//	/*manualObject = sceneManager->createManualObject("debug_object");
@@ -602,9 +636,38 @@ namespace XE {
 
 	void DebugDrawer::build()
 	{
-		if(isEnabled)
-			update();
+		if (isEnabled)
+		{	
 
+			bool tmp = _swapBuffer;
+
+			_swapBuffer = _swapBuffer ? false : true;
+		
+			std::list<int>* lineIndices;
+			std::list<int>* triangleIndices;
+
+			if (!_swapBuffer)
+			{
+				m_scene.getGraphicsManager().getIntoRendererQueue().push([this]() {
+					_t_DebugRenderer->updateVertices(lineVertices1);
+				});
+				
+
+				//triangleVertices = &triangleVertices1;
+				lineIndices = &lineIndices1;
+				triangleIndices = &triangleIndices1;
+			}
+			else
+			{
+				m_scene.getGraphicsManager().getIntoRendererQueue().push([this]() {
+					_t_DebugRenderer->updateVertices(lineVertices2);
+				});
+
+				//triangleVertices = &triangleVertices2;
+				lineIndices = &lineIndices2;
+				triangleIndices = &triangleIndices2;
+			}
+	}
 	/*	manualObject->beginUpdate(0);
 		if (lineVertices.size() > 0 && isEnabled)
 		{
@@ -638,7 +701,7 @@ namespace XE {
 
 	void DebugDrawer::clear()
 	{
-		clear();
+		//DebugRenderer::clear();
 		//lineVertices.clear();
 		//triangleVertices.clear();
 		//lineIndices.clear();
@@ -648,7 +711,7 @@ namespace XE {
 
 	int DebugDrawer::addLineVertex(const Ogre::Vector3 &vertex, const Ogre::ColourValue &colour)
 	{
-		getLineVertices().push_back(VertexPair(vertex, colour));
+		getLineVertices().push(Vertex(vertex, colour));
 		return linesIndex++;
 	}
 
@@ -660,7 +723,7 @@ namespace XE {
 
 	int DebugDrawer::addTriangleVertex(const Ogre::Vector3 &vertex, const Ogre::ColourValue &colour)
 	{
-		getTriangleVertices().push_back(VertexPair(vertex, colour));
+		getTriangleVertices().push(Vertex(vertex, colour));
 		return trianglesIndex++;
 	}
 

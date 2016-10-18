@@ -17,6 +17,14 @@ namespace XE
 	///Structure for a single vertex.		
 	struct Vertex
 	{
+		Vertex(){}
+		Vertex(const Ogre::Vector3& pos, const Ogre::ColourValue& col)
+			: position(pos)
+			 ,colour(col)
+		{
+
+		}
+
 		Ogre::Vector3 position;
 		Ogre::ColourValue colour;
 		Ogre::Vector2 uv;

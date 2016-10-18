@@ -138,7 +138,7 @@ class THOR_API Action
 		// Test if active and store relevant events
 		bool						isActive(const detail::EventBuffer& buffer, detail::ActionResult& out) const;
 
-
+		detail::ActionNode* getOperation();
 	// ---------------------------------------------------------------------------------------------------------------------------
 	// Private member functions
 	private:

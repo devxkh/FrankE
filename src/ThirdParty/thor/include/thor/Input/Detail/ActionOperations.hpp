@@ -107,7 +107,6 @@ namespace thor
 			virtual bool				isActionActive(const EventBuffer& buffer, ActionResult& out) const;
 			virtual bool				isEventActive(const SDL_Event& event) const = 0;
 
-		protected:
 			SDL_Event					mEvent;
 		};
 
@@ -127,7 +126,6 @@ namespace thor
 			explicit					RealtimeKeyLeaf(SDL_Scancode key);
 			virtual bool				isRealtimeActive() const;
 
-		private:
 			SDL_Scancode			mKey;
 		};
 
@@ -146,7 +144,7 @@ namespace thor
 			explicit					RealtimeMouseLeaf(MouseBottonID mouseButton);
 			virtual bool				isRealtimeActive() const;
 
-		private:
+
 			MouseBottonID			mMouseButton;
 		};
 
@@ -172,7 +170,6 @@ namespace thor
 			explicit					RealtimeJoystickButtonLeaf(SDL_JoyButtonEvent joystick);
 			virtual bool				isRealtimeActive() const;
 
-		private:
 			SDL_JoyButtonEvent				mJoystick;
 		};
 
@@ -183,7 +180,6 @@ namespace thor
 			RealtimeJoystickAxisLeaf(SDL_JoyAxisEvent joystick);
 			virtual bool				isRealtimeActive() const;
 
-		private:
 			SDL_JoyAxisEvent				mJoystick;
 		};
 
@@ -233,7 +229,6 @@ namespace thor
 			virtual bool				isActionActive(const EventBuffer& buffer) const;
 			virtual bool				isActionActive(const EventBuffer& buffer, ActionResult& out) const;
 
-		private:
 			ActionNode::CopiedPtr		mLhs;
 			ActionNode::CopiedPtr		mRhs;
 		};
@@ -246,7 +241,6 @@ namespace thor
 			virtual	bool				isActionActive(const EventBuffer& buffer) const;
 			virtual bool				isActionActive(const EventBuffer& buffer, ActionResult& out) const;
 
-		private:
 			ActionNode::CopiedPtr		mLhs;
 			ActionNode::CopiedPtr		mRhs;
 		};
@@ -259,7 +253,6 @@ namespace thor
 			virtual	bool				isActionActive(const EventBuffer& buffer) const;
 			virtual bool				isActionActive(const EventBuffer& buffer, ActionResult& out) const;
 
-		private:
 			ActionNode::CopiedPtr		mAction;
 		};
 

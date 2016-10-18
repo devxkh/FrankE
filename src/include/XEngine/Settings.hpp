@@ -31,6 +31,8 @@ namespace XE {
 		///Path to the data folder
 		std::string dataRootFolder;
 
+		bool fullscreen;
+
 		////dbData searchpath for physfs -> "F:/Projekte/coop/XGame/data/dbData"
 		//std::string dbDataFolder;
 

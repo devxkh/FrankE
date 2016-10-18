@@ -1,5 +1,4 @@
-#ifndef __CONTROLLERCOMPONENT_HPP__
-#define __CONTROLLERCOMPONENT_HPP__
+#pragma once
 
 #include <XESystem/SystemConfig.hpp>
 #include <Thor/Input/EventSystem.hpp>
@@ -49,5 +48,3 @@ namespace XE
 	};
 
 } // ns XE
-
-#endif // __CONTROLLERCOMPONENT_HPP__

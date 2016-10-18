@@ -31,8 +31,8 @@ namespace XE {
 	{
 	public:
 		
-		RenderableLayer(XE::Uint32 id, GUIRenderer& guiRenderer,
-						Ogre::ObjectMemoryManager* objManager, Ogre::SceneManager* sceneMgr, const XE::Uint16 atlasId = 0);
+		RenderableLayer(Uint32 id, GUIRenderer& guiRenderer,
+						Ogre::ObjectMemoryManager* objManager, Ogre::SceneManager* sceneMgr, const Uint16 atlasId = 0);
 
 
 		~RenderableLayer();

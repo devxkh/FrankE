@@ -21,6 +21,7 @@ namespace XE {
 		__t_DynamicLines(nullptr),
 		m_GraphicsManager(scene.getGraphicsManager())
 		, _swapBuffer(false)
+		, m_rendererisDone(true)
 	{
 		scene.getGraphicsManager().getIntoRendererQueue().push([this, &scene](){
 		
@@ -158,9 +159,9 @@ namespace XE {
     //------------------------------------------------------------------------------------------------
 	void DrawDynamicLines::update()
     {
-		if (m_GraphicsManager.GetRenderTask(RenderTaskID::DebugLines).isDone)
+		if (m_rendererisDone)
 		{
-			m_GraphicsManager.GetRenderTask(RenderTaskID::DebugLines).isDone = false;
+			m_rendererisDone = false;
 
 			bool tmp = _swapBuffer;
 
@@ -173,7 +174,7 @@ namespace XE {
 				__t_DynamicLines->update();
 
 				m_GraphicsManager.getFromRendererQueue().push([this]() {
-					m_GraphicsManager.GetRenderTask(RenderTaskID::DebugLines).isDone = true;
+					m_rendererisDone = true;
 				});
 			});
 

@@ -2,6 +2,8 @@
 
 #include <XESystem/SystemConfig.hpp>
 #include <XERenderer/private/DebugRenderer.hpp>
+
+#include <XERenderer/GUI/RenderableShape.hpp>
 #include <map>
 #include <vector>
 #include <list>
@@ -45,7 +47,7 @@ namespace XE {
 
 		void create(int recursionLevel);
 		void addToLineIndices(int baseIndex, std::list<int> *target);
-		int addToVertices(std::list<VertexPair> *target, const Ogre::Vector3 &position, const Ogre::ColourValue &colour, float scale);
+		int addToVertices(std::queue<Vertex> *target, const Ogre::Vector3 &position, const Ogre::ColourValue &colour, float scale);
 		void addToTriangleIndices(int baseIndex, std::list<int> *target);
 
 	private:
@@ -65,7 +67,7 @@ namespace XE {
 		int index;
 	};
 
-	class DebugDrawer : DebugRenderer
+	class DebugDrawer
 	{
 	public:
 		DebugDrawer(Scene& scene, float _fillAlpha);
@@ -89,14 +91,30 @@ namespace XE {
 
 		void clear();
 
-	private:
+		std::queue<Vertex>& getLineVertices();
+		std::queue<Vertex>& getTriangleVertices();
 
+		std::list<int>& getLineIndices();
+		std::list<int>& getTriangleIndices();
+
+	private:
+		DebugRenderer* _t_DebugRenderer;
+		Scene& m_scene;
+
+		bool _swapBuffer;
 		float fillAlpha;
 		IcoSphere icoSphere;
 
 		bool isEnabled;
 		
 		int linesIndex, trianglesIndex;
+
+
+		std::queue<Vertex> lineVertices1, triangleVertices1;
+		std::list<int> lineIndices1, triangleIndices1;
+
+		std::queue<Vertex> lineVertices2, triangleVertices2;
+		std::list<int> lineIndices2, triangleIndices2;
 
 	//	void initialise();
 	//	void shutdown();

@@ -54,7 +54,6 @@ namespace XE {
 		float getFarClipDistance() { return  m_farClipDistance; }
 		bool getAutoAspectRatio() { return  m_autoAspectRatio; }
 
-
 		void setPosition(const  Ogre::Vector3& position);
 
 		const Ogre::Ray& getScreenPointRay()  { return m_screenPointRay; }

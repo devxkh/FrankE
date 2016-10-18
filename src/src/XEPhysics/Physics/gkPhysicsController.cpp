@@ -47,6 +47,7 @@ gkPhysicsController::gkPhysicsController(gkDynamicsWorld* owner)
 		 m_dbvtMark(true),
 		 m_type(XFBType::PhysicsType_PT_NO_COLLISION),
 		 m_mode(0)
+		, m_renderOffset(Ogre::Vector3::ZERO)
 	, m_isGhost(false)
 {
 	// initial copy from object
@@ -737,6 +738,8 @@ btCollisionShape* gkPhysicsController::_createShape(const XFBType::PhysicsObject
 		//	mShape = new btCapsuleShape(radius, height);
 		//else if (axe == Ogre::Vector3f::UNIT_Z)
 		//	mShape = new btCapsuleShapeZ(radius, height);
+		//TODO per fb!!
+		m_renderOffset = Ogre::Vector3(0,-4.7f,0);
 
 		shape = new btCapsuleShape(size.x, size.y);//2.2f, 7.6f);
 		break;
@@ -757,7 +760,7 @@ btCollisionShape* gkPhysicsController::_createShape(const XFBType::PhysicsObject
 	/*	else
 			LOG(DEBUG) << "entity doesn't have a bodyComponent";*/
 	}
-
+	
 	if ((m_mode & GK_COMPOUND) != 0)//isCompound())
 	{
 		btCompoundShape *compShape = new btCompoundShape();
@@ -797,8 +800,23 @@ void gkPhysicsController::setTransform(const btTransform& worldTrans)
 	{
 		//node->setOrientation(rot);
 		//node->setPosition(loc);
-		body->setOrientation(Ogre::Quaternion(worldTrans.getRotation().w(), worldTrans.getRotation().x(), worldTrans.getRotation().y(), worldTrans.getRotation().z()));
-		body->setPosition(MathUtils::get(worldTrans.getOrigin()));
+		auto rot = worldTrans.getRotation();
+		body->setOrientation(Ogre::Quaternion(rot.w(), rot.x(), rot.y(), rot.z()));
+
+
+	//	auto aabb = getAabb();
+
+	//	btTransform& newTrans = m_collisionObject->getWorldTransform();
+	////	newTrans.setOrigin(btVector3(newTrans.getOrigin().x(), newTrans.getOrigin().y() - aabb.maxaabb.y / 2, newTrans.getOrigin().z()));
+	//	btVector3 newPos(newTrans.getOrigin().x(), newTrans.getOrigin().y() - aabb.maxaabb.y / 2, newTrans.getOrigin().z());
+
+	//	body->setPosition(MathUtils::get(newPos));// worldTrans.getOrigin()));
+		//auto correctPos = MathUtils::get(worldTrans.getOrigin());
+		Ogre::Vector3 pos = MathUtils::get(worldTrans.getOrigin());
+		if (m_renderOffset != Ogre::Vector3::ZERO)
+			pos += m_renderOffset;
+
+		body->setPosition(pos);
 	}
 //	m_object->notifyUpdate();
 }

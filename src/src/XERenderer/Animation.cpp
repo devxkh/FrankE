@@ -157,23 +157,23 @@ namespace XE
 			//TODO threading problem with pointers!??
 			//m_t_boneWeightPtrs is set in HandleAnimation from Renderable in the Renderthread
 			//auto refMask = *m_t_boneWeightPtrs; //Create a reference
-			
-												/*if (mask == NULL) not thread safe!
-			{*/
 
-			//for (int i = 0; i < m_t_boneWeightPtrs->size(); i++)
+			//if (mask == NULL) //not thread safe!
 			//{
-			//	if ((*m_t_boneWeightPtrs)[i] != NULL)
-			//		*(*m_t_boneWeightPtrs)[i] = 1.0;
-			//}
-			/*}
-			else
-			{
-				for (int i = 0; i < refMask.size(); i++)
 
-					if (refMask[i] != NULL)
-						*refMask[i] = mask->at(i);
-			}*/
+			//	for (int i = 0; i < m_t_boneWeightPtrs->size(); i++)
+			//	{
+			//		if ((*m_t_boneWeightPtrs)[i] != NULL)
+			//			*(*m_t_boneWeightPtrs)[i] = 1.0;
+			//	}
+			//}
+			//else
+			//{
+			//	for (int i = 0; i < refMask.size(); i++)
+
+			//		if (refMask[i] != NULL)
+			//			*refMask[i] = mask->at(i);
+			//}
 		});
 	}
 

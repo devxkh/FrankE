@@ -1,6 +1,8 @@
 
 hlms HlmsUnlit1 unlit
 {
-	diffuse_map				TestAtlas.png	
+	diffuse_map			TestAtlas.png	
 	scene_blend			alpha_blend
+	depth_check			off
+	depth_write			off
 }

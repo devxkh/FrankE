@@ -191,11 +191,13 @@ namespace XE
 					_t_OgreItemPtr = m_Scene.getOgreSceneManager().__OgreSceneMgrPtr->createItem(v2Mesh, (Ogre::SceneMemoryMgrTypes)Ogre::SCENE_DYNAMIC);
 					_t_OgreItemPtr->setVisibilityFlags(0x000000001);
 
-					Ogre::HlmsManager *hlmsManager = m_GraphicsManager.getRoot()->getHlmsManager();
-					Ogre::HlmsDatablock *datablock = hlmsManager->getDatablock("ShadowTest");
-					datablock->mShadowConstantBias = 0.001;
-					_t_OgreItemPtr->setDatablock(datablock);
-
+					//Ogre::HlmsManager *hlmsManager = m_GraphicsManager.getRoot()->getHlmsManager();
+					//Ogre::HlmsDatablock *datablock = hlmsManager->getDatablock("HlmsUnlit1");
+					//datablock->mShadowConstantBias = 0.001;
+					//_t_OgreItemPtr->setDatablock(datablock);
+					
+					auto aabb = _t_OgreItemPtr->getLocalAabb();
+				
 					//_t_OgreItemPtr->setCastShadows(true);
 					//	_t_OgreItemPtr->setDatablock("BaseWhite");
 						//meshV1 = tmp->getMesh();
@@ -212,6 +214,7 @@ namespace XE
 														 //floor->setMaterialName("Examples/Rockwall", "General");
 														 //floor->setCastShadows(false);
 					_t_OgreEntitySceneNodePtr->attachObject(_t_OgreItemPtr);
+	
 				}
 
 
