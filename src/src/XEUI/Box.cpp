@@ -194,7 +194,7 @@ void Box::AllocateChildren() const {
 }
 
 bool Box::IsChildInteresting( Widget::PtrConst child ) const {
-	return 	child->IsLocallyVisible() &&
+	return  //	child->IsLocallyVisible() &&
 		(child->getPosition().x > 0.f || child->size.x > 0.0f) &&
 		(child->getPosition().y > 0.f || child->size.y > 0.0f)
 	;
