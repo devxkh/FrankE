@@ -188,22 +188,22 @@ namespace XE {
 		faces.push_back(TriangleIndices(index0, index1, index2));
 	}
 
-	void IcoSphere::addToLineIndices(int baseIndex, std::list<int> *target)
+	void IcoSphere::addToLineIndices(int baseIndex, std::queue<int> *target)
 	{
 		for (std::list<LineIndices>::iterator i = lineIndices.begin(); i != lineIndices.end(); i++)
 		{
-			target->push_back(baseIndex + (*i).v1);
-			target->push_back(baseIndex + (*i).v2);
+			target->push(baseIndex + (*i).v1);
+			target->push(baseIndex + (*i).v2);
 		}
 	}
 
-	void IcoSphere::addToTriangleIndices(int baseIndex, std::list<int> *target)
+	void IcoSphere::addToTriangleIndices(int baseIndex, std::queue<int> *target)
 	{
 		for (std::list<TriangleIndices>::iterator i = faces.begin(); i != faces.end(); i++)
 		{
-			target->push_back(baseIndex + (*i).v1);
-			target->push_back(baseIndex + (*i).v2);
-			target->push_back(baseIndex + (*i).v3);
+			target->push(baseIndex + (*i).v1);
+			target->push(baseIndex + (*i).v2);
+			target->push(baseIndex + (*i).v3);
 		}
 	}
 
@@ -223,12 +223,15 @@ namespace XE {
 
 
 	DebugDrawer::DebugDrawer(Scene& scene, float _fillAlpha)
-		: 
-		  linesIndex(0)
+		:
+		linesIndex(0)
 		, trianglesIndex(0)
 		, _t_DebugRenderer(0)
 		, m_scene(scene)
 		, _swapBuffer(false)
+
+		, m_isDirty(false)
+		, m_rendererIsDone(true)
 	{
 		icoSphere.create(DEFAULT_ICOSPHERE_RECURSION_LEVEL);
 
@@ -259,12 +262,12 @@ namespace XE {
 		return _swapBuffer ? triangleVertices1 : triangleVertices2;
 	}
 
-	std::list<int>& DebugDrawer::getLineIndices()
+	std::queue<int>& DebugDrawer::getLineIndices()
 	{
 		return _swapBuffer ? lineIndices1 : lineIndices2;
 	}
 
-	std::list<int>& DebugDrawer::getTriangleIndices()
+	std::queue<int>& DebugDrawer::getTriangleIndices()
 	{
 		return _swapBuffer ? triangleIndices1 : triangleIndices2;
 	}
@@ -569,6 +572,7 @@ namespace XE {
 		const Ogre::ColourValue& colour)
 	{
 		buildLine(start, end, colour);
+
 	}
 
 	void DebugDrawer::drawCircle(const Ogre::Vector3 &centre,
@@ -579,6 +583,7 @@ namespace XE {
 	{
 		buildCircle(centre, radius, segmentsCount, colour);
 		if (isFilled) buildFilledCircle(centre, radius, segmentsCount, colour, fillAlpha);
+		m_isDirty = true;
 	}
 
 	void DebugDrawer::drawCylinder(const Ogre::Vector3 &centre,
@@ -590,6 +595,7 @@ namespace XE {
 	{
 		buildCylinder(centre, radius, segmentsCount, height, colour);
 		if (isFilled) buildFilledCylinder(centre, radius, segmentsCount, height, colour, fillAlpha);
+		m_isDirty = true;
 	}
 
 	void DebugDrawer::drawQuad(const Ogre::Vector3 *vertices,
@@ -598,6 +604,7 @@ namespace XE {
 	{
 		buildQuad(vertices, colour);
 		if (isFilled) buildFilledQuad(vertices, colour, fillAlpha);
+		m_isDirty = true;
 	}
 
 	void DebugDrawer::drawCuboid(const Ogre::Vector3 *vertices,
@@ -606,6 +613,7 @@ namespace XE {
 	{
 		buildCuboid(vertices, colour);
 		if (isFilled) buildFilledCuboid(vertices, colour, fillAlpha);
+		m_isDirty = true;
 	}
 
 	void DebugDrawer::drawSphere(const Ogre::Vector3 &centre,
@@ -623,6 +631,7 @@ namespace XE {
 			trianglesIndex += icoSphere.addToVertices(&getTriangleVertices(), centre, Ogre::ColourValue(colour.r, colour.g, colour.b, fillAlpha), radius);
 			icoSphere.addToTriangleIndices(baseIndex, &getTriangleIndices());
 		}
+		m_isDirty = true;
 	}
 
 	void DebugDrawer::drawTetrahedron(const Ogre::Vector3 &centre,
@@ -632,80 +641,63 @@ namespace XE {
 	{
 		buildTetrahedron(centre, scale, colour);
 		if (isFilled) buildFilledTetrahedron(centre, scale, colour, fillAlpha);
+
+		m_isDirty = true;
 	}
 
 	void DebugDrawer::build()
 	{
 		if (isEnabled)
 		{	
-
-			bool tmp = _swapBuffer;
-
-			_swapBuffer = _swapBuffer ? false : true;
-		
-			std::list<int>* lineIndices;
-			std::list<int>* triangleIndices;
-
-			if (!_swapBuffer)
+			if (m_rendererIsDone && m_isDirty)
 			{
-				m_scene.getGraphicsManager().getIntoRendererQueue().push([this]() {
-					_t_DebugRenderer->updateVertices(lineVertices1);
-				});
-				
+				m_rendererIsDone = false;
+			//	bool tmp = _swapBuffer;
 
-				//triangleVertices = &triangleVertices1;
-				lineIndices = &lineIndices1;
-				triangleIndices = &triangleIndices1;
-			}
-			else
-			{
-				m_scene.getGraphicsManager().getIntoRendererQueue().push([this]() {
-					_t_DebugRenderer->updateVertices(lineVertices2);
-				});
+				_swapBuffer = _swapBuffer ? false : true;
 
-				//triangleVertices = &triangleVertices2;
-				lineIndices = &lineIndices2;
-				triangleIndices = &triangleIndices2;
-			}
-	}
-	/*	manualObject->beginUpdate(0);
-		if (lineVertices.size() > 0 && isEnabled)
-		{
-			manualObject->estimateVertexCount(lineVertices.size());
-			manualObject->estimateIndexCount(lineIndices.size());
-			for (std::list<VertexPair>::iterator i = lineVertices.begin(); i != lineVertices.end(); i++)
-			{
-				manualObject->position(i->first);
-				manualObject->colour(i->second);
-			}
-			for (std::list<int>::iterator i = lineIndices.begin(); i != lineIndices.end(); i++)
-				manualObject->index(*i);
-		}
-		manualObject->end();
+				if (!_swapBuffer)
+				{
+					m_scene.getGraphicsManager().getIntoRendererQueue().push([this]() {
+						_t_DebugRenderer->updateVertices(lineIndices1 , lineVertices1);
 
-		manualObject->beginUpdate(1);
-		if (triangleVertices.size() > 0 && isEnabled)
-		{
-			manualObject->estimateVertexCount(triangleVertices.size());
-			manualObject->estimateIndexCount(triangleIndices.size());
-			for (std::list<VertexPair>::iterator i = triangleVertices.begin(); i != triangleVertices.end(); i++)
-			{
-				manualObject->position(i->first);
-				manualObject->colour(i->second.r, i->second.g, i->second.b, fillAlpha);
+						m_scene.getGraphicsManager().getFromRendererQueue().push([this]() {
+							m_rendererIsDone = true;
+							m_isDirty = false;
+						});
+					});
+				}
+				else
+				{
+					m_scene.getGraphicsManager().getIntoRendererQueue().push([this]() {
+						_t_DebugRenderer->updateVertices(lineIndices2, lineVertices2);
+
+						m_scene.getGraphicsManager().getFromRendererQueue().push([this]() {
+							m_rendererIsDone = true;
+							m_isDirty = false;
+						});
+					});
+				}
 			}
-			for (std::list<int>::iterator i = triangleIndices.begin(); i != triangleIndices.end(); i++)
-				manualObject->index(*i);
-		}
-		manualObject->end();*/
+	}	
 	}
 
 	void DebugDrawer::clear()
 	{
-		//DebugRenderer::clear();
-		//lineVertices.clear();
-		//triangleVertices.clear();
-		//lineIndices.clear();
-		//triangleIndices.clear();
+		std::queue<int> emptyLi;
+		std::swap(getLineIndices(), emptyLi);
+
+		std::queue<Vertex> emptyLV;
+		std::swap(getLineVertices(), emptyLV);
+	
+		
+		std::queue<int> emptyTi;
+		std::swap(getTriangleIndices(), emptyTi);
+
+		std::queue<Vertex> emptyTv;
+		std::swap(getTriangleVertices(), emptyTv);
+
+		
 		linesIndex = trianglesIndex = 0;
 	}
 
@@ -717,8 +709,8 @@ namespace XE {
 
 	void DebugDrawer::addLineIndices(int index1, int index2)
 	{
-		getLineIndices().push_back(index1);
-		getLineIndices().push_back(index2);
+		getLineIndices().push(index1);
+		getLineIndices().push(index2);
 	}
 
 	int DebugDrawer::addTriangleVertex(const Ogre::Vector3 &vertex, const Ogre::ColourValue &colour)
@@ -729,20 +721,20 @@ namespace XE {
 
 	void DebugDrawer::addTriangleIndices(int index1, int index2, int index3)
 	{
-		getTriangleIndices().push_back(index1);
-		getTriangleIndices().push_back(index2);
-		getTriangleIndices().push_back(index3);
+		getTriangleIndices().push(index1);
+		getTriangleIndices().push(index2);
+		getTriangleIndices().push(index3);
 	}
 
 	void DebugDrawer::addQuadIndices(int index1, int index2, int index3, int index4)
 	{
-		getTriangleIndices().push_back(index1);
-		getTriangleIndices().push_back(index2);
-		getTriangleIndices().push_back(index3);
+		getTriangleIndices().push(index1);
+		getTriangleIndices().push(index2);
+		getTriangleIndices().push(index3);
 
-		getTriangleIndices().push_back(index1);
-		getTriangleIndices().push_back(index3);
-		getTriangleIndices().push_back(index4);
+		getTriangleIndices().push(index1);
+		getTriangleIndices().push(index3);
+		getTriangleIndices().push(index4);
 	}
 
 }

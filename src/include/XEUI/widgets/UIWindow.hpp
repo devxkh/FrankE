@@ -7,12 +7,12 @@
 #include <SFML/System/String.hpp>
 #include <memory>
 
-#include <SDL.h>
-
-#include <XERenderer/GUI/WRectangle.hpp>
-#include <XERenderer/GUI/WCaption.hpp>
+struct SDL_Rect;
 
 namespace XE {
+		
+	class WRectangle;
+	class WCaption;
 
 	/** UIWindow.
 	*/
@@ -101,8 +101,8 @@ namespace XE {
 		bool m_resizing;
 
 
-		WRectangle m_rectangle;
-		WCaption m_label;
+		WRectangle* m_rectangle;
+		WCaption* m_label;
 	};
 
 } //ns XE

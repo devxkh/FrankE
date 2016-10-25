@@ -34,35 +34,19 @@ namespace XE
 	*/
 	class DebugRenderer : public Ogre::MovableObject
 	{
-
 	public:
 		/// Constructor - see setOperationType() for description of argument.
 		DebugRenderer(Uint32 id, Scene& scene, Ogre::ObjectMemoryManager* objManager, float fillAlpha);
 		virtual ~DebugRenderer();
-
-
-
-		void updateVertices(std::queue<Vertex>& vertices);
-
-
+		
+		void updateVertices(std::queue<int>& indices, std::queue<Vertex>& vertices);
+		
 		// MovableObject overrides
 		/** @copydoc MovableObject::getMovableType. */
 		const Ogre::String& getMovableType(void) const;
 
-		/// Add a point to the point list
-	//	void addPoint(const Ogre::Vector3 &p);
-		/// Add a point to the point list
-//		void addPoint(float x, float y, float z);
-
-		/// Change the location of an existing point in the point list
-//		void setPoint(unsigned short index, const Ogre::Vector3 &value);
-
 		/// Remove all points from the point list
 		void clear();
-
-		/// Call this to update the hardware buffer after making changes.
-	//	void update();
-		
 
 	private:
 
@@ -71,20 +55,10 @@ namespace XE
 		float m_fillAlpha;
 
 		GraphicsManager& m_GraphicsManager;
-		//modify only in renderthread!
-	//	DynamicLines* __t_DynamicLines;
-		//Ogre::ManualObject* _t_manualObject;
+
 		Ogre::ObjectMemoryManager* _t_ObjectMemoryManager;
 		Ogre::SceneManager* _t_sceneMrg;
-
-
-		bool m_rendererIsDone;
-
-		//std::vector<Ogre::Vector3> _PointsBuf1;
-		//std::vector<Ogre::Vector3> _PointsBuf2;
-
-
-
+		
 		Ogre::SceneNode* m_sceneNodeLines;
 
 		bool m_initalized;
@@ -98,7 +72,7 @@ namespace XE
 
 		~DebugRenderable();
 			
-		void updateVertices(std::queue<Vertex>& vertices);
+		void updateVertices(std::queue<int>& indices, std::queue<Vertex>& vertices);
 		
 		/// Remove all points from the point list
 		void clear();

@@ -3,6 +3,8 @@
 
 #include <ThirdParty/sfml/include/sfml/System/Vector2.hpp>
 
+#include <XERenderer/GUI/RenderableShape.hpp>
+
 #include <XEUI/Object.hpp>
 #include <memory>
 
@@ -15,6 +17,8 @@
 namespace XE {
 
 class Container;
+
+
 
 /** Base class for widgets.
  */
@@ -344,6 +348,9 @@ class Widget : public Object, public std::enable_shared_from_this<Widget> {
 
 		sf::Uint16 tabIdx;
 
+
+		RenderableShapesContainer m_shapesContainer;
+
 	private:
 		struct ClassId {
 			std::string id;
@@ -376,6 +383,7 @@ class Widget : public Object, public std::enable_shared_from_this<Widget> {
 		unsigned char m_mouse_button_down : 6; // 64 buttons, might not be enough for some people
 		bool m_mouse_in : 1;
 		bool m_visible : 1;
+
 };
 
 }

@@ -5,11 +5,11 @@
 #include <SFML/System/String.hpp>
 #include <memory>
 
-#include <XERenderer/GUI/WRectangle.hpp>
-#include <XERenderer/GUI/WCaption.hpp>
 
 namespace XE {
 
+	class WRectangle;
+	class WCaption;
 	class Image;
 
 	/** Pushbutton.
@@ -72,8 +72,8 @@ namespace XE {
 
 		void HandleMouseButtonEvent(bool press, int x, int y) override;
 
-		WRectangle m_rectangle;
-		WCaption m_wcaption;
+		WRectangle* m_rectangle;
+		WCaption* m_wcaption;
 
 		std::string m_imageName;
 

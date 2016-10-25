@@ -1,6 +1,7 @@
 #include <XEUI/Box.hpp>
 
 #include <XERenderer/GUI/WLayer.hpp>
+#include <XERenderer/GUI/WRectangle.hpp>
 #include <iterator>
 
 namespace XE {
@@ -9,8 +10,9 @@ Box::Box(WLayer&  layer, Orientation orientation, float spacing ) :
 	m_spacing( spacing ),
 	m_orientation( orientation )
 	,m_layer(layer)
-	, m_DebugRectangle(layer, 0, 0, 0, 0)
 {
+	m_shapesContainer.shapes.emplace_back(std::move(std::unique_ptr<WRectangle>(new WRectangle(layer, 0, 0, 0, 0))));
+	m_DebugRectangle = static_cast<WRectangle*>(m_shapesContainer.shapes.back().get());
 }
 
 
@@ -27,10 +29,10 @@ Box::Ptr Box::Create(WLayer&  layer, Orientation orientation, float spacing ) {
 void Box::draw() {
 
 	//m_DebugRectangle.setBackgroundImage("item_ball_hover.png");
-	m_DebugRectangle.setBackground(Ogre::ColourValue::Blue);
+	m_DebugRectangle->setBackground(Ogre::ColourValue::Blue);
 
-	m_DebugRectangle.setPosition(Widget::getPosition());
-	m_DebugRectangle.setSize(size);
+	m_DebugRectangle->setPosition(Widget::getPosition());
+	m_DebugRectangle->setSize(size);
 	//sf::FloatRect req(GetAllocation());
 	//sf::FloatRect parentAllocation(GetParent()->GetAllocation());
 

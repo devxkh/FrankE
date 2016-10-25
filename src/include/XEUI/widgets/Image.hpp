@@ -5,7 +5,6 @@
 #include <XEUI/Widget.hpp>
 #include <XEUI/Misc.hpp>
 
-#include <XERenderer/GUI/WRectangle.hpp>
 //#include <SFML/Graphics/Image.hpp>
 
 #include <memory>
@@ -13,6 +12,7 @@
 namespace XE {
 
 	struct SpriteData;
+	class WRectangle;
 
 	/** Image.
 	*/
@@ -50,7 +50,7 @@ namespace XE {
 
 	private:
 
-		WRectangle m_rectangle;
+		WRectangle* m_rectangle;
 		std::string m_imageName;
 		const SpriteData* m_sprite;
 		//mutable sf::Vector2f m_texture_offset;

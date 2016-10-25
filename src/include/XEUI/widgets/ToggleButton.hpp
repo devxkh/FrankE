@@ -7,9 +7,6 @@
 
 #include <XEUI/Widgets/Button.hpp>
 
-#include <XERenderer/GUI/WRectangle.hpp>
-#include <XERenderer/GUI/WCaption.hpp>
-
 namespace XE {
 
 	/** Toggle button.

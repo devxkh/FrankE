@@ -104,4 +104,7 @@ sfml_add_library(XERenderer
 	EXTERNAL_LIBS ${XERenderer_EXT_LIBS})
 
 
+
 set_property(TARGET XERenderer PROPERTY FOLDER "libraries")
+
+#cotire(XERenderer)

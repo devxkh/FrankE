@@ -4,17 +4,21 @@
 
 #include <XERenderer/GUI/GUIRenderer.hpp>
 #include <XERenderer/GUI/WLayer.hpp>
+#include <XERenderer/GUI/WRectangle.hpp>
+#include <XERenderer/GUI/WCaption.hpp>
 
 namespace XE {
 
 	Label::Label(WLayer& parentLayer, Uint16 fontId, const sf::String& text) :
 		m_text(text)
 		, m_wrap(false)
-		, m_wcaption(parentLayer,fontId)
-		
-		, m_DebugRectangle(parentLayer, 0, 0, 0, 0)
-
 	{
+		m_shapesContainer.shapes.emplace_back(std::move(std::unique_ptr<WRectangle>(new WRectangle(parentLayer, 0, 0, 0, 0))));
+		m_DebugRectangle = static_cast<WRectangle*>(m_shapesContainer.shapes.back().get());
+		m_shapesContainer.shapes.emplace_back(std::move(std::unique_ptr<WCaption>(new WCaption(parentLayer, fontId))));
+		m_wcaption = static_cast<WCaption*>(m_shapesContainer.shapes.back().get());
+
+
 		SetAlignment(sf::Vector2f(.5f, .5f));
 		draw();
 	}
@@ -138,7 +142,7 @@ namespace XE {
 
 	void Label::UpdateAlignment() {
 		
-		sf::Vector2i textSize = m_wcaption.GetTextStringMetrics(m_text);
+		sf::Vector2i textSize = m_wcaption->GetTextStringMetrics(m_text);
 
 		/*--------
 		xxxx*/
@@ -151,11 +155,11 @@ namespace XE {
 
 		sf::Vector2f textPos(posx + offsetx, middley + (textSize.y / 2));
 
-		m_wcaption.setPosition(textPos);
+		m_wcaption->setPosition(textPos);
 
-		m_DebugRectangle.setBackground(Ogre::ColourValue::White);
-		m_DebugRectangle.setPosition(Widget::getPosition());
-		m_DebugRectangle.setSize(size);
+		m_DebugRectangle->setBackground(Ogre::ColourValue::White);
+		m_DebugRectangle->setPosition(Widget::getPosition());
+		m_DebugRectangle->setSize(size);
 	}
 
 
@@ -176,8 +180,8 @@ namespace XE {
 
 		//sf::Vector2f textPos(posx + offsetx, Widget::getPosition().y);
 
-		m_wcaption.setSize(size.x, size.y);
-		m_wcaption.setText(GetText());
+		m_wcaption->setSize(size.x, size.y);
+		m_wcaption->setText(GetText());
 
 		//m_wcaption.setPosition(textPos);//  sf::Vector2f(parentAllocation.left + req.left, parentAllocation.top + req.top));
 		UpdateAlignment();
@@ -219,7 +223,7 @@ namespace XE {
 		metrics.x = 0.f;
 		}*/
 
-		return m_wcaption.getSize(); // metrics;
+		return m_wcaption->getSize(); // metrics;
 	}
 
 	const std::string& Label::GetName() const {

@@ -670,9 +670,7 @@ namespace XE {
 			SetState(State::NORMAL);
 		}
 
-		//KH if( m_drawable ) {
-		//KH 	m_drawable->Show( IsGloballyVisible() );
-		//KH }
+		m_shapesContainer.Show( IsGloballyVisible() );
 	}
 	
 	void Widget::Refresh() {

@@ -3,6 +3,12 @@
 //#include <SFGUI/RenderQueue.hpp>
 //#include <SFGUI/Engine.hpp>
 
+#include <XERenderer/GUI/WRectangle.hpp>
+#include <XERenderer/GUI/WCaption.hpp>
+
+
+#include <SDL.h>
+
 #include <limits>
 
 namespace XE {
@@ -14,9 +20,12 @@ namespace XE {
 		m_style(style),
 		m_dragging(false),
 		m_resizing(false)
-		, m_label(parentLayer, fontId)
-		, m_rectangle(parentLayer, 0, 0, 0, 0)
 	{
+		m_shapesContainer.shapes.emplace_back(std::move(std::unique_ptr<WCaption>(new WCaption(parentLayer, fontId))));
+		m_label = static_cast<WCaption*>(m_shapesContainer.shapes.back().get());
+		m_shapesContainer.shapes.emplace_back(std::move(std::unique_ptr<WRectangle>(new WRectangle(parentLayer, 0, 0, 0, 0))));
+		m_rectangle = static_cast<WRectangle*>(m_shapesContainer.shapes.back().get());
+
 
 	}
 

@@ -17,6 +17,9 @@
 
 #include <plog/Appenders/ConsoleAppender.h>
 
+
+#include <algorithm>
+
 namespace XE
 {
 	//#define GRAPHICS_THREAD 1  //compile with graphics render thread
@@ -31,6 +34,7 @@ namespace XE
 		//#ifdef GRAPHICS_THREAD
 		, mRenderThread(nullptr), // &GraphicsManager::RenderThread, this, this, engine),
 		//#endif
+		mAccumTimeSinceLastLogicFrame(0),
 		mEngine(engine)
 		, m_GUIRenderer(*this)
 		, m_SdlWindow(0)
@@ -173,6 +177,10 @@ namespace XE
 	//	});
 	//}
 
+	float GraphicsManager::getAccumTimeSinceLastLogicFrame()
+	{
+		return mAccumTimeSinceLastLogicFrame;
+	}
 
 	void GraphicsManager::setFullScreen(SDL_Window* wnd, bool fullscreen)
 	{
@@ -222,8 +230,12 @@ namespace XE
 		return _renderTasks[id];
 	}
 
+	double timeSinceLast = 1.0 / 60.0;
+
 	void GraphicsManager::updateRenderer()
 	{
+	//	mAccumTimeSinceLastLogicFrame = 0; //TODO not needed? always 0 ?
+
 		my_QueueManager.TriggerAllHandler();
 
 		my_FromRSQueueManager.push([this]() { //executed in mainthread
@@ -247,6 +259,16 @@ namespace XE
 
 		if (mRoot->isInitialised())
 			mRoot->renderOneFrame();
+
+		
+		auto elapsedTimeMainThread = m_clock.restart();
+
+		sf::Uint64 time = elapsedTimeMainThread.asMicroseconds();
+
+		double timeSinceLast = time / 1000000.0;
+		timeSinceLast = std::min(1.0, timeSinceLast); //Prevent from going haywire.
+
+		mAccumTimeSinceLastLogicFrame = timeSinceLast;
 	}
 
 	void GraphicsManager::createRenderer()

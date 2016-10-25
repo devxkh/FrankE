@@ -1,9 +1,10 @@
 #pragma once
 
-#include <XEUI/Bin.hpp>
 #include <XEUI/Widgets/ToggleButton.hpp>
 
 namespace XE {
+
+	class WRectangle;
 
 	/** Check button.
 	*/
@@ -30,7 +31,7 @@ namespace XE {
 		void draw() override;
 		
 
-		WRectangle m_checkedRectangle;
+		WRectangle* m_checkedRectangle;
 	};
 
 }

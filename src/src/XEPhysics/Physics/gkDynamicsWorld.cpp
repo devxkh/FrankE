@@ -62,7 +62,7 @@ gkDynamicsWorld::gkDynamicsWorld(const std::string& name, XE::Scene& scene)
 	        m_constraintSolver(0),
 	        m_debug(0),
 	        m_handleContacts(true)//,
-	,m_fps(60)
+	,m_fps(50)
 	, m_maxSubSteps(0)
 	,m_timeAcc(0)
 	,m_interpolation(true)

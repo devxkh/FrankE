@@ -7,6 +7,7 @@
 
 #include <vector>
 #include <atomic>
+#include <memory>
 
 namespace XE
 {
@@ -30,6 +31,7 @@ namespace XE
 		Ogre::Vector2 uv;
 	};
 
+
 	//BaseClass
 	/// lives in mainthread
 	class RenderableShape
@@ -46,6 +48,8 @@ namespace XE
 
 		bool isDirty;
 
+		bool isVisible;
+
 	protected:
 
 		std::vector<Vertex> m_verticesBuffer;
@@ -56,6 +60,30 @@ namespace XE
 
 		LayerRenderer* _layerRenderer;
 
+	};
+
+
+	class RenderableShapesContainer
+	{
+	public:
+		RenderableShapesContainer()
+		: m_show(true){
+
+		}
+
+		void Show(bool show)
+		{
+			for (auto& shape : shapes)
+			{
+				shape->isVisible = show;
+			}
+			m_show = show;
+		}
+	
+		std::vector<std::unique_ptr<RenderableShape>> shapes;
+
+	private :
+		bool m_show;
 	};
 }
 

@@ -5,13 +5,13 @@
 #include <XEUI/Misc.hpp>
 #include <memory>
 #include <SFML/System/String.hpp>
-#include <XERenderer/GUI/WCaption.hpp>
 
-#include <XERenderer/GUI/WRectangle.hpp>
 
 namespace XE {
 
 	class Font;
+	class WRectangle;
+	class WCaption;
 
 /** Text label.
  */
@@ -82,10 +82,10 @@ class  Label : public Widget, public Misc {
 		sf::String m_wrapped_text;
 		
 
-		WRectangle m_DebugRectangle;
+		WRectangle* m_DebugRectangle;
 
 		bool m_wrap;
-		WCaption m_wcaption;
+		WCaption* m_wcaption;
 };
 
 }

@@ -2,7 +2,6 @@
 #include <XEUI/Container.hpp>
 #include <XEUI/Misc.hpp>
 
-#include <XERenderer/GUI/WRectangle.hpp>
 
 #include <memory>
 #include <list>
@@ -11,6 +10,7 @@
 namespace XE {
 
 	class WLayer;
+	class WRectangle;
 
 /** Box sizer.
  * Widgets are arranged horizontally or vertically.
@@ -107,7 +107,7 @@ class Box : public Container {
 		float m_spacing;
 		Orientation m_orientation;
 
-		WRectangle m_DebugRectangle;
+		WRectangle* m_DebugRectangle;
 		WLayer& m_layer;
 };
 

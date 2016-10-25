@@ -22,6 +22,9 @@ namespace XE
 		, m_nearClipDistance(0.1f)
 		, m_farClipDistance(1000.0f)
 		, m_screenPointRay()
+
+		, _t_LastPosition(Ogre::Vector3::ZERO)
+		, _t_CurrentPosition(Ogre::Vector3::ZERO)
 	{
 		m_GraphicsManager.getIntoRendererQueue().push([this, id]() {
 
@@ -92,10 +95,45 @@ namespace XE
 
 	void CameraRenderable::updateLookAt(const  Ogre::Vector3& position, const  Ogre::Vector3& lookAt)
 	{
+	//	std::cout << "updateLookAt: " << position << std::endl;
+
 		m_GraphicsManager.getIntoRendererQueue().push([this, position, lookAt]() {
 			
-			_t_OgreCameraPtr->setPosition(position.x, position.y, position.z);
-			_t_OgreCameraPtr->lookAt(Ogre::Vector3(lookAt.x, lookAt.y, lookAt.z));
+		
+	//		std::cout << "#updateLookAt: " << position << std::endl;
+			
+			_t_LastPosition = _t_CurrentPosition;
+			_t_CurrentPosition = position;
+
+			float weight = m_GraphicsManager.getAccumTimeSinceLastLogicFrame() /  (1.0 / 50.0);
+			weight = std::min(1.0f, weight);
+
+			Ogre::Vector3 interpPosition = Ogre::Math::lerp(_t_LastPosition, _t_CurrentPosition, weight);
+	
+			float dt = m_GraphicsManager.getAccumTimeSinceLastLogicFrame();
+			
+			Ogre::Vector3 goalOffset(position - _t_OgreCameraPtr->getPosition() );
+		// Update now as yaw needs the derived orientation.
+		//	_t_OgreCameraPtr->getParentNode()->_getFullTransformUpdated();
+			//Ogre::Vector3 test(-0.10,0,0);
+			/*Ogre::Node *cameraNode = _t_OgreCameraPtr->getParentNode();
+			cameraNode->translate(camMovementDir, Ogre::Node::TS_LOCAL);*/
+		//	_t_OgreCameraPtr->move(goalOffset * dt);
+		//	Ogre::Node *cameraNode = _t_OgreCameraPtr->getParentNode();
+		//	_t_OgreCameraPtr->move(goalOffset *dt);// , Ogre::Node::TS_LOCAL);
+			_t_OgreCameraPtr->setPosition(position);
+
+		//	_t_OgreCameraPtr->moveRelative(goalOffset);
+			//_t_OgreCameraPtr->move(goalOffset);
+
+			//_t_OgreCameraPtr->setPosition(interpPosition);
+			//_t_OgreCameraPtr-(position * m_GraphicsManager.getAccumTimeSinceLastLogicFrame());
+			//	_t_OgreCameraPtr->setPosition(position.x, position.y, position.z);
+			//	_t_OgreCameraPtr->lookAt(Ogre::Vector3(lookAt.x, lookAt.y, lookAt.z));
+		//		_t_OgreCameraPtr->lookAt(lookAt);
+			m_GraphicsManager.getFromRendererQueue().push([this]() {
+				m_GraphicsManager.GetRenderTask(RenderTaskID::Camera).isDone = true;
+			});
 		});
 	}
 

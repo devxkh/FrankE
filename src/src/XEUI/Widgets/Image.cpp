@@ -5,6 +5,8 @@
 
 #include <XERenderer/GUI/GUIRenderer.hpp> //includes sprite data struct
 
+
+#include <XERenderer/GUI/WRectangle.hpp>
 #include <XERenderer/GUI/WLayer.hpp>
 #include <XERenderer/GUI/WScreen.hpp>
 //#include <SFGUI/Context.hpp>
@@ -19,10 +21,13 @@
 namespace XE {
 
 	Image::Image(WLayer& parentLayer, const std::string& imageName)
-		: m_rectangle(parentLayer, 0, 0, 0, 0)
-		, m_imageName(imageName)
+		: m_imageName(imageName)
 		, m_sprite(0)
 	{
+		m_shapesContainer.shapes.emplace_back(std::move(std::unique_ptr<WRectangle>(new WRectangle(parentLayer, 0, 0, 0, 0))));
+		m_rectangle = static_cast<WRectangle*>(m_shapesContainer.shapes.back().get());
+
+
 		SetAlignment(sf::Vector2f(.5f, .5f));
 		SetImage(imageName);
 	}
@@ -33,7 +38,7 @@ namespace XE {
 
 	void Image::SetImage(const std::string& imageName) {
 		
-		m_sprite = m_rectangle.setBackgroundImage(imageName);
+		m_sprite = m_rectangle->setBackgroundImage(imageName);
 
 		m_imageName = imageName;
 
@@ -64,8 +69,8 @@ namespace XE {
 	/*	sf::FloatRect req(GetAllocation());
 		sf::FloatRect parentAllocation(GetParent()->GetAllocation());*/
 
-		m_rectangle.setPosition(Widget::getPosition()); // sf::Vector2f(parentAllocation.left + req.left, parentAllocation.top + req.top));
-		m_rectangle.setSize(sf::Vector2f(size.x, size.y));
+		m_rectangle->setPosition(Widget::getPosition()); // sf::Vector2f(parentAllocation.left + req.left, parentAllocation.top + req.top));
+		m_rectangle->setSize(sf::Vector2f(size.x, size.y));
 
 		//std::unique_ptr<RenderQueue> queue = Context::Get().GetEngine().CreateImageDrawable(std::dynamic_pointer_cast<const Image>(shared_from_this()));
 

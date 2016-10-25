@@ -12,7 +12,7 @@ namespace XE
 		: m_guiRenderer(wLayer.m_guiRenderer)
 		, m_layer(wLayer)
 		, isDirty(false)
-
+		, isVisible(true)
 		, _layerRenderer(&m_guiRenderer.getLayerRenderer())
 	{
 			m_layer.addRenderableShape(this);

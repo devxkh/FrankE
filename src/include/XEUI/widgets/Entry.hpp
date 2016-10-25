@@ -3,13 +3,14 @@
 #include <XESystem/SystemConfig.hpp>
 #include <XEUI/Widget.hpp>
 
-#include <XERenderer/GUI/WRectangle.hpp>
-#include <XERenderer/GUI/WCaption.hpp>
-
 #include <SFML/System/String.hpp>
 #include <memory>
 
 namespace XE {
+
+	class WRectangle;
+	class WCaption;
+	class Font;
 
 	/** Entry widget
 	*/
@@ -159,9 +160,9 @@ namespace XE {
 
 		const Font* m_font;
 
-		WRectangle m_pane;
-		WRectangle m_cursor;
-		WCaption m_text;
+		WRectangle* m_pane;
+		WRectangle* m_cursor;
+		WCaption* m_text;
 	};
 
 }

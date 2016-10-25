@@ -61,7 +61,13 @@ namespace XE {
 		void _t_updateRayFromPoint(const Ogre::Vector2& screenpoint);
 
 
+		Ogre::Camera* _t_OgreCameraPtr;
+
 	private:
+
+
+		Ogre::Vector3 _t_LastPosition;
+		Ogre::Vector3 _t_CurrentPosition;
 
 		Ogre::Ray m_screenPointRay;
 
@@ -69,7 +75,6 @@ namespace XE {
 		XE::Uint16 m_ID;
 		Scene& m_Scene;
 
-		Ogre::Camera* _t_OgreCameraPtr;
 		XE::OgreWorkspace*			_t_OgreWorkspace;
 
 		

@@ -46,9 +46,9 @@ namespace XE {
 		~IcoSphere();
 
 		void create(int recursionLevel);
-		void addToLineIndices(int baseIndex, std::list<int> *target);
+		void addToLineIndices(int baseIndex, std::queue<int> *target);
 		int addToVertices(std::queue<Vertex> *target, const Ogre::Vector3 &position, const Ogre::ColourValue &colour, float scale);
-		void addToTriangleIndices(int baseIndex, std::list<int> *target);
+		void addToTriangleIndices(int baseIndex, std::queue<int> *target);
 
 	private:
 		int addVertex(const Ogre::Vector3 &vertex);
@@ -94,13 +94,15 @@ namespace XE {
 		std::queue<Vertex>& getLineVertices();
 		std::queue<Vertex>& getTriangleVertices();
 
-		std::list<int>& getLineIndices();
-		std::list<int>& getTriangleIndices();
+		std::queue<int>& getLineIndices();
+		std::queue<int>& getTriangleIndices();
 
 	private:
 		DebugRenderer* _t_DebugRenderer;
 		Scene& m_scene;
 
+		bool m_isDirty;
+		bool m_rendererIsDone;
 		bool _swapBuffer;
 		float fillAlpha;
 		IcoSphere icoSphere;
@@ -111,10 +113,10 @@ namespace XE {
 
 
 		std::queue<Vertex> lineVertices1, triangleVertices1;
-		std::list<int> lineIndices1, triangleIndices1;
+		std::queue<int> lineIndices1, triangleIndices1;
 
 		std::queue<Vertex> lineVertices2, triangleVertices2;
-		std::list<int> lineIndices2, triangleIndices2;
+		std::queue<int> lineIndices2, triangleIndices2;
 
 	//	void initialise();
 	//	void shutdown();

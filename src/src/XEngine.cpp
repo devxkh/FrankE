@@ -221,7 +221,7 @@ namespace XE
 
 
 
-		m_mtFrameLimiter.ApplyFrameLimit(m_clock);
+		m_mtFrameLimiter.ApplyFrameLimit(m_clock,50);
 
 		elapsedTimeMainThread = m_clock.restart();
 		
@@ -241,7 +241,7 @@ namespace XE
 
 		mGraphicsManager.getFromRendererQueue().TriggerAllHandler();
 
-		//bool cap = true;
+		//bool cap = true;limi
 
 
 		////If we want to cap the frame rate

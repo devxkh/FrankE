@@ -52,7 +52,7 @@ namespace XE
 						auto m_targetDirection = bodyComponent->getTargetPosition() - bodyComponent->getPosition();
 						auto m_targetDistance = m_targetDirection.normalise();
 
-						if (m_targetDistance <= bodyComponent->getPosition().y) //bodyComponent->getTargetDistance() <= 0.0)
+						if (m_targetDistance <= 6) //bodyComponent->getPosition().y) //bodyComponent->getTargetDistance() <= 0.0)
 						{
 					//		std::cout << ",ry:" << bodyComponent->getPosition().y << ",distance:" << distance << std::endl;
 							bodyComponent->setHasTargetPosition(false); // target reached

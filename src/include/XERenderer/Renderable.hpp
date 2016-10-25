@@ -71,7 +71,6 @@ namespace XE {
 		Ogre::Item* _t_OgreItemPtr;
 		Ogre::SceneNode* _t_OgreEntitySceneNodePtr;
 
-
 		GraphicsManager& m_GraphicsManager;
 
 		void _t_update();
@@ -98,6 +97,9 @@ namespace XE {
 
 	private:
 
+
+		Ogre::Vector3 _t_LastPosition;
+		Ogre::Vector3 _t_CurrentPosition;
 
 		Ogre::Vector3 m_position;
 		Ogre::Quaternion m_rotation;

@@ -10,6 +10,9 @@
 //#include <SFML/Graphics/Font.hpp>
 #include <cmath>
 
+#include <XERenderer/GUI/WRectangle.hpp>
+#include <XERenderer/GUI/WCaption.hpp>
+
 #include <ThirdParty/plog/Log.h>
 
 
@@ -28,12 +31,19 @@ namespace XE {
 		m_elapsed_time(0.f),
 		m_text_margin(0.f),
 		m_cursor_status(false)
-		, m_pane(parentLayer, 0, 0, 0, 0)
-		, m_text(parentLayer, fontId)
-		, m_cursor(parentLayer, 0, 0, 0, 0)
+		//, m_pane(parentLayer, 0, 0, 0, 0)
+		//, m_text(parentLayer, fontId)
+		//, m_cursor(parentLayer, 0, 0, 0, 0)
 		, m_font(parentLayer.m_guiRenderer.getFont(fontId))
 	{
-		m_pane.setBackground(Ogre::ColourValue::Black); //debug
+		m_shapesContainer.shapes.emplace_back(std::move(std::unique_ptr<WRectangle>(new WRectangle(parentLayer, 0, 0, 0, 0))));
+		m_pane = static_cast<WRectangle*>(m_shapesContainer.shapes.back().get());
+		m_shapesContainer.shapes.emplace_back(std::move(std::unique_ptr<WCaption>(new WCaption(parentLayer, fontId))));
+		m_text = static_cast<WCaption*>(m_shapesContainer.shapes.back().get());
+		m_shapesContainer.shapes.emplace_back(std::move(std::unique_ptr<WRectangle>(new WRectangle(parentLayer, 0, 0, 0, 0))));
+		m_cursor = static_cast<WRectangle*>(m_shapesContainer.shapes.back().get());
+
+		m_pane->setBackground(Ogre::ColourValue::Black); //debug
 	//	m_pane.setBackgroundImage("quickmenu_restart_hover.png");
 	}
 
@@ -71,9 +81,9 @@ namespace XE {
 
 		sf::Vector2f textPos(Widget::getPosition().x, middley + (line_height / 2));
 
-		m_text.setPosition(textPos); // sf::Vector2f(parentAllocation.left + req.left, parentAllocation.top + req.top));
-		m_text.setSize(size.x, size.y);
-		m_text.setText(GetVisibleText());
+		m_text->setPosition(textPos); // sf::Vector2f(parentAllocation.left + req.left, parentAllocation.top + req.top));
+		m_text->setSize(size.x, size.y);
+		m_text->setText(GetVisibleText());
 	
 
 
@@ -82,8 +92,8 @@ namespace XE {
 		//LOG(plog::info) << "wText:";
 		//std::wcout << GetVisibleText().toWideString();
 
-		m_pane.setPosition(Widget::getPosition()); // sf::Vector2f(parentAllocation.left + req.left, parentAllocation.top + req.top));
-		m_pane.setSize(size); // sf::Vector2f(req.width, req.height));
+		m_pane->setPosition(Widget::getPosition()); // sf::Vector2f(parentAllocation.left + req.left, parentAllocation.top + req.top));
+		m_pane->setSize(size); // sf::Vector2f(req.width, req.height));
 		//queue->Add(Renderer::Get().CreateText(vis_label));
 
 		// Draw cursor if entry is active and cursor is visible.
@@ -94,12 +104,12 @@ namespace XE {
 			}
 
 			// Get metrics.
-			sf::Vector2f metrics(m_pane.getLayer().m_guiRenderer.GetTextStringMetrics(cursor_string, m_font));
+			sf::Vector2f metrics(m_pane->getLayer().m_guiRenderer.GetTextStringMetrics(cursor_string, m_font));
 
 			
-			m_cursor.setPosition(sf::Vector2f(Widget::getPosition().x + metrics.x + text_padding, Widget::getPosition().y +  (size.y / 2.f - line_height / 2.f)));
-			m_cursor.setSize(sf::Vector2f(cursor_thickness, line_height));
-			m_cursor.setBackground(Ogre::ColourValue::Red);
+			m_cursor->setPosition(sf::Vector2f(Widget::getPosition().x + metrics.x + text_padding, Widget::getPosition().y +  (size.y / 2.f - line_height / 2.f)));
+			m_cursor->setSize(sf::Vector2f(cursor_thickness, line_height));
+			m_cursor->setBackground(Ogre::ColourValue::Red);
 			//queue->Add(
 			//	Renderer::Get().CreateRect(
 			//		sf::FloatRect(
@@ -171,7 +181,7 @@ namespace XE {
 
 		for (cursor_position = 0; cursor_position < length; cursor_position++) {
 			//auto text_length = Context::Get().GetEngine().GetTextStringMetrics(string.substr(0, static_cast<std::size_t>(cursor_position + 1)), font, font_size).x;
-			auto text_length = m_pane.getLayer().m_guiRenderer.GetTextStringMetrics(string.substr(0, static_cast<std::size_t>(cursor_position + 1)), m_font).x;
+			auto text_length = m_pane->getLayer().m_guiRenderer.GetTextStringMetrics(string.substr(0, static_cast<std::size_t>(cursor_position + 1)), m_font).x;
 			auto new_delta = std::fabs(text_start + text_length - static_cast<float>(mouse_pos_x));
 			if (new_delta < last_delta) {
 				last_delta = new_delta;
@@ -205,7 +215,7 @@ namespace XE {
 		}
 
 		//auto length = Context::Get().GetEngine().GetTextStringMetrics(string, font, font_size).x;
-		auto length = m_pane.getLayer().m_guiRenderer.GetTextStringMetrics(string, m_font).x;
+		auto length = m_pane->getLayer().m_guiRenderer.GetTextStringMetrics(string, m_font).x;
 
 		// While the string is too long for the given space keep chopping off characters
 		// on the right end of the string until the cursor is reached, then start
@@ -220,7 +230,7 @@ namespace XE {
 			}
 
 			//length = Context::Get().GetEngine().GetTextStringMetrics(string, font, font_size).x;
-			length = m_pane.getLayer().m_guiRenderer.GetTextStringMetrics(string, m_font).x;
+			length = m_pane->getLayer().m_guiRenderer.GetTextStringMetrics(string, m_font).x;
 		}
 
 		m_visible_string = string;

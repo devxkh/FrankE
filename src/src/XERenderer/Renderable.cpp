@@ -39,6 +39,8 @@ namespace XE
 		//, m_worldOrientation(1 , 0, 0, 0)*/
 		//,m_transform(0, 0, 0)
 		//,m_worldTransform(0, 0, 0)
+		, _t_LastPosition(Ogre::Vector3::ZERO)
+		, _t_CurrentPosition(Ogre::Vector3::ZERO)
 	{
 		m_GraphicsManager._t_Renderables.push_back(this);
 
@@ -61,12 +63,24 @@ namespace XE
 		});
 	}
 
+	const double cFrametime = 1.0 / 50.0;
+
 	void Renderable::_t_update()
 	{
+		//_t_LastPosition = _t_CurrentPosition;
+		//_t_CurrentPosition = m_position;
+
+		//float weight = m_GraphicsManager.getAccumTimeSinceLastLogicFrame() / cFrametime;
+		//weight = std::min(1.0f, weight);
+
+		//Ogre::Vector3 interpPosition = Ogre::Math::lerp(_t_LastPosition, _t_CurrentPosition, weight);
+		
 		_t_OgreEntitySceneNodePtr->setPosition(m_position);
 		_t_OgreEntitySceneNodePtr->setOrientation(m_rotation);
+
 		isDirty = false;
 	}
+	
 
 	void Renderable::setWorldPosition(const Ogre::Vector3& pos)
 	{
@@ -191,6 +205,10 @@ namespace XE
 					_t_OgreItemPtr = m_Scene.getOgreSceneManager().__OgreSceneMgrPtr->createItem(v2Mesh, (Ogre::SceneMemoryMgrTypes)Ogre::SCENE_DYNAMIC);
 					_t_OgreItemPtr->setVisibilityFlags(0x000000001);
 
+					Ogre::HlmsManager *hlmsManager = m_GraphicsManager.getRoot()->getHlmsManager();
+					Ogre::HlmsDatablock *datablock = hlmsManager->getDatablock("TestModel");
+					_t_OgreItemPtr->setDatablock(datablock);
+
 					//Ogre::HlmsManager *hlmsManager = m_GraphicsManager.getRoot()->getHlmsManager();
 					//Ogre::HlmsDatablock *datablock = hlmsManager->getDatablock("HlmsUnlit1");
 					//datablock->mShadowConstantBias = 0.001;
@@ -214,6 +232,7 @@ namespace XE
 														 //floor->setMaterialName("Examples/Rockwall", "General");
 														 //floor->setCastShadows(false);
 					_t_OgreEntitySceneNodePtr->attachObject(_t_OgreItemPtr);
+				//	_t_OgreEntitySceneNodePtr->setVisible(false);
 	
 				}
 

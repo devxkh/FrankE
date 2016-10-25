@@ -11,6 +11,8 @@
 
 #include <XEngine/OgreLogListener.hpp>
 
+#include <ThirdParty/sfml/include/sfml/System/Clock.hpp>
+
 #include <mutex>
 #include <thread>
 
@@ -91,6 +93,7 @@ namespace XE
 
 		void setFullScreen(SDL_Window* wnd, bool fullscreen);
 
+		float getAccumTimeSinceLastLogicFrame();
 
 		Ogre::RenderWindow* _t_getRenderWindow(XE::Uint16 id){ return _t_RenderWindow; }
 
@@ -105,6 +108,10 @@ namespace XE
 		void createRenderer();
 
 	private:
+
+		float mAccumTimeSinceLastLogicFrame;
+		
+		sf::Clock m_clock;
 
 		OgreLogListener m_ogreLog;
 

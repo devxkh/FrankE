@@ -91,6 +91,9 @@ namespace XE
 
 			for each (auto renderableShape in m_renderableShapes)
 			{
+				if (!renderableShape->isVisible)
+					continue;
+
 				std::vector<Vertex>& tmp = renderableShape->_update();
 
 				for (std::vector<Vertex>::iterator it = tmp.begin(); it != tmp.end(); ++it)

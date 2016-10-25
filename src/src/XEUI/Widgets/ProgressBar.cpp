@@ -5,17 +5,22 @@
 
 #include <ThirdParty/sfml/include/sfml/Graphics/Rect.hpp>
 #include <XEUI/Container.hpp>
+#include <XERenderer/GUI/WRectangle.hpp>
+
 
 namespace XE {
 
 	ProgressBar::ProgressBar(WLayer& parentLayer, Orientation orientation) :
 		m_fraction(0.f),
 		m_orientation(orientation)
-		, m_pane(parentLayer, 0, 0, 0, 0)
-		, m_barPane(parentLayer, 0, 0, 0, 0)
 	{
-		m_pane.setBackground(Ogre::ColourValue::Green); //debug
-		m_barPane.setBackground(Ogre::ColourValue::Black); //debug
+		m_shapesContainer.shapes.emplace_back(std::move(std::unique_ptr<WRectangle>(new WRectangle(parentLayer, 0, 0, 0, 0))));
+		m_pane = static_cast<WRectangle*>(m_shapesContainer.shapes.back().get());
+		m_shapesContainer.shapes.emplace_back(std::move(std::unique_ptr<WRectangle>(new WRectangle(parentLayer, 0, 0, 0, 0))));
+		m_barPane = static_cast<WRectangle*>(m_shapesContainer.shapes.back().get());
+
+		m_pane->setBackground(Ogre::ColourValue::Green); //debug
+		m_barPane->setBackground(Ogre::ColourValue::Black); //debug
 		//m_barPane.setBackgroundImage("OgreHead.png");
 	}
 
@@ -53,8 +58,8 @@ namespace XE {
 		/*sf::FloatRect req(GetAllocation());
 		sf::FloatRect parentAllocation(GetParent()->GetAllocation());*/
 
-		m_pane.setPosition(Widget::getPosition());//  sf::Vector2f(parentAllocation.left + req.left, parentAllocation.top + req.top));
-		m_pane.setSize(sf::Vector2f(size.x, size.y));// .width, req.height));
+		m_pane->setPosition(Widget::getPosition());//  sf::Vector2f(parentAllocation.left + req.left, parentAllocation.top + req.top));
+		m_pane->setSize(sf::Vector2f(size.x, size.y));// .width, req.height));
 
 		//return Context::Get().GetEngine().CreateProgressBarDrawable(std::dynamic_pointer_cast<const ProgressBar>(shared_from_this()));
 		float bar_border_width = 0;
@@ -85,12 +90,12 @@ namespace XE {
 			}
 
 			// Bar Pane.
-			m_barPane.setPosition(sf::Vector2f(Widget::getPosition().x + bar_rect.left, Widget::getPosition().y + bar_rect.top));
-			m_barPane.setSize(sf::Vector2f(bar_rect.width, bar_rect.height));
+			m_barPane->setPosition(sf::Vector2f(Widget::getPosition().x + bar_rect.left, Widget::getPosition().y + bar_rect.top));
+			m_barPane->setSize(sf::Vector2f(bar_rect.width, bar_rect.height));
 		}
 		else
 		{
-			m_barPane.setSize(sf::Vector2f(0, 0));
+			m_barPane->setSize(sf::Vector2f(0, 0));
 		}
 
 	}

@@ -3,11 +3,11 @@
 #include <XESystem/SystemConfig.hpp>
 #include <XEUI/Widget.hpp>
 
-#include <XERenderer/GUI/WRectangle.hpp>
-
 #include <memory>
 
 namespace XE {
+
+	class WRectangle;
 
 	/** Progress Bar.
 	*/
@@ -59,8 +59,8 @@ namespace XE {
 		float m_fraction;
 		Orientation m_orientation;
 
-		WRectangle m_pane;
-		WRectangle m_barPane;
+		WRectangle* m_pane;
+		WRectangle* m_barPane;
 	};
 
 }

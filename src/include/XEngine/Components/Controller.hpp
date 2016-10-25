@@ -3,6 +3,7 @@
 #include <XESystem/SystemConfig.hpp>
 #include <Thor/Input/EventSystem.hpp>
 #include <Thor/Input/ActionMap.hpp>
+#include <XESystem/Entityx/Entity.h>
 
 class SDL_Window;
 
@@ -42,6 +43,8 @@ namespace XE
 		SDL_Window* m_window;
 		Uint16 mID;
 
+
+		std::vector<entityx::Entity> selectedEntities;
 		WindowState _windowState;
 		XEngine& engine;
 
