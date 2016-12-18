@@ -103,8 +103,8 @@ namespace Ogre
     {
         {
             //Destroy all buffers which don't have a pool
-            BufferPackedVec::const_iterator itor = mBuffers[BP_TYPE_CONST].begin();
-            BufferPackedVec::const_iterator end  = mBuffers[BP_TYPE_CONST].end();
+            BufferPackedSet::const_iterator itor = mBuffers[BP_TYPE_CONST].begin();
+            BufferPackedSet::const_iterator end  = mBuffers[BP_TYPE_CONST].end();
             while( itor != end )
                 destroyConstBufferImpl( static_cast<ConstBufferPacked*>( *itor++ ) );
         }
@@ -635,8 +635,8 @@ namespace Ogre
     //-----------------------------------------------------------------------------------
     void D3D11VaoManager::reorganizeImmutableVaos(void)
     {
-        VertexArrayObjectVec::const_iterator itor = mVertexArrayObjects.begin();
-        VertexArrayObjectVec::const_iterator end  = mVertexArrayObjects.end();
+        VertexArrayObjectSet::const_iterator itor = mVertexArrayObjects.begin();
+        VertexArrayObjectSet::const_iterator end  = mVertexArrayObjects.end();
 
         while( itor != end )
         {
@@ -1303,6 +1303,9 @@ namespace Ogre
                                                                          mDevice );
         mRefedStagingBuffers[forUpload].push_back( stagingBuffer );
 
+        if( mNextStagingBufferTimestampCheckpoint == (unsigned long)( ~0 ) )
+            mNextStagingBufferTimestampCheckpoint = mTimer->getMilliseconds() + mDefaultStagingBufferLifetime;
+
         return stagingBuffer;
     }
     //-----------------------------------------------------------------------------------
@@ -1364,12 +1367,10 @@ namespace Ogre
                     StagingBuffer *stagingBuffer = *itor;
 
                     mNextStagingBufferTimestampCheckpoint = std::min(
-                                                    mNextStagingBufferTimestampCheckpoint,
-                                                    stagingBuffer->getLastUsedTimestamp() +
-                                                    currentTimeMs );
+                        mNextStagingBufferTimestampCheckpoint, 
+                        stagingBuffer->getLastUsedTimestamp() + stagingBuffer->getLifetimeThreshold() );
 
-                    if( stagingBuffer->getLastUsedTimestamp() - currentTimeMs >
-                        stagingBuffer->getLifetimeThreshold() )
+                    if( stagingBuffer->getLastUsedTimestamp() + stagingBuffer->getLifetimeThreshold() < currentTimeMs )
                     {
                         //Time to delete this buffer.
                         static_cast<D3D11StagingBuffer*>(stagingBuffer)->getBufferName()->Release();

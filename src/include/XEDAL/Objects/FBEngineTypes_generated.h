@@ -136,6 +136,18 @@ inline const char **EnumNamesFileLocation() {
 
 inline const char *EnumNameFileLocation(FileLocation e) { return EnumNamesFileLocation()[static_cast<int>(e)]; }
 
+enum TextureType {
+  TextureType_Unlit = 0,
+  TextureType_Pbs = 1
+};
+
+inline const char **EnumNamesTextureType() {
+  static const char *names[] = { "Unlit", "Pbs", nullptr };
+  return names;
+}
+
+inline const char *EnumNameTextureType(TextureType e) { return EnumNamesTextureType()[static_cast<int>(e)]; }
+
 enum UMesh {
   UMesh_NONE = 0,
   UMesh_MeshFile = 1,
@@ -664,10 +676,16 @@ inline flatbuffers::Offset<LocalFile> CreateLocalFile(flatbuffers::FlatBufferBui
 
 struct Material FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   const LocalFile *file() const { return GetPointer<const LocalFile *>(4); }
+  const flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>> *textures() const { return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>> *>(6); }
+  TextureType textureType() const { return static_cast<TextureType>(GetField<int8_t>(8, 0)); }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
            VerifyField<flatbuffers::uoffset_t>(verifier, 4 /* file */) &&
            verifier.VerifyTable(file()) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, 6 /* textures */) &&
+           verifier.Verify(textures()) &&
+           verifier.VerifyVectorOfStrings(textures()) &&
+           VerifyField<int8_t>(verifier, 8 /* textureType */) &&
            verifier.EndTable();
   }
 };
@@ -676,31 +694,36 @@ struct MaterialBuilder {
   flatbuffers::FlatBufferBuilder &fbb_;
   flatbuffers::uoffset_t start_;
   void add_file(flatbuffers::Offset<LocalFile> file) { fbb_.AddOffset(4, file); }
+  void add_textures(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>>> textures) { fbb_.AddOffset(6, textures); }
+  void add_textureType(TextureType textureType) { fbb_.AddElement<int8_t>(8, static_cast<int8_t>(textureType), 0); }
   MaterialBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
   MaterialBuilder &operator=(const MaterialBuilder &);
   flatbuffers::Offset<Material> Finish() {
-    auto o = flatbuffers::Offset<Material>(fbb_.EndTable(start_, 1));
+    auto o = flatbuffers::Offset<Material>(fbb_.EndTable(start_, 3));
     return o;
   }
 };
 
 inline flatbuffers::Offset<Material> CreateMaterial(flatbuffers::FlatBufferBuilder &_fbb,
-   flatbuffers::Offset<LocalFile> file = 0) {
+   flatbuffers::Offset<LocalFile> file = 0,
+   flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>>> textures = 0,
+   TextureType textureType = TextureType_Unlit) {
   MaterialBuilder builder_(_fbb);
+  builder_.add_textures(textures);
   builder_.add_file(file);
+  builder_.add_textureType(textureType);
   return builder_.Finish();
 }
 
 struct MeshFile FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   const LocalFile *file() const { return GetPointer<const LocalFile *>(4); }
-  const flatbuffers::Vector<flatbuffers::Offset<Material>> *materials() const { return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<Material>> *>(6); }
+  const Material *material() const { return GetPointer<const Material *>(6); }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
            VerifyField<flatbuffers::uoffset_t>(verifier, 4 /* file */) &&
            verifier.VerifyTable(file()) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, 6 /* materials */) &&
-           verifier.Verify(materials()) &&
-           verifier.VerifyVectorOfTables(materials()) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, 6 /* material */) &&
+           verifier.VerifyTable(material()) &&
            verifier.EndTable();
   }
 };
@@ -709,7 +732,7 @@ struct MeshFileBuilder {
   flatbuffers::FlatBufferBuilder &fbb_;
   flatbuffers::uoffset_t start_;
   void add_file(flatbuffers::Offset<LocalFile> file) { fbb_.AddOffset(4, file); }
-  void add_materials(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Material>>> materials) { fbb_.AddOffset(6, materials); }
+  void add_material(flatbuffers::Offset<Material> material) { fbb_.AddOffset(6, material); }
   MeshFileBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
   MeshFileBuilder &operator=(const MeshFileBuilder &);
   flatbuffers::Offset<MeshFile> Finish() {
@@ -720,9 +743,9 @@ struct MeshFileBuilder {
 
 inline flatbuffers::Offset<MeshFile> CreateMeshFile(flatbuffers::FlatBufferBuilder &_fbb,
    flatbuffers::Offset<LocalFile> file = 0,
-   flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Material>>> materials = 0) {
+   flatbuffers::Offset<Material> material = 0) {
   MeshFileBuilder builder_(_fbb);
-  builder_.add_materials(materials);
+  builder_.add_material(material);
   builder_.add_file(file);
   return builder_.Finish();
 }

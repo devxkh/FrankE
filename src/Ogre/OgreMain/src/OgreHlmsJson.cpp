@@ -492,6 +492,9 @@ namespace Ogre
 
         if( d.HasParseError() )
         {
+			auto test1 = (unsigned)d.GetErrorOffset();
+			auto test2 = d.GetParseError();
+
             OGRE_EXCEPT( Exception::ERR_INVALIDPARAMS,
                          "HlmsJson::loadMaterials",
                          "Invalid JSON string in file " + filename );

@@ -600,6 +600,11 @@ include_directories(${PROJECT_SOURCE_DIR}/src/ThirdParty/sfml/include)
 # Set Properties->General->Configuration Type to Dynamic Library(.lib)
 # Creates math.dll with the listed sources collected in the variables
 
+
+enable_unity_build(XEPhysics  ${XEPhysics_SOURCES}  ${XEPhysics_Util_SOURCES} ${XEPhysics_BULLET_SOURCES}  ${BulletCollision_SRCS} ${BulletDynamics_SRCS} 
+	 ${Physics_SOURCES} ${XEMath_SOURCES} 
+	${LinearMath_SRCS}  ${ConvexDecomposition_SRCS}  ${XEPhysics_Debug_SRC} )
+
 # Also adds sources to the Solution Explorer ----------------------------------------------------------------------------------
 #bullet can only be used as static !!!
 add_library(XEPhysics STATIC ${XEPhysics_SOURCES} ${XEPhysics_HEADER} ${XEPhysics_Util_SOURCES} ${XEPhysics_BULLET_SOURCES}  ${BulletCollision_SRCS} ${BulletCollision_HDRS} ${BulletDynamics_SRCS} ${BulletDynamics_HDRS} 

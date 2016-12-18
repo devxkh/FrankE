@@ -339,6 +339,17 @@ list(APPEND XEDAL_EXT_LIBS ${FMODFILE_LIBRARY})
 
 message("XEngine_EXT_LIBS:" ${XEngine_EXT_LIBS})
 
+enable_unity_build(XEngine  ${XEngine_SOURCES}  ${XEngineModules_SOURCES}  ${SRC} ${XEngine_UI_SOURCES}  ${XEEngineRTOS_SOURCES} ${XEEngineRTC_SOURCES}
+		  ${XEComponents_SOURCES}  ${XESystems_SOURCES}
+		 ${XEngine_main_SOURCES} 
+			 ${XEEngineAnimation_SOURCES}
+				 ${XEAudio_SOURCES} 
+			${XEScripts_SOURCES}${XEScripts_LUASRC}
+	 ${XEController_SOURCES}  ${XEController_UI_SOURCES} 
+	  ${XEAnimation_SOURCES} ${XEAnimationNodes_SOURCES} ${XEAnimationProp_SOURCES}
+	 ${XEAnimationHelper_SOURCES})
+
+
 #----------------------------------------------------------------
 # Set Properties->General->Configuration Type to Dynamic Library(.lib)
 # Creates math.dll with the listed sources collected in the variables

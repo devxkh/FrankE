@@ -52,3 +52,22 @@ hlms AllSettings pbs
 	//Alpha	channel controls the masks on detail_map3 and detail_normal_map3
 	detail_weight_map	nm_up.png
 }
+
+hlms Rocks pbs
+{
+	roughness	0.4
+	fresnel		1.33
+	
+	diffuse_map		Rocks_Diffuse.tga
+	normal_map		Rocks_Normal.tga
+	roughness_map	Rocks_Spec.tga
+	specular_map	Rocks_Diffuse.tga
+}
+
+hlms Marble pbs
+{
+	roughness	1.0
+	detail_map0				MRAMOR6X6.jpg
+	detail_offset_scale0 	0 0 5 5
+	roughness_map			MRAMOR-bump.jpg
+}

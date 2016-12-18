@@ -23,9 +23,16 @@
 	//pass.f3dGridHWW[slice].y = grid_height / renderTarget->height;
 	//pass.f3dGridHWW[slice].z = grid_width * lightsPerCell;
 	//uint sampleOffset = 0;
+@property( hlms_forward3d_flipY )
+	float windowHeight = pass.f3dGridHWW[1].w; //renderTarget->height
+	uint sampleOffset = offset +
+						uint(floor( (windowHeight - gl_FragCoord.y) * pass.f3dGridHWW[slice].y ) * pass.f3dGridHWW[slice].z) +
+						uint(floor( gl_FragCoord.x * pass.f3dGridHWW[slice].x ) * lightsPerCell);
+@end @property( !hlms_forward3d_flipY )
 	uint sampleOffset = offset +
 						uint(floor( gl_FragCoord.y * pass.f3dGridHWW[slice].y ) * pass.f3dGridHWW[slice].z) +
 						uint(floor( gl_FragCoord.x * pass.f3dGridHWW[slice].x ) * lightsPerCell);
+@end
 
 	uint numLightsInGrid = texelFetch( f3dGrid, int(sampleOffset) ).x;
 
@@ -39,7 +46,7 @@
 
 		vec3 lightDiffuse	= texelFetch( f3dLightList, int(idx + 1u) ).xyz;
 		vec3 lightSpecular	= texelFetch( f3dLightList, int(idx + 2u) ).xyz;
-		vec3 attenuation	= texelFetch( f3dLightList, int(idx + 3u) ).xyz;
+		vec4 attenuation	= texelFetch( f3dLightList, int(idx + 3u) ).xyzw;
 
 		vec3 lightDir	= posAndType.xyz - inPs.pos;
 		float fDistance	= length( lightDir );
@@ -48,6 +55,9 @@
 		{
 			lightDir *= 1.0 / fDistance;
 			float atten = 1.0 / (1.0 + (attenuation.y + attenuation.z * fDistance) * fDistance );
+			@property( hlms_forward_fade_attenuation_range )
+				atten *= max( (attenuation.x - fDistance) * attenuation.w, 0.0f );
+			@end
 
 			if( posAndType.w == 1.0 )
 			{

@@ -16,6 +16,14 @@ layout(location = FRAG_COLOR, index = 0) out float outColour;
 in vec4 gl_FragCoord;
 @end
 
+@property( two_sided_lighting )
+	@property( hlms_forward3d_flipY )
+		@piece( two_sided_flip_normal )* (gl_FrontFacing ? -1.0 : 1.0)@end
+	@end @property( !hlms_forward3d_flipY )
+		@piece( two_sided_flip_normal )* (gl_FrontFacing ? 1.0 : -1.0)@end
+	@end
+@end
+
 // START UNIFORM DECLARATION
 @property( !hlms_shadowcaster || alpha_test )
 	@property( !hlms_shadowcaster )
@@ -51,7 +59,7 @@ in block
 	@property( detail_map_nm@n )uint detailNormMapIdx@n;@end @end
 @property( envprobe_map )	uint envMapIdx;@end
 
-@property( diffuse_map || detail_maps_diffuse )vec4 diffuseCol;@end
+vec4 diffuseCol;
 @property( specular_map && !metallic_workflow && !fresnel_workflow )vec3 specularCol;@end
 @property( metallic_workflow || (specular_map && fresnel_workflow) )@insertpiece( FresnelType ) F0;@end
 @property( roughness_map )float ROUGHNESS;@end
@@ -216,8 +224,12 @@ void main()
 {
     @insertpiece( custom_ps_preExecution )
 @property( hlms_normal || hlms_qtangent )
-	uint materialId	= instance.worldMaterialIdx[inPs.drawId].x & 0x1FFu;
-	material = materialArray.m[materialId];
+	@property( !lower_gpu_overhead )
+		uint materialId	= instance.worldMaterialIdx[inPs.drawId].x & 0x1FFu;
+		material = materialArray.m[materialId];
+	@end @property( lower_gpu_overhead )
+		material = materialArray.m[0];
+	@end
 @property( diffuse_map )	diffuseIdx			= material.indices0_3.x & 0x0000FFFFu;@end
 @property( normal_map_tex )	normalIdx			= material.indices0_3.x >> 16u;@end
 @property( specular_map )	specularIdx			= material.indices0_3.y & 0x0000FFFFu;@end
@@ -260,41 +272,34 @@ void main()
 	/// 'insertpiece( SampleDiffuseMap )' must've written to diffuseCol. However if there are no
 	/// diffuse maps, we must initialize it to some value. If there are no diffuse or detail maps,
 	/// we must not access diffuseCol at all, but rather use material.kD directly (see piece( kD ) ).
-	@property( !diffuse_map && detail_maps_diffuse )diffuseCol = vec4( 0.0, 0.0, 0.0, 0.0 );@end
+	@property( !diffuse_map )diffuseCol = material.bgDiffuse;@end
 
 	/// Blend the detail diffuse maps with the main diffuse.
 @foreach( detail_maps_diffuse, n )
 	@insertpiece( blend_mode_idx@n ) @add( t, 1 ) @end
 
 	/// Apply the material's diffuse over the textures
-@property( diffuse_map || detail_maps_diffuse )
 	@property( !transparent_mode )
 		diffuseCol.xyz *= material.kD.xyz;
 	@end @property( transparent_mode )
 		diffuseCol.xyz *= material.kD.xyz * diffuseCol.w * diffuseCol.w;
 	@end
-@end
 
 @property( alpha_test )
-	@property( diffuse_map || detail_maps_diffuse )
 	if( material.kD.w @insertpiece( alpha_test_cmp_func ) diffuseCol.a )
 		discard;
-	@end @property( !diffuse_map && !detail_maps_diffuse )
-	if( material.kD.w @insertpiece( alpha_test_cmp_func ) 1.0 )
-		discard;
-	@end
 @end
 
 @property( !normal_map )
 	// Geometric normal
-	nNormal = normalize( inPs.normal );
+	nNormal = normalize( inPs.normal ) @insertpiece( two_sided_flip_normal );
 @end @property( normal_map )
 	//Normal mapping.
-	vec3 geomNormal = normalize( inPs.normal );
+	vec3 geomNormal = normalize( inPs.normal ) @insertpiece( two_sided_flip_normal );
 	vec3 vTangent = normalize( inPs.tangent );
 
 	//Get the TBN matrix
-	vec3 vBinormal	= normalize( cross( vTangent, geomNormal )@insertpiece( tbnApplyReflection ) );
+	vec3 vBinormal	= normalize( cross( geomNormal, vTangent )@insertpiece( tbnApplyReflection ) );
 	mat3 TBN		= mat3( vTangent, vBinormal, geomNormal );
 
 	@property( normal_map_tex )nNormal = getTSNormal( vec3( inPs.uv@value(uv_normal).xy, normalIdx ) );@end
@@ -464,7 +469,7 @@ void main()
 
 @property( alpha_test )
 	Material material;
-	@property( diffuse_map || detail_maps_diffuse )float diffuseCol;@end
+	float diffuseCol;
 	@property( num_textures )uniform sampler2DArray textureMaps[@value( num_textures )];@end
 	@property( diffuse_map )uint diffuseIdx;@end
 	@property( detail_weight_map )uint weightMapIdx;@end
@@ -477,8 +482,12 @@ void main()
 	@insertpiece( custom_ps_preExecution )
 
 @property( alpha_test )
-	uint materialId	= instance.worldMaterialIdx[inPs.drawId].x & 0x1FFu;
-	material = materialArray.m[materialId];
+	@property( !lower_gpu_overhead )
+		uint materialId	= instance.worldMaterialIdx[inPs.drawId].x & 0x1FFu;
+		material = materialArray.m[materialId];
+	@end @property( lower_gpu_overhead )
+		material = materialArray.m[0];
+	@end
 @property( diffuse_map )	diffuseIdx			= material.indices0_3.x & 0x0000FFFFu;@end
 @property( detail_weight_map )	weightMapIdx		= material.indices0_3.z & 0x0000FFFFu;@end
 @property( detail_map0 )	detailMapIdx0		= material.indices0_3.z >> 16u;@end
@@ -508,7 +517,7 @@ void main()
 	/// 'insertpiece( SampleDiffuseMap )' must've written to diffuseCol. However if there are no
 	/// diffuse maps, we must initialize it to some value. If there are no diffuse or detail maps,
 	/// we must not access diffuseCol at all, but rather use material.kD directly (see piece( kD ) ).
-	@property( !diffuse_map && detail_maps_diffuse )diffuseCol = 0.0;@end
+	@property( !diffuse_map )diffuseCol = material.bgDiffuse.w;@end
 
 	/// Blend the detail diffuse maps with the main diffuse.
 @foreach( detail_maps_diffuse, n )
@@ -517,13 +526,8 @@ void main()
 	/// Apply the material's alpha over the textures
 @property( TODO_REFACTOR_ACCOUNT_MATERIAL_ALPHA )	diffuseCol.xyz *= material.kD.xyz;@end
 
-	@property( diffuse_map || detail_maps_diffuse )
 	if( material.kD.w @insertpiece( alpha_test_cmp_func ) diffuseCol )
 		discard;
-	@end @property( !diffuse_map && !detail_maps_diffuse )
-	if( material.kD.w @insertpiece( alpha_test_cmp_func ) 1.0 )
-		discard;
-	@end
 @end /// !alpha_test
 
 @property( !hlms_shadow_uses_depth_texture )

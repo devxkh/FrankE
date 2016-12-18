@@ -54,6 +54,8 @@ set(XERenderer_private_SOURCES
 		${SRCROOT}/private/DynamicRenderable.cpp
 		${SRCROOT}/private/DynamicLines.hpp
 		${SRCROOT}/private/DynamicRenderable.hpp
+	#	${SRCROOT}/private/OgreHelper.cpp
+	#	${SRCROOT}/private/OgreHelper.hpp
 )
 source_group("src\\private" FILES ${XERenderer_private_SOURCES})
 
@@ -93,6 +95,9 @@ include_directories (${PROJECT_SOURCE_DIR}/src/Ogre/Components/Hlms/Common/inclu
 include_directories (${PROJECT_SOURCE_DIR}/src/Ogre/Components/Hlms/Pbs/include)
 include_directories (${PROJECT_SOURCE_DIR}/src/Ogre/RenderSystems/GL3Plus/include)
 include_directories (${PROJECT_SOURCE_DIR}/src/Ogre/RenderSystems/GL3Plus/include/GLSL)
+
+enable_unity_build(XERenderer  ${XERenderer_SOURCES} ${XERenderer_private_SOURCES} ${XEGraphics_SOURCES}  ${XERenderer_Editor_SOURCES})
+
 
 sfml_add_library(XERenderer 
 	SOURCES ${XERenderer_SOURCES} ${XERenderer_HEADER} ${XERenderer_private_SOURCES} ${XEGraphics_HEADER} ${XEGraphics_SOURCES} ${XERenderer_Editor_HEADER} ${XERenderer_Editor_SOURCES}

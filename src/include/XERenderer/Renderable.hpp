@@ -1,8 +1,6 @@
-#ifndef __OGREENTITY_HPP__
-#define __OGREENTITY_HPP__
+#pragma once
 
 #include <XESystem/SystemConfig.hpp>
-
 #include <Ogre/OgreMain/include/OgreVector3.h>
 
 namespace Ogre
@@ -97,6 +95,7 @@ namespace XE {
 
 	private:
 
+		//Ogre::Item* _newItem;
 
 		Ogre::Vector3 _t_LastPosition;
 		Ogre::Vector3 _t_CurrentPosition;
@@ -120,8 +119,4 @@ namespace XE {
 
 
 	};
-
 }
-
-
-#endif //__OGREENTITY_HPP__

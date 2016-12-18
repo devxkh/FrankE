@@ -15,12 +15,23 @@
 
 #include <Ogre/OgreMain/include//OgreHlmsManager.h>
 
+#include <Ogre/OgreMain/include/OgreHlms.h>
+#include <Ogre/OgreMain/include/OgreGpuProgramManager.h>
 
 #include <XERenderer/OgreSceneManager.hpp>
+
+#include <XERenderer/private/OgreHelper.hpp>
 
 #include <XEngine/Components/AnimationComponent.hpp>
 #include <ThirdParty/plog/Log.h>
 #include <XEngine/Scene.hpp>
+
+#include <Ogre/OgreMain/include/OgreBillboard.h>
+#include <XEDAL/PhysFS/PhysFsStream.hpp>
+#include <Ogre/Components/Hlms/Pbs/include/OgreHlmsPbs.h>
+
+#include <Ogre/OgreMain/include/OgreHlmsTextureManager.h>
+#include <Ogre/Components/Hlms/Pbs/include/OgreHlmsPbsDatablock.h>
 
 namespace XE
 {
@@ -34,7 +45,7 @@ namespace XE
 		, m_position(0, 0, 0)
 		//, m_worldScale(1, 1, 1)
 		//, m_scale(1, 1, 1)
-
+		, _t_OgreItemPtr(0)
 		, m_rotation(1, 0, 0, 0)
 		//, m_worldOrientation(1 , 0, 0, 0)*/
 		//,m_transform(0, 0, 0)
@@ -124,13 +135,14 @@ namespace XE
 			for (auto var : *meshes)
 			{
 				Ogre::v1::MeshPtr meshV1;
-				Ogre::Item* newItem;
+				
 				//std::cout << "meshes:" << var->Name()->c_str() << std::endl;
 				LOG(plog::info) << "Renderable:_t_createItem";
 				LOG(plog::info) << "mesh_type:" << EnumNameUMesh(var->mesh_type());
 
 				if (var->mesh_type() == XFBType::UMesh::UMesh_MeshPlane)
 				{
+					return;
 					//------------------- OGRE PLANE MESH -----------------------
 					meshV1 = Ogre::v1::MeshManager::getSingleton().createPlane(
 						std::to_string(m_ID),
@@ -149,28 +161,45 @@ namespace XE
 					//Leave it loaded if you want to use athene with v1 Entity.
 					meshV1->unload();
 
-					newItem = m_Scene.getOgreSceneManager().__OgreSceneMgrPtr->createItem(manual, (Ogre::SceneMemoryMgrTypes)Ogre::SCENE_DYNAMIC); //renderable->memType()); //Ogre::SCENE_DYNAMIC);
+					_t_OgreItemPtr = m_Scene.getOgreSceneManager().__OgreSceneMgrPtr->createItem(manual, (Ogre::SceneMemoryMgrTypes)Ogre::SCENE_DYNAMIC); //renderable->memType()); //Ogre::SCENE_DYNAMIC);
 
 					Ogre::HlmsManager *hlmsManager = m_GraphicsManager.getRoot()->getHlmsManager();
 					Ogre::HlmsDatablock *datablock = hlmsManager->getDatablock("StonesPbs");
-					newItem->setDatablock(datablock); //todo multiple materials per mesh	
+					_t_OgreItemPtr->setDatablock(datablock); //todo multiple materials per mesh	
 												   //floor->setMaterialName("Examples/Rockwall", "General");
 												   //floor->setCastShadows(false);
-					newItem->setCastShadows(true);
+					_t_OgreItemPtr->setCastShadows(true);
 
 
-					_t_OgreEntitySceneNodePtr->attachObject(newItem);
+					_t_OgreEntitySceneNodePtr->attachObject(_t_OgreItemPtr);
 				}
 				else if (var->mesh_type() == XFBType::UMesh::UMesh_MeshCube)
 				{
-					newItem = m_Scene.getOgreSceneManager().__OgreSceneMgrPtr->createItem("Cube_d.mesh",
+					_t_OgreItemPtr = m_Scene.getOgreSceneManager().__OgreSceneMgrPtr->createItem("Cube_d.mesh",
 																							Ogre::ResourceGroupManager::
 																							AUTODETECT_RESOURCE_GROUP_NAME,
 																							Ogre::SCENE_DYNAMIC);
 
-					newItem->setVisibilityFlags(0x000000001);
+					_t_OgreItemPtr->setVisibilityFlags(0x000000001);
 				
-					_t_OgreEntitySceneNodePtr->attachObject(newItem);
+					_t_OgreEntitySceneNodePtr->attachObject(_t_OgreItemPtr);
+
+
+					//auto bbs = m_Scene.getOgreSceneManager().__OgreSceneMgrPtr->createBillboardSet();
+					//Ogre::v1::Billboard* sunBillboard = bbs->createBillboard(Ogre::Vector3(0, 0, 0));
+					////You need sets Billboard::mDirection to some value other than the default Vector3::ZERO to make BBT_ORIENTED_SELF / BBT_PERPENDICULAR_SELF work.
+					//sunBillboard->mDirection = Ogre::Vector3::UNIT_Y;
+					//bbs->setBillboardType(Ogre::v1::BillboardType::BBT_ORIENTED_SELF);
+				
+					////bbs->Ogre::Renderable::setDatablock("TestModel");
+					//bbs->setRenderQueueGroup(5);
+					//m_Scene.getOgreSceneManager().__OgreSceneMgrPtr->getRenderQueue()->setRenderQueueMode(5, Ogre::RenderQueue::Modes::V1_FAST);
+
+					//Ogre::HlmsManager *hlmsManager = m_GraphicsManager.getRoot()->getHlmsManager();
+					//Ogre::HlmsDatablock *datablock = hlmsManager->getDatablock("BillBoardTest");
+					//bbs->setDatablock(datablock);
+
+					//_t_OgreEntitySceneNodePtr->attachObject(bbs);
 				}
 
 				else if (var->mesh_type() == XFBType::UMesh::UMesh_MeshFile)
@@ -206,8 +235,16 @@ namespace XE
 					_t_OgreItemPtr->setVisibilityFlags(0x000000001);
 
 					Ogre::HlmsManager *hlmsManager = m_GraphicsManager.getRoot()->getHlmsManager();
-					Ogre::HlmsDatablock *datablock = hlmsManager->getDatablock("TestModel");
+
+
+					/*Ogre::HlmsDatablock *datablockTest = hlmsManager->getDatablock("DefaultPbs");
+					_t_OgreItemPtr->setDatablock(datablockTest);*/
+
+					Ogre::HlmsDatablock *datablock = hlmsManager->getDatablock(meshFile->material()->file()->fileName()->c_str());//"TestModel");
 					_t_OgreItemPtr->setDatablock(datablock);
+
+					
+
 
 					//Ogre::HlmsManager *hlmsManager = m_GraphicsManager.getRoot()->getHlmsManager();
 					//Ogre::HlmsDatablock *datablock = hlmsManager->getDatablock("HlmsUnlit1");
@@ -318,13 +355,79 @@ namespace XE
 
 	void Renderable::update(const void* fbData)
 	{
-		destoyItems(); //mainthread !
+	//	destoyItems(); //mainthread !
 
 		m_GraphicsManager.getIntoRendererQueue().push([this, fbData]()
 		{
 			Ogre::LogManager::getSingleton().logMessage("RQ -> Renderable::update");
+			
+			Ogre::HlmsManager *hlmsManager = m_GraphicsManager.getRoot()->getHlmsManager();
+		
+			//https://github.com/spookyboo/HLMSEditor/blob/74e175352a6d794c0c0fe937ab7ce14134255e5e/source/src/hlms_utils_manager.cpp
+			Ogre::HlmsJson hlmsJson(hlmsManager);
+			// Load the json file and create the datablock(s)
+	
+			std::string filename =  "assets/TestModel.material.json";
 
-			_t_createItem(fbData);
+			Ogre::HlmsPbs* hlmsPbs = static_cast<Ogre::HlmsPbs*>(hlmsManager->getHlms(Ogre::HLMS_PBS));
+
+			Ogre::HlmsTextureManager *hlmsTextureManager = hlmsManager->getTextureManager();
+			hlmsTextureManager->destroyTexture("outUV.png");
+		//	Ogre::HlmsPbsDatablock* hlmsPbsDataBlock = static_cast<Ogre::HlmsPbsDatablock*>(hlmsPbs->getDatablock("TestModel"));
+	//		auto tex = hlmsPbsDataBlock->getTexture(Ogre::TEX_TYPE_2D);
+	//		hlmsTextureManager->destroyTexture(tex->getName());
+
+
+			//assign dummy material to free item material
+			Ogre::HlmsDatablock *datablock = hlmsManager->getDatablock("DefaultPbs");
+			_t_OgreItemPtr->setDatablock(datablock);
+
+			//destroy item material
+			Ogre::HlmsDatablock *latestDatablock = hlmsPbs->getDatablock("TestModel");//"TestModel");
+			if (latestDatablock && latestDatablock != hlmsPbs->getDefaultDatablock())
+			{
+
+
+				hlmsPbs->destroyDatablock("TestModel");
+			}
+			
+			XE::PhysFsStream wonderfullStream;
+			if (wonderfullStream.open(filename.c_str()))
+			{
+				// Make sure that the stream's reading position is at the beginning
+				wonderfullStream.seek(0);
+
+				std::vector<char> buffer(wonderfullStream.getSize());
+				if (wonderfullStream.read(buffer.data(), wonderfullStream.getSize()))
+				{
+					buffer.push_back('\0'); //rapidjson needs to be null terminated
+					hlmsJson.loadMaterials("TestModel.material.json", &buffer[0]);
+				}
+			}			
+
+			Ogre::HlmsDatablock *datablockNew = hlmsManager->getDatablock("TestModel");
+			_t_OgreItemPtr->setDatablock(datablockNew);
+		
+	//		_newItem->setDatablock(datablock);
+			//OgreHelper::ReloadMaterial("TestModel","General","TestModel.material.json", true);
+
+			//------------ reload hlms template files ----------------
+			//Hot reload of PBS shaders. We need to clear the microcode cache
+			//to prevent using old compiled versions.
+			//Ogre::Root *root = m_GraphicsManager.getRoot();
+			////Ogre::HlmsManager *hlmsManager = root->getHlmsManager();
+
+			//Ogre::Hlms *hlms = hlmsManager->getHlms(Ogre::HLMS_PBS);
+			//Ogre::GpuProgramManager::getSingleton().clearMicrocodeCache();
+			//hlms->reloadFrom(hlms->getDataFolder());
+	
+			////Hot reload of Unlit shaders.
+			//Ogre::Hlms *hlmsUnlit = hlmsManager->getHlms(Ogre::HLMS_UNLIT);
+			//Ogre::GpuProgramManager::getSingleton().clearMicrocodeCache();
+			//hlmsUnlit->reloadFrom(hlmsUnlit->getDataFolder());
+			//------------ reload hlms template files ----------------
+
+		//	_t_createItem(fbData);
 
 			//	delete deleteThisBuffer;
 		});

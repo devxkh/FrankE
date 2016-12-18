@@ -199,13 +199,14 @@ namespace XE
 			else if (*(dataFolder.end() - 1) != '/')
 				dataFolder += "/";
 
+
 			Ogre::String shaderSyntax = "GLSL";
 			if (mRoot->getRenderSystem()->getName() == "Direct3D11 Rendering Subsystem")
 				shaderSyntax = "HLSL";
 
-			Ogre::Archive *archiveLibrary = Ogre::ArchiveManager::getSingletonPtr()->load(dataFolder + shaderSyntax + "/Common", "FileSystem", true);
-			Ogre::Archive *archiveUnlit = Ogre::ArchiveManager::getSingletonPtr()->load(dataFolder + shaderSyntax + "/Unlit", "FileSystem", true);
-			Ogre::Archive *archivePbs = Ogre::ArchiveManager::getSingletonPtr()->load(dataFolder + shaderSyntax + "/Pbs", "FileSystem", true);
+			Ogre::Archive *archiveLibrary = Ogre::ArchiveManager::getSingletonPtr()->load(dataFolder + "/Common/" + shaderSyntax, "FileSystem", true);
+			Ogre::Archive *archiveUnlit = Ogre::ArchiveManager::getSingletonPtr()->load(dataFolder + "/Unlit/" + shaderSyntax, "FileSystem", true);
+			Ogre::Archive *archivePbs = Ogre::ArchiveManager::getSingletonPtr()->load(dataFolder + "/Pbs/" + shaderSyntax, "FileSystem", true);
 
 			Ogre::ArchiveVec library;
 			library.push_back(archiveLibrary);

@@ -127,6 +127,8 @@ include_directories (${PROJECT_SOURCE_DIR}/extlibs/headers/luajit)
 # Properties->C/C++->General->Additional Include Directories
 #include_directories (.)
 
+enable_unity_build(XEUI  ${XEUI_Widgets_SOURCES} ${XEUI_Console_SOURCES} ${XEGraphics_SOURCES} ${XEUI_DAL_SOURCES})
+
 # Also adds sources to the Solution Explorer ------------------------------
 #add_library(XEUI STATIC ${XEUI_SOURCES} ${XEUI_HEADER} ${XEUI_Widgets_SOURCES} ${XEUI_Console_SOURCES} )
 sfml_add_library(XEUI 

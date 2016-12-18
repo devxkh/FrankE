@@ -53,9 +53,6 @@ namespace XE {
 	void LayerRenderer::_t_initRenderer(TextureAtlas* atlas, Ogre::ObjectMemoryManager* objManager, Ogre::SceneManager* sceneMgr)
 	{
 		 _t_OgreSceneMgrPtr = sceneMgr;
-
-
-
 	}
 
 	void LayerRenderer::redrawAllLayers()
