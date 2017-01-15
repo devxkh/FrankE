@@ -16,6 +16,7 @@ namespace entityx
 
 namespace XE {
 
+	class ScreenComponent;
 	class ControllerComponent;
 	class ScreenPanel;
 
@@ -49,7 +50,7 @@ namespace XE {
 		Alignment::Ptr  m_alignment;
 		Entry::Ptr m_entry;
 		
-		entityx::Entity m_entity;
+		ScreenComponent* m_screen;
 
 		bool m_running;
 		bool m_resume;

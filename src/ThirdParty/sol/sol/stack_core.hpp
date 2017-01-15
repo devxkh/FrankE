@@ -29,10 +29,17 @@
 #include "tuple.hpp"
 #include "traits.hpp"
 #include "tie.hpp"
+#include "stack_guard.hpp"
+#include <vector>
+#include <string>
 
 namespace sol {
 	namespace detail {
 		struct as_reference_tag {};
+		template <typename T>
+		struct as_pointer_tag {};
+		template <typename T>
+		struct as_value_tag {};
 
 		using special_destruct_func = void(*)(void*);
 
@@ -51,6 +58,38 @@ namespace sol {
 			special_destruct_func& dx = *static_cast<special_destruct_func*>(static_cast<void*>(pointerpointer + 1));
 			(dx)(memory);
 			return 0;
+		}
+
+		template <typename T>
+		inline int user_alloc_destroy(lua_State* L) {
+			void* rawdata = lua_touserdata(L, 1);
+			T* data = static_cast<T*>(rawdata);
+			std::allocator<T> alloc;
+			alloc.destroy(data);
+			return 0;
+		}
+
+		template <typename T>
+		inline int usertype_alloc_destroy(lua_State* L) {
+			void* rawdata = lua_touserdata(L, 1);
+			T** pdata = static_cast<T**>(rawdata);
+			T* data = *pdata;
+			std::allocator<T> alloc{};
+			alloc.destroy(data);
+			return 0;
+		}
+
+		template <typename T>
+		void reserve(T&, std::size_t) {}
+
+		template <typename T, typename Al>
+		void reserve(std::vector<T, Al>& arr, std::size_t hint) {
+			arr.reserve(hint);
+		}
+
+		template <typename T, typename Tr, typename Al>
+		void reserve(std::basic_string<T, Tr, Al>& arr, std::size_t hint) {
+			arr.reserve(hint);
 		}
 	} // detail
 
@@ -82,6 +121,17 @@ namespace sol {
 			operator bool() const { return success; };
 		};
 
+		struct record {
+			int last;
+			int used;
+
+			record() : last(), used() {}
+			void use(int count) {
+				last = count;
+				used += count;
+			}
+		};
+
 		namespace stack_detail {
 			template <typename T>
 			struct strip {
@@ -108,8 +158,8 @@ namespace sol {
 				false;
 #endif
 			template<typename T>
-			inline decltype(auto) unchecked_get(lua_State* L, int index = -1) {
-				return getter<meta::unqualified_t<T>>{}.get(L, index);
+			inline decltype(auto) unchecked_get(lua_State* L, int index, record& tracking) {
+				return getter<meta::unqualified_t<T>>{}.get(L, index, tracking);
 			}
 		} // stack_detail
 
@@ -124,7 +174,7 @@ namespace sol {
 		}
 
 		// overload allows to use a pusher of a specific type, but pass in any kind of args
-		template<typename T, typename Arg, typename... Args>
+		template<typename T, typename Arg, typename... Args, typename = std::enable_if_t<!std::is_same<T, Arg>::value>>
 		inline int push(lua_State* L, Arg&& arg, Args&&... args) {
 			return pusher<meta::unqualified_t<T>>{}.push(L, std::forward<Arg>(arg), std::forward<Args>(args)...);
 		}
@@ -134,7 +184,8 @@ namespace sol {
 			typedef meta::all<
 				std::is_lvalue_reference<T>,
 				meta::neg<std::is_const<T>>,
-				meta::neg<is_lua_primitive<T>>
+				meta::neg<is_lua_primitive<meta::unqualified_t<T>>>,
+				meta::neg<is_unique_usertype<meta::unqualified_t<T>>>
 			> use_reference_tag;
 			return pusher<std::conditional_t<use_reference_tag::value, detail::as_reference_tag, meta::unqualified_t<T>>>{}.push(L, std::forward<T>(t), std::forward<Args>(args)...);
 		}
@@ -164,27 +215,39 @@ namespace sol {
 		}
 
 		template <typename T, typename Handler>
-		bool check(lua_State* L, int index, Handler&& handler) {
+		bool check(lua_State* L, int index, Handler&& handler, record& tracking) {
 			typedef meta::unqualified_t<T> Tu;
 			checker<Tu> c;
 			// VC++ has a bad warning here: shut it up
 			(void)c;
-			return c.check(L, index, std::forward<Handler>(handler));
+			return c.check(L, index, std::forward<Handler>(handler), tracking);
+		}
+
+		template <typename T, typename Handler>
+		bool check(lua_State* L, int index, Handler&& handler) {
+			record tracking{};
+			return check<T>(L, index, std::forward<Handler>(handler), tracking);
 		}
 
 		template <typename T>
-		bool check(lua_State* L, int index = -1) {
+		bool check(lua_State* L, int index = -lua_size<meta::unqualified_t<T>>::value) {
 			auto handler = no_panic;
 			return check<T>(L, index, handler);
 		}
 
 		template<typename T, typename Handler>
+		inline decltype(auto) check_get(lua_State* L, int index, Handler&& handler, record& tracking) {
+			return check_getter<meta::unqualified_t<T>>{}.get(L, index, std::forward<Handler>(handler), tracking);
+		}
+
+		template<typename T, typename Handler>
 		inline decltype(auto) check_get(lua_State* L, int index, Handler&& handler) {
-			return check_getter<meta::unqualified_t<T>>{}.get(L, index, std::forward<Handler>(handler));
+			record tracking{};
+			return check_get<T>(L, index, handler, tracking);
 		}
 
 		template<typename T>
-		inline decltype(auto) check_get(lua_State* L, int index = -1) {
+		inline decltype(auto) check_get(lua_State* L, int index = -lua_size<meta::unqualified_t<T>>::value) {
 			auto handler = no_panic;
 			return check_get<T>(L, index, handler);
 		}
@@ -193,36 +256,88 @@ namespace sol {
 
 #ifdef SOL_CHECK_ARGUMENTS
 			template <typename T>
-			inline auto tagged_get(types<T>, lua_State* L, int index = -1) -> decltype(stack_detail::unchecked_get<T>(L, index)) {
-				auto op = check_get<T>(L, index, type_panic);
-				return *op;
+			inline auto tagged_get(types<T>, lua_State* L, int index, record& tracking) -> decltype(stack_detail::unchecked_get<T>(L, index, tracking)) {
+				auto op = check_get<T>(L, index, type_panic, tracking);
+				return *std::move(op);
 			}
 #else
 			template <typename T>
-			inline decltype(auto) tagged_get(types<T>, lua_State* L, int index = -1) {
-				return stack_detail::unchecked_get<T>(L, index);
+			inline decltype(auto) tagged_get(types<T>, lua_State* L, int index, record& tracking) {
+				return stack_detail::unchecked_get<T>(L, index, tracking);
 			}
 #endif
 
 			template <typename T>
-			inline decltype(auto) tagged_get(types<optional<T>>, lua_State* L, int index = -1) {
-				return stack_detail::unchecked_get<optional<T>>(L, index);
+			inline decltype(auto) tagged_get(types<optional<T>>, lua_State* L, int index, record& tracking) {
+				return stack_detail::unchecked_get<optional<T>>(L, index, tracking);
 			}
 
-			template <typename T>
-			inline int alloc_destroy(lua_State* L) {
-				void* rawdata = lua_touserdata(L, upvalue_index(1));
-				T* data = static_cast<T*>(rawdata);
-				std::allocator<T> alloc;
-				alloc.destroy(data);
-				return 0;
-			}
+			template <bool b>
+			struct check_types {
+				template <typename T, typename... Args, typename Handler>
+				static bool check(types<T, Args...>, lua_State* L, int firstargument, Handler&& handler, record& tracking) {
+					if (!stack::check<T>(L, firstargument + tracking.used, handler, tracking))
+						return false;
+					return check(types<Args...>(), L, firstargument, std::forward<Handler>(handler), tracking);
+				}
+
+				template <typename Handler>
+				static bool check(types<>, lua_State*, int, Handler&&, record&) {
+					return true;
+				}
+			};
+
+			template <>
+			struct check_types<false> {
+				template <typename... Args, typename Handler>
+				static bool check(types<Args...>, lua_State*, int, Handler&&, record&) {
+					return true;
+				}
+			};
 
 		} // stack_detail
 
+		template <bool b, typename... Args, typename Handler>
+		bool multi_check(lua_State* L, int index, Handler&& handler, record& tracking) {
+			return stack_detail::check_types<b>{}.check(types<meta::unqualified_t<Args>...>(), L, index, std::forward<Handler>(handler), tracking);
+		}
+
+		template <bool b, typename... Args, typename Handler>
+		bool multi_check(lua_State* L, int index, Handler&& handler) {
+			record tracking{};
+			return multi_check<b, Args...>(L, index, std::forward<Handler>(handler), tracking);
+		}
+
+		template <bool b, typename... Args>
+		bool multi_check(lua_State* L, int index) {
+			auto handler = no_panic;
+			return multi_check<b, Args...>(L, index, handler);
+		}
+
+		template <typename... Args, typename Handler>
+		bool multi_check(lua_State* L, int index, Handler&& handler, record& tracking) {
+			return multi_check<true, Args...>(L, index, std::forward<Handler>(handler), tracking);
+		}
+
+		template <typename... Args, typename Handler>
+		bool multi_check(lua_State* L, int index, Handler&& handler) {
+			return multi_check<true, Args...>(L, index, std::forward<Handler>(handler));
+		}
+
+		template <typename... Args>
+		bool multi_check(lua_State* L, int index) {
+			return multi_check<true, Args...>(L, index);
+		}
+
 		template<typename T>
-		inline decltype(auto) get(lua_State* L, int index = -1) {
-			return stack_detail::tagged_get(types<T>(), L, index);
+		inline decltype(auto) get(lua_State* L, int index, record& tracking) {
+			return stack_detail::tagged_get(types<T>(), L, index, tracking);
+		}
+
+		template<typename T>
+		inline decltype(auto) get(lua_State* L, int index = -lua_size<meta::unqualified_t<T>>::value) {
+			record tracking{};
+			return get<T>(L, index, tracking);
 		}
 
 		template<typename T>

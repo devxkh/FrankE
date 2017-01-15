@@ -58,7 +58,7 @@ public:
    @param operationType The type of render operation to perform.
    @param useIndices Specifies whether to use indices to determine the
           vertices to use as input. */
-  void initialize(Ogre::v1::RenderOperation::OperationType operationType,
+  void initialize(Ogre::OperationType operationType,
                   bool useIndices);
 
   /// Implementation of Ogre::SimpleRenderable
@@ -120,11 +120,11 @@ protected:
   float *mVertexBuffer;
   char * mIndexBufferCursor;
 
-  Ogre::v1::RenderOperation::OperationType m_operationType;
+  Ogre::OperationType m_operationType;
   Ogre::AxisAlignedBox mBox;
   Ogre::VertexArrayObject* mVao;
   Ogre::VaoManager * mVaoManager;
-  Ogre::v1::RenderOperation::OperationType mOperationType;
+  Ogre::OperationType mOperationType;
   Ogre::VertexElement2Vec mVertexElements;
   bool m32BitIndices;
   Ogre::String mName;

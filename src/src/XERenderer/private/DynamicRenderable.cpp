@@ -38,7 +38,7 @@ namespace XE {
     }
 
     //------------------------------------------------------------------------------------------------
-	void DynamicRenderable::initialize(Ogre::v1::RenderOperation::OperationType operationType,
+	void DynamicRenderable::initialize(Ogre::OperationType operationType,
                                        bool useIndices)
     {
 		m_operationType = operationType;

@@ -1,12 +1,7 @@
-#ifndef __UI_DEBUG_STATE_HPP__
-#define __UI_DEBUG_STATE_HPP__
+#pragma once
 
 #include <XEUI/UIState.hpp>
-#include <XEUI/widgets/Label.hpp>
-#include <XEUI/Alignment.hpp>
-#include <XEUI/Box.hpp>
-#include <XEUI/Alignment.hpp>
-#include <XESystem/Entityx/Entity.h>
+#include <memory>
 
 namespace entityx
 {
@@ -15,8 +10,14 @@ namespace entityx
 
 namespace XE {
 
+	class Label;
+	class Box;
+	class Alignment;
+
+	class ScreenComponent;
 	class ControllerComponent;
 	class MenuItem;
+	class CameraRenderable;
 
 	class UIDebug : public XE::UIState
 	{
@@ -41,20 +42,19 @@ namespace XE {
 	protected:
 
 		//initialization order!
-		Label::Ptr m_FpsRendererThread;
-		Label::Ptr m_FpsAvqThread;
-		Label::Ptr m_FpsMainThread;
-		Label::Ptr m_BatchCount;
-		Box::Ptr  m_Box;
-		Alignment::Ptr  m_alignment;
+		ScreenComponent*			m_screen;
+		CameraRenderable*			m_cameraRenderable;
 
-		entityx::Entity m_entity;
+		std::shared_ptr<Label>		m_FpsRendererThread;
+		std::shared_ptr<Label>		m_FpsAvqThread;
+		std::shared_ptr<Label>		m_FpsMainThread;
+		std::shared_ptr<Label>		m_BatchCount;
+		std::shared_ptr<Box>		m_Box;
+		std::shared_ptr<Alignment>	m_alignment;
 
-		MenuItem* mMenuitem;
-		bool m_running;
-		bool m_resume;
+		MenuItem*					mMenuitem;
+		bool						m_running;
+		bool						m_resume;
 	};
 
 } // namespace XE
-
-#endif // __UI_DEBUG_STATE_HPP__

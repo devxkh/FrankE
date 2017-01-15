@@ -4,6 +4,10 @@
 
 #include <XEUI/UIState.hpp>
 
+namespace XET {
+	struct TestControllerComponent;
+}
+
 class UIState_1 : public XE::UIState
 {
 
@@ -26,10 +30,12 @@ public:
 
 	void ButtonClick();
 	void MouseEnter();
+	void Btn_QuitClick();
 
 protected:
 
-	entityx::Entity m_entity;
+	XE::ScreenComponent*		m_screen;
+	XET::TestControllerComponent*	m_controller;
 
 	bool m_running;
 	bool m_resume;
@@ -44,4 +50,5 @@ private:
 	XE::ProgressBar::Ptr m_progressbar;
 	XE::Entry::Ptr m_entry;
 	XE::UIWindow::Ptr m_window;
+	XE::Button::Ptr m_btnQuit;
 };

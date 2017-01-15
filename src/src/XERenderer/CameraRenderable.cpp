@@ -48,6 +48,10 @@ namespace XE
 		});
 	}
 
+	CameraRenderable::~CameraRenderable()
+	{
+
+	}
 
 	void CameraRenderable::_t_updateRayFromPoint(const Ogre::Vector2& screenpoint)
 	{
@@ -130,7 +134,7 @@ namespace XE
 			//_t_OgreCameraPtr-(position * m_GraphicsManager.getAccumTimeSinceLastLogicFrame());
 			//	_t_OgreCameraPtr->setPosition(position.x, position.y, position.z);
 			//	_t_OgreCameraPtr->lookAt(Ogre::Vector3(lookAt.x, lookAt.y, lookAt.z));
-		//		_t_OgreCameraPtr->lookAt(lookAt);
+		//	_t_OgreCameraPtr->lookAt(lookAt);
 			m_GraphicsManager.getFromRendererQueue().push([this]() {
 				m_GraphicsManager.GetRenderTask(RenderTaskID::Camera).isDone = true;
 			});

@@ -15,9 +15,13 @@ namespace XE
 		virtual void setEntityWithBody(entityx::Entity object) = 0;
 		
 		virtual void setTransformState(const TransformState& state) = 0;
+		
+		virtual void setPosition(const Ogre::Real& x , const Ogre::Real& y, const Ogre::Real& z) = 0;
 
 		virtual void setOrientation(const Ogre::Quaternion& orientation) = 0;
 		
+		virtual void suspend(bool suspend) = 0;
+
 		virtual void rotate(const Ogre::Vector3& axis, float scalar) = 0;
 	
 		virtual void collided(entityx::Entity collider, const Ogre::Vector3& positionWorldOnB, const Ogre::Vector3& normalWorldOnB, float distance1, float appliedImpulse) = 0;
@@ -27,7 +31,10 @@ namespace XE
 
 	struct PhysicsComponent
 	{
+		PhysicsComponent();
 		~PhysicsComponent();
+
+		IPhysicsObject* get();
 
 		std::vector<std::unique_ptr<IPhysicsObject>> objects;
 	};
@@ -42,6 +49,10 @@ namespace XE
 
 		void rotate(const Ogre::Vector3& axis, float scalar);
 
+		virtual void suspend(bool suspend);
+		
+		void setPosition(const Ogre::Real& x, const Ogre::Real& y, const Ogre::Real& z);
+		
 		void setTransformState(const TransformState& state);
 
 		void setEntityWithBody(entityx::Entity object);
@@ -65,8 +76,12 @@ namespace XE
 		void setTransformState(const TransformState& state);
 
 		void setEntityWithBody(entityx::Entity object);
-				
+		
+		void suspend(bool suspend);
+		
 		void setOrientation(const Ogre::Quaternion& orientation);
+	
+		void setPosition(const Ogre::Real& x, const Ogre::Real& y, const Ogre::Real& z);
 
 		void rotate(const Ogre::Vector3& axis, float scalar);
 
@@ -89,6 +104,10 @@ namespace XE
 		void setOrientation(const Ogre::Quaternion& orientation);
 
 		void rotate(const Ogre::Vector3& axis, float scalar);
+		
+		void suspend(bool suspend);
+
+		void setPosition(const Ogre::Real& x, const Ogre::Real& y, const Ogre::Real& z);
 
 		void setTransformState(const TransformState& state);
 		

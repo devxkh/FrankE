@@ -54,6 +54,10 @@ gkCharacter::~gkCharacter()
 	m_collisionObject = 0;
 }
 
+void gkCharacter::getGhostTranformState(TransformState& state)
+{
+	state.toTransform(m_collisionObject->getWorldTransform());
+}
 
 void gkCharacter::setGhostTranformState(const TransformState& trans)
 {

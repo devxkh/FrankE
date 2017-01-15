@@ -14,6 +14,8 @@ namespace XET
 	{
 		TestControllerComponent(XE::Uint16 id, XE::XEngine& engine, SDL_Window* window, bool defaultCtrl = false);
 
+		~TestControllerComponent();
+
 		void setActionMap(XE::ControllerComponent& controller);
 
 

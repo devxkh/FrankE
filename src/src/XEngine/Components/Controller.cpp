@@ -18,11 +18,24 @@
 
 namespace XE
 {
+	ControllerComponent::ControllerComponent() 
+		:m_ControllerData(0)
+	{
+	}
+
+	ControllerComponent::~ControllerComponent()
+	{
+	//	delete m_ControllerData;
+	}
+
+	ControllerData* ControllerComponent::get() {
+		return m_ControllerData;
+	}
 
 	using namespace thor;
 	//using namespace sf;
 
-	ControllerComponent::ControllerComponent(Uint16 id, XEngine& engine, SDL_Window* window, bool defaultCtrl)
+	ControllerData::ControllerData(Uint16 id, XEngine& engine, SDL_Window* window, bool defaultCtrl)
 		: isActive(false)
 		, m_window(window)
 		, mID(id)
@@ -72,7 +85,13 @@ namespace XE
 		}
 	}
 
-	//void ControllerComponent::setActionMap(const std::string& ctrlFile, const std::string& schema)
+
+	void ControllerData::destroy()
+	{
+
+	}
+
+	//void ControllerData::setActionMap(const std::string& ctrlFile, const std::string& schema)
 	//{
 	//	std::cout << "settingActionMap!" << std::endl;
 
@@ -185,7 +204,7 @@ namespace XE
 	//	return elems;
 	//}
 
-	//void ControllerComponent::loadControllerFile()
+	//void ControllerData::loadControllerFile()
 	//{
 
 	//	InputConfigFile cfg;

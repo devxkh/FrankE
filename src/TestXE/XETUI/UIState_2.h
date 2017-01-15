@@ -4,6 +4,10 @@
 
 #include <XEUI/UIState.hpp>
 
+namespace XET {
+	struct TestControllerComponent;
+}
+
 class UIState_2 : public XE::UIState
 {
 public:
@@ -28,7 +32,8 @@ public:
 
 private:
 
-	entityx::Entity m_entity;
+	XE::ScreenComponent*		m_screen;
+	XET::TestControllerComponent*	m_controller;
 
 	//initialization order!
 	XE::Button::Ptr m_btnTest;

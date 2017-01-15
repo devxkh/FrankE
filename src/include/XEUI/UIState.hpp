@@ -1,5 +1,4 @@
-#ifndef UISTATE_HPP
-#define UISTATE_HPP
+#pragma once
 
 #include <XESystem/SystemConfig.hpp>
 
@@ -38,5 +37,3 @@ namespace XE {
 	};
 
 } // namespace XE
-
-#endif // UISTATE_HPP

@@ -3,6 +3,7 @@
 #include <XERenderer/GraphicsManager.hpp>
 #include <XEngine/Components/Body.hpp>
 #include <XERenderer/Renderable.hpp>
+#include <XERenderer/LightRenderable.hpp>
 
 namespace XE
 {
@@ -21,17 +22,27 @@ namespace XE
 		_graphicsMgr.GetRenderTask(RenderTaskID::RenderBody).isDone = false;
 
 		entityx::ComponentHandle<BodyComponent> body;
-		entityx::ComponentHandle<Renderable> renderable;
-
-		for (entityx::Entity entity : es.entities_with_components(body, renderable)) {
+		
+		for (entityx::Entity entity : es.entities_with_components(body)) {
 			
 			auto debug =  body->getPosition();
 
 			if (body->isDirty())
 			{
 				//TODO use transformation for performance?
-				renderable->setWorldPosition(body->getPosition());
-				renderable->setOrientation(body->getOrientation()); 
+				if (entity.has_component<Renderable>())
+				{
+					entityx::ComponentHandle<Renderable> renderable = entity.component<Renderable>();
+					renderable->setWorldPosition(body->getPosition());
+					renderable->setOrientation(body->getOrientation());
+				}
+								
+				if (entity.has_component<LightRenderable>())
+				{
+					entityx::ComponentHandle<LightRenderable> lightRenderable = entity.component<LightRenderable>();
+					lightRenderable->setPosition(body->getPosition());
+				}
+
 				body->isDirty(false);
 			}			
 		}

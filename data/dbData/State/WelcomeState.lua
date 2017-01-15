@@ -18,12 +18,12 @@ function init()
 end
 
 
-function afterinit()
+function afterinit(cameraFree)
 
   print("WelcomeState afterinit - start")
 
-
-
+  cameraFree:getCameraNode():setPosition(0, 500, 150)
+	cameraFree:rotate(0,-45)
   print("WelcomeState afterinit - end")
 
 end

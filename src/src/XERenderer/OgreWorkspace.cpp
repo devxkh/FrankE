@@ -374,11 +374,12 @@ namespace XE {
 				//passScene->
 				
 				Ogre::CompositorWorkspaceDef *workDef = m_compositorManager->addWorkspaceDefinition(std::string("MyOwnWorkspace"));
-				workDef->connectOutput(nodeDef->getName(), 0);
+				//workDef->connectOutput(nodeDef->getName(), 0);
+				workDef->connectExternal(0, nodeDef->getName(),0);
 
 			//	this->mGraphicsManager.getRoot()->getHlmsManager()->setShadowMappingUseBackFaces(false);
 
-				setShadowMapping(nodeDef, false, 1);
+				setShadowMapping(nodeDef, true, 1 , 2048, true);
 				//todo!	controller.getControllerView().getCameraController()._t_getOgreCamera();
 				Ogre::CompositorWorkspace*  myworkspace = m_compositorManager->addWorkspace(mEngine.getOgreSceneManager().__OgreSceneMgrPtr, renderWindow, camera, "MyOwnWorkspace", true);
 

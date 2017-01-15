@@ -65,9 +65,11 @@ namespace sol {
 			return std::unique_ptr<T, Dx>(new T(std::forward<Args>(args)...));
 		}
 
-		template <typename T, typename List>
+		template <typename Tag, typename T>
 		struct tagged {
-			List l;
+			T value;
+			template <typename Arg, typename... Args, meta::disable<std::is_same<meta::unqualified_t<Arg>, tagged>> = meta::enabler>
+			tagged(Arg&& arg, Args&&... args) : value(std::forward<Arg>(arg), std::forward<Args>(args)...) {}
 		};
 	} // detail
 
@@ -87,14 +89,26 @@ namespace sol {
 
 	template <typename... Functions>
 	struct constructor_wrapper {
-		std::tuple<Functions...> set;
-		template <typename... Args>
-		constructor_wrapper(Args&&... args) : set(std::forward<Args>(args)...) {}
+		std::tuple<Functions...> functions;
+		template <typename Arg, typename... Args, meta::disable<std::is_same<meta::unqualified_t<Arg>, constructor_wrapper>> = meta::enabler>
+		constructor_wrapper(Arg&& arg, Args&&... args) : functions(std::forward<Arg>(arg), std::forward<Args>(args)...) {}
 	};
 
 	template <typename... Functions>
 	inline auto initializers(Functions&&... functions) {
 		return constructor_wrapper<std::decay_t<Functions>...>(std::forward<Functions>(functions)...);
+	}
+
+	template <typename... Functions>
+	struct factory_wrapper {
+		std::tuple<Functions...> functions;
+		template <typename Arg, typename... Args, meta::disable<std::is_same<meta::unqualified_t<Arg>, factory_wrapper>> = meta::enabler>
+		factory_wrapper(Arg&& arg, Args&&... args) : functions(std::forward<Arg>(arg), std::forward<Args>(args)...) {}
+	};
+
+	template <typename... Functions>
+	inline auto factories(Functions&&... functions) {
+		return factory_wrapper<std::decay_t<Functions>...>(std::forward<Functions>(functions)...);
 	}
 
 	template <typename Function>

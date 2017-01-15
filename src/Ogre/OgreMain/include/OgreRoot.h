@@ -116,6 +116,7 @@ namespace Ogre
         ExternalTextureSourceManager* mExternalTextureSourceManager;
         HlmsManager         *mHlmsManager;
         HlmsLowLevel        *mHlmsLowLevelProxy;
+        HlmsCompute         *mHlmsCompute;
         CompositorManager2 *mCompositorManager2;
         unsigned long mNextFrame;
         Real mFrameSmoothingTime;
@@ -143,6 +144,7 @@ namespace Ogre
         MovableObjectFactory* mManualObjectFactory;
         MovableObjectFactory* mBillboardChainFactory;
         MovableObjectFactory* mRibbonTrailFactory;
+        MovableObjectFactory* mWireAabbFactory;
 
         /// Are we initialised yet?
         bool mIsInitialised;
@@ -246,6 +248,8 @@ namespace Ogre
         bool restoreConfig(void);
 
         /** Displays a dialog asking the user to choose system settings.
+            @param aCustomDialog If left null ogre will use the default config
+                dialog. Otherwise it will use the one provided.
             @remarks
                 This method displays the default dialog allowing the user to
                 choose the rendering system, video mode etc. If there is are
@@ -261,7 +265,7 @@ namespace Ogre
                 If they clicked 'Cancel' (in which case the app should
                 strongly consider terminating), <b>false</b> is returned.
          */
-        bool showConfigDialog(void);
+        bool showConfigDialog( ConfigDialog* aCustomDialog = 0 );
 
         /** Adds a new rendering subsystem to the list of available renderers.
             @remarks

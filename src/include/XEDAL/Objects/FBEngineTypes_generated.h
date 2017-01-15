@@ -28,6 +28,7 @@ struct SpawnPointComponent;
 struct Trigger;
 struct PhysicsComponent;
 struct SoundListener;
+struct Attenuation;
 struct Light;
 struct Camera;
 struct System;
@@ -287,6 +288,24 @@ MANUALLY_ALIGNED_STRUCT(4) Colour FLATBUFFERS_FINAL_CLASS {
   float a() const { return flatbuffers::EndianScalar(a_); }
 };
 STRUCT_END(Colour, 16);
+
+MANUALLY_ALIGNED_STRUCT(4) Attenuation FLATBUFFERS_FINAL_CLASS {
+ private:
+  float range_;
+  float constant_;
+  float linear_;
+  float quadratic_;
+
+ public:
+  Attenuation(float _range, float _constant, float _linear, float _quadratic)
+    : range_(flatbuffers::EndianScalar(_range)), constant_(flatbuffers::EndianScalar(_constant)), linear_(flatbuffers::EndianScalar(_linear)), quadratic_(flatbuffers::EndianScalar(_quadratic)) { }
+
+  float range() const { return flatbuffers::EndianScalar(range_); }
+  float constant() const { return flatbuffers::EndianScalar(constant_); }
+  float linear() const { return flatbuffers::EndianScalar(linear_); }
+  float quadratic() const { return flatbuffers::EndianScalar(quadratic_); }
+};
+STRUCT_END(Attenuation, 16);
 
 MANUALLY_ALIGNED_STRUCT(4) Connection FLATBUFFERS_FINAL_CLASS {
  private:
@@ -678,6 +697,7 @@ struct Material FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   const LocalFile *file() const { return GetPointer<const LocalFile *>(4); }
   const flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>> *textures() const { return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>> *>(6); }
   TextureType textureType() const { return static_cast<TextureType>(GetField<int8_t>(8, 0)); }
+  const flatbuffers::String *name() const { return GetPointer<const flatbuffers::String *>(10); }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
            VerifyField<flatbuffers::uoffset_t>(verifier, 4 /* file */) &&
@@ -686,6 +706,8 @@ struct Material FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
            verifier.Verify(textures()) &&
            verifier.VerifyVectorOfStrings(textures()) &&
            VerifyField<int8_t>(verifier, 8 /* textureType */) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, 10 /* name */) &&
+           verifier.Verify(name()) &&
            verifier.EndTable();
   }
 };
@@ -696,10 +718,11 @@ struct MaterialBuilder {
   void add_file(flatbuffers::Offset<LocalFile> file) { fbb_.AddOffset(4, file); }
   void add_textures(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>>> textures) { fbb_.AddOffset(6, textures); }
   void add_textureType(TextureType textureType) { fbb_.AddElement<int8_t>(8, static_cast<int8_t>(textureType), 0); }
+  void add_name(flatbuffers::Offset<flatbuffers::String> name) { fbb_.AddOffset(10, name); }
   MaterialBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
   MaterialBuilder &operator=(const MaterialBuilder &);
   flatbuffers::Offset<Material> Finish() {
-    auto o = flatbuffers::Offset<Material>(fbb_.EndTable(start_, 3));
+    auto o = flatbuffers::Offset<Material>(fbb_.EndTable(start_, 4));
     return o;
   }
 };
@@ -707,8 +730,10 @@ struct MaterialBuilder {
 inline flatbuffers::Offset<Material> CreateMaterial(flatbuffers::FlatBufferBuilder &_fbb,
    flatbuffers::Offset<LocalFile> file = 0,
    flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>>> textures = 0,
-   TextureType textureType = TextureType_Unlit) {
+   TextureType textureType = TextureType_Unlit,
+   flatbuffers::Offset<flatbuffers::String> name = 0) {
   MaterialBuilder builder_(_fbb);
+  builder_.add_name(name);
   builder_.add_textures(textures);
   builder_.add_file(file);
   builder_.add_textureType(textureType);
@@ -1208,8 +1233,12 @@ struct Light FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   const Vec3f *directionVector() const { return GetStruct<const Vec3f *>(8); }
   LightType lightType() const { return static_cast<LightType>(GetField<uint8_t>(10, 0)); }
   float powerScale() const { return GetField<float>(12, 0); }
-  const AmbientLight *ambientLight() const { return GetPointer<const AmbientLight *>(14); }
-  const flatbuffers::String *name() const { return GetPointer<const flatbuffers::String *>(16); }
+  const Attenuation *attenuation() const { return GetStruct<const Attenuation *>(14); }
+  const AmbientLight *ambientLight() const { return GetPointer<const AmbientLight *>(16); }
+  const flatbuffers::String *name() const { return GetPointer<const flatbuffers::String *>(18); }
+  uint8_t castShadows() const { return GetField<uint8_t>(20, 0); }
+  uint8_t useInstantRadiosity() const { return GetField<uint8_t>(22, 0); }
+  float IRVplThreshold() const { return GetField<float>(24, 0); }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
            VerifyField<Colour>(verifier, 4 /* colourDiffuse */) &&
@@ -1217,10 +1246,14 @@ struct Light FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
            VerifyField<Vec3f>(verifier, 8 /* directionVector */) &&
            VerifyField<uint8_t>(verifier, 10 /* lightType */) &&
            VerifyField<float>(verifier, 12 /* powerScale */) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, 14 /* ambientLight */) &&
+           VerifyField<Attenuation>(verifier, 14 /* attenuation */) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, 16 /* ambientLight */) &&
            verifier.VerifyTable(ambientLight()) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, 16 /* name */) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, 18 /* name */) &&
            verifier.Verify(name()) &&
+           VerifyField<uint8_t>(verifier, 20 /* castShadows */) &&
+           VerifyField<uint8_t>(verifier, 22 /* useInstantRadiosity */) &&
+           VerifyField<float>(verifier, 24 /* IRVplThreshold */) &&
            verifier.EndTable();
   }
 };
@@ -1233,12 +1266,16 @@ struct LightBuilder {
   void add_directionVector(const Vec3f *directionVector) { fbb_.AddStruct(8, directionVector); }
   void add_lightType(LightType lightType) { fbb_.AddElement<uint8_t>(10, static_cast<uint8_t>(lightType), 0); }
   void add_powerScale(float powerScale) { fbb_.AddElement<float>(12, powerScale, 0); }
-  void add_ambientLight(flatbuffers::Offset<AmbientLight> ambientLight) { fbb_.AddOffset(14, ambientLight); }
-  void add_name(flatbuffers::Offset<flatbuffers::String> name) { fbb_.AddOffset(16, name); }
+  void add_attenuation(const Attenuation *attenuation) { fbb_.AddStruct(14, attenuation); }
+  void add_ambientLight(flatbuffers::Offset<AmbientLight> ambientLight) { fbb_.AddOffset(16, ambientLight); }
+  void add_name(flatbuffers::Offset<flatbuffers::String> name) { fbb_.AddOffset(18, name); }
+  void add_castShadows(uint8_t castShadows) { fbb_.AddElement<uint8_t>(20, castShadows, 0); }
+  void add_useInstantRadiosity(uint8_t useInstantRadiosity) { fbb_.AddElement<uint8_t>(22, useInstantRadiosity, 0); }
+  void add_IRVplThreshold(float IRVplThreshold) { fbb_.AddElement<float>(24, IRVplThreshold, 0); }
   LightBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
   LightBuilder &operator=(const LightBuilder &);
   flatbuffers::Offset<Light> Finish() {
-    auto o = flatbuffers::Offset<Light>(fbb_.EndTable(start_, 7));
+    auto o = flatbuffers::Offset<Light>(fbb_.EndTable(start_, 11));
     return o;
   }
 };
@@ -1249,15 +1286,23 @@ inline flatbuffers::Offset<Light> CreateLight(flatbuffers::FlatBufferBuilder &_f
    const Vec3f *directionVector = 0,
    LightType lightType = LightType_LT_DIRECTIONAL,
    float powerScale = 0,
+   const Attenuation *attenuation = 0,
    flatbuffers::Offset<AmbientLight> ambientLight = 0,
-   flatbuffers::Offset<flatbuffers::String> name = 0) {
+   flatbuffers::Offset<flatbuffers::String> name = 0,
+   uint8_t castShadows = 0,
+   uint8_t useInstantRadiosity = 0,
+   float IRVplThreshold = 0) {
   LightBuilder builder_(_fbb);
+  builder_.add_IRVplThreshold(IRVplThreshold);
   builder_.add_name(name);
   builder_.add_ambientLight(ambientLight);
+  builder_.add_attenuation(attenuation);
   builder_.add_powerScale(powerScale);
   builder_.add_directionVector(directionVector);
   builder_.add_colourSpecular(colourSpecular);
   builder_.add_colourDiffuse(colourDiffuse);
+  builder_.add_useInstantRadiosity(useInstantRadiosity);
+  builder_.add_castShadows(castShadows);
   builder_.add_lightType(lightType);
   return builder_.Finish();
 }

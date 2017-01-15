@@ -1,9 +1,9 @@
 
   
-cam_height = 2.5    -- height of camera above character's center of mass
-turn_speed = 0.005	-- turn speed of the character
+cam_height = 7    -- height of camera above character's center of mass
+turn_speed = 1	-- turn speed of the character
 zoom_speed = 1	-- camera zoom speed
-walk_speed = 12  -- character walk speed in km/h
+walk_speed = 10  -- character walk speed in km/h
 
 function onMoveFreeCamera(player)
 --  player:
@@ -19,11 +19,25 @@ function update(entity, deltatime)
 --    print("Playercontrollersystem  na endlich!!")
 end
 
-
-
-function move(entity)
+function doSpell(entity)
   
   print("doSpell")
+  
+ 
+end
+
+function onPunch(entity)
+  
+  print("onPunch")
+  
+   entity.animationComponent:getParameter(3):setValue(1) -- 3 parameter for  baseanimation
+   --entity.animationComponent:getParameter(7):setValue(1) -- 7 for top animation
+   
+end
+
+function move(entity , direction)
+  
+  print("move")
 end
 
 function onMove()

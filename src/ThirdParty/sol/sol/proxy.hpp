@@ -40,7 +40,7 @@ namespace sol {
 		}
 
 		template<std::size_t... I, typename T>
-		void tuple_set(std::index_sequence<I...>, T&& value) const {
+		void tuple_set(std::index_sequence<I...>, T&& value) {
 			tbl.traverse_set(std::get<I>(key)..., std::forward<T>(value));
 		}
 
@@ -49,7 +49,7 @@ namespace sol {
 		key_type key;
 
 		template<typename T>
-		proxy(Table table, T&& key) : tbl(table), key(std::forward<T>(key)) {}
+		proxy(Table table, T&& k) : tbl(table), key(std::forward<T>(k)) {}
 
 		template<typename T>
 		proxy& set(T&& item) {
@@ -63,12 +63,12 @@ namespace sol {
 			return *this;
 		}
 
-		template<typename U, meta::enable<meta::is_callable<meta::unwrap_unqualified_t<U>>> = meta::enabler>
+		template<typename U, meta::enable<meta::neg<is_lua_reference<meta::unwrap_unqualified_t<U>>>, meta::is_callable<meta::unwrap_unqualified_t<U>>> = meta::enabler>
 		proxy& operator=(U&& other) {
 			return set_function(std::forward<U>(other));
 		}
 
-		template<typename U, meta::disable<meta::is_callable<meta::unwrap_unqualified_t<U>>> = meta::enabler>
+		template<typename U, meta::disable<meta::neg<is_lua_reference<meta::unwrap_unqualified_t<U>>>, meta::is_callable<meta::unwrap_unqualified_t<U>>> = meta::enabler>
 		proxy& operator=(U&& other) {
 			return set(std::forward<U>(other));
 		}
@@ -123,50 +123,54 @@ namespace sol {
 
 	template<typename Table, typename Key, typename T>
 	inline bool operator==(T&& left, const proxy<Table, Key>& right) {
-		return left == right.template get<std::decay_t<T>>();
+		typedef decltype(stack::get<T>(nullptr, 0)) U;
+		return right.template get<optional<U>>() == left;
 	}
 
 	template<typename Table, typename Key, typename T>
 	inline bool operator==(const proxy<Table, Key>& right, T&& left) {
-		return right.template get<std::decay_t<T>>() == left;
+		typedef decltype(stack::get<T>(nullptr, 0)) U;
+		return right.template get<optional<U>>() == left;
 	}
 
 	template<typename Table, typename Key, typename T>
 	inline bool operator!=(T&& left, const proxy<Table, Key>& right) {
-		return right.template get<std::decay_t<T>>() != left;
+		typedef decltype(stack::get<T>(nullptr, 0)) U;
+		return right.template get<optional<U>>() == left;
 	}
 
 	template<typename Table, typename Key, typename T>
 	inline bool operator!=(const proxy<Table, Key>& right, T&& left) {
-		return right.template get<std::decay_t<T>>() != left;
+		typedef decltype(stack::get<T>(nullptr, 0)) U;
+		return right.template get<optional<U>>() == left;
 	}
 
 	template<typename Table, typename Key>
-	inline bool operator==(nil_t, const proxy<Table, Key>& right) {
+	inline bool operator==(lua_nil_t, const proxy<Table, Key>& right) {
 		return !right.valid();
 	}
 
 	template<typename Table, typename Key>
-	inline bool operator==(const proxy<Table, Key>& right, nil_t) {
+	inline bool operator==(const proxy<Table, Key>& right, lua_nil_t) {
 		return !right.valid();
 	}
 
 	template<typename Table, typename Key>
-	inline bool operator!=(nil_t, const proxy<Table, Key>& right) {
+	inline bool operator!=(lua_nil_t, const proxy<Table, Key>& right) {
 		return right.valid();
 	}
 
 	template<typename Table, typename Key>
-	inline bool operator!=(const proxy<Table, Key>& right, nil_t) {
+	inline bool operator!=(const proxy<Table, Key>& right, lua_nil_t) {
 		return right.valid();
 	}
 
 	namespace stack {
 		template <typename Table, typename Key>
 		struct pusher<proxy<Table, Key>> {
-			static int push(lua_State*, const proxy<Table, Key>& p) {
+			static int push(lua_State* L, const proxy<Table, Key>& p) {
 				sol::reference r = p;
-				return r.push();
+				return r.push(L);
 			}
 		};
 	} // stack

@@ -28,6 +28,7 @@ namespace XE
 		
 		float m_CameraYaw;
 		float m_CameraPitch;
+		bool m_freezed;
 
 	private:
 		bool _isDirty;

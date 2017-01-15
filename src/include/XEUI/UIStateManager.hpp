@@ -18,6 +18,8 @@ namespace XE {
 	class UIStateManager
 	{
 	public:
+		~UIStateManager();
+		
 		template < typename T >
 		std::unique_ptr< T > build( const Uint16& id, entityx::Entity entity, bool replace = true );
 

@@ -90,7 +90,7 @@ namespace XE
 
 	protected:
 		//called from Ogre::Renderable
-		Ogre::v1::RenderOperation::OperationType mOperationType;
+		Ogre::OperationType mOperationType;
 
 	private:
 		/// List of lights for this object

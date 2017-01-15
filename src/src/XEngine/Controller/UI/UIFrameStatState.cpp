@@ -9,15 +9,18 @@
 #include <XESystem/Entityx/Entity.h>
 #include <XEngine/Components/ScreenComponent.hpp>
 #include <XERenderer/CameraRenderable.hpp>
+#include <XEUI/widgets/Label.hpp>
+#include <XEUI/Alignment.hpp>
+#include <XEUI/Box.hpp>
 
 namespace XE {
 
 	UIDebug::UIDebug(const Ogre::uint16& id, entityx::Entity entity, bool replace = true)
 		: UIState(id, replace)
-		, m_entity(entity)
-
+		, m_screen(entity.component<XE::ScreenComponent>().get())
+		, m_cameraRenderable(entity.component<XE::CameraRenderable>().get())
 	{
-		XE::WLayer& layer = entity.component<ScreenComponent>()->wLayer;
+		XE::WLayer& layer = *m_screen->wLayer.get();
 
 		m_Box = Box::Create(layer, Box::Orientation::VERTICAL, 2.f);
 		m_FpsRendererThread = Label::Create(layer, "Hello World!\nAnother Line");
@@ -42,14 +45,14 @@ namespace XE {
 		m_alignment->SetScale(sf::Vector2f(.0f, .0f)); //smallest possible
 		m_alignment->SetAlignment(sf::Vector2f(1.0f, .5f));
 
-		entity.component<ScreenComponent>()->getDesktop()->Add(m_alignment); //add alignment to desktop -> so alignment get the desktop as parent
+		m_screen->getDesktop()->Add(m_alignment); //add alignment to desktop -> so alignment get the desktop as parent
 	}
 
 	UIDebug::~UIDebug()
 	{
 		m_Box->RemoveAll();
 		m_alignment->Remove(m_Box);
-		m_entity.component<ScreenComponent>()->getDesktop()->Remove(m_alignment);
+		m_screen->getDesktop()->Remove(m_alignment);
 	}
 
 	void UIDebug::create(const char* fbdata)
@@ -78,7 +81,7 @@ namespace XE {
 
 	void UIDebug::update(float delta)
 	{
-		GraphicsManager::FrameStats& stats = m_entity.component<CameraRenderable>()->getGraphicsManager().getFrameStats();
+		GraphicsManager::FrameStats& stats = m_cameraRenderable->getGraphicsManager().getFrameStats();
 		std::stringstream fpsAvg;
 		fpsAvg << (int)stats.AvgFps << " AvgFps RThread";
 		m_FpsAvqThread->SetText(fpsAvg.str());

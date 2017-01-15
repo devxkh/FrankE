@@ -5,6 +5,7 @@
 #include <Ogre/OgreMain/include/Animation/OgreSkeletonAnimation.h>
 //#include <Ogre/OgreMain/include/Animation/OgreSkeletonAnimationDef.h>
 
+#include <XESystem/Entityx/entityx.h>
 #include <XEngine/Animation/Nodes/AnimationNode.h>
 #include <XEngine/Animation/Nodes/OutputNode.h>
 #include <XEngine/Animation/Nodes/ParameterNode.h>
@@ -84,6 +85,7 @@ namespace XE
 				{
 					newNode->setNodeId(var->id());
 					newNode->init(var->node());
+					newNode->_type = var->node_type();
 
 					_nodes.emplace(var->id(), std::move(newNode));
 				}
@@ -153,11 +155,21 @@ namespace XE
 		}
 	}
 	
-	ParameterNode& AnimationComponent::getParameter(sf::Uint16 nodeId)
+	ParameterNode& AnimationComponent::getParameter(XE::Uint16 nodeId)
 	{
 		auto it = _nodes.find(nodeId);
 		if (it != _nodes.end())
-			return static_cast<ParameterNode&>(*it->second.get());
+		{
+			if (it->second->_type == XFBType::UAnimationNode::UAnimationNode_ParameterNode)
+			{
+				return static_cast<ParameterNode&>(*it->second.get());
+			}
+			else
+			{
+				LOG(plog::fatal) << "Node is not a Parameternode, id : " << nodeId;
+				return *(new ParameterNode()); //dummy -> else crash
+			}
+		}
 		else
 		{
 			LOG(plog::fatal) << "No Parameter found for id : " << nodeId << ", in _nodes";

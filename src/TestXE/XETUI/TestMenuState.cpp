@@ -34,10 +34,10 @@ TestMenuState::TestMenuState(XE::XEngine& engine, bool replace)
 	XET::TestControllerComponent* ctrl = entity.assign<XET::TestControllerComponent>(0,engine,  engine.getGraphicsManager().getWindow(), true).get();
 
 	XE::ScreenComponent* screenComp = entity.assign<XE::ScreenComponent>(*camRenderable, engine.getGraphicsManager().getWindow()).get(); //createScreen(); //workspace needed for screen
-	screenComp->mUIStateManager.addUIState(screenComp->mUIStateManager.build <XE::UIDebug>(NetMsg::UIStateId_Stats, entity, true));
+	screenComp->mUIStateManager.get()->addUIState(screenComp->mUIStateManager.get()->build <XE::UIDebug>(NetMsg::UIStateId_Stats, entity, true));
 //	screenComp->mUIStateManager.addUIState(screenComp->mUIStateManager.build <XE::UIConsole>(10, entity, true));//ctrl.createConsole();
 
-	screenComp->mUIStateManager.addUIState(screenComp->mUIStateManager.build <UIState_1>(99, entity, true));//ctrl.createConsole();
+	screenComp->mUIStateManager.get()->addUIState(screenComp->mUIStateManager.get()->build <UIState_1>(99, entity, true));//ctrl.createConsole();
 
 	//XE::ScreenComponent* screenComp = entity.assign<XE::ScreenComponent>(*camRenderable, engine.getGraphicsManager().getWindowManager().getWindow(0)).get(); //createScreen(); //workspace needed for screen
 

@@ -3,6 +3,7 @@
 #include <Ogre/OgreMain/include/OgreVector3.h>
 #include <XEScripts/LUA/LuaVector3.hpp>
 #include <XEDAL/PhysFS/PhysFsStream.hpp>
+#include <ThirdParty/sfml/include/sfml/System/Vector2.hpp>
 
 namespace XE {
 
@@ -24,6 +25,50 @@ namespace XE {
 			// typical member function
 			"y", &Ogre::Vector3::y,
 			"z", &Ogre::Vector3::z
+
+			// gets or set the value using member variable syntax
+			//"hp", sol::property(&player::get_hp, &player::set_hp),
+
+			//// read and write variable
+			//"speed", &player::speed,
+			//// can only read from, not write to
+			//"bullets", sol::readonly(&player::bullets)
+			);
+
+		state.new_usertype< Ogre::Quaternion>("Quaternion",
+
+			// 3 constructors
+			//sol::constructors<sol::types<>, sol::types<int>, sol::types<int, int>>(),
+			sol::constructors<sol::types<>, sol::types<float, float, float, float>>(),
+
+			// typical member function that returns a variable
+
+			"w", &Ogre::Quaternion::w,
+			"x", &Ogre::Quaternion::x,
+			// typical member function
+			"y", &Ogre::Quaternion::y,
+			"z", &Ogre::Quaternion::z
+
+			// gets or set the value using member variable syntax
+			//"hp", sol::property(&player::get_hp, &player::set_hp),
+
+			//// read and write variable
+			//"speed", &player::speed,
+			//// can only read from, not write to
+			//"bullets", sol::readonly(&player::bullets)
+			);
+
+		state.new_usertype<sf::Vector2f>("Vector2f",
+
+			// 3 constructors
+			//sol::constructors<sol::types<>, sol::types<int>, sol::types<int, int>>(),
+			sol::constructors<sol::types<>, sol::types<float, float>>(),
+
+			// typical member function that returns a variable
+
+			"x", &sf::Vector2f::x,
+			// typical member function
+			"y", &sf::Vector2f::y
 
 			// gets or set the value using member variable syntax
 			//"hp", sol::property(&player::get_hp, &player::set_hp),

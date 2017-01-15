@@ -97,7 +97,7 @@ namespace XE {
 
 	DebugRenderable::DebugRenderable(GraphicsManager& gMgr)
 		: Renderable()
-		, mOperationType(Ogre::v1::RenderOperation::OT_LINE_LIST)
+		, mOperationType(Ogre::OperationType::OT_LINE_LIST)
 
 		, m_currentVertexBufferSize(0)
 		, m_currentIndexBufferSize(0)
@@ -133,7 +133,7 @@ namespace XE {
 				Ogre::BT_DYNAMIC_DEFAULT,
 				NULL, false);
 
-			m_Vao = m_VaoManager->createVertexArrayObject(vertexBuffers, m_indexBuffer, Ogre::v1::RenderOperation::OT_LINE_LIST);
+			m_Vao = m_VaoManager->createVertexArrayObject(vertexBuffers, m_indexBuffer, Ogre::OperationType::OT_LINE_LIST);
 
 			mVaoPerLod[0].push_back(m_Vao);
 			//mVaoPerLod[1].push_back(m_Vao); //needed for shadow caster Node!

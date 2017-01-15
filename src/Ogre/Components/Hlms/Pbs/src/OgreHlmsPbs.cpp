@@ -43,6 +43,8 @@ THE SOFTWARE.
 #include "OgreHighLevelGpuProgramManager.h"
 #include "OgreHighLevelGpuProgram.h"
 #include "OgreForward3D.h"
+#include "Cubemaps/OgreParallaxCorrectedCubemap.h"
+#include "InstantRadiosity/OgreInstantRadiosity.h"
 
 #include "OgreSceneManager.h"
 #include "Compositor/OgreCompositorShadowNode.h"
@@ -135,6 +137,10 @@ namespace Ogre
     const IdString PbsProperty::EnvMapScale       = IdString( "envmap_scale" );
     const IdString PbsProperty::AmbientFixed      = IdString( "ambient_fixed" );
     const IdString PbsProperty::AmbientHemisphere = IdString( "ambient_hemisphere" );
+    const IdString PbsProperty::TargetEnvprobeMap = IdString( "target_envprobe_map" );
+    const IdString PbsProperty::ParallaxCorrectCubemaps = IdString( "parallax_correct_cubemaps" );
+    const IdString PbsProperty::UseParallaxCorrectCubemaps= IdString( "use_parallax_correct_cubemaps" );
+    const IdString PbsProperty::IrradianceVolumes = IdString( "irradiance_volumes" );
 
     const IdString PbsProperty::BrdfDefault       = IdString( "BRDF_Default" );
     const IdString PbsProperty::BrdfCookTorrance  = IdString( "BRDF_CookTorrance" );
@@ -199,7 +205,12 @@ namespace Ogre
         mShadowmapSamplerblock( 0 ),
         mShadowmapCmpSamplerblock( 0 ),
         mCurrentShadowmapSamplerblock( 0 ),
+        mParallaxCorrectedCubemap( 0 ),
         mCurrentPassBuffer( 0 ),
+        mGridBuffer( 0 ),
+        mGlobalLightListBuffer( 0 ),
+        mTexUnitSlotStart( 0 ),
+        mIrrandianceVolume( 0 ),
         mLastBoundPool( 0 ),
         mLastTextureHash( 0 ),
         mShadowFilter( PCF_3x3 ),
@@ -270,7 +281,7 @@ namespace Ogre
         const HlmsCache *retVal = Hlms::createShaderCacheEntry( renderableHash, passCache, finalHash,
                                                                 queuedRenderable );
 
-        if( mShaderProfile == "hlsl" )
+        if( mShaderProfile == "hlsl" || mShaderProfile == "metal" )
         {
             mListener->shaderCacheEntryCreated( mShaderProfile, retVal, passCache,
                                                 mSetProperties, queuedRenderable );
@@ -278,9 +289,9 @@ namespace Ogre
         }
 
         //Set samplers.
-        if( !retVal->pixelShader.isNull() )
+        if( !retVal->pso.pixelShader.isNull() )
         {
-            GpuProgramParametersSharedPtr psParams = retVal->pixelShader->getDefaultParameters();
+            GpuProgramParametersSharedPtr psParams = retVal->pso.pixelShader->getDefaultParameters();
 
             int texUnit = 1; //Vertex shader consumes 1 slot with its tbuffer.
 
@@ -292,6 +303,9 @@ namespace Ogre
                 texUnit += 2;
             }
 
+            if( mIrrandianceVolume && getProperty( HlmsBaseProp::ShadowCaster ) == 0 )
+                psParams->setNamedConstant( "irradianceVolume", texUnit++ );
+
             if( !mPreparedPass.shadowMaps.empty() )
             {
                 vector<int>::type shadowMaps;
@@ -301,6 +315,11 @@ namespace Ogre
 
                 psParams->setNamedConstant( "texShadowMap", &shadowMaps[0], shadowMaps.size(), 1 );
             }
+
+            int cubemapTexUnit = 0;
+            const int32 parallaxCorrectCubemaps = getProperty( PbsProperty::ParallaxCorrectCubemaps );
+            if( parallaxCorrectCubemaps )
+                cubemapTexUnit = texUnit++;
 
             assert( dynamic_cast<const HlmsPbsDatablock*>( queuedRenderable.renderable->getDatablock() ) );
             const HlmsPbsDatablock *datablock = static_cast<const HlmsPbsDatablock*>(
@@ -313,25 +332,30 @@ namespace Ogre
                                             texUnit++ );
             }
 
-            if( getProperty( PbsProperty::EnvProbeMap ) )
+            const int32 envProbeMap         = getProperty( PbsProperty::EnvProbeMap );
+            const int32 targetEnvProbeMap   = getProperty( PbsProperty::TargetEnvprobeMap );
+            if( (envProbeMap && envProbeMap != targetEnvProbeMap) || parallaxCorrectCubemaps )
             {
-                assert( !datablock->getTexture( PBSM_REFLECTION ).isNull() );
-                psParams->setNamedConstant( "texEnvProbeMap", texUnit++ );
+                assert( !datablock->getTexture( PBSM_REFLECTION ).isNull() || parallaxCorrectCubemaps );
+                if( !envProbeMap || envProbeMap == targetEnvProbeMap )
+                    psParams->setNamedConstant( "texEnvProbeMap", cubemapTexUnit );
+                else
+                    psParams->setNamedConstant( "texEnvProbeMap", texUnit++ );
             }
         }
 
-        GpuProgramParametersSharedPtr vsParams = retVal->vertexShader->getDefaultParameters();
+        GpuProgramParametersSharedPtr vsParams = retVal->pso.vertexShader->getDefaultParameters();
         vsParams->setNamedConstant( "worldMatBuf", 0 );
 
         mListener->shaderCacheEntryCreated( mShaderProfile, retVal, passCache,
                                             mSetProperties, queuedRenderable );
 
-        mRenderSystem->_setProgramsFromHlms( retVal );
+        mRenderSystem->_setPipelineStateObject( &retVal->pso );
 
         mRenderSystem->bindGpuProgramParameters( GPT_VERTEX_PROGRAM, vsParams, GPV_ALL );
-        if( !retVal->pixelShader.isNull() )
+        if( !retVal->pso.pixelShader.isNull() )
         {
-            GpuProgramParametersSharedPtr psParams = retVal->pixelShader->getDefaultParameters();
+            GpuProgramParametersSharedPtr psParams = retVal->pso.pixelShader->getDefaultParameters();
             mRenderSystem->bindGpuProgramParameters( GPT_FRAGMENT_PROGRAM, psParams, GPV_ALL );
         }
 
@@ -519,6 +543,20 @@ namespace Ogre
         setTextureProperty( PbsProperty::EnvProbeMap,   datablock,  PBSM_REFLECTION );
         setTextureProperty( PbsProperty::DetailWeightMap,datablock, PBSM_DETAIL_WEIGHT );
 
+        {
+            //Save the name of the cubemap for hazard prevention
+            //(don't sample the cubemap and render to it at the same time).
+            TexturePtr reflectionTexture = datablock->getTexture( PBSM_REFLECTION );
+            if( !reflectionTexture.isNull() )
+            {
+                //Manual reflection texture
+                if( datablock->getCubemapProbe() )
+                    setProperty( PbsProperty::UseParallaxCorrectCubemaps, 1 );
+                setProperty( PbsProperty::EnvProbeMap, static_cast<int32>(
+                             IdString( reflectionTexture->getName() ).mHash ) );
+            }
+        }
+
         bool usesNormalMap = !datablock->getTexture( PBSM_NORMAL ).isNull();
         for( size_t i=PBSM_DETAIL0_NM; i<=PBSM_DETAIL3_NM; ++i )
             usesNormalMap |= !datablock->getTexture( i ).isNull();
@@ -682,6 +720,8 @@ namespace Ogre
             }
         }
 
+        mTargetEnvMap.setNull();
+
         AmbientLightMode ambientMode = mAmbientLightMode;
         ColourValue upperHemisphere = sceneManager->getAmbientLightUpperHemisphere();
         ColourValue lowerHemisphere = sceneManager->getAmbientLightLowerHemisphere();
@@ -714,6 +754,25 @@ namespace Ogre
 
             if( envMapScale != 1.0f )
                 setProperty( PbsProperty::EnvMapScale, 1 );
+
+            //Save cubemap's name so that we never try to render & sample to/from it at the same time
+            const CompositorTexture &compoTarget = sceneManager->getCompositorTarget();
+            if( !compoTarget.textures->empty() )
+            {
+                const TexturePtr &firstTargetTex = (*compoTarget.textures)[0];
+                if( firstTargetTex->getTextureType() == TEX_TYPE_CUBE_MAP )
+                {
+                    setProperty( PbsProperty::TargetEnvprobeMap,
+                                 static_cast<int32>( IdString(firstTargetTex->getName()).mHash ) );
+                    mTargetEnvMap = firstTargetTex;
+                }
+            }
+
+            if( mParallaxCorrectedCubemap )
+                setProperty( PbsProperty::ParallaxCorrectCubemaps, 1 );
+
+            if( mIrrandianceVolume )
+                setProperty( PbsProperty::IrradianceVolumes, 1 );
         }
 
         if( mOptimizationStrategy == LowerGpuOverhead )
@@ -758,12 +817,18 @@ namespace Ogre
 
         if( !casterPass )
         {
-            Forward3D *forward3D = sceneManager->getForward3D();
-            if( forward3D )
+            ForwardPlusBase *forwardPlus = sceneManager->_getActivePassForwardPlus();
+            if( forwardPlus )
             {
-                mapSize += forward3D->getConstBufferSize();
-                mGridBuffer             = forward3D->getGridBuffer( camera );
-                mGlobalLightListBuffer  = forward3D->getGlobalLightListBuffer( camera );
+                mapSize += forwardPlus->getConstBufferSize();
+                mGridBuffer             = forwardPlus->getGridBuffer( camera );
+                mGlobalLightListBuffer  = forwardPlus->getGlobalLightListBuffer( camera );
+            }
+
+            if( mParallaxCorrectedCubemap )
+            {
+                mParallaxCorrectedCubemap->_notifyPreparePassHash( viewMatrix );
+                mapSize += mParallaxCorrectedCubemap->getConstBufferSize();
             }
 
             //mat4 view + mat4 shadowRcv[numShadowMaps].texViewProj +
@@ -780,6 +845,11 @@ namespace Ogre
             //vec3 ambientLowerHemi + padding + vec3 ambientHemisphereDir + padding
             if( ambientMode == AmbientHemisphere )
                 mapSize += 8 * 4;
+
+            //vec3 irradianceOrigin + float maxPower +
+            //vec3 irradianceSize + float invHeight + mat4 invView
+            if( mIrrandianceVolume )
+                mapSize += (4 + 4 + 4*4) * 4;
 
             //float pssmSplitPoints N times.
             mapSize += numPssmSplits * 4;
@@ -828,9 +898,8 @@ namespace Ogre
 
         //mat4 viewProj;
         Matrix4 viewProjMatrix = projectionMatrix * viewMatrix;
-        Matrix4 tmp = viewProjMatrix.transpose();
         for( size_t i=0; i<16; ++i )
-            *passBufferPtr++ = (float)tmp[0][i];
+            *passBufferPtr++ = (float)viewProjMatrix[0][i];
 
         mPreparedPass.viewMatrix        = viewMatrix;
 
@@ -839,15 +908,13 @@ namespace Ogre
         if( !casterPass )
         {
             //mat4 view;
-            tmp = viewMatrix.transpose();
             for( size_t i=0; i<16; ++i )
-                *passBufferPtr++ = (float)tmp[0][i];
+                *passBufferPtr++ = (float)viewMatrix[0][i];
 
             for( int32 i=0; i<numShadowMaps; ++i )
             {
                 //mat4 shadowRcv[numShadowMaps].texViewProj
                 Matrix4 viewProjTex = shadowNode->getViewProjectionMatrix( i );
-                viewProjTex = viewProjTex.transpose();
                 for( size_t j=0; j<16; ++j )
                     *passBufferPtr++ = (float)viewProjTex[0][j];
 
@@ -926,6 +993,36 @@ namespace Ogre
                 *passBufferPtr++ = static_cast<float>( hemisphereDir.y );
                 *passBufferPtr++ = static_cast<float>( hemisphereDir.z );
                 *passBufferPtr++ = 1.0f;
+            }
+
+            if( mIrrandianceVolume )
+            {
+                const Vector3 irradianceCellSize = mIrrandianceVolume->getIrradianceCellSize();
+                const Vector3 irradianceVolumeOrigin = mIrrandianceVolume->getIrradianceOrigin() /
+                                                       irradianceCellSize;
+                const float fTexWidth = static_cast<float>(
+                            mIrrandianceVolume->getIrradianceVolumeTexture()->getWidth() );
+                const float fTexDepth = static_cast<float>(
+                            mIrrandianceVolume->getIrradianceVolumeTexture()->getDepth() );
+
+                *passBufferPtr++ = static_cast<float>( irradianceVolumeOrigin.x ) / fTexWidth;
+                *passBufferPtr++ = static_cast<float>( irradianceVolumeOrigin.y );
+                *passBufferPtr++ = static_cast<float>( irradianceVolumeOrigin.z ) / fTexDepth;
+                *passBufferPtr++ = mIrrandianceVolume->getIrradianceMaxPower() *
+                                   mIrrandianceVolume->mVplPowerBoost;
+
+                const float fTexHeight = static_cast<float>(
+                            mIrrandianceVolume->getIrradianceVolumeTexture()->getHeight() );
+
+                *passBufferPtr++ = 1.0f / (fTexWidth * irradianceCellSize.x);
+                *passBufferPtr++ = 1.0f / irradianceCellSize.y;
+                *passBufferPtr++ = 1.0f / (fTexDepth * irradianceCellSize.z);
+                *passBufferPtr++ = 1.0f / fTexHeight;
+
+                //mat4 invView;
+                Matrix4 invViewMatrix = viewMatrix.inverse();
+                for( size_t i=0; i<16; ++i )
+                    *passBufferPtr++ = (float)invViewMatrix[0][i];
             }
 
             //float pssmSplitPoints
@@ -1060,11 +1157,17 @@ namespace Ogre
                 }
             }
 
-            Forward3D *forward3D = sceneManager->getForward3D();
-            if( forward3D )
+            ForwardPlusBase *forwardPlus = sceneManager->_getActivePassForwardPlus();
+            if( forwardPlus )
             {
-                forward3D->fillConstBufferData( renderTarget, passBufferPtr );
-                passBufferPtr += forward3D->getConstBufferSize() >> 2;
+                forwardPlus->fillConstBufferData( renderTarget, passBufferPtr );
+                passBufferPtr += forwardPlus->getConstBufferSize() >> 2u;
+            }
+
+            if( mParallaxCorrectedCubemap )
+            {
+                mParallaxCorrectedCubemap->fillConstBufferData( viewMatrix, passBufferPtr );
+                passBufferPtr += mParallaxCorrectedCubemap->getConstBufferSize() >> 2u;
             }
         }
         else
@@ -1103,6 +1206,14 @@ namespace Ogre
             mCurrentShadowmapSamplerblock = mShadowmapSamplerblock;
         else
             mCurrentShadowmapSamplerblock = mShadowmapCmpSamplerblock;
+
+        mTexUnitSlotStart = mPreparedPass.shadowMaps.size() + 1;
+        if( mGridBuffer )
+            mTexUnitSlotStart += 2;
+        if( mIrrandianceVolume )
+            mTexUnitSlotStart += 1;
+        if( mParallaxCorrectedCubemap )
+            mTexUnitSlotStart += 1;
 
         uploadDirtyDatablocks();
 
@@ -1171,6 +1282,17 @@ namespace Ogre
                             CbShaderBuffer( PixelShader, 2, mGlobalLightListBuffer, 0, 0 );
                 }
 
+                if( mIrrandianceVolume )
+                {
+                    const TexturePtr &irradianceTex = mIrrandianceVolume->getIrradianceVolumeTexture();
+                    const HlmsSamplerblock *samplerblock = mIrrandianceVolume->getIrradSamplerblock();
+
+                    *commandBuffer->addCommand<CbTexture>() = CbTexture( texUnit, true,
+                                                                         irradianceTex.get(),
+                                                                         samplerblock );
+                    ++texUnit;
+                }
+
                 //We changed HlmsType, rebind the shared textures.
                 FastArray<TexturePtr>::const_iterator itor = mPreparedPass.shadowMaps.begin();
                 FastArray<TexturePtr>::const_iterator end  = mPreparedPass.shadowMaps.end();
@@ -1180,6 +1302,16 @@ namespace Ogre
                                                                          mCurrentShadowmapSamplerblock );
                     ++texUnit;
                     ++itor;
+                }
+
+                if( mParallaxCorrectedCubemap )
+                {
+                    Texture *pccTexture = mParallaxCorrectedCubemap->getBlendCubemap().get();
+                    const HlmsSamplerblock *samplerblock =
+                            mParallaxCorrectedCubemap->getBlendCubemapTrilinearSamplerblock();
+                    *commandBuffer->addCommand<CbTexture>() = CbTexture( texUnit, true, pccTexture,
+                                                                         samplerblock );
+                    ++texUnit;
                 }
             }
             else
@@ -1217,6 +1349,14 @@ namespace Ogre
                                                                            1, newPool->materialBuffer, 0,
                                                                            newPool->materialBuffer->
                                                                            getTotalSizeBytes() );
+            CubemapProbe *manualProbe = datablock->getCubemapProbe();
+            if( manualProbe )
+            {
+                ConstBufferPacked *probeConstBuf = manualProbe->getConstBufferForManualProbes();
+                *commandBuffer->addCommand<CbShaderBuffer>() = CbShaderBuffer( PixelShader,
+                                                                               3, probeConstBuf,
+                                                                               0, 0 );
+            }
             mLastBoundPool = newPool;
         }
 
@@ -1419,15 +1559,18 @@ namespace Ogre
             if( datablock->mTextureHash != mLastTextureHash )
             {
                 //Rebind textures
-                size_t texUnit = mPreparedPass.shadowMaps.size() + (!mGridBuffer ? 1 : 3);
+                size_t texUnit = mTexUnitSlotStart;
 
                 PbsBakedTextureArray::const_iterator itor = datablock->mBakedTextures.begin();
                 PbsBakedTextureArray::const_iterator end  = datablock->mBakedTextures.end();
 
                 while( itor != end )
                 {
-                    *commandBuffer->addCommand<CbTexture>() =
-                            CbTexture( texUnit++, true, itor->texture.get(), itor->samplerBlock );
+                    if( itor->texture != mTargetEnvMap )
+                    {
+                        *commandBuffer->addCommand<CbTexture>() =
+                                CbTexture( texUnit++, true, itor->texture.get(), itor->samplerBlock );
+                    }
                     ++itor;
                 }
 

@@ -31,18 +31,6 @@
 #include "call.hpp"
 
 namespace sol {
-	template <typename Sig, typename... Ps>
-	struct function_arguments {
-		std::tuple<Ps...> params;
-		template <typename... Args>
-		function_arguments(Args&&... args) : params(std::forward<Args>(args)...) {}
-	};
-
-	template <typename Sig = function_sig<>, typename... Args>
-	function_arguments<Sig, Args...> function_args(Args&&... args) {
-		return function_arguments<Sig, Args...>(std::forward<Args>(args)...);
-	}
-
 	namespace stack {
 		template<typename... Sigs>
 		struct pusher<function_sig<Sigs...>> {
@@ -193,12 +181,15 @@ namespace sol {
 		struct pusher<function_arguments<T, Args...>> {
 			template <std::size_t... I, typename FP>
 			static int push_func(std::index_sequence<I...>, lua_State* L, FP&& fp) {
-				return stack::push<T>(L, detail::forward_get<I>(fp.params)...);
+				return stack::push<T>(L, detail::forward_get<I>(fp.arguments)...);
 			}
 
-			template <typename FP>
-			static int push(lua_State* L, FP&& fp) {
-				return push_func(std::make_index_sequence<sizeof...(Args)>(), L, std::forward<FP>(fp));
+			static int push(lua_State* L, const function_arguments<T, Args...>& fp) {
+				return push_func(std::make_index_sequence<sizeof...(Args)>(), L, fp);
+			}
+
+			static int push(lua_State* L, function_arguments<T, Args...>&& fp) {
+				return push_func(std::make_index_sequence<sizeof...(Args)>(), L, std::move(fp));
 			}
 		};
 
@@ -229,13 +220,13 @@ namespace sol {
 		struct pusher<overload_set<Functions...>> {
 			static int push(lua_State* L, overload_set<Functions...>&& set) {
 				typedef function_detail::overloaded_function<Functions...> F;
-				pusher<function_sig<>>{}.set_fx<F>(L, std::move(set.set));
+				pusher<function_sig<>>{}.set_fx<F>(L, std::move(set.functions));
 				return 1;
 			}
 
 			static int push(lua_State* L, const overload_set<Functions...>& set) {
 				typedef function_detail::overloaded_function<Functions...> F;
-				pusher<function_sig<>>{}.set_fx<F>(L, set.set);
+				pusher<function_sig<>>{}.set_fx<F>(L, set.functions);
 				return 1;
 			}
 		};
@@ -285,6 +276,31 @@ namespace sol {
 			}
 		};
 
+		template <typename T>
+		struct pusher<var_wrapper<T>> {
+			static int push(lua_State* L, var_wrapper<T>&& vw) {
+				return stack::push(L, std::move(vw.value));
+			}
+			static int push(lua_State* L, const var_wrapper<T>& vw) {
+				return stack::push(L, vw.value);
+			}
+		};
+
+		template <typename... Functions>
+		struct pusher<factory_wrapper<Functions...>> {
+			static int push(lua_State* L, const factory_wrapper<Functions...>& fw) {
+				typedef function_detail::overloaded_function<Functions...> F;
+				pusher<function_sig<>>{}.set_fx<F>(L, fw.functions);
+				return 1;
+			}
+
+			static int push(lua_State* L, factory_wrapper<Functions...>&& fw) {
+				typedef function_detail::overloaded_function<Functions...> F;
+				pusher<function_sig<>>{}.set_fx<F>(L, std::move(fw.functions));
+				return 1;
+			}
+		};
+
 		template <typename T, typename... Lists>
 		struct pusher<detail::tagged<T, constructor_list<Lists...>>> {
 			static int push(lua_State* L, detail::tagged<T, constructor_list<Lists...>>) {
@@ -295,17 +311,18 @@ namespace sol {
 
 		template <typename T, typename... Fxs>
 		struct pusher<detail::tagged<T, constructor_wrapper<Fxs...>>> {
-			static int push(lua_State* L, constructor_wrapper<Fxs...> c) {
+			template <typename C>
+			static int push(lua_State* L, C&& c) {
 				lua_CFunction cf = call_detail::call_user<T, false, false, constructor_wrapper<Fxs...>>;
-				int closures = stack::push<user<T>>(L, std::move(c));
+				int closures = stack::push<user<constructor_wrapper<Fxs...>>>(L, std::forward<C>(c));
 				return stack::push(L, c_closure(cf, closures));
 			}
 		};
 
 		template <typename T>
 		struct pusher<detail::tagged<T, destructor_wrapper<void>>> {
-			static int push(lua_State* L, detail::tagged<T, destructor_wrapper<void>>) {
-				lua_CFunction cf = call_detail::destruct<T>;
+			static int push(lua_State* L, destructor_wrapper<void>) {
+				lua_CFunction cf = detail::usertype_alloc_destroy<T>;
 				return stack::push(L, cf);
 			}
 		};

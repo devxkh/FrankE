@@ -72,7 +72,7 @@ namespace sol {
 
 	public:
 		load_result() = default;
-		load_result(lua_State* L, int index = -1, int returncount = 0, int popcount = 0, load_status err = load_status::ok) noexcept : L(L), index(index), returncount(returncount), popcount(popcount), err(err) {
+		load_result(lua_State* Ls, int stackindex = -1, int retnum = 0, int popnum = 0, load_status lerr = load_status::ok) noexcept : L(Ls), index(stackindex), returncount(retnum), popcount(popnum), err(lerr) {
 
 		}
 		load_result(const load_result&) = default;
@@ -119,7 +119,7 @@ namespace sol {
 
 		template<typename... Ret, typename... Args>
 		decltype(auto) call(Args&&... args) {
-			return get<function>().template call<Ret...>(std::forward<Args>(args)...);
+			return get<protected_function>().template call<Ret...>(std::forward<Args>(args)...);
 		}
 
 		template<typename... Args>

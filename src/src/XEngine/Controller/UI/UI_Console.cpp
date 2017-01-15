@@ -31,11 +31,9 @@ namespace XE {
 
 	UIConsole::UIConsole(const Ogre::uint16& id, entityx::Entity entity, bool replace = true)
 		: UIState(id, replace)
-		, m_entity(entity)
+		, m_screen(entity.component<ScreenComponent>().get())
 	{
-		auto screen = entity.component<ScreenComponent>();
-	
-		WLayer& layer = screen->wLayer;
+		WLayer& layer = *m_screen->wLayer.get();
 		
 		m_consoleWidgetContainer = Box::Create(layer, Box::Orientation::VERTICAL, 0.f);
 
@@ -48,7 +46,7 @@ namespace XE {
 
 		m_entry = Entry::Create(layer);
 		m_entry->size = sf::Vector2f(200.f, 30.f);
-		screen->m_Desktop->AddEntry(m_entry);
+		m_screen->m_Desktop->AddEntry(m_entry);
 
 		for each (auto label in m_linesOfText)
 		{
@@ -63,7 +61,7 @@ namespace XE {
 		m_alignment->Add(m_consoleWidgetContainer);
 		m_alignment->SetScale(sf::Vector2f(.0f, .0f)); //smallest possible
 
-		entity.component<ScreenComponent>()->getDesktop()->Add(m_alignment);
+		m_screen->getDesktop()->Add(m_alignment);
 
 		m_alignment->SetAlignment(sf::Vector2f(0.0f, 1.0f));
 	}
@@ -71,10 +69,10 @@ namespace XE {
 	UIConsole::~UIConsole()
 	{
 		m_linesOfText.clear();
-		m_entity.component<ScreenComponent>()->m_Desktop->RemoveEntry(m_entry);
+		m_screen->m_Desktop->RemoveEntry(m_entry);
 		m_consoleWidgetContainer->RemoveAll();
 		m_alignment->Remove(m_consoleWidgetContainer);
-		m_entity.component<ScreenComponent>()->getDesktop()->Remove(m_alignment);
+		m_screen->getDesktop()->Remove(m_alignment);
 	}
 
 	void UIConsole::create(const char* fbdata)

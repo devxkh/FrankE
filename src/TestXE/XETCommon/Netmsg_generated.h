@@ -29,6 +29,7 @@ struct SpawnPointComponent;
 struct Trigger;
 struct PhysicsComponent;
 struct SoundListener;
+struct Attenuation;
 struct Light;
 struct Camera;
 struct System;
@@ -70,6 +71,7 @@ struct CharacterComponent;
 struct AbilityComponent;
 struct AIComponent;
 struct Chatmessage;
+struct ExecCommand;
 struct Login;
 struct ReturnStatus;
 struct PlayerComponent;
@@ -122,35 +124,36 @@ enum PlayerState {
   PlayerState_InAir = 7,
   PlayerState_JumpLanding = 8,
   PlayerState_OnMenu = 9,
-  PlayerState_IsSpawning = 10,
-  PlayerState_Spectating = 11,
-  PlayerState_Casting = 12,
-  PlayerState_Emote_1 = 13,
-  PlayerState_Emote_2 = 14,
-  PlayerState_Emote_3 = 15,
-  PlayerState_Dancing_1 = 16,
-  PlayerState_Dancing_2 = 17,
-  PlayerState_Dancing_3 = 18,
-  PlayerState_Blocking_1 = 19,
-  PlayerState_Blocking_2 = 20,
-  PlayerState_Blocking_3 = 21,
-  PlayerState_Attack_1 = 22,
-  PlayerState_Attack_2 = 23,
-  PlayerState_Attack_3 = 24,
-  PlayerState_Attack_4 = 25,
-  PlayerState_Attack_5 = 26,
-  PlayerState_Attack_6 = 27,
-  PlayerState_Hitted_1 = 28,
-  PlayerState_Hitted_2 = 29,
-  PlayerState_Hitted_3 = 30,
-  PlayerState_Hitted_4 = 31,
-  PlayerState_Hitted_5 = 32,
-  PlayerState_Hitted_6 = 33,
-  PlayerState_Count = 34
+  PlayerState_IsCustomizing = 10,
+  PlayerState_IsSpawning = 11,
+  PlayerState_Spectating = 12,
+  PlayerState_Casting = 13,
+  PlayerState_Emote_1 = 14,
+  PlayerState_Emote_2 = 15,
+  PlayerState_Emote_3 = 16,
+  PlayerState_Dancing_1 = 17,
+  PlayerState_Dancing_2 = 18,
+  PlayerState_Dancing_3 = 19,
+  PlayerState_Blocking_1 = 20,
+  PlayerState_Blocking_2 = 21,
+  PlayerState_Blocking_3 = 22,
+  PlayerState_Attack_1 = 23,
+  PlayerState_Attack_2 = 24,
+  PlayerState_Attack_3 = 25,
+  PlayerState_Attack_4 = 26,
+  PlayerState_Attack_5 = 27,
+  PlayerState_Attack_6 = 28,
+  PlayerState_Hitted_1 = 29,
+  PlayerState_Hitted_2 = 30,
+  PlayerState_Hitted_3 = 31,
+  PlayerState_Hitted_4 = 32,
+  PlayerState_Hitted_5 = 33,
+  PlayerState_Hitted_6 = 34,
+  PlayerState_Count = 35
 };
 
 inline const char **EnumNamesPlayerState() {
-  static const char *names[] = { "Idling", "Joining", "Dying", "Dead", "Running", "Walking", "JumpStart", "InAir", "JumpLanding", "OnMenu", "IsSpawning", "Spectating", "Casting", "Emote_1", "Emote_2", "Emote_3", "Dancing_1", "Dancing_2", "Dancing_3", "Blocking_1", "Blocking_2", "Blocking_3", "Attack_1", "Attack_2", "Attack_3", "Attack_4", "Attack_5", "Attack_6", "Hitted_1", "Hitted_2", "Hitted_3", "Hitted_4", "Hitted_5", "Hitted_6", "Count", nullptr };
+  static const char *names[] = { "Idling", "Joining", "Dying", "Dead", "Running", "Walking", "JumpStart", "InAir", "JumpLanding", "OnMenu", "IsCustomizing", "IsSpawning", "Spectating", "Casting", "Emote_1", "Emote_2", "Emote_3", "Dancing_1", "Dancing_2", "Dancing_3", "Blocking_1", "Blocking_2", "Blocking_3", "Attack_1", "Attack_2", "Attack_3", "Attack_4", "Attack_5", "Attack_6", "Hitted_1", "Hitted_2", "Hitted_3", "Hitted_4", "Hitted_5", "Hitted_6", "Count", nullptr };
   return names;
 }
 
@@ -293,11 +296,12 @@ enum Data {
   Data_ReturnStatus = 4,
   Data_InputEvent = 5,
   Data_Entity = 6,
-  Data_GameState = 7
+  Data_GameState = 7,
+  Data_ExecCommand = 8
 };
 
 inline const char **EnumNamesData() {
-  static const char *names[] = { "NONE", "Chatmessage", "Scene", "Login", "ReturnStatus", "InputEvent", "Entity", "GameState", nullptr };
+  static const char *names[] = { "NONE", "Chatmessage", "Scene", "Login", "ReturnStatus", "InputEvent", "Entity", "GameState", "ExecCommand", nullptr };
   return names;
 }
 
@@ -604,6 +608,41 @@ inline flatbuffers::Offset<Chatmessage> CreateChatmessage(flatbuffers::FlatBuffe
   return builder_.Finish();
 }
 
+struct ExecCommand FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+  const flatbuffers::String *cmd() const { return GetPointer<const flatbuffers::String *>(4); }
+  const flatbuffers::String *cmdOpt() const { return GetPointer<const flatbuffers::String *>(6); }
+  bool Verify(flatbuffers::Verifier &verifier) const {
+    return VerifyTableStart(verifier) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, 4 /* cmd */) &&
+           verifier.Verify(cmd()) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, 6 /* cmdOpt */) &&
+           verifier.Verify(cmdOpt()) &&
+           verifier.EndTable();
+  }
+};
+
+struct ExecCommandBuilder {
+  flatbuffers::FlatBufferBuilder &fbb_;
+  flatbuffers::uoffset_t start_;
+  void add_cmd(flatbuffers::Offset<flatbuffers::String> cmd) { fbb_.AddOffset(4, cmd); }
+  void add_cmdOpt(flatbuffers::Offset<flatbuffers::String> cmdOpt) { fbb_.AddOffset(6, cmdOpt); }
+  ExecCommandBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
+  ExecCommandBuilder &operator=(const ExecCommandBuilder &);
+  flatbuffers::Offset<ExecCommand> Finish() {
+    auto o = flatbuffers::Offset<ExecCommand>(fbb_.EndTable(start_, 2));
+    return o;
+  }
+};
+
+inline flatbuffers::Offset<ExecCommand> CreateExecCommand(flatbuffers::FlatBufferBuilder &_fbb,
+   flatbuffers::Offset<flatbuffers::String> cmd = 0,
+   flatbuffers::Offset<flatbuffers::String> cmdOpt = 0) {
+  ExecCommandBuilder builder_(_fbb);
+  builder_.add_cmdOpt(cmdOpt);
+  builder_.add_cmd(cmd);
+  return builder_.Finish();
+}
+
 struct Login FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   const flatbuffers::String *identity() const { return GetPointer<const flatbuffers::String *>(4); }
   bool Verify(flatbuffers::Verifier &verifier) const {
@@ -880,6 +919,7 @@ inline bool VerifyData(flatbuffers::Verifier &verifier, const void *union_obj, D
     case Data_InputEvent: return verifier.VerifyTable(reinterpret_cast<const InputEvent *>(union_obj));
     case Data_Entity: return verifier.VerifyTable(reinterpret_cast<const Entity *>(union_obj));
     case Data_GameState: return verifier.VerifyTable(reinterpret_cast<const GameState *>(union_obj));
+    case Data_ExecCommand: return verifier.VerifyTable(reinterpret_cast<const ExecCommand *>(union_obj));
     default: return false;
   }
 }

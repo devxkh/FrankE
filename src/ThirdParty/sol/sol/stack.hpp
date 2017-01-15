@@ -66,13 +66,26 @@ namespace sol {
 				return std::pair<T, int>(*reinterpret_cast<T*>(static_cast<void*>(voiddata.data())), index);
 			}
 
+			struct evaluator {
+				template <typename Fx, typename... Args>
+				static decltype(auto) eval(types<>, std::index_sequence<>, lua_State*, int, record&, Fx&& fx, Args&&... args) {
+					return std::forward<Fx>(fx)(std::forward<Args>(args)...);
+				}
+				
+				template <typename Fx, typename Arg, typename... Args, std::size_t I, std::size_t... Is, typename... FxArgs>
+				static decltype(auto) eval(types<Arg, Args...>, std::index_sequence<I, Is...>, lua_State* L, int start, record& tracking, Fx&& fx, FxArgs&&... fxargs) {
+					return eval(types<Args...>(), std::index_sequence<Is...>(), L, start, tracking, std::forward<Fx>(fx), std::forward<FxArgs>(fxargs)..., stack_detail::unchecked_get<Arg>(L, start + tracking.used, tracking));
+				}
+			};
+
 			template <bool checkargs = default_check_arguments, std::size_t... I, typename R, typename... Args, typename Fx, typename... FxArgs, typename = std::enable_if_t<!std::is_void<R>::value>>
 			inline decltype(auto) call(types<R>, types<Args...> ta, std::index_sequence<I...> tai, lua_State* L, int start, Fx&& fx, FxArgs&&... args) {
 #ifndef _MSC_VER
 				static_assert(meta::all<meta::is_not_move_only<Args>...>::value, "One of the arguments being bound is a move-only type, and it is not being taken by reference: this will break your code. Please take a reference and std::move it manually if this was your intention.");
 #endif // This compiler make me so fucking sad
-				check_types<checkargs>{}.check(ta, tai, L, start, type_panic);
-				return fx(std::forward<FxArgs>(args)..., stack_detail::unchecked_get<Args>(L, start + I - meta::count_for_to_pack<I, is_transparent_argument, Args...>::value)...);
+				multi_check<checkargs, Args...>(L, start, type_panic);
+				record tracking{};
+				return evaluator{}.eval(ta, tai, L, start, tracking, std::forward<Fx>(fx), std::forward<FxArgs>(args)...);
 			}
 
 			template <bool checkargs = default_check_arguments, std::size_t... I, typename... Args, typename Fx, typename... FxArgs>
@@ -80,8 +93,9 @@ namespace sol {
 #ifndef _MSC_VER
 				static_assert(meta::all<meta::is_not_move_only<Args>...>::value, "One of the arguments being bound is a move-only type, and it is not being taken by reference: this will break your code. Please take a reference and std::move it manually if this was your intention.");
 #endif // This compiler make me so fucking sad
-				check_types<checkargs>{}.check(ta, tai, L, start, type_panic);
-				fx(std::forward<FxArgs>(args)..., stack_detail::unchecked_get<Args>(L, start + I - meta::count_for_to_pack<I, is_transparent_argument, Args...>::value)...);
+				multi_check<checkargs, Args...>(L, start, type_panic);
+				record tracking{};
+				evaluator{}.eval(ta, tai, L, start, tracking, std::forward<Fx>(fx), std::forward<FxArgs>(args)...);
 			}
 		} // stack_detail
 
@@ -109,7 +123,7 @@ namespace sol {
 			}
 			int last = index + count;
 			for (int i = index; i < last; ++i) {
-				lua_remove(L, i);
+				lua_remove(L, index);
 			}
 		}
 
@@ -167,13 +181,16 @@ namespace sol {
 			return call_into_lua(returns_list(), args_list(), L, start, std::forward<Fx>(fx), std::forward<FxArgs>(fxargs)...);
 		}
 
-		inline call_syntax get_call_syntax(lua_State* L, const std::string& key, int index = -2) {
+		inline call_syntax get_call_syntax(lua_State* L, const std::string& key, int index) {
+			if (lua_gettop(L) == 0) {
+				return call_syntax::dot;
+			}
 			luaL_getmetatable(L, key.c_str());
 			auto pn = pop_n(L, 1);
-			if (lua_compare(L, -1, index, LUA_OPEQ) == 1) {
-				return call_syntax::colon;
+			if (lua_compare(L, -1, index, LUA_OPEQ) != 1) {
+				return call_syntax::dot;
 			}
-			return call_syntax::dot;
+			return call_syntax::colon;
 		}
 
 		inline void script(lua_State* L, const std::string& code) {

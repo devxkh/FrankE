@@ -22,7 +22,7 @@ namespace XET {
 
 	void TestControllerSystem::setBasicInputEvents(TestControllerComponent& controller)
 	{
-		controller.system.connect0(ControllerSettings::ActionType_Quit, [this]() { onQuit(); });
+		controller.get()->system.connect0(ControllerSettings::ActionType_Quit, [this]() { onQuit(); });
 
 		////Interface
 		//controller.system.connect(ActionType_NavRight, [this, &controller](XE::ActionContext context) { menuNav(context, controller); });  //std::bind(&TestControllerSystem::menuNav, std::placeholders::_1, ControllerSettings::ActionType_NavRight));
@@ -31,16 +31,16 @@ namespace XET {
 		//controller.system.connect(ActionType_NavDown, [this, &controller](XE::ActionContext context) { menuNav(context, controller); });
 		//controller.system.connect(ActionType_NavEnter, [this, &controller](XE::ActionContext context) { menuNav(context, controller); });
 
-		controller.system.connect(ControllerSettings::ActionType_Resized, [this](XE::ActionContext context) { onResized(context); });
+		controller.get()->system.connect(ControllerSettings::ActionType_Resized, [this](XE::ActionContext context) { onResized(context); });
 
-		controller.system.connect(ControllerSettings::ActionType_KeyDown, [this](XE::ActionContext context) { onKeyDown(context); });
-		controller.system.connect(ControllerSettings::ActionType_KeyPressed, [this](XE::ActionContext context) { onKeyPressed(context); });
-		controller.system.connect(ControllerSettings::ActionType_TextEntered, [this](XE::ActionContext context) { onTextEntered(context); });
+		controller.get()->system.connect(ControllerSettings::ActionType_KeyDown, [this](XE::ActionContext context) { onKeyDown(context); });
+		controller.get()->system.connect(ControllerSettings::ActionType_KeyPressed, [this](XE::ActionContext context) { onKeyPressed(context); });
+		controller.get()->system.connect(ControllerSettings::ActionType_TextEntered, [this](XE::ActionContext context) { onTextEntered(context); });
 
 		//mouse only events
-		controller.system.connect(ControllerSettings::ActionType_PointSelectStart, [this](XE::ActionContext context) { onPointSelectStart(context); });
-		controller.system.connect(ControllerSettings::ActionType_PointSelectEnd, [this](XE::ActionContext context) { onPointSelectEnd(context); });
-		controller.system.connect(ControllerSettings::ActionType_PointMoved, [this](XE::ActionContext context) { onPointMoved(context); });
+		controller.get()->system.connect(ControllerSettings::ActionType_PointSelectStart, [this](XE::ActionContext context) { onPointSelectStart(context); });
+		controller.get()->system.connect(ControllerSettings::ActionType_PointSelectEnd, [this](XE::ActionContext context) { onPointSelectEnd(context); });
+		controller.get()->system.connect(ControllerSettings::ActionType_PointMoved, [this](XE::ActionContext context) { onPointMoved(context); });
 	}
 
 	TestControllerSystem::TestControllerSystem(XE::XEngine& engine)
@@ -232,9 +232,9 @@ namespace XET {
 
 		for (entityx::Entity entity : mEngine.getScene().entities.entities_with_components(controller)) {
 
-			controller->_windowState.width = size.x;
-			controller->_windowState.height = size.y;
-			controller->_windowState.isDirty = true;
+			controller->get()->_windowState.width = size.x;
+			controller->get()->_windowState.height = size.y;
+			controller->get()->_windowState.isDirty = true;
 		}
 
 		std::cout << "Resized!   New size = (" << size.x << ", " << size.y << ")" << std::endl;
@@ -280,26 +280,26 @@ namespace XET {
 		entityx::ComponentHandle<XE::BodyComponent> body = entity.component<XE::BodyComponent>();
 		entityx::ComponentHandle<TestControllerComponent> controller = entity.component<TestControllerComponent>();
 
-		if (controller->actionmap.isActive(ControllerSettings::ActionType_StrafeLeft))
+		if (controller->get()->actionmap.isActive(ControllerSettings::ActionType_StrafeLeft))
 			moveDirection.x = -1.0f;//left
 
-		if (controller->actionmap.isActive(ControllerSettings::ActionType_Forward))
+		if (controller->get()->actionmap.isActive(ControllerSettings::ActionType_Forward))
 			moveDirection.z = -1.0f;//forward
 
-		if (controller->actionmap.isActive(ControllerSettings::ActionType_StrafeRight))
+		if (controller->get()->actionmap.isActive(ControllerSettings::ActionType_StrafeRight))
 			moveDirection.x = 1.0f; //right
 
-		if (controller->actionmap.isActive(ControllerSettings::ActionType_Backward))
+		if (controller->get()->actionmap.isActive(ControllerSettings::ActionType_Backward))
 			moveDirection.z = 1.0f;//backward
 
-		if (controller->actionmap.isActive(ControllerSettings::ActionType_TurnLeft) && !controller->actionmap.isActive(ControllerSettings::ActionType_StrafeLeft) && !controller->actionmap.isActive(ControllerSettings::ActionType_StrafeRight))
+		if (controller->get()->actionmap.isActive(ControllerSettings::ActionType_TurnLeft) && !controller->get()->actionmap.isActive(ControllerSettings::ActionType_StrafeLeft) && !controller->get()->actionmap.isActive(ControllerSettings::ActionType_StrafeRight))
 		{
 			if (entity.has_component<XE::BodyComponent>())
 				entity.component<XE::BodyComponent>()->rotate(XE::Vector3::UNIT_Y, XE::Radian(_turn_speed *  dt));
 			else // camera
 				moveDirection.x = -1.0f;//left
 		}
-		else if (controller->actionmap.isActive(ControllerSettings::ActionType_TurnRight) && !controller->actionmap.isActive(ControllerSettings::ActionType_StrafeLeft) && !controller->actionmap.isActive(ControllerSettings::ActionType_StrafeRight))
+		else if (controller->get()->actionmap.isActive(ControllerSettings::ActionType_TurnRight) && !controller->get()->actionmap.isActive(ControllerSettings::ActionType_StrafeLeft) && !controller->get()->actionmap.isActive(ControllerSettings::ActionType_StrafeRight))
 		{
 			if (entity.has_component<XE::BodyComponent>())
 				entity.component<XE::BodyComponent>()->rotate(XE::Vector3::UNIT_Y, XE::Radian(-_turn_speed *  dt));
@@ -314,11 +314,11 @@ namespace XET {
 
 		for (entityx::Entity entity : es.entities_with_components(controller)) {
 			
-			if (controller->m_window)
-				controller->actionmap.update(); //clearing events !!
+			if (controller->get()->m_window)
+				controller->get()->actionmap.update(); //clearing events !!
 
 			// Forward actions to callbacks: Invokes onResize() in case of Event::Resized events
-			controller->actionmap.invokeCallbacks(controller->system, controller->m_window);
+			controller->get()->actionmap.invokeCallbacks(controller->get()->system, controller->get()->m_window);
 
 			if (entity.has_component<XE::CameraFreeComponent>())
 			{
@@ -355,13 +355,13 @@ namespace XET {
 
 			if (entity.has_component<XE::ScreenComponent>())
 			{
-				if (controller->_windowState.isDirty)
+				if (controller->get()->_windowState.isDirty)
 				{
-					controller->_windowState.isDirty = false;
-					entity.component<XE::ScreenComponent>()->setSize(controller->_windowState.width, controller->_windowState.height);
+					controller->get()->_windowState.isDirty = false;
+					entity.component<XE::ScreenComponent>()->setSize(controller->get()->_windowState.width, controller->get()->_windowState.height);
 				}
 
-				entity.component<XE::ScreenComponent>()->mUIStateManager.update(dt);
+				entity.component<XE::ScreenComponent>()->mUIStateManager.get()->update(dt);
 				entity.component<XE::ScreenComponent>()->m_Desktop->Update(dt);
 			}
 		}

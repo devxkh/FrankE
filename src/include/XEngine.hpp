@@ -115,6 +115,7 @@ namespace XE
 		
 		void init();
 		void quit();
+		void destroy();
 
 		template < typename T >
 		std::unique_ptr< T > build(XEngine& engine, bool replace = true);

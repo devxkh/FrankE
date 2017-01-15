@@ -1,4 +1,4 @@
-﻿/*
+/*
 -----------------------------------------------------------------------------
 This source file is part of OGRE
     (Object-oriented Graphics Rendering Engine)
@@ -65,19 +65,6 @@ namespace Ogre {
         mBoneAssignments.clear();
         mBoneAssignmentsOutOfDate = true;
     }
-    //-----------------------------------------------------------------------
-//    void SubMesh::_compileBoneAssignments(void)
-//    {
-//        uint8 maxBones = rationaliseBoneAssignments();
-
-////        if (maxBones != 0)
-////        {
-////            mParent->compileBoneAssignments(mBoneAssignments, maxBones,
-////                blendIndexToBoneIndexMap, vertexData);
-////        }
-
-//        mBoneAssignmentsOutOfDate = false;
-//    }
     //---------------------------------------------------------------------
     uint8 SubMesh::rationaliseBoneAssignments(void)
     {
@@ -100,7 +87,10 @@ namespace Ogre {
             VertexBoneAssignmentVec::iterator itor = first;
 
             while( itor != end && itor->vertexIndex == i )
+            {
                 ++bonesPerVertex;
+                ++itor;
+            }
 
             maxBonesPerVertex = std::max( maxBonesPerVertex, bonesPerVertex );
 
@@ -158,6 +148,143 @@ namespace Ogre {
         }
 
         return maxBonesPerVertex;
+    }
+    //-----------------------------------------------------------------------
+    void SubMesh::_compileBoneAssignments(void)
+    {
+        const uint8 maxBones = rationaliseBoneAssignments();
+
+        mBoneAssignmentsOutOfDate = false;
+
+        if( maxBones )
+        {
+            _buildBoneIndexMap();
+            size_t highestBoneNum = 0;
+            for( size_t i=0; i<mBlendIndexToBoneIndexMap.size(); ++i )
+                highestBoneNum = std::max<size_t>( highestBoneNum, mBlendIndexToBoneIndexMap[i] );
+
+            vector<uint16>::type boneToBlend( highestBoneNum + 1u );
+            for( size_t i=0; i<highestBoneNum; ++i )
+                boneToBlend[i] = 0;
+            for( size_t i=0; i<mBlendIndexToBoneIndexMap.size(); ++i )
+                boneToBlend[mBlendIndexToBoneIndexMap[i]] = static_cast<uint16>( i );
+
+            const bool hadIndependentVaos = mVao[VpNormal][0] != mVao[VpShadow][0];
+            destroyShadowMappingVaos();
+
+            VertexElement2Vec newVertexDeclaration;
+            VertexArrayObject::ReadRequestsArray readRequests;
+
+            {
+                VertexElement2VecVec vertexDeclaration = mVao[VpNormal][0]->getVertexDeclaration();
+                VertexElement2VecVec::const_iterator itor = vertexDeclaration.begin();
+                VertexElement2VecVec::const_iterator end  = vertexDeclaration.end();
+
+                while( itor != end )
+                {
+                    VertexElement2Vec::const_iterator itElement = itor->begin();
+                    VertexElement2Vec::const_iterator enElement = itor->end();
+
+                    while( itElement != enElement )
+                    {
+                        if( itElement->mSemantic != VES_BLEND_INDICES &&
+                            itElement->mSemantic != VES_BLEND_INDICES2 &&
+                            itElement->mSemantic != VES_BLEND_WEIGHTS &&
+                            itElement->mSemantic != VES_BLEND_WEIGHTS2 )
+                        {
+                            readRequests.push_back( VertexArrayObject::ReadRequests(
+                                                        itElement->mSemantic ) );
+                            newVertexDeclaration.push_back( *itElement );
+                        }
+
+                        ++itElement;
+                    }
+
+                    ++itor;
+                }
+            }
+
+            const VertexElementType weightsElemType = v1::VertexElement::multiplyTypeCount( VET_FLOAT1,
+                                                                                            maxBones );
+            newVertexDeclaration.push_back( VertexElement2( VET_UBYTE4, VES_BLEND_INDICES ) );
+            newVertexDeclaration.push_back( VertexElement2( weightsElemType, VES_BLEND_WEIGHTS ) );
+
+            const size_t newVertexSize = VaoManager::calculateVertexSize( newVertexDeclaration );
+            const size_t numVertices = mVao[VpNormal][0]->getVertexBuffers()[0]->getNumElements();
+            uint8 *newVertexBufData = reinterpret_cast<uint8*>( OGRE_MALLOC_SIMD(
+                                                                    numVertices * newVertexSize,
+                                                                    MEMCATEGORY_GEOMETRY ) );
+            FreeOnDestructor dataPtrContainer( newVertexBufData );
+
+            mVao[VpNormal][0]->readRequests( readRequests );
+            mVao[VpNormal][0]->mapAsyncTickets( readRequests );
+
+            VertexBoneAssignmentVec::const_iterator itBoneAssignments = mBoneAssignments.begin();
+            VertexBoneAssignmentVec::const_iterator enBoneAssignments = mBoneAssignments.end();
+
+            for( size_t i=0; i<numVertices; ++i )
+            {
+                VertexArrayObject::ReadRequestsArray::const_iterator itor = readRequests.begin();
+                VertexArrayObject::ReadRequestsArray::const_iterator end  = readRequests.end();
+
+                while( itor != end )
+                {
+                    memcpy( newVertexBufData, itor->data + i * itor->vertexBuffer->getBytesPerElement(),
+                            v1::VertexElement::getTypeSize( itor->type ) );
+
+                    newVertexBufData += v1::VertexElement::getTypeSize( itor->type );
+
+                    ++itor;
+                }
+
+                uint8 lastUsedBoneIdx = 0;
+                uint8 *dstBlendIndex = newVertexBufData;
+                float *dstBlendWeight = reinterpret_cast<float*>( newVertexBufData + 4u );
+
+                while( itBoneAssignments != enBoneAssignments &&
+                       itBoneAssignments->vertexIndex == i )
+                {
+                    lastUsedBoneIdx     = (uint8)boneToBlend[itBoneAssignments->boneIndex];
+                    *dstBlendIndex++    = (uint8)boneToBlend[itBoneAssignments->boneIndex];
+                    *dstBlendWeight++   = itBoneAssignments->weight;
+                    ++itBoneAssignments;
+                }
+
+                const size_t remainingBoneEntries = maxBones - (dstBlendIndex - newVertexBufData);
+
+                for( size_t j=0; j<remainingBoneEntries; ++j )
+                {
+                    *dstBlendIndex++    = lastUsedBoneIdx;
+                    *dstBlendWeight++   = 0;
+                }
+
+                newVertexBufData = reinterpret_cast<uint8*>( dstBlendWeight );
+            }
+
+            mVao[VpNormal][0]->unmapAsyncTickets( readRequests );
+
+            const BufferType bufferType = mVao[VpNormal][0]->getVertexBuffers()[0]->getBufferType();
+            const bool keepAsShadow = mVao[VpNormal][0]->getVertexBuffers()[0]->getShadowCopy() != 0;
+            VertexBufferPacked *vertexBuffer = mParent->mVaoManager->createVertexBuffer(
+                        newVertexDeclaration, numVertices, bufferType, newVertexBufData, keepAsShadow );
+            if( !keepAsShadow )
+                dataPtrContainer.ptr = 0;
+
+            const OperationType opType = mVao[VpNormal][0]->getOperationType();
+            IndexBufferPacked *indexBuffer = mVao[VpNormal][0]->getIndexBuffer();
+            destroyVaos( mVao[VpNormal], mParent->mVaoManager, false );
+
+            VertexBufferPackedVec vertexBuffers( 1u, vertexBuffer );
+            VertexArrayObject *vao = mParent->mVaoManager->createVertexArrayObject( vertexBuffers,
+                                                                                    indexBuffer,
+                                                                                    opType );
+            mVao[VpNormal].push_back( vao );
+
+            const bool oldValue = Mesh::msOptimizeForShadowMapping;
+            Mesh::msOptimizeForShadowMapping = hadIndependentVaos;
+            _prepareForShadowMapping( false );
+            Mesh::msOptimizeForShadowMapping = oldValue;
+        }
     }
     //---------------------------------------------------------------------
     void SubMesh::_buildBoneIndexMap(void)

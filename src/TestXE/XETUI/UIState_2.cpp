@@ -6,13 +6,16 @@
 
 #include "UIState_1.h"
 
+#include "../XETCommon/TestController.hpp"
+
 UIState_2::UIState_2(const XE::uint16& id, entityx::Entity entity, bool replace = true)
 	: UIState(id, replace)
-	, m_entity(entity)
+	, m_screen(entity.component<XE::ScreenComponent>().get())
+	, m_controller(entity.component<XET::TestControllerComponent>().get())
 {
 	LOG(plog::info) << "UIState_2 Init";
 
-	XE::WLayer& layer = entity.component<XE::ScreenComponent>()->wLayer;
+	XE::WLayer& layer = *m_screen->wLayer.get();
 
 	m_Box = XE::Box::Create(layer, XE::Box::Orientation::VERTICAL, 10.f);
 
@@ -25,7 +28,7 @@ UIState_2::UIState_2(const XE::uint16& id, entityx::Entity entity, bool replace 
 	m_alignment->Add(m_Box);
 	m_alignment->SetScale(sf::Vector2f(.0f, .0f)); //smallest possible
 
-	entity.component<XE::ScreenComponent>()->getDesktop()->Add(m_alignment);
+	m_screen->getDesktop()->Add(m_alignment);
 
 	m_alignment->SetAlignment(sf::Vector2f(.5f, .5f));
 
@@ -36,7 +39,7 @@ UIState_2::~UIState_2()
 {
 	m_Box->RemoveAll();
 	m_alignment->Remove(m_Box);
-	m_entity.component<XE::ScreenComponent>()->getDesktop()->Remove(m_alignment);
+	m_screen->getDesktop()->Remove(m_alignment);
 }
 
 void UIState_2::ButtonClick() {
@@ -47,10 +50,16 @@ void UIState_2::ButtonClick() {
 	// When the Button is clicked it's label should change.
 	m_btnTest->SetLabel(oss.str());
 	
-	auto sc = m_entity.component<XE::ScreenComponent>();
+	entityx::ComponentHandle<XET::TestControllerComponent>  controller;
 
-	sc->mUIStateManager.addUIState(sc->mUIStateManager.build <UIState_1>(99, m_entity, true));
-	sc->mUIStateManager.destroyUIState(98);
+	for (entityx::Entity entity : m_controller->get()->engine.getScene().entities.entities_with_components(controller)) {
+
+		//todo condition for controller selection
+
+		m_screen->mUIStateManager.get()->addUIState(m_screen->mUIStateManager.get()->build <UIState_1>(99, entity, true));
+		m_screen->mUIStateManager.get()->destroyUIState(98);
+	}
+
 }
 
 void UIState_2::create(const char* fbdata)

@@ -94,7 +94,7 @@ namespace XE {
 		//mMaterial->getTechnique(0)->getPass(0)->setVertexColourTracking(Ogre::TVC_DIFFUSE);
 
 		// create 5 sections, four LineStrip (for max. 4 circles) and one Line version
-		mVisualHelperObject->begin("BaseWhite", Ogre::v1::RenderOperation::OT_LINE_STRIP);
+		mVisualHelperObject->begin("BaseWhite", Ogre::OperationType::OT_LINE_STRIP);
 		mVisualHelperObject->position(0, 0, 0);  // dummy
 		mVisualHelperObject->colour(1, 1, 1);    // dummy
 		mVisualHelperObject->position(0, 0, 0);  // dummy
@@ -102,7 +102,7 @@ namespace XE {
 		mVisualHelperObject->index(0);
 		mVisualHelperObject->end();
 
-		mVisualHelperObject->begin("BaseWhite", Ogre::v1::RenderOperation::OT_LINE_STRIP);
+		mVisualHelperObject->begin("BaseWhite", Ogre::OperationType::OT_LINE_STRIP);
 		mVisualHelperObject->position(0, 0, 0);  // dummy
 		mVisualHelperObject->colour(1, 1, 1);    // dummy
 		mVisualHelperObject->position(0, 0, 0);  // dummy
@@ -110,7 +110,7 @@ namespace XE {
 		mVisualHelperObject->index(1);
 		mVisualHelperObject->end();
 
-		mVisualHelperObject->begin("BaseWhite", Ogre::v1::RenderOperation::OT_LINE_STRIP);
+		mVisualHelperObject->begin("BaseWhite", Ogre::OperationType::OT_LINE_STRIP);
 		mVisualHelperObject->position(0, 0, 0);  // dummy
 		mVisualHelperObject->colour(1, 1, 1);    // dummy
 		mVisualHelperObject->position(0, 0, 0);  // dummy
@@ -118,7 +118,7 @@ namespace XE {
 		mVisualHelperObject->index(2);
 		mVisualHelperObject->end();
 
-		mVisualHelperObject->begin("BaseWhite", Ogre::v1::RenderOperation::OT_LINE_STRIP);
+		mVisualHelperObject->begin("BaseWhite", Ogre::OperationType::OT_LINE_STRIP);
 		mVisualHelperObject->position(0, 0, 0);  // dummy
 		mVisualHelperObject->colour(1, 1, 1);    // dummy
 		mVisualHelperObject->position(0, 0, 0);  // dummy
@@ -126,7 +126,7 @@ namespace XE {
 		mVisualHelperObject->index(3);
 		mVisualHelperObject->end();
 
-		mVisualHelperObject->begin("BaseWhite", Ogre::v1::RenderOperation::OT_LINE_LIST);
+		mVisualHelperObject->begin("BaseWhite", Ogre::OperationType::OT_LINE_LIST);
 		mVisualHelperObject->position(0, 0, 0);  // dummy
 		mVisualHelperObject->colour(1, 1, 1);    // dummy
 		mVisualHelperObject->position(0, 0, 0);  // dummy
@@ -190,7 +190,7 @@ namespace XE {
 		else
 			radius = mDirectionalLightCircleRadius;
 
-	//	mVisualHelperObject->begin("BaseWhite", Ogre::v1::RenderOperation::OT_LINE_STRIP);
+	//	mVisualHelperObject->begin("BaseWhite", Ogre::OperationType::OT_LINE_STRIP);
 		//mVisualHelperObject->position(0, 0, 0);  // dummy
 		//mVisualHelperObject->colour(1, 1, 1);    // dummy
 		//mVisualHelperObject->position(0, 0, 0);  // dummy
@@ -200,7 +200,7 @@ namespace XE {
 
 		int idx = 0;
 		// draw circles
-		mVisualHelperObject->begin("BaseWhite", Ogre::v1::RenderOperation::OT_LINE_STRIP);
+		mVisualHelperObject->begin("BaseWhite", Ogre::OperationType::OT_LINE_STRIP);
 		_drawCircle(radius, 0, mColour1, idx);
 		//mVisualHelperObject->end();
 
@@ -215,7 +215,7 @@ namespace XE {
 		mVisualHelperObject->end();
 
 		// draw four lines between both circles
-		mVisualHelperObject->begin("BaseWhite", Ogre::v1::RenderOperation::OT_LINE_LIST);
+		mVisualHelperObject->begin("BaseWhite", Ogre::OperationType::OT_LINE_LIST);
 		mVisualHelperObject->position(radius, 0, 0);
 		mVisualHelperObject->colour(mColour1);
 		mVisualHelperObject->position(radius, 0, mDirectionalLightLength);

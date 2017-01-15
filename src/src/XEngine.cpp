@@ -101,6 +101,67 @@ namespace XE
 
 	void XEngine::registerObject(sol::state& lua)
 	{
+		lua.new_usertype<Entity>("Entity"
+			//methods
+			//, "onTick", &AIEvents::onTick
+
+			//properties
+			, "bodyComponent", sol::property(&Entity::getComponent<BodyComponent>)
+			, "physicsComponent", sol::property(&Entity::getComponent<PhysicsComponent>)
+			, "animationComponent", sol::property(&Entity::getComponent<AnimationComponent>)
+			);
+
+		auto overloaded = sol::overload(
+			sol::resolve<void(const Ogre::Vector3&)>(&BodyComponent::setPosition),
+			sol::resolve<void(Ogre::Real x, Ogre::Real y, Ogre::Real z)>(&BodyComponent::setPosition));
+
+
+		lua.new_usertype<BodyComponent>("BodyComponent"
+			//methods
+			, "getPosition", &BodyComponent::getPosition
+			, "getOrientation", &BodyComponent::getOrientation
+			, "setPosition", overloaded
+			, "setTargetPosition", &BodyComponent::setTargetPosition
+
+			//properties
+			, "hasTargetPosition", sol::property(&BodyComponent::hasTargetPosition)
+			);
+
+
+		lua.new_usertype<AnimationComponent>("AnimationComponent"
+			//methods
+			, "getParameter", &AnimationComponent::getParameter
+			
+			//properties
+			);
+
+		lua.new_usertype<ParameterNode>("ParameterNode"
+			//methods
+			, "setValue", &ParameterNode::setValue
+			);
+
+		lua.new_usertype<IPhysicsObject>("PhysicsObject"
+			//methods
+	//		, "rotate", &IPhysicsObject::rotate 
+			, "setOrientation", &IPhysicsObject::setOrientation
+	//		, "setTransformState", &IPhysicsObject::setTransformState
+			, "setPosition", &IPhysicsObject::setPosition
+			, "suspend", &IPhysicsObject::suspend
+			//properties
+			//, "hasTargetPosition", sol::property(&BodyComponent::hasTargetPosition)
+			);
+
+		lua.new_usertype<PhysicsComponent>("PhysicsComponent"
+			//methods
+			, "get", &PhysicsComponent::get
+			);
+		
+		lua.new_usertype<CameraFreeComponent>("CameraFreeComponent"
+			//methods
+			, "getCameraNode", &CameraFreeComponent::getCameraNode
+			, "rotate", &CameraFreeComponent::rotate
+			);
+
 		lua.new_usertype<XEngine>("XEngine",
 
 			//properties
@@ -128,6 +189,13 @@ namespace XE
 		m_running = false;
 	}
 
+	void XEngine::destroy()
+	{
+		for (entityx::Entity entity : m_scene->entities.entities_for_debugging()) {
+
+			entity.destroy();
+		}
+	}
 
 	void XEngine::setScene(std::unique_ptr<Scene> scene)
 	{

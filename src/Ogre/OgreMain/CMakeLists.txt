@@ -51,6 +51,7 @@ add_filtered_std("CommandBuffer")
 add_filtered_std("Compositor")
 add_filtered_std("Compositor/Pass")
 add_filtered_std("Compositor/Pass/PassClear")
+add_filtered_std("Compositor/Pass/PassCompute")
 add_filtered_std("Compositor/Pass/PassDepthCopy")
 add_filtered_std("Compositor/Pass/PassMipmap")
 add_filtered_std("Compositor/Pass/PassQuad")
@@ -374,9 +375,6 @@ else ()
 	# exclude OgreAlignedAllocator.cpp from unity builds; causes problems on Linux
 	ogre_add_library(OgreMain ${OGRE_LIB_TYPE} ${PREC_HEADER} ${HEADER_FILES} ${SOURCE_FILES} ${PLATFORM_HEADERS} ${PLATFORM_SOURCE_FILES} ${THREAD_HEADER_FILES} ${THREAD_SOURCE_FILES} SEPARATE "src/OgreAlignedAllocator.cpp")
 endif ()
-
-
-
 # In visual studio 2010 - 64 bit we get this error: "LINK : fatal error LNK1210: exceeded internal ILK size limit; link with /INCREMENTAL:NO"
 if(WIN32 AND MSVC10 AND CMAKE_CL_64)
   set_target_properties(OgreMain PROPERTIES 

@@ -7,6 +7,7 @@
 #include "UIState_2.h"
 #include <sstream>
 #include <XEngine/Components/ScreenComponent.hpp>
+#include "../XETCommon/TestController.hpp"
 
 void UIState_1::ButtonClick() {
 
@@ -20,10 +21,15 @@ void UIState_1::ButtonClick() {
 	// When the Button is clicked it's label should change.
 	m_btnTest->SetLabel(oss.str());
 	
-	auto sc = m_entity.component<XE::ScreenComponent>();
-	
-	sc->mUIStateManager.addUIState(sc->mUIStateManager.build <UIState_2>(98, m_entity, true));
-	sc->mUIStateManager.destroyUIState(99);
+	entityx::ComponentHandle<XET::TestControllerComponent>  controller;
+
+	for (entityx::Entity entity : m_controller->get()->engine.getScene().entities.entities_with_components(controller)) {
+		
+		//todo condition for controller selection
+		m_screen->mUIStateManager.get()->addUIState(m_screen->mUIStateManager.get()->build <UIState_2>(98, entity, true));
+		m_screen->mUIStateManager.get()->destroyUIState(99);
+	}
+
 }
 
 void UIState_1::MouseEnter() {
@@ -31,13 +37,18 @@ void UIState_1::MouseEnter() {
 		m_btnTest->SetLabel("Mouse Entered");
 }
 
+void UIState_1::Btn_QuitClick() {
+
+	m_controller->get()->engine.quit();
+}
 
 UIState_1::UIState_1(const XE::Uint16& id, entityx::Entity entity, bool replace = true)
 	: UIState(id, replace)
-	, m_entity(entity)
+	, m_screen(entity.component<XE::ScreenComponent>().get())
+	, m_controller(entity.component<XET::TestControllerComponent>().get())
 {
 	auto screen = entity.component<XE::ScreenComponent>();
-	XE::WLayer& layer = screen->wLayer;
+	XE::WLayer& layer = *screen->wLayer.get();
 
 	m_Box = XE::Box::Create(layer, XE::Box::Orientation::VERTICAL, 10.f);
 
@@ -58,11 +69,15 @@ UIState_1::UIState_1(const XE::Uint16& id, entityx::Entity entity, bool replace 
 	m_progressbar = XE::ProgressBar::Create(layer);
 	m_progressbar->size = sf::Vector2f(200.f, 40.f);	
 
+	m_btnQuit = XE::Button::Create(layer, "Quit");
+	m_btnQuit->size = sf::Vector2f(161, 36);
+
 	m_Box->Pack(m_entry);
 	m_Box->Pack(m_progressbar);
 	m_Box->Pack(m_checkBoxTest);
 	m_Box->Pack(m_btnTest);
 	m_Box->Pack(m_imageTest);
+	m_Box->Pack(m_btnQuit);
 
 	//m_window = XE::UIWindow::Create(layer);
 	//m_window->size = sf::Vector2f(250.f, 200.f);
@@ -78,14 +93,15 @@ UIState_1::UIState_1(const XE::Uint16& id, entityx::Entity entity, bool replace 
 
 	m_btnTest->GetSignal(XE::Widget::OnLeftClick).Connect(std::bind(&UIState_1::ButtonClick, this));
 	m_btnTest->GetSignal(XE::Widget::OnMouseEnter).Connect(std::bind(&UIState_1::MouseEnter, this));
+	m_btnQuit->GetSignal(XE::Widget::OnLeftClick).Connect(std::bind(&UIState_1::Btn_QuitClick, this));
 }
 
 UIState_1::~UIState_1()
 {
-	m_entity.component<XE::ScreenComponent>()->m_Desktop->RemoveEntry(m_entry);
+	m_screen->m_Desktop->RemoveEntry(m_entry);
 	m_Box->RemoveAll();
 	m_alignment->Remove(m_Box);
-	m_entity.component<XE::ScreenComponent>()->getDesktop()->Remove(m_alignment);
+	m_screen->getDesktop()->Remove(m_alignment);
 }
 
 void UIState_1::create(const char* fbdata)

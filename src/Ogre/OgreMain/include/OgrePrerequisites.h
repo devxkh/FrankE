@@ -75,7 +75,11 @@ namespace Ogre {
 
     #if OGRE_COMPILER == OGRE_COMPILER_GNUC && OGRE_COMP_VER >= 310 && !defined(STLPORT)
     #   if OGRE_COMP_VER >= 430
-    #       define OGRE_HASH_NAMESPACE ::std::tr1
+    #       if __cplusplus >= 201103L
+    #           define OGRE_HASH_NAMESPACE ::std
+    #       else
+    #           define OGRE_HASH_NAMESPACE ::std::tr1
+    #       endif
     #       define OGRE_HASHMAP_NAME unordered_map
     #       define OGRE_HASHMULTIMAP_NAME unordered_multimap
     #       define OGRE_HASHSET_NAME unordered_set
@@ -180,6 +184,8 @@ namespace Ogre {
     class ExternalTextureSourceManager;
     class Factory;
     class Forward3D;
+    class ForwardClustered;
+    class ForwardPlusBase;
     struct FrameEvent;
     class FrameListener;
     class Frustum;
@@ -197,12 +203,16 @@ namespace Ogre {
     class Hlms;
     struct HlmsBlendblock;
     struct HlmsCache;
+    class HlmsCompute;
+    class HlmsComputeJob;
+    struct HlmsComputePso;
     class HlmsDatablock;
     class HlmsListener;
     class HlmsLowLevel;
     class HlmsLowLevelDatablock;
     struct HlmsMacroblock;
     class HlmsManager;
+    struct HlmsPso;
     struct HlmsSamplerblock;
     class HlmsTextureManager;
     struct HlmsTexturePack;
@@ -318,6 +328,7 @@ namespace Ogre {
     class TextureManager;
     struct Transform;
     class Timer;
+    class UavBufferPacked;
     class UserObjectBindings;
     class VaoManager;
     class Vector2;
@@ -327,6 +338,7 @@ namespace Ogre {
     class VertexAnimationTrack;
     struct VertexArrayObject;
     class VertexBufferPacked;
+    class WireAabb;
     class WireBoundingBox;
     class WorkQueue;
     class CompositorManager2;

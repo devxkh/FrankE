@@ -60,24 +60,44 @@ namespace sol {
 
 	template <typename F, typename G>
 	inline decltype(auto) property(F&& f, G&& g) {
-		using namespace sol;
 		typedef lua_bind_traits<meta::unqualified_t<F>> left_traits;
 		typedef lua_bind_traits<meta::unqualified_t<G>> right_traits;
-		return property_detail::property(meta::boolean<(left_traits::arity < right_traits::arity)>(), std::forward<F>(f), std::forward<G>(g));
+		return property_detail::property(meta::boolean<(left_traits::free_arity < right_traits::free_arity)>(), std::forward<F>(f), std::forward<G>(g));
 	}
 
 	template <typename F>
 	inline decltype(auto) property(F&& f) {
-		using namespace sol;
 		typedef lua_bind_traits<meta::unqualified_t<F>> left_traits;
-		return property_detail::property(meta::boolean<(left_traits::arity == 0)>(), std::forward<F>(f));
+		return property_detail::property(meta::boolean<(left_traits::free_arity < 2)>(), std::forward<F>(f));
+	}
+
+	template <typename F>
+	inline decltype(auto) readonly_property(F&& f) {
+		return property_detail::property(std::true_type(), std::forward<F>(f));
 	}
 
 	// Allow someone to make a member variable readonly (const)
 	template <typename R, typename T>
-	auto readonly(R T::* v) {
+	inline auto readonly(R T::* v) {
 		typedef const R C;
 		return static_cast<C T::*>(v);
+	}
+
+	template <typename T>
+	struct var_wrapper {
+		T value;
+		template <typename... Args>
+		var_wrapper(Args&&... args) : value(std::forward<Args>(args)...) {}
+		var_wrapper(const var_wrapper&) = default;
+		var_wrapper(var_wrapper&&) = default;
+		var_wrapper& operator=(const var_wrapper&) = default;
+		var_wrapper& operator=(var_wrapper&&) = default;
+	};
+
+	template <typename V>
+	inline auto var(V&& v) {
+		typedef meta::unqualified_t<V> T;
+		return var_wrapper<T>(std::forward<V>(v));
 	}
 
 } // sol

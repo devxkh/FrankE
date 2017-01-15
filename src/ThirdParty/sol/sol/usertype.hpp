@@ -25,6 +25,7 @@
 #include "stack.hpp"
 #include "usertype_metatable.hpp"
 #include "simple_usertype_metatable.hpp"
+#include "container_usertype_metatable.hpp"
 #include <memory>
 
 namespace sol {
@@ -57,8 +58,29 @@ namespace sol {
 		template<typename... Args>
 		usertype(simple_tag, lua_State* L, Args&&... args) : metatableregister(detail::make_unique_deleter<simple_usertype_metatable<T>, detail::deleter>(L, std::forward<Args>(args)...)) {}
 
+		usertype_detail::registrar* registrar_data() {
+			return metatableregister.get();
+		}
+
 		int push(lua_State* L) {
 			return metatableregister->push_um(L);
+		}
+	};
+
+	template<typename T>
+	class simple_usertype : public usertype<T> {
+	private:
+		typedef usertype<T> base_t;
+		lua_State* state;
+
+	public:
+		template<typename... Args>
+		simple_usertype(lua_State* L, Args&&... args) : base_t(simple, L, std::forward<Args>(args)...), state(L) {}
+		
+		template <typename N, typename F>
+		void set(N&& n, F&& f) {
+			auto meta = static_cast<simple_usertype_metatable<T>*>(base_t::registrar_data());
+			meta->add(state, n, f);
 		}
 	};
 

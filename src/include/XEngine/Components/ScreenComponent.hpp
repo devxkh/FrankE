@@ -1,16 +1,15 @@
-#ifndef __SCREENCOMPONENT_HPP__
-#define __SCREENCOMPONENT_HPP__
+#pragma once
 
 #include <XESystem/SystemConfig.hpp>
 #include <XEUI/UIStateManager.hpp>
 #include <XEUI/Desktop.hpp>
 
-#include <XERenderer/GUI/WLayer.hpp>
 
 class SDL_Window;
 
 namespace XE
 {
+	class WLayer;
 	class CameraRenderable;
 
 	struct ScreenComponent
@@ -19,6 +18,8 @@ namespace XE
 		ScreenComponent(CameraRenderable& camRenderable, Uint32 width, Uint32 height, const Uint16 atlasId = 0);
 	
 		ScreenComponent(CameraRenderable& camRenderable, SDL_Window* window, const Uint16 atlasId = 0);
+
+		~ScreenComponent();
 
 		inline Desktop::Ptr getDesktop(){ return m_Desktop; }
 
@@ -46,9 +47,9 @@ namespace XE
 
 		void setSize(const Uint32 width, const Uint32 height);
 
-		WLayer wLayer;
+		std::shared_ptr<WLayer> wLayer;
 		Desktop::Ptr m_Desktop;
-		UIStateManager		mUIStateManager;
+		std::shared_ptr<UIStateManager>		mUIStateManager;
 		bool isActive;
 
 		Int32 width;
@@ -56,5 +57,3 @@ namespace XE
 	};
 
 } // ns XE
-
-#endif // __SCREENCOMPONENT_HPP__

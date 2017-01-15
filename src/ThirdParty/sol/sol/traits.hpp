@@ -45,6 +45,9 @@ namespace sol {
 		template<typename... Args>
 		struct is_tuple<std::tuple<Args...>> : std::true_type { };
 
+		template <typename T>
+		struct is_builtin_type : std::integral_constant<bool, std::is_arithmetic<T>::value || std::is_pointer<T>::value || std::is_array<T>::value> {};
+
 		template<typename T>
 		struct unwrapped {
 			typedef T type;
@@ -126,6 +129,9 @@ namespace sol {
 		};
 
 		constexpr const auto enabler = enable_t::_;
+
+		template<bool value, typename T = void>
+		using disable_if_t = std::enable_if_t<!value, T>;
 
 		template<typename... Args>
 		using enable = std::enable_if_t<all<Args...>::value, enable_t>;
@@ -259,37 +265,54 @@ namespace sol {
 				static const bool value = sizeof(test<Derived>(0)) == sizeof(yes);
 			};
 
+			struct has_begin_end_impl {
+				template<typename T, typename U = unqualified_t<T>,
+					typename B = decltype(std::declval<U&>().begin()),
+					typename E = decltype(std::declval<U&>().end())>
+					static std::true_type test(int);
+
+				template<typename...>
+				static std::false_type test(...);
+			};
+
+			struct has_key_value_pair_impl {
+				template<typename T, typename U = unqualified_t<T>,
+					typename V = typename U::value_type,
+					typename F = decltype(std::declval<V&>().first),
+					typename S = decltype(std::declval<V&>().second)>
+					static std::true_type test(int);
+
+				template<typename...>
+				static std::false_type test(...);
+			};
+
+			template <typename T, typename U = T, typename = decltype(std::declval<T&>() < std::declval<U&>())>
+			std::true_type supports_op_less_test(const T&);
+			std::false_type supports_op_less_test(...);
+			template <typename T, typename U = T, typename = decltype(std::declval<T&>() == std::declval<U&>())>
+			std::true_type supports_op_equal_test(const T&);
+			std::false_type supports_op_equal_test(...);
+			template <typename T, typename U = T, typename = decltype(std::declval<T&>() <= std::declval<U&>())>
+			std::true_type supports_op_less_equal_test(const T&);
+			std::false_type supports_op_less_equal_test(...);
+
 		} // meta_detail
+
+		template <typename T>
+		using supports_op_less = decltype(meta_detail::supports_op_less_test(std::declval<T&>()));
+		template <typename T>
+		using supports_op_equal = decltype(meta_detail::supports_op_equal_test(std::declval<T&>()));
+		template <typename T>
+		using supports_op_less_equal = decltype(meta_detail::supports_op_less_equal_test(std::declval<T&>()));
 
 		template<typename T>
 		struct is_callable : boolean<meta_detail::is_callable<T>::value> {};
 
-		struct has_begin_end_impl {
-			template<typename T, typename U = unqualified_t<T>,
-				typename B = decltype(std::declval<U&>().begin()),
-				typename E = decltype(std::declval<U&>().end())>
-				static std::true_type test(int);
-
-			template<typename...>
-			static std::false_type test(...);
-		};
+		template<typename T>
+		struct has_begin_end : decltype(meta_detail::has_begin_end_impl::test<T>(0)) {};
 
 		template<typename T>
-		struct has_begin_end : decltype(has_begin_end_impl::test<T>(0)) {};
-
-		struct has_key_value_pair_impl {
-			template<typename T, typename U = unqualified_t<T>,
-				typename V = typename U::value_type,
-				typename F = decltype(std::declval<V&>().first),
-				typename S = decltype(std::declval<V&>().second)>
-				static std::true_type test(int);
-
-			template<typename...>
-			static std::false_type test(...);
-		};
-
-		template<typename T>
-		struct has_key_value_pair : decltype(has_key_value_pair_impl::test<T>(0)) {};
+		struct has_key_value_pair : decltype(meta_detail::has_key_value_pair_impl::test<T>(0)) {};
 
 		template <typename T>
 		using is_string_constructible = any<std::is_same<unqualified_t<T>, const char*>, std::is_same<unqualified_t<T>, char>, std::is_same<unqualified_t<T>, std::string>, std::is_same<unqualified_t<T>, std::initializer_list<char>>>;
@@ -356,32 +379,32 @@ namespace sol {
 		}
 
 		template<typename T>
-		decltype(auto) deref(T&& item) {
+		auto deref(T&& item) -> decltype(std::forward<T>(item)) {
 			return std::forward<T>(item);
 		}
 
 		template<typename T>
-		T& deref(T* item) {
+		inline T& deref(T* item) {
 			return *item;
 		}
 
 		template<typename T, typename Dx>
-		decltype(auto) deref(std::unique_ptr<T, Dx>& item) {
+		inline std::add_lvalue_reference_t<T> deref(std::unique_ptr<T, Dx>& item) {
 			return *item;
 		}
 
 		template<typename T>
-		T& deref(std::shared_ptr<T>& item) {
+		inline std::add_lvalue_reference_t<T> deref(std::shared_ptr<T>& item) {
 			return *item;
 		}
 
 		template<typename T, typename Dx>
-		decltype(auto) deref(const std::unique_ptr<T, Dx>& item) {
+		inline std::add_lvalue_reference_t<T> deref(const std::unique_ptr<T, Dx>& item) {
 			return *item;
 		}
 
 		template<typename T>
-		T& deref(const std::shared_ptr<T>& item) {
+		inline std::add_lvalue_reference_t<T> deref(const std::shared_ptr<T>& item) {
 			return *item;
 		}
 

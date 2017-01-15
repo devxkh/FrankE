@@ -35,7 +35,7 @@ freely, subject to the following restrictions:
 
 using namespace XE;
 
-HandleAnimation::HandleAnimation(XE::GraphicsManager& gMgr, const uint32_t id)
+HandleAnimation::HandleAnimation(XE::GraphicsManager& gMgr, const XE::Uint32 id)
 : Animation(gMgr, id)
  , m_activeReferencingNodesCount( 0 )
 , m_accumulatedWeight( 0 )

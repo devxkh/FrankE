@@ -52,6 +52,11 @@ namespace XE
 		setOrientation(transform->rotation()->w(), transform->rotation()->x(), transform->rotation()->y(), transform->rotation()->z());
 	}
 
+	BodyComponent::~BodyComponent()
+	{
+
+	}
+
 	const Ogre::Vector3& BodyComponent::getTargetDirection() {
 		return m_targetDirection;
 	}

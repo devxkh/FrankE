@@ -48,7 +48,7 @@ namespace XE {
 	}
 
 	//------------------------------------------------------------------------------------------------
-	Ogre::v1::RenderOperation::OperationType DynamicLines::getOperationType() const
+	Ogre::OperationType DynamicLines::getOperationType() const
 	{
 		return m_operationType;
 	}
@@ -118,7 +118,7 @@ namespace XE {
 
 		ManualObject::clear();
 
-		begin("BaseWhite", Ogre::v1::RenderOperation::OT_LINE_LIST);
+		begin("BaseWhite", Ogre::OperationType::OT_LINE_LIST);
 
 		for (int i = 0; i < size; i++)
 		{

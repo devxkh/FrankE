@@ -423,7 +423,7 @@ namespace XE
  //    );
  // 
  // mRenderOpPtr->vertexData->vertexBufferBinding->setBinding(0, mVertexBuffer);
- // mRenderOpPtr->operationType = Ogre::v1::RenderOperation::OT_TRIANGLE_LIST;
+ // mRenderOpPtr->operationType = Ogre::OperationType::OT_TRIANGLE_LIST;
  // mRenderOpPtr->useIndexes = false;
  //}
  //

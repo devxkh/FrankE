@@ -9,6 +9,7 @@
 #include <ThirdParty/sol/sol.hpp>
 
 #include <map>
+#include <vector>
 
 namespace XE {
 
@@ -43,6 +44,7 @@ public:
 	sol::state state;
 
 private:
+
 
 	XEngine& m_engine;
 

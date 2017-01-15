@@ -24,12 +24,13 @@ freely, subject to the following restrictions:
     distribution.
 */
 
-#ifndef __TECNOFREAK__NODE__H__
-#define __TECNOFREAK__NODE__H__ 
+#pragma once
 
 //#include <XEngine/Animation/Common.h>
 #include <XEngine/Animation/INode.h>
 //#include <XEngine/Animation/SharedData.h>
+
+#include <XEDAL/Objects/FBEngineTypes_generated.h>
 
 #include <vector>
 #include <map>
@@ -73,6 +74,8 @@ public:
 //protected:
 	Port* createPort( const int id);
 
+	XFBType::UAnimationNode _type;
+
 private:
 	float m_weight;
 	int _nodeId;
@@ -82,5 +85,3 @@ private:
 };
 
 }
-
-#endif

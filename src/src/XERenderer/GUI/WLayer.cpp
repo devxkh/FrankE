@@ -30,6 +30,9 @@ namespace XE
 
 	WLayer::~WLayer()
 	{
+		//delete the shapes first
+		m_renderableShapes.clear();
+
 		m_layerRenderer.removeWlayer(this);
 
 		m_guiRenderer.getGraphicsManager().getIntoRendererQueue().push([this]() {

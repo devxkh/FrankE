@@ -142,7 +142,6 @@ namespace XE
 
 				if (var->mesh_type() == XFBType::UMesh::UMesh_MeshPlane)
 				{
-					return;
 					//------------------- OGRE PLANE MESH -----------------------
 					meshV1 = Ogre::v1::MeshManager::getSingleton().createPlane(
 						std::to_string(m_ID),
@@ -219,17 +218,23 @@ namespace XE
 					bool halfUVs = true;
 					bool useQtangents = true;
 
-					auto v1Mesh = Ogre::v1::MeshManager::getSingleton().load(
-						meshFile->file()->fileName()->c_str(), Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME,
-						Ogre::v1::HardwareBuffer::HBU_STATIC, Ogre::v1::HardwareBuffer::HBU_STATIC);
-					/*		auto v1Mesh = Ogre::v1::MeshManager::getSingleton().load(
-							"Sinbad.mesh", Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME,
-							Ogre::v1::HardwareBuffer::HBU_STATIC, Ogre::v1::HardwareBuffer::HBU_STATIC);*/
-							//Create a v2 mesh to import to, with a different name.
-					auto v2Mesh = Ogre::MeshManager::getSingleton().createManual(meshFile->file()->fileName()->c_str(), Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+					auto v2Mesh = Ogre::MeshManager::getSingleton().getByName(meshFile->file()->fileName()->c_str(), Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
 
-					v2Mesh->importV1(v1Mesh.get(), halfPosition, halfUVs, useQtangents);
-					v1Mesh->unload();
+					if (!v2Mesh)
+					{
+						auto v1Mesh = Ogre::v1::MeshManager::getSingleton().load(
+							meshFile->file()->fileName()->c_str(), Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME,
+							Ogre::v1::HardwareBuffer::HBU_STATIC, Ogre::v1::HardwareBuffer::HBU_STATIC);
+						/*		auto v1Mesh = Ogre::v1::MeshManager::getSingleton().load(
+								"Sinbad.mesh", Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME,
+								Ogre::v1::HardwareBuffer::HBU_STATIC, Ogre::v1::HardwareBuffer::HBU_STATIC);*/
+								//Create a v2 mesh to import to, with a different name.
+
+						v2Mesh = Ogre::MeshManager::getSingleton().createManual(meshFile->file()->fileName()->c_str(), Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+
+						v2Mesh->importV1(v1Mesh.get(), halfPosition, halfUVs, useQtangents);
+						v1Mesh->unload();
+					}
 
 					_t_OgreItemPtr = m_Scene.getOgreSceneManager().__OgreSceneMgrPtr->createItem(v2Mesh, (Ogre::SceneMemoryMgrTypes)Ogre::SCENE_DYNAMIC);
 					_t_OgreItemPtr->setVisibilityFlags(0x000000001);
@@ -240,7 +245,7 @@ namespace XE
 					/*Ogre::HlmsDatablock *datablockTest = hlmsManager->getDatablock("DefaultPbs");
 					_t_OgreItemPtr->setDatablock(datablockTest);*/
 
-					Ogre::HlmsDatablock *datablock = hlmsManager->getDatablock(meshFile->material()->file()->fileName()->c_str());//"TestModel");
+					Ogre::HlmsDatablock *datablock = hlmsManager->getDatablock(meshFile->material()->name()->c_str());//"TestModel");
 					_t_OgreItemPtr->setDatablock(datablock);
 
 					
@@ -356,83 +361,150 @@ namespace XE
 	void Renderable::update(const void* fbData)
 	{
 	//	destoyItems(); //mainthread !
+		
+		//TODO http://www.ogre3d.org/forums/viewtopic.php?f=2&t=91995
 
 		m_GraphicsManager.getIntoRendererQueue().push([this, fbData]()
 		{
+			const XFBType::RenderableComponent* renderable = (const XFBType::RenderableComponent*)fbData;
+
+			//	auto renderable = flatbuffers::GetRoot<XFBType::RenderableComponent>(fbData);
+			auto meshes = renderable->meshes();
+
+
 			Ogre::LogManager::getSingleton().logMessage("RQ -> Renderable::update");
-			
+
 			Ogre::HlmsManager *hlmsManager = m_GraphicsManager.getRoot()->getHlmsManager();
-		
+
 			//https://github.com/spookyboo/HLMSEditor/blob/74e175352a6d794c0c0fe937ab7ce14134255e5e/source/src/hlms_utils_manager.cpp
 			Ogre::HlmsJson hlmsJson(hlmsManager);
-			// Load the json file and create the datablock(s)
-	
-			std::string filename =  "assets/TestModel.material.json";
 
-			Ogre::HlmsPbs* hlmsPbs = static_cast<Ogre::HlmsPbs*>(hlmsManager->getHlms(Ogre::HLMS_PBS));
-
-			Ogre::HlmsTextureManager *hlmsTextureManager = hlmsManager->getTextureManager();
-			hlmsTextureManager->destroyTexture("outUV.png");
-		//	Ogre::HlmsPbsDatablock* hlmsPbsDataBlock = static_cast<Ogre::HlmsPbsDatablock*>(hlmsPbs->getDatablock("TestModel"));
-	//		auto tex = hlmsPbsDataBlock->getTexture(Ogre::TEX_TYPE_2D);
-	//		hlmsTextureManager->destroyTexture(tex->getName());
-
-
-			//assign dummy material to free item material
-			Ogre::HlmsDatablock *datablock = hlmsManager->getDatablock("DefaultPbs");
-			_t_OgreItemPtr->setDatablock(datablock);
-
-			//destroy item material
-			Ogre::HlmsDatablock *latestDatablock = hlmsPbs->getDatablock("TestModel");//"TestModel");
-			if (latestDatablock && latestDatablock != hlmsPbs->getDefaultDatablock())
+			if (meshes)
 			{
-
-
-				hlmsPbs->destroyDatablock("TestModel");
-			}
-			
-			XE::PhysFsStream wonderfullStream;
-			if (wonderfullStream.open(filename.c_str()))
-			{
-				// Make sure that the stream's reading position is at the beginning
-				wonderfullStream.seek(0);
-
-				std::vector<char> buffer(wonderfullStream.getSize());
-				if (wonderfullStream.read(buffer.data(), wonderfullStream.getSize()))
+				for (auto fbMesh : *meshes)
 				{
-					buffer.push_back('\0'); //rapidjson needs to be null terminated
-					hlmsJson.loadMaterials("TestModel.material.json", &buffer[0]);
+					LOG(plog::info) << "Renderable:_t_createItem";
+
+					LOG(plog::info) << "mesh_type:" << EnumNameUMesh(fbMesh->mesh_type());
+
+					if (fbMesh->mesh_type() == XFBType::UMesh::UMesh_MeshFile)
+					{
+						const XFBType::MeshFile* mesh = (const XFBType::MeshFile*)fbMesh->mesh();
+												
+						auto textures = mesh->material()->textures();
+
+						//----------------- destroy textures -----------------------------
+						if (textures)
+						{
+							Ogre::HlmsTextureManager *hlmsTextureManager = hlmsManager->getTextureManager();
+
+							for (auto fbTexture : *textures)
+							{
+								auto tex = fbTexture->c_str();
+
+								hlmsTextureManager->destroyTexture(tex); // "outUV.png");
+							}
+						}
+						
+						//-------------- assign dummy material to free item material ----------------------
+						Ogre::HlmsDatablock *datablock = hlmsManager->getDatablock("DefaultPbs");
+						_t_OgreItemPtr->setDatablock(datablock);
+
+						//-------------- destroy item material ------------------------------------
+						if (mesh->material()->textureType() == XFBType::TextureType::TextureType_Pbs)
+						{
+							Ogre::HlmsPbs* hlmsPbs = static_cast<Ogre::HlmsPbs*>(hlmsManager->getHlms(Ogre::HLMS_PBS));
+														
+							auto matName = mesh->material()->name()->c_str();
+							Ogre::HlmsDatablock *latestDatablock = hlmsPbs->getDatablock(matName); // "TestModel");//"TestModel");
+						
+							if (latestDatablock && latestDatablock != hlmsPbs->getDefaultDatablock())
+							{
+								hlmsPbs->destroyDatablock(mesh->material()->name()->c_str()); // "TestModel");
+							}
+						}
+
+						std::string filename = mesh->material()->file()->filePath()->c_str();
+						//filename += mesh->material()->file()->fileName()->c_str();
+
+					//		filename = "assets/TestModel.material.json";		
+
+						XE::PhysFsStream wonderfullStream;
+						if (wonderfullStream.open(filename.c_str()))
+						{
+							// Make sure that the stream's reading position is at the beginning
+							wonderfullStream.seek(0);
+
+							std::vector<char> buffer(wonderfullStream.getSize());
+							if (wonderfullStream.read(buffer.data(), wonderfullStream.getSize()))
+							{
+								buffer.push_back('\0'); //rapidjson needs to be null terminated
+								hlmsJson.loadMaterials(mesh->material()->file()->fileName()->c_str(), &buffer[0]);
+							}
+						}
+
+						Ogre::HlmsDatablock *datablockNew = hlmsManager->getDatablock(mesh->material()->name()->c_str());// "TestModel");
+						_t_OgreItemPtr->setDatablock(datablockNew);
+
+								//------------ reload hlms template files ----------------
+								//Hot reload of PBS shaders. We need to clear the microcode cache
+								//to prevent using old compiled versions.
+								//Ogre::Root *root = m_GraphicsManager.getRoot();
+								////Ogre::HlmsManager *hlmsManager = root->getHlmsManager();
+
+								//Ogre::Hlms *hlms = hlmsManager->getHlms(Ogre::HLMS_PBS);
+								//Ogre::GpuProgramManager::getSingleton().clearMicrocodeCache();
+								//hlms->reloadFrom(hlms->getDataFolder());
+
+								////Hot reload of Unlit shaders.
+								//Ogre::Hlms *hlmsUnlit = hlmsManager->getHlms(Ogre::HLMS_UNLIT);
+								//Ogre::GpuProgramManager::getSingleton().clearMicrocodeCache();
+								//hlmsUnlit->reloadFrom(hlmsUnlit->getDataFolder());
+								//------------ reload hlms template files ----------------
+
+							//	_t_createItem(fbData);
+					}
 				}
-			}			
-
-			Ogre::HlmsDatablock *datablockNew = hlmsManager->getDatablock("TestModel");
-			_t_OgreItemPtr->setDatablock(datablockNew);
-		
-	//		_newItem->setDatablock(datablock);
-			//OgreHelper::ReloadMaterial("TestModel","General","TestModel.material.json", true);
-
-			//------------ reload hlms template files ----------------
-			//Hot reload of PBS shaders. We need to clear the microcode cache
-			//to prevent using old compiled versions.
-			//Ogre::Root *root = m_GraphicsManager.getRoot();
-			////Ogre::HlmsManager *hlmsManager = root->getHlmsManager();
-
-			//Ogre::Hlms *hlms = hlmsManager->getHlms(Ogre::HLMS_PBS);
-			//Ogre::GpuProgramManager::getSingleton().clearMicrocodeCache();
-			//hlms->reloadFrom(hlms->getDataFolder());
-	
-			////Hot reload of Unlit shaders.
-			//Ogre::Hlms *hlmsUnlit = hlmsManager->getHlms(Ogre::HLMS_UNLIT);
-			//Ogre::GpuProgramManager::getSingleton().clearMicrocodeCache();
-			//hlmsUnlit->reloadFrom(hlmsUnlit->getDataFolder());
-			//------------ reload hlms template files ----------------
-
-		//	_t_createItem(fbData);
-
+			}
 			//	delete deleteThisBuffer;
 		});
 	}
 
+	/*void reloadHlmsResource(Ogre::Root* root, const std::string& resourceName)
+	{
+		const std::array<Ogre::HlmsTypes, 7> searchHlms = { Ogre::HLMS_PBS, Ogre::HLMS_TOON, Ogre::HLMS_UNLIT, Ogre::HLMS_USER0, Ogre::HLMS_USER1, Ogre::HLMS_USER2, Ogre::HLMS_USER3 };
+
+		Ogre::Hlms* hlms = nullptr;
+		Ogre::HlmsDatablock* datablockToReload = nullptr;
+		for (auto searchHlmsIt = searchHlms.begin(); searchHlmsIt != searchHlms.end() && datablockToReload == nullptr; ++searchHlmsIt)
+		{
+			hlms = root->getHlmsManager()->getHlms(*searchHlmsIt);
+			if (hlms)
+				datablockToReload = hlms->getDatablock(resourceName);
+		}
+
+		if (datablockToReload == nullptr || datablockToReload == hlms->getDefaultDatablock())
+			return;
+
+		Ogre::String const *filenameTmp, *resourceGroupTmp;
+		datablockToReload->getFilenameAndResourceGroup(&filenameTmp, &resourceGroupTmp);
+		if (filenameTmp && resourceGroupTmp && !filenameTmp->empty() && !resourceGroupTmp->empty())
+		{
+			const Ogre::String filename(*filenameTmp), resourceGroup(*resourceGroupTmp);
+			Ogre::vector<Ogre::Renderable*>::type lrlist = datablockToReload->getLinkedRenderables();
+			for (auto it = lrlist.begin(); it != lrlist.end(); ++it)
+				(*it)->_setNullDatablock();
+
+			hlms->destroyDatablock(resourceName);
+
+			hlms->getHlmsManager()->loadMaterials(filename, resourceGroup);
+
+			Ogre::HlmsDatablock *datablockNew = hlms->getDatablock(resourceName);
+			for (auto it = lrlist.begin(); it != lrlist.end(); ++it)
+				(*it)->setDatablock(datablockNew);
+		}
+		else {}
+	}*/
 
 	//void Renderable::scale(const Ogre::Vector3& scale){
 	//	m_scale = scale;

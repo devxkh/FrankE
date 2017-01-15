@@ -47,11 +47,11 @@ namespace XE
 		typedef Ogre::Quaternion Quaternion;
 		typedef Ogre::Camera Camera;
 		typedef float Real;
-		typedef Ogre::v1::RenderOperation::OperationType OperationType;
+		typedef Ogre::OperationType OperationType;
 
 	public:
 		/// Constructor - see setOperationType() for description of argument.
-		DynamicLines( Ogre::IdType id, Ogre::ObjectMemoryManager* objManager, Ogre::SceneManager* sceneMgr, OperationType opType = Ogre::v1::RenderOperation::OT_LINE_STRIP);
+		DynamicLines( Ogre::IdType id, Ogre::ObjectMemoryManager* objManager, Ogre::SceneManager* sceneMgr, OperationType opType = Ogre::OperationType::OT_LINE_STRIP);
 		virtual ~DynamicLines();
 
 		/// Add a point to the point list
@@ -98,7 +98,7 @@ namespace XE
 
 
 	private:
-		Ogre::v1::RenderOperation::OperationType m_operationType;
+		Ogre::OperationType m_operationType;
 
 		bool mDirty;
 	};

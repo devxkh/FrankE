@@ -24,9 +24,13 @@ namespace XE {
 
 	SoundHandle::~SoundHandle(){
 
-		FMOD_RESULT result = _soundPtr->release();  /* Release the parent, not the sound that was retrieved with getSubSound. */
-		if (result != FMOD_OK)
-			LOG(plog::fatal) << "FMOD error! (" << result << "): " << FMOD_ErrorString(result) << ",SoundManager::PlayStream";
+		if (_soundPtr)
+		{
+			//FIXME crash on release!?
+			//FMOD_RESULT result = _soundPtr->release();  /* Release the parent, not the sound that was retrieved with getSubSound. */
+			//if (result != FMOD_OK)
+			//	LOG(plog::fatal) << "FMOD error! (" << result << "): " << FMOD_ErrorString(result) << ",SoundManager::PlayStream";
+		}
 	}
 	
 	void SoundHandle::create(SoundManager& soundMgr, SOUND_TYPE soundType)

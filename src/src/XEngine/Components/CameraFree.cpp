@@ -14,6 +14,7 @@ namespace XE
 		, _cameraBodyNode(bodyComponent)
 		, m_CameraYaw(0)
 		, m_CameraPitch(0)
+		, m_freezed(false)
 	{
 		//_cameraRenderable.setAutoTracking(false);
 		_cameraBodyNode.setFixedYawAxis(true);
@@ -34,6 +35,9 @@ namespace XE
 
 	void CameraFreeComponent::rotate(float x, float y)
 	{
+		if (m_freezed)
+			return;
+
 		m_CameraYaw += x;
 		m_CameraPitch += y;
 

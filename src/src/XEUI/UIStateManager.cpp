@@ -4,6 +4,11 @@
 
 namespace XE {
 
+	UIStateManager::~UIStateManager()
+	{
+
+	}
+
 	void UIStateManager::update(const float deltaTime)
 	{
 		for (auto &state : m_states)

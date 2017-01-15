@@ -8,33 +8,37 @@
 namespace XET
 {
 	TestControllerComponent::TestControllerComponent(XE::Uint16 id, XE::XEngine& engine, SDL_Window* window, bool defaultCtrl)
-		: ControllerComponent(id, engine, window, defaultCtrl)
 	{
+		ControllerComponent::m_ControllerData = new XE::ControllerData(id, engine, window, defaultCtrl);
+	}
+
+	TestControllerComponent::~TestControllerComponent() {
+		delete ControllerComponent::m_ControllerData;
 	}
 
 	void TestControllerComponent::setActionMap(XE::ControllerComponent& controller)
 	{
 		std::cout << "settingActionMap!" << std::endl;
 
-		controller.actionmap[ControllerSettings::ActionType::ActionType_TextEntered] = XE::Action(SDL_TEXTINPUT);
-		controller.actionmap[ControllerSettings::ActionType::ActionType_KeyPressed] = XE::Action(SDL_KEYUP);
-		controller.actionmap[ControllerSettings::ActionType::ActionType_KeyDown] = XE::Action(SDL_KEYDOWN);
+		controller.get()->actionmap[ControllerSettings::ActionType::ActionType_TextEntered] = XE::Action(SDL_TEXTINPUT);
+		controller.get()->actionmap[ControllerSettings::ActionType::ActionType_KeyPressed] = XE::Action(SDL_KEYUP);
+		controller.get()->actionmap[ControllerSettings::ActionType::ActionType_KeyDown] = XE::Action(SDL_KEYDOWN);
 
 		// Resize: Change window size (single event)
-		controller.actionmap[ControllerSettings::ActionType::ActionType_Resized] = XE::Action(SDL_WINDOWEVENT);
+		controller.get()->actionmap[ControllerSettings::ActionType::ActionType_Resized] = XE::Action(SDL_WINDOWEVENT);
 		//actionmap[ControllerSettings::ActionType::ActionType_Quit] = Action(Event::Closed);
 
 		//Actions festlegen
-		controller.actionmap[ControllerSettings::ActionType::ActionType_PointSelectStart] = XE::Action(SDL_MOUSEBUTTONDOWN);// || XE::Action(sf::Mouse::Right, XE::Action::PressOnce);
-		controller.actionmap[ControllerSettings::ActionType::ActionType_PointSelectEnd] = XE::Action(SDL_MOUSEBUTTONUP);// || XE::Action(sf::Mouse::Right, XE::Action::ReleaseOnce);
-		controller.actionmap[ControllerSettings::ActionType::ActionType_PointMoved] = XE::Action(SDL_MOUSEMOTION);
+		controller.get()->actionmap[ControllerSettings::ActionType::ActionType_PointSelectStart] = XE::Action(SDL_MOUSEBUTTONDOWN);// || XE::Action(sf::Mouse::Right, XE::Action::PressOnce);
+		controller.get()->actionmap[ControllerSettings::ActionType::ActionType_PointSelectEnd] = XE::Action(SDL_MOUSEBUTTONUP);// || XE::Action(sf::Mouse::Right, XE::Action::ReleaseOnce);
+		controller.get()->actionmap[ControllerSettings::ActionType::ActionType_PointMoved] = XE::Action(SDL_MOUSEMOTION);
 
-		controller.actionmap[ControllerSettings::ActionType::ActionType_Quit] = XE::Action(SDL_SCANCODE_ESCAPE, XE::Action::PressOnce);// || XE::Action(SDL_SCANCODE_qui sf::Event::Closed);
-		controller.actionmap[ControllerSettings::ActionType::ActionType_NavLeft] = XE::Action(SDL_SCANCODE_LEFT, XE::Action::PressOnce);
-		controller.actionmap[ControllerSettings::ActionType::ActionType_NavRight] = XE::Action(SDL_SCANCODE_RIGHT, XE::Action::PressOnce);
-		controller.actionmap[ControllerSettings::ActionType::ActionType_NavUp] = XE::Action(SDL_SCANCODE_UP, XE::Action::PressOnce);
-		controller.actionmap[ControllerSettings::ActionType::ActionType_NavDown] = XE::Action(SDL_SCANCODE_DOWN, XE::Action::PressOnce);
-		controller.actionmap[ControllerSettings::ActionType::ActionType_NavEnter] = XE::Action(SDL_SCANCODE_RETURN, XE::Action::PressOnce);
+		controller.get()->actionmap[ControllerSettings::ActionType::ActionType_Quit] = XE::Action(SDL_SCANCODE_ESCAPE, XE::Action::PressOnce);// || XE::Action(SDL_SCANCODE_qui sf::Event::Closed);
+		controller.get()->actionmap[ControllerSettings::ActionType::ActionType_NavLeft] = XE::Action(SDL_SCANCODE_LEFT, XE::Action::PressOnce);
+		controller.get()->actionmap[ControllerSettings::ActionType::ActionType_NavRight] = XE::Action(SDL_SCANCODE_RIGHT, XE::Action::PressOnce);
+		controller.get()->actionmap[ControllerSettings::ActionType::ActionType_NavUp] = XE::Action(SDL_SCANCODE_UP, XE::Action::PressOnce);
+		controller.get()->actionmap[ControllerSettings::ActionType::ActionType_NavDown] = XE::Action(SDL_SCANCODE_DOWN, XE::Action::PressOnce);
+		controller.get()->actionmap[ControllerSettings::ActionType::ActionType_NavEnter] = XE::Action(SDL_SCANCODE_RETURN, XE::Action::PressOnce);
 		
 		//std::string schemafile;
 		//std::string jsonfile;
@@ -108,16 +112,16 @@ namespace XET
 
 				if (j == 0)
 				{
-					controller.actionmap[(*it)->actionType()] = action; // XE::Action(XE::JoystickButton(0, 2), evtType);
+					controller.get()->actionmap[(*it)->actionType()] = action; // XE::Action(XE::JoystickButton(0, 2), evtType);
 					j++;
 				}
 				else if ((*itEvt)->actionOperator() == ControllerSettings::ActionOperator::ActionOperator_And)
 				{
-					controller.actionmap[(*it)->actionType()] = controller.actionmap[(*it)->actionType()] && action;
+					controller.get()->actionmap[(*it)->actionType()] = controller.get()->actionmap[(*it)->actionType()] && action;
 				}
 				else //or and none .....  if ((*itEvt)->actionOperator() == ControllerSettings::ActionOperator::ActionOperator_Or)
 				{
-					controller.actionmap[(*it)->actionType()] = controller.actionmap[(*it)->actionType()] || action;
+					controller.get()->actionmap[(*it)->actionType()] = controller.get()->actionmap[(*it)->actionType()] || action;
 				}
 			}
 		}

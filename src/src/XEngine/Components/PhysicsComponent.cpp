@@ -5,8 +5,16 @@
 namespace XE
 {
 
+	PhysicsComponent::PhysicsComponent()
+	{
+	}
+	
 	PhysicsComponent::~PhysicsComponent()
 	{
+	}
+
+	IPhysicsObject* PhysicsComponent::get() { 
+		return objects[0].get(); 
 	}
 
 	RigidBody::RigidBody()
@@ -18,7 +26,8 @@ namespace XE
 
 	RigidBody::~RigidBody()
 	{
-		m_dynWorld->destroyObject(rigidBody);
+		if(m_dynWorld)
+			m_dynWorld->destroyObject(rigidBody);
 	}
 
 	void RigidBody::setOrientation(const Ogre::Quaternion& orientation)
@@ -29,6 +38,17 @@ namespace XE
 	void RigidBody::rotate(const Ogre::Vector3& axis, float scalar)
 	{
 		//todo ?
+	}
+
+	void RigidBody::setPosition(const Ogre::Real& x, const Ogre::Real& y, const Ogre::Real& z)
+	{
+		//todo ?
+	}
+
+
+	void RigidBody::suspend(bool suspend)
+	{
+		rigidBody->suspend(suspend);
 	}
 
 	void RigidBody::setTransformState(const TransformState& state)
@@ -63,7 +83,8 @@ namespace XE
 
 	Ghost::~Ghost()
 	{
-		m_dynWorld->destroyObject(ghost);
+		if (m_dynWorld)
+			m_dynWorld->destroyObject(ghost);
 	}
 
 	void Ghost::setOrientation(const Ogre::Quaternion& orientation)
@@ -72,6 +93,16 @@ namespace XE
 	}
 
 	void Ghost::rotate(const Ogre::Vector3& axis, float scalar)
+	{
+		//todo ?
+	}
+
+	void Ghost::suspend(bool suspend)
+	{
+		ghost->suspend(suspend);
+	}
+
+	void Ghost::setPosition(const Ogre::Real& x, const Ogre::Real& y, const Ogre::Real& z)
 	{
 		//todo ?
 	}
@@ -107,7 +138,13 @@ namespace XE
 
 	CharacterPhysics::~CharacterPhysics()
 	{
-		m_dynWorld->destroyObject(character);
+		if (m_dynWorld)
+			m_dynWorld->destroyObject(character);
+	}
+
+	void CharacterPhysics::suspend(bool suspend)
+	{
+		character->suspend(suspend);
 	}
 
 	void CharacterPhysics::setTransformState(const TransformState& state)
@@ -128,6 +165,16 @@ namespace XE
 	void CharacterPhysics::rotate(const Ogre::Vector3& axis, float scalar)
 	{
 		character->rotate(axis, scalar);
+	}
+
+	void CharacterPhysics::setPosition(const Ogre::Real& x, const Ogre::Real& y, const Ogre::Real& z)
+	{
+		TransformState state;
+		character->getGhostTranformState(state);
+		state.loc.x = x;
+		state.loc.y = y;
+		state.loc.z = z;
+		character->setGhostTranformState(state);
 	}
 
 	void CharacterPhysics::collided(entityx::Entity collider, const Ogre::Vector3& positionWorldOnB, const Ogre::Vector3& normalWorldOnB, float distance1, float appliedImpulse)

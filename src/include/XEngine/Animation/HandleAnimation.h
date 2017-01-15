@@ -29,6 +29,7 @@ freely, subject to the following restrictions:
 
 //#include "HandleAnimation.h"
 
+#include <XESystem/SystemConfig.hpp>
 #include "AnimationTriggerSystem.h"
 #include <XERenderer/Animation.h>
 
@@ -46,7 +47,7 @@ namespace XE
 class HandleAnimation :  public Animation
 {
 public:
-	HandleAnimation(XE::GraphicsManager& gMgr, const uint32_t id);
+	HandleAnimation(XE::GraphicsManager& gMgr, const XE::Uint32 id);
 	virtual ~HandleAnimation();
 
 	void update(const float elapsedSeconds, const bool updateRenderer = false);

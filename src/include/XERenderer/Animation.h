@@ -24,8 +24,9 @@ freely, subject to the following restrictions:
     distribution.
 */
 
-#ifndef __TECNOFREAK__OGRE_ANIMATION__H__
-#define __TECNOFREAK__OGRE_ANIMATION__H__
+#pragma once
+
+#include <XESystem/SystemConfig.hpp>
 
 #include <vector>
 
@@ -51,10 +52,10 @@ public:
 	/*
 		creates an Animation object: not in renderthread!
 	*/
-	Animation(XE::GraphicsManager& gMgr,const uint16_t id);
+	Animation(XE::GraphicsManager& gMgr,const XE::Uint16 id);
 	virtual ~Animation();
 
-	virtual const uint16_t getId() const;
+	virtual const XE::Uint16 getId() const;
 
 	virtual bool getEnabled() const;
 	virtual void setEnabled( const bool enabled );
@@ -108,7 +109,7 @@ private:
 
 	//Ogre::AnimationState* _t_getAnimationState();
 	//const Ogre::AnimationState* _t_getAnimationState() const;
-	uint16_t _id;
+	XE::Uint16 _id;
 	bool m_Enabled;
 	float m_Length;
 	bool m_Loop;
@@ -121,7 +122,3 @@ private:
 };
 
 } // XE
-
-
-
-#endif

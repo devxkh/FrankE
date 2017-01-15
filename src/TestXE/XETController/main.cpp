@@ -22,7 +22,7 @@ int main()
 		game.update();
 	}
 
-	game.quit();
+	game.destroy();
 
 	return EXIT_SUCCESS; 
 }

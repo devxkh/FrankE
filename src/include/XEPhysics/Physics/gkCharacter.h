@@ -36,6 +36,7 @@ class btPairCachingGhostObject;
 class btKinematicCharacterController;
 class btTriangleMesh;
 class gkDynamicsWorld;
+class btTransform;
 
 
 class gkCharacter : public gkPhysicsController, public btActionInterface
@@ -49,6 +50,7 @@ public:
 	void setVelocity(const Ogre::Vector3& v, float timeInterval);
 	void setLinearVelocity(float forward, float backward, float rightward, float leftward, float timeInterval);
 
+	void getGhostTranformState(TransformState& state);
 	void setGhostTranformState(const TransformState& trans);
 
 	btPairCachingGhostObject* getGhostObject() const;

@@ -7,6 +7,8 @@
 
 #include <XERenderer/GraphicsManager.hpp>
 
+#include <unordered_map>
+
 namespace XE {
 
 	AnimationControllerSystem::AnimationControllerSystem(XE::GraphicsManager& gMgr, XE::Scene& scene)

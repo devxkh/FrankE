@@ -20,7 +20,7 @@ int main(int argc, char **argv)
 		game.update();
 	}
 
-	game.quit();
+	game.destroy();
 
 	return EXIT_SUCCESS;
 }

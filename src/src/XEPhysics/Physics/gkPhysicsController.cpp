@@ -43,7 +43,7 @@ gkPhysicsController::gkPhysicsController(gkDynamicsWorld* owner)
 	     m_object(),
 	     m_collisionObject(0),
 	     m_shape(0),
-	     m_suspend(true),
+	     m_suspend(false),
 		 m_dbvtMark(true),
 		 m_type(XFBType::PhysicsType_PT_NO_COLLISION),
 		 m_mode(0)
@@ -778,7 +778,7 @@ void gkPhysicsController::setEntityWithBody(entityx::Entity object)
 
 	m_object = object;
 
-	suspend(false);
+	//suspend(false);
 }
 
 void gkPhysicsController::setTransform(const btTransform& worldTrans)

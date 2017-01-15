@@ -33,6 +33,7 @@ namespace XE {
 	public:
 
 		CameraRenderable(XE::Uint16 id, GraphicsManager& gmanager, Scene& scene);
+		~CameraRenderable();
 
 		void destroy();
 	

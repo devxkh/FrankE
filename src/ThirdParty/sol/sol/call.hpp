@@ -30,11 +30,6 @@
 namespace sol {
 	namespace call_detail {
 
-		template <bool b, typename F>
-		inline decltype(auto) pick(std::integral_constant<bool, b>, F&& f) {
-			return std::forward<F>(f);
-		}
-
 		template <typename R, typename W>
 		inline auto& pick(std::true_type, property_wrapper<R, W>& f) {
 			return f.read;
@@ -57,35 +52,26 @@ namespace sol {
 		struct constructor_match {
 			T* obj;
 
-			constructor_match(T* obj) : obj(obj) {}
+			constructor_match(T* o) : obj(o) {}
 
 			template <typename Fx, std::size_t I, typename... R, typename... Args>
 			int operator()(types<Fx>, index_value<I>, types<R...> r, types<Args...> a, lua_State* L, int, int start) const {
 				detail::default_construct func{};
-				return stack::call_into_lua<false>(r, a, L, start, func, obj);
+				return stack::call_into_lua<stack::stack_detail::default_check_arguments>(r, a, L, start, func, obj);
 			}
 		};
 
-		template <typename T>
-		inline int destruct(lua_State* L) {
-			T* obj = stack::get<non_null<T*>>(L, 1);
-			std::allocator<T> alloc{};
-			alloc.destroy(obj);
-			return 0;
-		}
-
 		namespace overload_detail {
 			template <std::size_t... M, typename Match, typename... Args>
-			inline int overload_match_arity(sol::types<>, std::index_sequence<>, std::index_sequence<M...>, Match&&, lua_State* L, int, int, Args&&...) {
+			inline int overload_match_arity(types<>, std::index_sequence<>, std::index_sequence<M...>, Match&&, lua_State* L, int, int, Args&&...) {
 				return luaL_error(L, "sol: no matching function call takes this number of arguments and the specified types");
 			}
 
 			template <typename Fx, typename... Fxs, std::size_t I, std::size_t... In, std::size_t... M, typename Match, typename... Args>
-			inline int overload_match_arity(sol::types<Fx, Fxs...>, std::index_sequence<I, In...>, std::index_sequence<M...>, Match&& matchfx, lua_State* L, int fxarity, int start, Args&&... args) {
+			inline int overload_match_arity(types<Fx, Fxs...>, std::index_sequence<I, In...>, std::index_sequence<M...>, Match&& matchfx, lua_State* L, int fxarity, int start, Args&&... args) {
 				typedef lua_bind_traits<meta::unqualified_t<Fx>> traits;
 				typedef meta::tuple_types<typename traits::return_type> return_types;
 				typedef typename traits::free_args_list args_list;
-				typedef typename args_list::indices args_indices;
 				// compile-time eliminate any functions that we know ahead of time are of improper arity
 				if (meta::find_in_pack_v<index_value<traits::free_arity>, index_value<M>...>::value) {
 					return overload_match_arity(types<Fxs...>(), std::index_sequence<In...>(), std::index_sequence<M...>(), std::forward<Match>(matchfx), L, fxarity, start, std::forward<Args>(args)...);
@@ -93,8 +79,48 @@ namespace sol {
 				if (traits::free_arity != fxarity) {
 					return overload_match_arity(types<Fxs...>(), std::index_sequence<In...>(), std::index_sequence<traits::free_arity, M...>(), std::forward<Match>(matchfx), L, fxarity, start, std::forward<Args>(args)...);
 				}
-				if (!stack::stack_detail::check_types<true>().check(args_list(), args_indices(), L, start, no_panic)) {
+				stack::record tracking{};
+				if (!stack::stack_detail::check_types<true>{}.check(args_list(), L, start, no_panic, tracking)) {
 					return overload_match_arity(types<Fxs...>(), std::index_sequence<In...>(), std::index_sequence<M...>(), std::forward<Match>(matchfx), L, fxarity, start, std::forward<Args>(args)...);
+				}
+				return matchfx(types<Fx>(), index_value<I>(), return_types(), args_list(), L, fxarity, start, std::forward<Args>(args)...);
+			}
+
+			template <std::size_t... M, typename Match, typename... Args>
+			inline int overload_match_arity_single(types<>, std::index_sequence<>, std::index_sequence<M...>, Match&& matchfx, lua_State* L, int fxarity, int start, Args&&... args) {
+				return overload_match_arity(types<>(), std::index_sequence<>(), std::index_sequence<M...>(), std::forward<Match>(matchfx), L, fxarity, start, std::forward<Args>(args)...);
+			}
+
+			template <typename Fx, std::size_t I, std::size_t... M, typename Match, typename... Args>
+			inline int overload_match_arity_single(types<Fx>, std::index_sequence<I>, std::index_sequence<M...>, Match&& matchfx, lua_State* L, int fxarity, int start, Args&&... args) {
+				typedef lua_bind_traits<meta::unqualified_t<Fx>> traits;
+				typedef meta::tuple_types<typename traits::return_type> return_types;
+				typedef typename traits::free_args_list args_list;
+				// compile-time eliminate any functions that we know ahead of time are of improper arity
+				if (meta::find_in_pack_v<index_value<traits::free_arity>, index_value<M>...>::value) {
+					return overload_match_arity(types<>(), std::index_sequence<>(), std::index_sequence<M...>(), std::forward<Match>(matchfx), L, fxarity, start, std::forward<Args>(args)...);
+				}
+				if (traits::free_arity != fxarity) {
+					return overload_match_arity(types<>(), std::index_sequence<>(), std::index_sequence<traits::free_arity, M...>(), std::forward<Match>(matchfx), L, fxarity, start, std::forward<Args>(args)...);
+				}
+				return matchfx(types<Fx>(), index_value<I>(), return_types(), args_list(), L, fxarity, start, std::forward<Args>(args)...);
+			}
+
+			template <typename Fx, typename Fx1, typename... Fxs, std::size_t I, std::size_t I1, std::size_t... In, std::size_t... M, typename Match, typename... Args>
+			inline int overload_match_arity_single(types<Fx, Fx1, Fxs...>, std::index_sequence<I, I1, In...>, std::index_sequence<M...>, Match&& matchfx, lua_State* L, int fxarity, int start, Args&&... args) {
+				typedef lua_bind_traits<meta::unqualified_t<Fx>> traits;
+				typedef meta::tuple_types<typename traits::return_type> return_types;
+				typedef typename traits::free_args_list args_list;
+				// compile-time eliminate any functions that we know ahead of time are of improper arity
+				if (meta::find_in_pack_v<index_value<traits::free_arity>, index_value<M>...>::value) {
+					return overload_match_arity(types<Fx1, Fxs...>(), std::index_sequence<I1, In...>(), std::index_sequence<M...>(), std::forward<Match>(matchfx), L, fxarity, start, std::forward<Args>(args)...);
+				}
+				if (traits::free_arity != fxarity) {
+					return overload_match_arity(types<Fx1, Fxs...>(), std::index_sequence<I1, In...>(), std::index_sequence<traits::free_arity, M...>(), std::forward<Match>(matchfx), L, fxarity, start, std::forward<Args>(args)...);
+				}
+				stack::record tracking{};
+				if (!stack::stack_detail::check_types<true>{}.check(args_list(), L, start, no_panic, tracking)) {
+					return overload_match_arity(types<Fx1, Fxs...>(), std::index_sequence<I1, In...>(), std::index_sequence<M...>(), std::forward<Match>(matchfx), L, fxarity, start, std::forward<Args>(args)...);
 				}
 				return matchfx(types<Fx>(), index_value<I>(), return_types(), args_list(), L, fxarity, start, std::forward<Args>(args)...);
 			}
@@ -102,7 +128,7 @@ namespace sol {
 
 		template <typename... Functions, typename Match, typename... Args>
 		inline int overload_match_arity(Match&& matchfx, lua_State* L, int fxarity, int start, Args&&... args) {
-			return overload_detail::overload_match_arity(types<Functions...>(), std::make_index_sequence<sizeof...(Functions)>(), std::index_sequence<>(), std::forward<Match>(matchfx), L, fxarity, start, std::forward<Args>(args)...);
+			return overload_detail::overload_match_arity_single(types<Functions...>(), std::make_index_sequence<sizeof...(Functions)>(), std::index_sequence<>(), std::forward<Match>(matchfx), L, fxarity, start, std::forward<Args>(args)...);
 		}
 
 		template <typename... Functions, typename Match, typename... Args>
@@ -119,9 +145,9 @@ namespace sol {
 
 		template <typename T, typename... TypeLists>
 		inline int construct(lua_State* L) {
-			static const auto& meta = usertype_traits<T>::metatable;
+			static const auto& meta = usertype_traits<T>::metatable();
 			int argcount = lua_gettop(L);
-			call_syntax syntax = argcount > 0 ? stack::get_call_syntax(L, meta, 1) : call_syntax::dot;
+			call_syntax syntax = argcount > 0 ? stack::get_call_syntax(L, &usertype_traits<T>::user_metatable()[0], 1) : call_syntax::dot;
 			argcount -= static_cast<int>(syntax);
 
 			T** pointerpointer = reinterpret_cast<T**>(lua_newuserdata(L, sizeof(T*) + sizeof(T)));
@@ -135,7 +161,7 @@ namespace sol {
 
 			userdataref.push();
 			luaL_getmetatable(L, &meta[0]);
-			if (type_of(L, -1) == type::nil) {
+			if (type_of(L, -1) == type::lua_nil) {
 				lua_pop(L, 1);
 				return luaL_error(L, "sol: unable to get usertype metatable");
 			}
@@ -146,27 +172,51 @@ namespace sol {
 
 		template <typename F, bool is_index, bool is_variable, bool checked, int boost, typename = void>
 		struct agnostic_lua_call_wrapper {
-			template <typename Fx>
-			static int var_call(std::true_type, lua_State* L, Fx&& f) {
+			template <typename Fx, typename... Args>
+			static int call(lua_State* L, Fx&& f, Args&&... args) {
 				typedef wrapper<meta::unqualified_t<F>> wrap;
 				typedef typename wrap::returns_list returns_list;
 				typedef typename wrap::free_args_list args_list;
 				typedef typename wrap::caller caller;
-				return stack::call_into_lua<checked>(returns_list(), args_list(), L, boost + ( is_index ? 2 : 3 ), caller(), std::forward<Fx>(f));
+				return stack::call_into_lua<checked>(returns_list(), args_list(), L, boost + 1, caller(), std::forward<Fx>(f), std::forward<Args>(args)...);
+			}
+		};
+
+		template <typename T, bool is_variable, bool checked, int boost, typename C>
+		struct agnostic_lua_call_wrapper<var_wrapper<T>, true, is_variable, checked, boost, C> {
+			template <typename F>
+			static int call(lua_State* L, F&& f) {
+				return stack::push_reference(L, detail::unwrap(f.value));
+			}
+		};
+
+		template <typename T, bool is_variable, bool checked, int boost, typename C>
+		struct agnostic_lua_call_wrapper<var_wrapper<T>, false, is_variable, checked, boost, C> {
+			template <typename V>
+			static int call_assign(std::true_type, lua_State* L, V&& f) {
+				detail::unwrap(f.value) = stack::get<meta::unwrapped_t<T>>(L, boost + (is_variable ? 3 : 1));
+				return 0;
 			}
 
-			template <typename Fx>
-			static int var_call(std::false_type, lua_State* L, Fx&& f) {
-				typedef wrapper<meta::unqualified_t<F>> wrap;
-				typedef typename wrap::free_args_list args_list;
-				typedef typename wrap::returns_list returns_list;
-				typedef typename wrap::caller caller;
-				return stack::call_into_lua<checked>(returns_list(), args_list(), L, boost + 1, caller(), std::forward<Fx>(f));
+			template <typename... Args>
+			static int call_assign(std::false_type, lua_State* L, Args&&...) {
+				return luaL_error(L, "sol: cannot write to this variable: copy assignment/constructor not available");
 			}
 
-			template <typename Fx>
-			static int call(lua_State* L, Fx&& f) {
-				return var_call(std::integral_constant<bool, is_variable>(), L, std::forward<Fx>(f));
+			template <typename... Args>
+			static int call_const(std::false_type, lua_State* L, Args&&... args) {
+				typedef meta::unwrapped_t<T> R;
+				return call_assign(std::is_assignable<std::add_lvalue_reference_t<meta::unqualified_t<R>>, R>(), L, std::forward<Args>(args)...);
+			}
+
+			template <typename... Args>
+			static int call_const(std::true_type, lua_State* L, Args&&...) {
+				return luaL_error(L, "sol: cannot write to a readonly (const) variable");
+			}
+
+			template <typename V>
+			static int call(lua_State* L, V&& f) {
+				return call_const(std::is_const<meta::unwrapped_t<T>>(), L, f);
 			}
 		};
 
@@ -226,13 +276,14 @@ namespace sol {
 			static int call(lua_State* L, Fx&& f) {
 				typedef std::conditional_t<std::is_void<T>::value, object_type, T> Ta;
 #ifdef SOL_SAFE_USERTYPE
-				object_type* o = static_cast<object_type*>(stack::get<Ta*>(L, 1));
-				if (o == nullptr) {
-					return luaL_error(L, "sol: received null for 'self' argument (use ':' for accessing member functions, make sure member variables are preceeded by the actual object with '.' syntax)");
+				auto maybeo = stack::check_get<Ta*>(L, 1);
+				if (!maybeo || maybeo.value() == nullptr) {
+					return luaL_error(L, "sol: received nil for 'self' argument (use ':' for accessing member functions, make sure member variables are preceeded by the actual object with '.' syntax)");
 				}
+				object_type* o = static_cast<object_type*>(maybeo.value());
 				return call(L, std::forward<Fx>(f), *o);
 #else
-				object_type& o = static_cast<object_type&>(stack::get<Ta&>(L, 1));
+				object_type& o = static_cast<object_type&>(*stack::get<non_null<Ta*>>(L, 1));
 				return call(L, std::forward<Fx>(f), o);
 #endif // Safety
 			}
@@ -240,7 +291,7 @@ namespace sol {
 
 		template <typename T, typename F, bool is_variable, bool checked, int boost>
 		struct lua_call_wrapper<T, F, false, is_variable, checked, boost, std::enable_if_t<std::is_member_object_pointer<F>::value>> {
-			typedef sol::lua_bind_traits<F> traits_type;
+			typedef lua_bind_traits<F> traits_type;
 			typedef wrapper<meta::unqualified_t<F>> wrap;
 			typedef typename wrap::object_type object_type;
 
@@ -255,16 +306,17 @@ namespace sol {
 			static int call_assign(std::true_type, lua_State* L, V&& f) {
 				typedef std::conditional_t<std::is_void<T>::value, object_type, T> Ta;
 #ifdef SOL_SAFE_USERTYPE
-				object_type* o = static_cast<object_type*>(stack::get<Ta*>(L, 1));
-				if (o == nullptr) {
+				auto maybeo = stack::check_get<Ta*>(L, 1);
+				if (!maybeo || maybeo.value() == nullptr) {
 					if (is_variable) {
 						return luaL_error(L, "sol: received nil for 'self' argument (bad '.' access?)");
 					}
 					return luaL_error(L, "sol: received nil for 'self' argument (pass 'self' as first argument)");
 				}
+				object_type* o = static_cast<object_type*>(maybeo.value());
 				return call_assign(std::true_type(), L, f, *o);
 #else
-				object_type& o = static_cast<object_type&>(stack::get<Ta&>(L, 1));
+				object_type& o = static_cast<object_type&>(*stack::get<non_null<Ta*>>(L, 1));
 				return call_assign(std::true_type(), L, f, o);
 #endif // Safety
 			}
@@ -298,7 +350,7 @@ namespace sol {
 
 		template <typename T, typename F, bool is_variable, bool checked, int boost>
 		struct lua_call_wrapper<T, F, true, is_variable, checked, boost, std::enable_if_t<std::is_member_object_pointer<F>::value>> {
-			typedef sol::lua_bind_traits<F> traits_type;
+			typedef lua_bind_traits<F> traits_type;
 			typedef wrapper<meta::unqualified_t<F>> wrap;
 			typedef typename wrap::object_type object_type;
 
@@ -313,29 +365,30 @@ namespace sol {
 			static int call(lua_State* L, V&& f) {
 				typedef std::conditional_t<std::is_void<T>::value, object_type, T> Ta;
 #ifdef SOL_SAFE_USERTYPE
-				object_type* o = static_cast<object_type*>(stack::get<Ta*>(L, 1));
-				if (o == nullptr) {
+				auto maybeo = stack::check_get<Ta*>(L, 1);
+				if (!maybeo || maybeo.value() == nullptr) {
 					if (is_variable) {
-						return luaL_error(L, "sol: 'self' argument is nil (bad '.' access?)");
+						return luaL_error(L, "sol: 'self' argument is lua_nil (bad '.' access?)");
 					}
-					return luaL_error(L, "sol: 'self' argument is nil (pass 'self' as first argument)");
+					return luaL_error(L, "sol: 'self' argument is lua_nil (pass 'self' as first argument)");
 				}
+				object_type* o = static_cast<object_type*>(maybeo.value());
 				return call(L, f, *o);
 #else
-				object_type& o = static_cast<object_type&>(stack::get<Ta&>(L, 1));
+				object_type& o = static_cast<object_type&>(*stack::get<non_null<Ta*>>(L, 1));
 				return call(L, f, o);
 #endif // Safety
 			}
 		};
 
 		template <typename T, typename... Args, bool is_index, bool is_variable, bool checked, int boost, typename C>
-		struct lua_call_wrapper<T, sol::constructor_list<Args...>, is_index, is_variable, checked, boost, C> {
-			typedef sol::constructor_list<Args...> F;
+		struct lua_call_wrapper<T, constructor_list<Args...>, is_index, is_variable, checked, boost, C> {
+			typedef constructor_list<Args...> F;
 
 			static int call(lua_State* L, F&) {
-				const auto& metakey = usertype_traits<T>::metatable;
+				const auto& metakey = usertype_traits<T>::metatable();
 				int argcount = lua_gettop(L);
-				call_syntax syntax = argcount > 0 ? stack::get_call_syntax(L, metakey, 1) : call_syntax::dot;
+				call_syntax syntax = argcount > 0 ? stack::get_call_syntax(L, &usertype_traits<T>::user_metatable()[0], 1) : call_syntax::dot;
 				argcount -= static_cast<int>(syntax);
 
 				T** pointerpointer = reinterpret_cast<T**>(lua_newuserdata(L, sizeof(T*) + sizeof(T)));
@@ -348,7 +401,7 @@ namespace sol {
 
 				userdataref.push();
 				luaL_getmetatable(L, &metakey[0]);
-				if (type_of(L, -1) == type::nil) {
+				if (type_of(L, -1) == type::lua_nil) {
 					lua_pop(L, 1);
 					return luaL_error(L, "sol: unable to get usertype metatable");
 				}
@@ -359,28 +412,28 @@ namespace sol {
 		};
 
 		template <typename T, typename... Cxs, bool is_index, bool is_variable, bool checked, int boost, typename C>
-		struct lua_call_wrapper<T, sol::constructor_wrapper<Cxs...>, is_index, is_variable, checked, boost, C> {
-			typedef sol::constructor_wrapper<Cxs...> F;
+		struct lua_call_wrapper<T, constructor_wrapper<Cxs...>, is_index, is_variable, checked, boost, C> {
+			typedef constructor_wrapper<Cxs...> F;
 
 			struct onmatch {
 				template <typename Fx, std::size_t I, typename... R, typename... Args>
 				int operator()(types<Fx>, index_value<I>, types<R...> r, types<Args...> a, lua_State* L, int, int start, F& f) {
-					const auto& metakey = usertype_traits<T>::metatable;
+					const auto& metakey = usertype_traits<T>::metatable();
 					T** pointerpointer = reinterpret_cast<T**>(lua_newuserdata(L, sizeof(T*) + sizeof(T)));
 					reference userdataref(L, -1);
 					T*& referencepointer = *pointerpointer;
 					T* obj = reinterpret_cast<T*>(pointerpointer + 1);
 					referencepointer = obj;
 
-					auto& func = std::get<I>(f.set);
+					auto& func = std::get<I>(f.functions);
 					stack::call_into_lua<checked>(r, a, L, boost + start, func, detail::implicit_wrapper<T>(obj));
 
 					userdataref.push();
 					luaL_getmetatable(L, &metakey[0]);
-					if (type_of(L, -1) == type::nil) {
+					if (type_of(L, -1) == type::lua_nil) {
 						lua_pop(L, 1);
 						std::string err = "sol: unable to get usertype metatable for ";
-						err += usertype_traits<T>::name;
+						err += usertype_traits<T>::name();
 						return luaL_error(L, err.c_str());
 					}
 					lua_setmetatable(L, -2);
@@ -390,7 +443,7 @@ namespace sol {
 			};
 
 			static int call(lua_State* L, F& f) {
-				call_syntax syntax = stack::get_call_syntax(L, usertype_traits<T>::metatable);
+				call_syntax syntax = stack::get_call_syntax(L, &usertype_traits<T>::user_metatable()[0], 1);
 				int syntaxval = static_cast<int>(syntax);
 				int argcount = lua_gettop(L) - syntaxval;
 				return construct_match<T, meta::pop_front_type_t<meta::function_args_t<Cxs>>...>(onmatch(), L, argcount, 1 + syntaxval, f);
@@ -399,17 +452,17 @@ namespace sol {
 		};
 
 		template <typename T, typename Fx, bool is_index, bool is_variable, bool checked, int boost>
-		struct lua_call_wrapper<T, sol::destructor_wrapper<Fx>, is_index, is_variable, checked, boost, std::enable_if_t<std::is_void<Fx>::value>> {
-			typedef sol::destructor_wrapper<Fx> F;
+		struct lua_call_wrapper<T, destructor_wrapper<Fx>, is_index, is_variable, checked, boost, std::enable_if_t<std::is_void<Fx>::value>> {
+			typedef destructor_wrapper<Fx> F;
 
 			static int call(lua_State* L, const F&) {
-				return destruct<T>(L);
+				return detail::usertype_alloc_destroy<T>(L);
 			}
 		};
 
 		template <typename T, typename Fx, bool is_index, bool is_variable, bool checked, int boost>
-		struct lua_call_wrapper<T, sol::destructor_wrapper<Fx>, is_index, is_variable, checked, boost, std::enable_if_t<!std::is_void<Fx>::value>> {
-			typedef sol::destructor_wrapper<Fx> F;
+		struct lua_call_wrapper<T, destructor_wrapper<Fx>, is_index, is_variable, checked, boost, std::enable_if_t<!std::is_void<Fx>::value>> {
+			typedef destructor_wrapper<Fx> F;
 
 			static int call(lua_State* L, const F& f) {
 				T& obj = stack::get<T>(L);
@@ -425,13 +478,84 @@ namespace sol {
 			struct on_match {
 				template <typename Fx, std::size_t I, typename... R, typename... Args>
 				int operator()(types<Fx>, index_value<I>, types<R...>, types<Args...>, lua_State* L, int, int, F& fx) {
-					auto& f = std::get<I>(fx.set);
-					return lua_call_wrapper<T, Fx, is_index, is_variable, checked>{}.call(L, f);
+					auto& f = std::get<I>(fx.functions);
+					return lua_call_wrapper<T, Fx, is_index, is_variable, checked, boost>{}.call(L, f);
 				}
 			};
 
 			static int call(lua_State* L, F& fx) {
 				return overload_match_arity<Fs...>(on_match(), L, lua_gettop(L), 1, fx);
+			}
+		};
+
+		template <typename T, typename... Fs, bool is_index, bool is_variable, bool checked, int boost, typename C>
+		struct lua_call_wrapper<T, factory_wrapper<Fs...>, is_index, is_variable, checked, boost, C> {
+			typedef factory_wrapper<Fs...> F;
+
+			struct on_match {
+				template <typename Fx, std::size_t I, typename... R, typename... Args>
+				int operator()(types<Fx>, index_value<I>, types<R...>, types<Args...>, lua_State* L, int, int, F& fx) {
+					auto& f = std::get<I>(fx.functions);
+					return lua_call_wrapper<T, Fx, is_index, is_variable, checked, boost>{}.call(L, f);
+				}
+			};
+
+			static int call(lua_State* L, F& fx) {
+				return overload_match_arity<Fs...>(on_match(), L, lua_gettop(L), 1, fx);
+			}
+		};
+
+		template <typename T, typename R, typename W, bool is_index, bool is_variable, bool checked, int boost, typename C>
+		struct lua_call_wrapper<T, property_wrapper<R, W>, is_index, is_variable, checked, boost, C> {
+			typedef std::conditional_t<is_index, R, W> P;
+			typedef meta::unqualified_t<P> U;
+			typedef lua_bind_traits<U> traits_type;
+
+			template <typename F>
+			static int self_call(lua_State* L, F&& f) {
+				typedef wrapper<U> wrap;
+				typedef meta::unqualified_t<typename traits_type::template arg_at<0>> object_type;
+				typedef meta::pop_front_type_t<typename traits_type::free_args_list> args_list;
+				typedef T Ta;
+#ifdef SOL_SAFE_USERTYPE
+				auto maybeo = stack::check_get<Ta*>(L, 1);
+				if (!maybeo || maybeo.value() == nullptr) {
+					if (is_variable) {
+						return luaL_error(L, "sol: 'self' argument is lua_nil (bad '.' access?)");
+					}
+					return luaL_error(L, "sol: 'self' argument is lua_nil (pass 'self' as first argument)");
+				}
+				object_type* o = static_cast<object_type*>(maybeo.value());
+#else
+				object_type* o = static_cast<object_type*>(stack::get<non_null<Ta*>>(L, 1));
+#endif // Safety
+				typedef typename wrap::returns_list returns_list;
+				typedef typename wrap::caller caller;
+				return stack::call_into_lua<checked>(returns_list(), args_list(), L, boost + (is_variable ? 3 : 2), caller(), f, *o);
+			}
+
+			template <typename F, typename... Args>
+			static int defer_call(std::false_type, lua_State* L, F&& f, Args&&... args) {
+				return self_call(L, pick(meta::boolean<is_index>(), f), std::forward<Args>(args)...);
+			}
+
+			template <typename F, typename... Args>
+			static int defer_call(std::true_type, lua_State* L, F&& f, Args&&... args) {
+				auto& p = pick(meta::boolean<is_index>(), std::forward<F>(f));
+				return lua_call_wrapper<T, meta::unqualified_t<decltype(p)>, is_index, is_variable, checked, boost>{}.call(L, p, std::forward<Args>(args)...);
+			}
+
+			template <typename F, typename... Args>
+			static int call(lua_State* L, F&& f, Args&&... args) {
+				typedef meta::any<
+					std::is_void<U>,
+					std::is_same<U, no_prop>,
+					meta::is_specialization_of<var_wrapper, U>,
+					meta::is_specialization_of<constructor_wrapper, U>,
+					meta::is_specialization_of<constructor_list, U>,
+					std::is_member_pointer<U>
+				> is_specialized;
+				return defer_call(is_specialized(), L, std::forward<F>(f), std::forward<Args>(args)...);
 			}
 		};
 
@@ -442,6 +566,14 @@ namespace sol {
 			template <typename... Args>
 			static int call(lua_State* L, F& fx, Args&&... args) {
 				return lua_call_wrapper<T, V, is_index, is_variable, true, boost>{}.call(L, fx.value, std::forward<Args>(args)...);
+			}
+		};
+
+		template <typename T, typename Sig, typename P, bool is_index, bool is_variable, bool checked, int boost, typename C>
+		struct lua_call_wrapper<T, function_arguments<Sig, P>, is_index, is_variable, checked, boost, C> {
+			template <typename F>
+			static int call(lua_State* L, F&& f) {
+				return lua_call_wrapper<T, meta::unqualified_t<P>, is_index, is_variable, stack::stack_detail::default_check_arguments, boost>{}.call(L, std::get<0>(f.arguments));
 			}
 		};
 
@@ -468,6 +600,8 @@ namespace sol {
 		template <typename R, typename W>
 		struct is_var_bind<property_wrapper<R, W>> : std::true_type {};
 
+		template <typename T>
+		struct is_var_bind<var_wrapper<T>> : std::true_type {};
 	} // call_detail
 
 	template <typename T>

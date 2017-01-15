@@ -32,9 +32,11 @@ namespace XE
 		DT_count
 	};
 
-	struct  ControllerComponent
+	struct  ControllerData
 	{
-		ControllerComponent(Uint16 id, XEngine& engine, SDL_Window* window, bool defaultCtrl = false);
+		ControllerData(Uint16 id, XEngine& engine, SDL_Window* window, bool defaultCtrl = false);
+
+		void destroy();
 
 		DeviceType m_deviceType;
 		thor::ActionMap<std::size_t>::CallbackSystem system;
@@ -48,6 +50,15 @@ namespace XE
 		WindowState _windowState;
 		XEngine& engine;
 
+	};
+
+	struct  ControllerComponent
+	{
+		ControllerComponent();
+		~ControllerComponent();
+		ControllerData* get();
+
+		ControllerData* m_ControllerData;
 	};
 
 } // ns XE

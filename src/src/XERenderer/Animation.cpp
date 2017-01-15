@@ -38,7 +38,7 @@ namespace XE
 {
 	typedef std::vector< float > BoneWeightList;
 
-	Animation::Animation(XE::GraphicsManager& gMgr, const uint16_t id)
+	Animation::Animation(XE::GraphicsManager& gMgr, const XE::Uint16 id)
 		: m_GraphicsManager(gMgr)
 		, m_boneWeightList(nullptr)
 		, m_t_boneWeightPtrs(nullptr)
@@ -76,7 +76,7 @@ namespace XE
 		});
 	}
 
-	const uint16_t Animation::getId() const
+	const XE::Uint16 Animation::getId() const
 	{
 		return _id;
 	}

@@ -2,8 +2,7 @@
 //
 ////////////////////////////////////////////////////////////
 
-#ifndef SYSTEM_CONFIG_HPP
-#define SYSTEM_CONFIG_HPP
+#pragma once
 
 namespace XE{
 
@@ -91,5 +90,3 @@ namespace XE{
 	#endif
 
 }
-
-#endif // SYSTEM_CONFIG_HPP

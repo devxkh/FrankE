@@ -7,6 +7,9 @@ namespace Ogre
 	class Light;
 	//class SceneManager;
 	class SceneNode;
+		
+	class InstantRadiosity;
+	class Vector3;
 }
 
 namespace XE
@@ -19,7 +22,11 @@ namespace XE
 	{
 		LightRenderable(GraphicsManager& gmanager, Scene& scene, const void* fbData);
 		
+		~LightRenderable();
+
 		void setLightData(const void* fbData);
+
+		void setPosition(const Ogre::Vector3& pos);
 
 	private:
 
@@ -27,6 +34,8 @@ namespace XE
 
 		Ogre::SceneNode* _t_OgreEntitySceneNodePtr;
 		GraphicsManager& m_GraphicsManager;
+
+		Ogre::InstantRadiosity          *mInstantRadiosity;
 
 		Ogre::Light* m_light;
 		Ogre::SceneNode* m_LightAxisNode;

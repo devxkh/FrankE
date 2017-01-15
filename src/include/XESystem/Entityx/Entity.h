@@ -134,6 +134,9 @@ public:
   template <typename C>
   ComponentHandle<C> assign_from_copy(const C &component);
 
+  template <typename C>
+  void reparent(const C &component);
+
   template <typename C, typename ... Args>
   ComponentHandle<C> replace(Args && ... args);
 
@@ -142,6 +145,9 @@ public:
 
   template <typename C, typename = typename std::enable_if<!std::is_const<C>::value>::type>
   ComponentHandle<C> component();
+  
+  template <typename C, typename = typename std::enable_if<!std::is_const<C>::value>::type>
+  C * Entity::getComponent();
 
   template <typename C, typename = typename std::enable_if<std::is_const<C>::value>::type>
   const ComponentHandle<C, const EntityManager> component() const;
@@ -197,8 +203,13 @@ public:
   const C *get() const;
 
   /**
-   * Remove the component from its entity and destroy it.
+   * remove the component from its entity and destroy it.
    */
+  void destroy();
+
+  /**
+  * Remove the component from its entity and don't destroy it.
+  */
   void remove();
 
   bool operator == (const ComponentHandle<C> &other) const {
@@ -628,6 +639,26 @@ class EntityManager : entityx::help::NonCopyable {
 
     // Remove component bit.
     entity_component_mask_[id.index()].reset(family);
+  }
+
+  /**
+   * Remove a Component from an Entity::Id
+   *
+   * Emits a ComponentRemovedEvent<C> event.
+   */
+  template <typename C>
+  void destroy(Entity::Id id) {
+    assert_valid(id);
+    const BaseComponent::Family family = component_family<C>();
+    const uint32_t index = id.index();
+
+    // Find the pool for this component family.
+    BasePool *pool = component_pools_[family];
+    ComponentHandle<C> component(this, id);
+    event_manager_.emit<ComponentRemovedEvent<C>>(Entity(this, id), component);
+
+    // Remove component bit.
+    entity_component_mask_[id.index()].reset(family);
 
     // Call destructor.
     pool->destroy(index);
@@ -899,6 +930,22 @@ ComponentHandle<C> Entity::assign_from_copy(const C &component) {
   return manager_->assign<C>(id_, std::forward<const C &>(component));
 }
 
+template <typename C>
+void Entity::reparent(const C &component) {
+
+	//event_manager_.emit<ComponentAddedEvent<C>>(Entity(this, id), component);
+
+	//manager_->assign<C>(id_, std::forward<const C &>(component));
+	//assert(valid() && has_component<C>());
+
+	////remove
+	//ComponentHandle<C> handle = component<C>();
+	//handle.get()->remove();
+
+	////-------- assign to Target
+	//targetEntity.assign_from_copy<C>(*handle.get());
+}
+
 template <typename C, typename ... Args>
 ComponentHandle<C> Entity::replace(Args && ... args) {
   assert(valid());
@@ -921,6 +968,12 @@ template <typename C, typename>
 ComponentHandle<C> Entity::component() {
   assert(valid());
   return manager_->component<C>(id_);
+}
+
+template <typename C, typename>
+C * Entity::getComponent() {
+	assert(valid());
+	return manager_->component<C>(id_).get();
 }
 
   template <typename C, typename>
@@ -1010,6 +1063,11 @@ inline void ComponentHandle<C, EM>::remove() {
   manager_->template remove<C>(id_);
 }
 
+template <typename C, typename EM>
+inline void ComponentHandle<C, EM>::destroy() {
+	assert(valid());
+	manager_->template destroy<C>(id_);
+}
 
 }  // namespace entityx
 

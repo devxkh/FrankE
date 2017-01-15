@@ -22,28 +22,23 @@
 #ifndef SOL_OPTIONAL_HPP
 #define SOL_OPTIONAL_HPP
 
-#if __cplusplus > 201402L
-#include <optional>
-#elif defined(SOL_USE_BOOST)
+#include "compatibility.hpp"
+#include "in_place.hpp"
+#if defined(SOL_USE_BOOST)
 #include <boost/optional.hpp>
 #else
-#include "../Optional/optional.hpp"
-#endif // C++ 14
+#include "optional_implementation.hpp"
+#endif // Boost vs. Better optional
 
 namespace sol {
 
-#if __cplusplus > 201402L
-	template <typename T>
-	using optional = sol::optional<T>;
-	using nullopt_t = std::nullopt_t;
-	constexpr nullopt_t nullopt = std::nullopt;
-#elif defined(SOL_USE_BOOST)
+#if defined(SOL_USE_BOOST)
 	template <typename T>
 	using optional = boost::optional<T>;
 	using nullopt_t = boost::none_t;
 	const nullopt_t nullopt = boost::none;
-#else
-#endif // C++ 14
-}
+#endif // Boost vs. Better optional
+
+} // sol
 
 #endif // SOL_OPTIONAL_HPP
