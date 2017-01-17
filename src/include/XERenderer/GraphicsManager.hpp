@@ -26,7 +26,7 @@ namespace Ogre
 	class RenderWindow;
 }
 
-#define UseRenderThread 0 // 1 = use renderthread, 0 = dont use renderthread
+#define UseRenderThread 1 // 1 = use renderthread, 0 = dont use renderthread
 
 namespace XE
 {

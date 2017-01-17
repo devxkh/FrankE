@@ -77,7 +77,7 @@ namespace XE
 
 	GraphicsManager::~GraphicsManager()
 	{
-		delete mRenderThread;
+	//FIXME crash?	delete mRenderThread;
 		delete _t_OgreWorkspace;
 
 		if (m_SdlWindow)
