@@ -80,6 +80,20 @@ struct InputEvent;
 struct Component;
 struct MessageRoot;
 
+enum AbilityBehavior {
+  AbilityBehavior_AB_None = 0,
+  AbilityBehavior_AB_Punch = 1,
+  AbilityBehavior_AB_Bolt = 2,
+  AbilityBehavior_AB_Block = 3
+};
+
+inline const char **EnumNamesAbilityBehavior() {
+  static const char *names[] = { "AB_None", "AB_Punch", "AB_Bolt", "AB_Block", nullptr };
+  return names;
+}
+
+inline const char *EnumNameAbilityBehavior(AbilityBehavior e) { return EnumNamesAbilityBehavior()[static_cast<int>(e)]; }
+
 enum MsgStatus {
   MsgStatus_S_Unknown = 0,
   MsgStatus_S_LoginSuccess = 1,
@@ -491,6 +505,7 @@ struct AbilityComponent FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   XFBType::PhysicsShape shape() const { return static_cast<XFBType::PhysicsShape>(GetField<int8_t>(14, 0)); }
   const XFBType::Vec3f *size() const { return GetStruct<const XFBType::Vec3f *>(16); }
   const XFBType::Vec3f *offset() const { return GetStruct<const XFBType::Vec3f *>(18); }
+  AbilityBehavior abilityBehavior() const { return static_cast<AbilityBehavior>(GetField<uint16_t>(20, 0)); }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
            VerifyField<uint16_t>(verifier, 4 /* id */) &&
@@ -501,6 +516,7 @@ struct AbilityComponent FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
            VerifyField<int8_t>(verifier, 14 /* shape */) &&
            VerifyField<XFBType::Vec3f>(verifier, 16 /* size */) &&
            VerifyField<XFBType::Vec3f>(verifier, 18 /* offset */) &&
+           VerifyField<uint16_t>(verifier, 20 /* abilityBehavior */) &&
            verifier.EndTable();
   }
 };
@@ -516,10 +532,11 @@ struct AbilityComponentBuilder {
   void add_shape(XFBType::PhysicsShape shape) { fbb_.AddElement<int8_t>(14, static_cast<int8_t>(shape), 0); }
   void add_size(const XFBType::Vec3f *size) { fbb_.AddStruct(16, size); }
   void add_offset(const XFBType::Vec3f *offset) { fbb_.AddStruct(18, offset); }
+  void add_abilityBehavior(AbilityBehavior abilityBehavior) { fbb_.AddElement<uint16_t>(20, static_cast<uint16_t>(abilityBehavior), 0); }
   AbilityComponentBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
   AbilityComponentBuilder &operator=(const AbilityComponentBuilder &);
   flatbuffers::Offset<AbilityComponent> Finish() {
-    auto o = flatbuffers::Offset<AbilityComponent>(fbb_.EndTable(start_, 8));
+    auto o = flatbuffers::Offset<AbilityComponent>(fbb_.EndTable(start_, 9));
     return o;
   }
 };
@@ -532,13 +549,15 @@ inline flatbuffers::Offset<AbilityComponent> CreateAbilityComponent(flatbuffers:
    float power = 0,
    XFBType::PhysicsShape shape = XFBType::PhysicsShape_SH_BOX,
    const XFBType::Vec3f *size = 0,
-   const XFBType::Vec3f *offset = 0) {
+   const XFBType::Vec3f *offset = 0,
+   AbilityBehavior abilityBehavior = AbilityBehavior_AB_None) {
   AbilityComponentBuilder builder_(_fbb);
   builder_.add_offset(offset);
   builder_.add_size(size);
   builder_.add_power(power);
   builder_.add_cooldown(cooldown);
   builder_.add_duration(duration);
+  builder_.add_abilityBehavior(abilityBehavior);
   builder_.add_id(id);
   builder_.add_shape(shape);
   builder_.add_hasPhysics(hasPhysics);

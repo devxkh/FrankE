@@ -231,6 +231,17 @@ namespace XE
 		return _renderTasks[id];
 	}
 
+	void GraphicsManager::setShadowMappingUseBackFaces(bool useBackFaces)
+	{
+		getIntoRendererQueue().push([this, useBackFaces]()
+		{
+			Ogre::HlmsManager *hlmsManager = getRoot()->getHlmsManager();
+
+			//http://www.ogre3d.org/forums/viewtopic.php?f=25&t=88836#p529968
+			hlmsManager->setShadowMappingUseBackFaces(useBackFaces);
+		});
+	}
+
 	double timeSinceLast = 1.0 / 60.0;
 
 	void GraphicsManager::updateRenderer()

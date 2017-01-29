@@ -134,17 +134,25 @@ table LocalFile
 	resourceGrp:string;	
 }
 
+enum TextureType : byte
+{
+	Unlit,
+	Pbs
+}
 
 table Material
 {
 	file:LocalFile;	
+	textures:[string];
+	textureType:TextureType;
+	name:string;
 	//todo all material properties, not only from ogre material file		
 }
 
 table MeshFile
 {
 	file:LocalFile;		
-	materials:[Material];
+	material:Material;
 }
 
 table MeshCube
@@ -197,10 +205,14 @@ enum MemoryMgrType : ubyte
 table RenderableComponent {
 	memType:MemoryMgrType;
 	renderqueue:uint;	
+	visible:bool;	
 	meshes:[Mesh];
+	visibilityFlags:uint;
+	lightMask:uint;
 	castShadows:bool;
 	mode:uint;
 	showAABB:bool;
+	shadowconstBias:float;
 	group:uint; // e.g. static grouping
 }
 
@@ -247,14 +259,26 @@ enum LightType : ubyte
   LT_SPOTLIGHT = 2
 }
 
+struct Attenuation
+{
+	range:float;
+	constant:float;
+	linear:float;
+	quadratic:float;
+}
+
 table Light {
 	colourDiffuse:Colour;
 	colourSpecular:Colour;
     directionVector:Vec3f;
 	lightType:LightType;
 	powerScale:float;
+	attenuation:Attenuation;
 	ambientLight:AmbientLight;
 	name:string;	
+	castShadows:bool;
+	useInstantRadiosity:bool;
+	IRVplThreshold:float;
 }
 
 table Camera {

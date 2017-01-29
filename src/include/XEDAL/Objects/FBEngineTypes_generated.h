@@ -982,22 +982,30 @@ inline flatbuffers::Offset<Mesh> CreateMesh(flatbuffers::FlatBufferBuilder &_fbb
 struct RenderableComponent FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   MemoryMgrType memType() const { return static_cast<MemoryMgrType>(GetField<uint8_t>(4, 0)); }
   uint32_t renderqueue() const { return GetField<uint32_t>(6, 0); }
-  const flatbuffers::Vector<flatbuffers::Offset<Mesh>> *meshes() const { return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<Mesh>> *>(8); }
-  uint8_t castShadows() const { return GetField<uint8_t>(10, 0); }
-  uint32_t mode() const { return GetField<uint32_t>(12, 0); }
-  uint8_t showAABB() const { return GetField<uint8_t>(14, 0); }
-  uint32_t group() const { return GetField<uint32_t>(16, 0); }
+  uint8_t visible() const { return GetField<uint8_t>(8, 0); }
+  const flatbuffers::Vector<flatbuffers::Offset<Mesh>> *meshes() const { return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<Mesh>> *>(10); }
+  uint32_t visibilityFlags() const { return GetField<uint32_t>(12, 0); }
+  uint32_t lightMask() const { return GetField<uint32_t>(14, 0); }
+  uint8_t castShadows() const { return GetField<uint8_t>(16, 0); }
+  uint32_t mode() const { return GetField<uint32_t>(18, 0); }
+  uint8_t showAABB() const { return GetField<uint8_t>(20, 0); }
+  float shadowconstBias() const { return GetField<float>(22, 0); }
+  uint32_t group() const { return GetField<uint32_t>(24, 0); }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
            VerifyField<uint8_t>(verifier, 4 /* memType */) &&
            VerifyField<uint32_t>(verifier, 6 /* renderqueue */) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, 8 /* meshes */) &&
+           VerifyField<uint8_t>(verifier, 8 /* visible */) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, 10 /* meshes */) &&
            verifier.Verify(meshes()) &&
            verifier.VerifyVectorOfTables(meshes()) &&
-           VerifyField<uint8_t>(verifier, 10 /* castShadows */) &&
-           VerifyField<uint32_t>(verifier, 12 /* mode */) &&
-           VerifyField<uint8_t>(verifier, 14 /* showAABB */) &&
-           VerifyField<uint32_t>(verifier, 16 /* group */) &&
+           VerifyField<uint32_t>(verifier, 12 /* visibilityFlags */) &&
+           VerifyField<uint32_t>(verifier, 14 /* lightMask */) &&
+           VerifyField<uint8_t>(verifier, 16 /* castShadows */) &&
+           VerifyField<uint32_t>(verifier, 18 /* mode */) &&
+           VerifyField<uint8_t>(verifier, 20 /* showAABB */) &&
+           VerifyField<float>(verifier, 22 /* shadowconstBias */) &&
+           VerifyField<uint32_t>(verifier, 24 /* group */) &&
            verifier.EndTable();
   }
 };
@@ -1007,15 +1015,19 @@ struct RenderableComponentBuilder {
   flatbuffers::uoffset_t start_;
   void add_memType(MemoryMgrType memType) { fbb_.AddElement<uint8_t>(4, static_cast<uint8_t>(memType), 0); }
   void add_renderqueue(uint32_t renderqueue) { fbb_.AddElement<uint32_t>(6, renderqueue, 0); }
-  void add_meshes(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Mesh>>> meshes) { fbb_.AddOffset(8, meshes); }
-  void add_castShadows(uint8_t castShadows) { fbb_.AddElement<uint8_t>(10, castShadows, 0); }
-  void add_mode(uint32_t mode) { fbb_.AddElement<uint32_t>(12, mode, 0); }
-  void add_showAABB(uint8_t showAABB) { fbb_.AddElement<uint8_t>(14, showAABB, 0); }
-  void add_group(uint32_t group) { fbb_.AddElement<uint32_t>(16, group, 0); }
+  void add_visible(uint8_t visible) { fbb_.AddElement<uint8_t>(8, visible, 0); }
+  void add_meshes(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Mesh>>> meshes) { fbb_.AddOffset(10, meshes); }
+  void add_visibilityFlags(uint32_t visibilityFlags) { fbb_.AddElement<uint32_t>(12, visibilityFlags, 0); }
+  void add_lightMask(uint32_t lightMask) { fbb_.AddElement<uint32_t>(14, lightMask, 0); }
+  void add_castShadows(uint8_t castShadows) { fbb_.AddElement<uint8_t>(16, castShadows, 0); }
+  void add_mode(uint32_t mode) { fbb_.AddElement<uint32_t>(18, mode, 0); }
+  void add_showAABB(uint8_t showAABB) { fbb_.AddElement<uint8_t>(20, showAABB, 0); }
+  void add_shadowconstBias(float shadowconstBias) { fbb_.AddElement<float>(22, shadowconstBias, 0); }
+  void add_group(uint32_t group) { fbb_.AddElement<uint32_t>(24, group, 0); }
   RenderableComponentBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
   RenderableComponentBuilder &operator=(const RenderableComponentBuilder &);
   flatbuffers::Offset<RenderableComponent> Finish() {
-    auto o = flatbuffers::Offset<RenderableComponent>(fbb_.EndTable(start_, 7));
+    auto o = flatbuffers::Offset<RenderableComponent>(fbb_.EndTable(start_, 11));
     return o;
   }
 };
@@ -1023,18 +1035,26 @@ struct RenderableComponentBuilder {
 inline flatbuffers::Offset<RenderableComponent> CreateRenderableComponent(flatbuffers::FlatBufferBuilder &_fbb,
    MemoryMgrType memType = MemoryMgrType_SCENE_DYNAMIC,
    uint32_t renderqueue = 0,
+   uint8_t visible = 0,
    flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Mesh>>> meshes = 0,
+   uint32_t visibilityFlags = 0,
+   uint32_t lightMask = 0,
    uint8_t castShadows = 0,
    uint32_t mode = 0,
    uint8_t showAABB = 0,
+   float shadowconstBias = 0,
    uint32_t group = 0) {
   RenderableComponentBuilder builder_(_fbb);
   builder_.add_group(group);
+  builder_.add_shadowconstBias(shadowconstBias);
   builder_.add_mode(mode);
+  builder_.add_lightMask(lightMask);
+  builder_.add_visibilityFlags(visibilityFlags);
   builder_.add_meshes(meshes);
   builder_.add_renderqueue(renderqueue);
   builder_.add_showAABB(showAABB);
   builder_.add_castShadows(castShadows);
+  builder_.add_visible(visible);
   builder_.add_memType(memType);
   return builder_.Finish();
 }

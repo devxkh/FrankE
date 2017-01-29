@@ -32,6 +32,10 @@
 
 #include <Ogre/OgreMain/include/OgreHlmsTextureManager.h>
 #include <Ogre/Components/Hlms/Pbs/include/OgreHlmsPbsDatablock.h>
+#include <Ogre/Components/Hlms/Common/include/OgreHlmsBufferManager.h>
+#include <Ogre/Components/Hlms/Unlit/include/OgreHlmsUnlit.h>
+#include <Ogre/Components/Hlms/Unlit/include/OgreHlmsUnlitDatablock.h>
+
 
 namespace XE
 {
@@ -47,6 +51,7 @@ namespace XE
 		//, m_scale(1, 1, 1)
 		, _t_OgreItemPtr(0)
 		, m_rotation(1, 0, 0, 0)
+		, m_datablock(0)
 		//, m_worldOrientation(1 , 0, 0, 0)*/
 		//,m_transform(0, 0, 0)
 		//,m_worldTransform(0, 0, 0)
@@ -88,6 +93,7 @@ namespace XE
 		
 		_t_OgreEntitySceneNodePtr->setPosition(m_position);
 		_t_OgreEntitySceneNodePtr->setOrientation(m_rotation);
+		_t_OgreEntitySceneNodePtr->setVisible(m_isVisible);
 
 		isDirty = false;
 	}
@@ -102,6 +108,12 @@ namespace XE
 	void Renderable::setOrientation(const Ogre::Quaternion& rot)
 	{
 		m_rotation = rot;
+		isDirty = true;
+	}
+
+	void Renderable::setVisibility(const bool isVisible)
+	{
+		m_isVisible = isVisible;
 		isDirty = true;
 	}
 
@@ -163,14 +175,13 @@ namespace XE
 					_t_OgreItemPtr = m_Scene.getOgreSceneManager().__OgreSceneMgrPtr->createItem(manual, (Ogre::SceneMemoryMgrTypes)Ogre::SCENE_DYNAMIC); //renderable->memType()); //Ogre::SCENE_DYNAMIC);
 
 					Ogre::HlmsManager *hlmsManager = m_GraphicsManager.getRoot()->getHlmsManager();
-					Ogre::HlmsDatablock *datablock = hlmsManager->getDatablock("StonesPbs");
-					_t_OgreItemPtr->setDatablock(datablock); //todo multiple materials per mesh	
+					m_datablock = hlmsManager->getDatablock("StonesPbs");
+					//_t_OgreItemPtr->setDatablock(datablock); //todo multiple materials per mesh	
 												   //floor->setMaterialName("Examples/Rockwall", "General");
 												   //floor->setCastShadows(false);
-					_t_OgreItemPtr->setCastShadows(true);
+			
 
-
-					_t_OgreEntitySceneNodePtr->attachObject(_t_OgreItemPtr);
+					//_t_OgreEntitySceneNodePtr->attachObject(_t_OgreItemPtr);
 				}
 				else if (var->mesh_type() == XFBType::UMesh::UMesh_MeshCube)
 				{
@@ -179,26 +190,63 @@ namespace XE
 																							AUTODETECT_RESOURCE_GROUP_NAME,
 																							Ogre::SCENE_DYNAMIC);
 
-					_t_OgreItemPtr->setVisibilityFlags(0x000000001);
 				
-					_t_OgreEntitySceneNodePtr->attachObject(_t_OgreItemPtr);
+					//_t_OgreEntitySceneNodePtr->attachObject(_t_OgreItemPtr);
 
 
-					//auto bbs = m_Scene.getOgreSceneManager().__OgreSceneMgrPtr->createBillboardSet();
-					//Ogre::v1::Billboard* sunBillboard = bbs->createBillboard(Ogre::Vector3(0, 0, 0));
-					////You need sets Billboard::mDirection to some value other than the default Vector3::ZERO to make BBT_ORIENTED_SELF / BBT_PERPENDICULAR_SELF work.
-					//sunBillboard->mDirection = Ogre::Vector3::UNIT_Y;
-					//bbs->setBillboardType(Ogre::v1::BillboardType::BBT_ORIENTED_SELF);
+					auto bbs = m_Scene.getOgreSceneManager().__OgreSceneMgrPtr->createBillboardSet();
+					Ogre::v1::Billboard* sunBillboard = bbs->createBillboard(Ogre::Vector3(0, 0, 0));
+					sunBillboard->setDimensions(25,25);
+					//You need sets Billboard::mDirection to some value other than the default Vector3::ZERO to make BBT_ORIENTED_SELF / BBT_PERPENDICULAR_SELF work.
+					sunBillboard->mDirection = Ogre::Vector3::UNIT_Y;
+					bbs->setBillboardType(Ogre::v1::BillboardType::BBT_ORIENTED_SELF);
 				
-					////bbs->Ogre::Renderable::setDatablock("TestModel");
-					//bbs->setRenderQueueGroup(5);
-					//m_Scene.getOgreSceneManager().__OgreSceneMgrPtr->getRenderQueue()->setRenderQueueMode(5, Ogre::RenderQueue::Modes::V1_FAST);
+					//bbs->Ogre::Renderable::setDatablock("TestModel");
+					bbs->setRenderQueueGroup(5);
+					m_Scene.getOgreSceneManager().__OgreSceneMgrPtr->getRenderQueue()->setRenderQueueMode(5, Ogre::RenderQueue::Modes::V1_FAST);
 
-					//Ogre::HlmsManager *hlmsManager = m_GraphicsManager.getRoot()->getHlmsManager();
-					//Ogre::HlmsDatablock *datablock = hlmsManager->getDatablock("BillBoardTest");
-					//bbs->setDatablock(datablock);
+					Ogre::HlmsManager *hlmsManager = m_GraphicsManager.getRoot()->getHlmsManager();
+					Ogre::HlmsDatablock *datablock = hlmsManager->getDatablock("BillBoardTest");
+					bbs->setDatablock(datablock);
 
-					//_t_OgreEntitySceneNodePtr->attachObject(bbs);
+					Ogre::HlmsUnlitDatablock *datablockUnlit = (Ogre::HlmsUnlitDatablock*)datablock;
+					//	assert(dynamic_cast<Ogre::HlmsUnlit*>(hlmsManager->getHlms(Ogre::HLMS_UNLIT)));
+					/*	Ogre::HlmsUnlit *hlmsUnlit = static_cast<Ogre::HlmsUnlit*>(hlmsManager->getHlms(Ogre::HLMS_UNLIT));
+					
+						Ogre::HlmsUnlitDatablock *datablockUnlit = (Ogre::HlmsUnlitDatablock*)hlmsUnlit->createDatablock(
+							"TestMat", "TestMat", Ogre::HlmsMacroblock(), Ogre::HlmsBlendblock(), Ogre::HlmsParamVec());
+						datablockUnlit->setTexture(0, 0,
+							Ogre::TextureManager::getSingleton().load("tornado.png",
+								Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME), 0);*/
+						Ogre::Matrix4 mat(Ogre::Matrix4::IDENTITY);
+						//mat.setScale(Ogre::Vector3(1, 1, 1));
+					//	mat.setTrans(Ogre::Vector3(0.5, 0.5, 0));
+						datablockUnlit->setEnableAnimationMatrix(0, true);
+						datablockUnlit->setAnimationMatrix(0, mat);
+					//	auto controller = Ogre::ControllerManager::getSingleton().createTextureUVScroller(? ? , 1.0f);
+						//Ogre::MaterialPtr m = Ogre::MaterialManager::getSingleton().create(
+						//	"MyOffsetMaterial", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, true);
+					
+/*
+						Ogre::Technique *technique = m->createTechnique();
+						Ogre::Pass *pass_ambient = technique->createPass();*/
+
+				//		auto controller = Ogre::ControllerManager::getSingleton().createTextureUVScroller(?? , 1.0f);
+						//datablockUnlit->getTexture()->get
+						//auto renderables = _t_OgreItemPtr->mRenderables[0];
+						//auto text = datablockUnlit->getTexture(2);
+					
+						//renderables->setMaterial(m);
+						//auto material = renderables->getMaterial();
+						//auto pass = material->getTechnique(0)->getPass(0);
+						//auto texUState = pass->createTextureUnitState("tornado.png", 0);
+						//auto controller = Ogre::ControllerManager::getSingleton().createTextureUVScroller(texUState, 1.0f);
+					/*	auto tech = renderables->get();
+						auto pass = tech->getPass(0);
+
+						 Ogre::TextureUnitState* t = pass->getTextureUnitState(0);*/
+				
+					_t_OgreEntitySceneNodePtr->attachObject(bbs);
 				}
 
 				else if (var->mesh_type() == XFBType::UMesh::UMesh_MeshFile)
@@ -237,16 +285,15 @@ namespace XE
 					}
 
 					_t_OgreItemPtr = m_Scene.getOgreSceneManager().__OgreSceneMgrPtr->createItem(v2Mesh, (Ogre::SceneMemoryMgrTypes)Ogre::SCENE_DYNAMIC);
-					_t_OgreItemPtr->setVisibilityFlags(0x000000001);
+				//	_t_OgreItemPtr->setVisibilityFlags(0x000000001);
 
 					Ogre::HlmsManager *hlmsManager = m_GraphicsManager.getRoot()->getHlmsManager();
-
-
+					
 					/*Ogre::HlmsDatablock *datablockTest = hlmsManager->getDatablock("DefaultPbs");
 					_t_OgreItemPtr->setDatablock(datablockTest);*/
 
-					Ogre::HlmsDatablock *datablock = hlmsManager->getDatablock(meshFile->material()->name()->c_str());//"TestModel");
-					_t_OgreItemPtr->setDatablock(datablock);
+					m_datablock = hlmsManager->getDatablock(meshFile->material()->name()->c_str());//"TestModel");
+				//	_t_OgreItemPtr->setDatablock(datablock);
 
 					
 
@@ -257,7 +304,7 @@ namespace XE
 					//_t_OgreItemPtr->setDatablock(datablock);
 					
 					auto aabb = _t_OgreItemPtr->getLocalAabb();
-				
+					
 					//_t_OgreItemPtr->setCastShadows(true);
 					//	_t_OgreItemPtr->setDatablock("BaseWhite");
 						//meshV1 = tmp->getMesh();
@@ -273,13 +320,25 @@ namespace XE
 					//	newItem->setDatablock("Marble"); //todo multiple materials per mesh	
 														 //floor->setMaterialName("Examples/Rockwall", "General");
 														 //floor->setCastShadows(false);
-					_t_OgreEntitySceneNodePtr->attachObject(_t_OgreItemPtr);
+
 				//	_t_OgreEntitySceneNodePtr->setVisible(false);
 	
 				}
 
-
-
+				/*_t_OgreItemPtr->setRenderQueueGroup(renderable->renderqueue());
+				m_Scene.getOgreSceneManager().__OgreSceneMgrPtr->getRenderQueue()->setRenderQueueMode(renderable->renderqueue(), Ogre::RenderQueue::Modes::V1_FAST);
+*/
+				m_isVisible = renderable->visible();
+				_t_OgreItemPtr->setVisibilityFlags(renderable->visibilityFlags());
+				_t_OgreEntitySceneNodePtr->attachObject(_t_OgreItemPtr);
+				_t_OgreItemPtr->setVisibilityFlags(renderable->visibilityFlags()); // 0x000000001);
+				_t_OgreItemPtr->setCastShadows(renderable->castShadows());
+				_t_OgreEntitySceneNodePtr->setVisible(renderable->visible());
+				if (m_datablock)
+				{
+					m_datablock->mShadowConstantBias = renderable->shadowconstBias();
+					_t_OgreItemPtr->setDatablock(m_datablock);
+				}
 			}
 		}
 
@@ -407,8 +466,8 @@ namespace XE
 						}
 						
 						//-------------- assign dummy material to free item material ----------------------
-						Ogre::HlmsDatablock *datablock = hlmsManager->getDatablock("DefaultPbs");
-						_t_OgreItemPtr->setDatablock(datablock);
+						m_datablock = hlmsManager->getDatablock("DefaultPbs");
+						_t_OgreItemPtr->setDatablock(m_datablock);
 
 						//-------------- destroy item material ------------------------------------
 						if (mesh->material()->textureType() == XFBType::TextureType::TextureType_Pbs)
@@ -439,12 +498,12 @@ namespace XE
 							if (wonderfullStream.read(buffer.data(), wonderfullStream.getSize()))
 							{
 								buffer.push_back('\0'); //rapidjson needs to be null terminated
-								hlmsJson.loadMaterials(mesh->material()->file()->fileName()->c_str(), &buffer[0]);
+								hlmsJson.loadMaterials(mesh->material()->file()->fileName()->c_str(), "General", &buffer[0]);
 							}
 						}
 
-						Ogre::HlmsDatablock *datablockNew = hlmsManager->getDatablock(mesh->material()->name()->c_str());// "TestModel");
-						_t_OgreItemPtr->setDatablock(datablockNew);
+						m_datablock = hlmsManager->getDatablock(mesh->material()->name()->c_str());// "TestModel");
+					
 
 								//------------ reload hlms template files ----------------
 								//Hot reload of PBS shaders. We need to clear the microcode cache
@@ -465,6 +524,21 @@ namespace XE
 							//	_t_createItem(fbData);
 					}
 				}
+			}
+
+			/*_t_OgreItemPtr->setRenderQueueGroup(renderable->renderqueue());
+			m_Scene.getOgreSceneManager().__OgreSceneMgrPtr->getRenderQueue()->setRenderQueueMode(renderable->renderqueue(), Ogre::RenderQueue::Modes::V1_FAST);*/
+
+			m_isVisible = renderable->visible();
+			_t_OgreEntitySceneNodePtr->setVisible(renderable->visible());
+			_t_OgreItemPtr->setVisibilityFlags(renderable->visibilityFlags());
+			//_t_OgreEntitySceneNodePtr->attachObject(_t_OgreItemPtr);
+			_t_OgreItemPtr->setVisibilityFlags(renderable->visibilityFlags()); // 0x000000001);
+			_t_OgreItemPtr->setCastShadows(renderable->castShadows());
+			if (m_datablock)
+			{
+				m_datablock->mShadowConstantBias = renderable->shadowconstBias();
+				_t_OgreItemPtr->setDatablock(m_datablock);
 			}
 			//	delete deleteThisBuffer;
 		});

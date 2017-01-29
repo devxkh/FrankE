@@ -180,6 +180,7 @@ namespace XE
 			}
 		}
 		else {
+
 			delete mInstantRadiosity;
 			mInstantRadiosity = 0;
 		}

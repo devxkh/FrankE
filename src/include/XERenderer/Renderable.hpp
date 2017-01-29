@@ -33,6 +33,8 @@ namespace XE {
 
 		void setOrientation(const Ogre::Quaternion& rot);
 
+		void setVisibility(const bool isVisible);
+
 		//void rotate(const  Ogre::Quaternion& q, Ogre::Node::TransformSpace relativeTo = Ogre::Node::TS_LOCAL);
 		//void rotate(const Ogre::Vector3& axis, const Ogre::Radian& angle, Ogre::Node::TransformSpace relativeTo = Ogre::Node::TS_LOCAL);
 		//void scale(const Ogre::Vector3& scale);
@@ -100,9 +102,11 @@ namespace XE {
 		Ogre::Vector3 _t_LastPosition;
 		Ogre::Vector3 _t_CurrentPosition;
 
+		bool m_isVisible;
 		Ogre::Vector3 m_position;
 		Ogre::Quaternion m_rotation;
 
+		Ogre::HlmsDatablock *m_datablock;
 
 		//change only in renderthread
 		Ogre::v1::AnimationStateSet* _t_animations;

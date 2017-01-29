@@ -84,6 +84,9 @@ namespace XE
 
 		void updateRenderer();
 
+		void setShadowMappingUseBackFaces(bool useBackFaces);
+
+
 		GUIRenderer& getGUIRenderer() { return m_GUIRenderer; }
 
 		inline Ogre::Root*	 getRoot() { return mRoot; }
