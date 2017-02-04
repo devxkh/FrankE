@@ -36,6 +36,9 @@
 #include <Ogre/Components/Hlms/Unlit/include/OgreHlmsUnlit.h>
 #include <Ogre/Components/Hlms/Unlit/include/OgreHlmsUnlitDatablock.h>
 
+#include <Ogre/OgreMain/include/OgrePredefinedControllers.h>
+
+#include <XERenderer/Animation/TextureAnimationController.hpp>
 
 namespace XE
 {
@@ -117,6 +120,10 @@ namespace XE
 		isDirty = true;
 	}
 
+	bool Renderable::isVisible()
+	{
+		return m_isVisible;
+	}
 	//void Renderable::setBlendmode()// Ogre::v1::Entity* _t_entity)
 	//{
 	//	m_GraphicsManager.getIntoRendererQueue().push([this]() {
@@ -190,7 +197,7 @@ namespace XE
 																							AUTODETECT_RESOURCE_GROUP_NAME,
 																							Ogre::SCENE_DYNAMIC);
 
-				
+	
 					//_t_OgreEntitySceneNodePtr->attachObject(_t_OgreItemPtr);
 
 
@@ -206,10 +213,10 @@ namespace XE
 					m_Scene.getOgreSceneManager().__OgreSceneMgrPtr->getRenderQueue()->setRenderQueueMode(5, Ogre::RenderQueue::Modes::V1_FAST);
 
 					Ogre::HlmsManager *hlmsManager = m_GraphicsManager.getRoot()->getHlmsManager();
-					Ogre::HlmsDatablock *datablock = hlmsManager->getDatablock("BillBoardTest");
-					bbs->setDatablock(datablock);
+					m_datablock = hlmsManager->getDatablock("BillBoardTest");
+					bbs->setDatablock(m_datablock);
 
-					Ogre::HlmsUnlitDatablock *datablockUnlit = (Ogre::HlmsUnlitDatablock*)datablock;
+					Ogre::HlmsUnlitDatablock *datablockUnlit = (Ogre::HlmsUnlitDatablock*)m_datablock;
 					//	assert(dynamic_cast<Ogre::HlmsUnlit*>(hlmsManager->getHlms(Ogre::HLMS_UNLIT)));
 					/*	Ogre::HlmsUnlit *hlmsUnlit = static_cast<Ogre::HlmsUnlit*>(hlmsManager->getHlms(Ogre::HLMS_UNLIT));
 					
@@ -218,15 +225,41 @@ namespace XE
 						datablockUnlit->setTexture(0, 0,
 							Ogre::TextureManager::getSingleton().load("tornado.png",
 								Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME), 0);*/
-						Ogre::Matrix4 mat(Ogre::Matrix4::IDENTITY);
-						//mat.setScale(Ogre::Vector3(1, 1, 1));
-					//	mat.setTrans(Ogre::Vector3(0.5, 0.5, 0));
+					//	Ogre::Matrix4 mat(Ogre::Matrix4::IDENTITY);
+					//	//mat.setScale(Ogre::Vector3(1, 1, 1));
+					////	mat.setTrans(Ogre::Vector3(0.5, 0.5, 0));
+					//	Ogre::Matrix4 xform(Ogre::Matrix4::IDENTITY);
+					//	mat[0][3] = 1.0;
+					//	mat[1][3] = 0;
+
+					//	xform = mat * xform;
+						//datablockUnlit->setFlipbookAnim(2,3, 1); //x , y , speed
 						datablockUnlit->setEnableAnimationMatrix(0, true);
-						datablockUnlit->setAnimationMatrix(0, mat);
+					//	datablockUnlit->setAnimationMatrix(0, xform);
+						//auto tex = datablockUnlit->getTexture(0);
+	
+						//Ogre::ControllerManager::getSingleton().getElapsedTime();
+						Ogre::Controller<Ogre::Real>* ret = 0;
+
+						float speed = 1.0;
+
+						if (speed != 0)
+						{
+							Ogre::SharedPtr< Ogre::ControllerValue<Ogre::Real> > val;
+							Ogre::SharedPtr< Ogre::ControllerFunction<Ogre::Real> > func;
+
+							// We do both scrolls with a single controller
+							val.bind(OGRE_NEW XETexCoordModifierControllerValue(datablockUnlit, 0, true, false,false,false,false));
+							// Create function: use -speed since we're altering texture coords so they have reverse effect
+							func.bind(OGRE_NEW Ogre::ScaleControllerFunction(-speed, true));
+							ret = Ogre::ControllerManager::getSingleton().createController(Ogre::ControllerManager::getSingleton().getFrameTimeSource(), val, func);
+						}
+
 					//	auto controller = Ogre::ControllerManager::getSingleton().createTextureUVScroller(? ? , 1.0f);
+					
 						//Ogre::MaterialPtr m = Ogre::MaterialManager::getSingleton().create(
 						//	"MyOffsetMaterial", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, true);
-					
+			
 /*
 						Ogre::Technique *technique = m->createTechnique();
 						Ogre::Pass *pass_ambient = technique->createPass();*/
@@ -415,6 +448,11 @@ namespace XE
 
 			_t_OgreEntitySceneNodePtr->removeAndDestroyAllChildren();
 		});
+	}
+
+	void Renderable::update(float delta)
+	{
+
 	}
 
 	void Renderable::update(const void* fbData)

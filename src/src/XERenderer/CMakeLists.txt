@@ -45,6 +45,34 @@ set(XERenderer_Editor_HEADER
 
 source_group("include\\Editor" FILES ${XERenderer_Editor_HEADER})
 
+# ------------ Hlms ---------------
+set(XERenderer_Hlms_SOURCES   
+     ${SRCROOT}/Hlms/XEHlmsUnlit.cpp
+	 ${SRCROOT}/Hlms/XEHlmsUnlitDatablock.cpp
+	 ${SRCROOT}/Hlms/XEHlmsJsonUnlit.cpp
+)
+source_group("src\\Hlms" FILES ${XERenderer_Hlms_SOURCES})
+
+set(XERenderer_Hlms_HEADER
+	 ${INCROOT}/Hlms/XEHlmsUnlit.hpp
+	 ${INCROOT}/Hlms/XEHlmsUnlitDatablock.hpp
+	 ${INCROOT}/Hlms/XEHlmsJsonUnlit.hpp
+)
+
+source_group("include\\Hlms" FILES ${XERenderer_Hlms_HEADER})
+
+
+# ------------ Animation ---------------
+set(XERenderer_Animation_SOURCES   
+     ${SRCROOT}/Animation/TextureAnimationController.cpp
+)
+source_group("src\\Animation" FILES ${XERenderer_Animation_SOURCES})
+
+set(XERenderer_Animation_HEADER
+	 ${INCROOT}/Animation/TextureAnimationController.hpp
+)
+
+source_group("include\\Animation" FILES ${XERenderer_Animation_HEADER})
 
 
 set(XERenderer_private_SOURCES
@@ -101,7 +129,7 @@ enable_unity_build(XERenderer  ${XERenderer_SOURCES} ${XERenderer_private_SOURCE
 
 sfml_add_library(XERenderer 
 	SOURCES ${XERenderer_SOURCES} ${XERenderer_HEADER} ${XERenderer_private_SOURCES} ${XEGraphics_HEADER} ${XEGraphics_SOURCES} ${XERenderer_Editor_HEADER} ${XERenderer_Editor_SOURCES}
-
+	 ${XERenderer_Hlms_HEADER} ${XERenderer_Hlms_SOURCES} ${XERenderer_Animation_HEADER} ${XERenderer_Animation_SOURCES}
 	DEPENDS OgreMain XEDAL 
 	RenderSystem_GL3Plus 
 #	RenderSystem_Direct3D11

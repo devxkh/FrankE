@@ -24,6 +24,8 @@ namespace XE {
 		~Renderable();
 
 		void update(const void* fbData);
+		
+		void update(float delta);
 
 		void createAnimations(AnimationComponent& animationComponent);
 
@@ -34,6 +36,8 @@ namespace XE {
 		void setOrientation(const Ogre::Quaternion& rot);
 
 		void setVisibility(const bool isVisible);
+	
+		bool isVisible();
 
 		//void rotate(const  Ogre::Quaternion& q, Ogre::Node::TransformSpace relativeTo = Ogre::Node::TS_LOCAL);
 		//void rotate(const Ogre::Vector3& axis, const Ogre::Radian& angle, Ogre::Node::TransformSpace relativeTo = Ogre::Node::TS_LOCAL);

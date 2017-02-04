@@ -6,3 +6,26 @@ hlms HlmsUnlit1 unlit
 	depth_check			off
 	depth_write			off
 }
+
+
+hlms BillBoardTest unlit
+{
+	diffuse_map			alizee_tga_final.jpg	
+	
+	cull_mode none 
+	depth_check			on
+	depth_write			on
+	
+}
+
+
+
+hlms Bolt_1 unlit
+{
+	diffuse_map			bolt_1.png	
+	scene_blend			alpha_blend
+	depth_check			on
+	depth_write			on
+	cull_mode 		 none
+
+}
