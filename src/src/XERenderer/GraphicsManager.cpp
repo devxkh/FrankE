@@ -43,6 +43,7 @@ namespace XE
 		, m_ogreLog()
 	{
 	//	static plog::ConsoleAppender<plog::TxtFormatter> consoleAppender; 
+	//	plog::init(plog::debug, "HelloLog.txt", 1000000).addAppender(&consoleAppender);
 		plog::init(plog::debug, "HelloLog.txt", 1000000);// .addAppender(&consoleAppender); // Step2: initialize the logger.
 	
 		new Ogre::LogManager();// Creating the manager. This may only be called once!
@@ -207,8 +208,8 @@ namespace XE
 				shaderSyntax = "HLSL";
 
 			Ogre::Archive *archiveLibrary = Ogre::ArchiveManager::getSingletonPtr()->load(dataFolder + "/Common/" + shaderSyntax, "FileSystem", true);
-			//org Ogre::Archive *archiveUnlit = Ogre::ArchiveManager::getSingletonPtr()->load(dataFolder + "/Unlit/" + shaderSyntax, "FileSystem", true);
-			Ogre::Archive *archiveUnlit = Ogre::ArchiveManager::getSingletonPtr()->load(dataFolder + "/XEUnlit/" + shaderSyntax, "FileSystem", true);
+			Ogre::Archive *archiveUnlit = Ogre::ArchiveManager::getSingletonPtr()->load(dataFolder + "/Unlit/" + shaderSyntax, "FileSystem", true);
+			//Ogre::Archive *archiveUnlit = Ogre::ArchiveManager::getSingletonPtr()->load(dataFolder + "/XEUnlit/" + shaderSyntax, "FileSystem", true);
 			Ogre::Archive *archivePbs = Ogre::ArchiveManager::getSingletonPtr()->load(dataFolder + "/Pbs/" + shaderSyntax, "FileSystem", true);
 
 			Ogre::ArchiveVec library;

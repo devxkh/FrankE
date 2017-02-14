@@ -7,7 +7,7 @@ const int SCREEN_FPS = 60;
 const int SCREEN_TICKS_PER_FRAME = 1000 / SCREEN_FPS;
 
 namespace sf {
-	class Clock;
+	class Time;
 }
 
 namespace XE
@@ -17,7 +17,7 @@ namespace XE
 	public:
 		FrameLimiter();
 
-		void ApplyFrameLimit(sf::Clock& clock, float wanted_fps = 120.0f);
+		void ApplyFrameLimit(sf::Time& elapsedTime, float wanted_fps = 120.0f);
 
 	private:
 

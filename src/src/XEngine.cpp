@@ -285,13 +285,14 @@ namespace XE
 		//		//GpuProgramManager::getSingleton().loadMicrocodeCache(shaderCacheFile);
 		//	});
 		//}
-//		sf::Time elapsed1 = m_clock.getElapsedTime();
 
-
-
-		m_mtFrameLimiter.ApplyFrameLimit(m_clock,50);
+		//sf::Time elapsed1 = m_clock.getElapsedTime();
 
 		elapsedTimeMainThread = m_clock.restart();
+
+
+		m_mtFrameLimiter.ApplyFrameLimit(elapsedTimeMainThread,50);
+
 		
 		sf::Uint64 time = elapsedTimeMainThread.asMicroseconds();
 

@@ -10,7 +10,7 @@ hlms HlmsUnlit1 unlit
 
 hlms BillBoardTest unlit
 {
-	diffuse_map			alizee_tga_final.jpg	
+	diffuse_map			debugimg.png	
 	
 	cull_mode none 
 	depth_check			on

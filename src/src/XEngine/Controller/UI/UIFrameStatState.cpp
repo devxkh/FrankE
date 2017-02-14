@@ -8,6 +8,7 @@
 #include <XEUI/UIManager.hpp>
 #include <XESystem/Entityx/Entity.h>
 #include <XEngine/Components/ScreenComponent.hpp>
+#include <XEngine/Components/Controller.hpp>
 #include <XERenderer/CameraRenderable.hpp>
 #include <XEUI/widgets/Label.hpp>
 #include <XEUI/Alignment.hpp>
@@ -18,6 +19,7 @@ namespace XE {
 	UIDebug::UIDebug(const Ogre::uint16& id, entityx::Entity entity, bool replace = true)
 		: UIState(id, replace)
 		, m_screen(entity.component<XE::ScreenComponent>().get())
+		//, m_controller(entity.component<XE::ControllerComponent>().get())
 		, m_cameraRenderable(entity.component<XE::CameraRenderable>().get())
 	{
 		XE::WLayer& layer = *m_screen->wLayer.get();
@@ -95,7 +97,7 @@ namespace XE {
 		fpsWorst << (int)stats.WorstTime << " Worst RThread";
 		m_BatchCount->SetText(fpsWorst.str());
 
-
+		//m_controller->get()->engine.
 		std::stringstream fpsMain;
 		fpsMain << (int)getFPS(FPSClock.restart()) << " MainThread";
 		m_FpsMainThread->SetText(fpsMain.str());

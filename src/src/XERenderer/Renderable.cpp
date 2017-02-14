@@ -37,8 +37,7 @@
 #include <Ogre/Components/Hlms/Unlit/include/OgreHlmsUnlitDatablock.h>
 
 #include <Ogre/OgreMain/include/OgrePredefinedControllers.h>
-
-#include <XERenderer/Animation/TextureAnimationController.hpp>
+#include <Ogre/Components/Hlms/Unlit/include/OgreTextureAnimationController.h>
 
 namespace XE
 {
@@ -234,26 +233,41 @@ namespace XE
 
 					//	xform = mat * xform;
 						//datablockUnlit->setFlipbookAnim(2,3, 1); //x , y , speed
-						datablockUnlit->setEnableAnimationMatrix(0, true);
 					//	datablockUnlit->setAnimationMatrix(0, xform);
 						//auto tex = datablockUnlit->getTexture(0);
 	
 						//Ogre::ControllerManager::getSingleton().getElapsedTime();
-						Ogre::Controller<Ogre::Real>* ret = 0;
+			
+					Ogre::HlmsSamplerblock samplerblock;
+					samplerblock.setAddressingMode(Ogre::TAM_WRAP);
+					datablockUnlit->setSamplerblock(0, samplerblock);
 
-						float speed = 1.0;
+					datablockUnlit->setEnableAnimationMatrix(0, true);
+					
+					Ogre::Controller<Ogre::Real>* ret = 0;
 
-						if (speed != 0)
-						{
-							Ogre::SharedPtr< Ogre::ControllerValue<Ogre::Real> > val;
-							Ogre::SharedPtr< Ogre::ControllerFunction<Ogre::Real> > func;
+					float speed = 1.0;
+					Ogre::TextureAnimationControllerValue* ctrlVal = 0;
 
-							// We do both scrolls with a single controller
-							val.bind(OGRE_NEW XETexCoordModifierControllerValue(datablockUnlit, 0, true, false,false,false,false));
-							// Create function: use -speed since we're altering texture coords so they have reverse effect
-							func.bind(OGRE_NEW Ogre::ScaleControllerFunction(-speed, true));
-							ret = Ogre::ControllerManager::getSingleton().createController(Ogre::ControllerManager::getSingleton().getFrameTimeSource(), val, func);
-						}
+					if (speed != 0)
+					{
+						Ogre::SharedPtr< Ogre::ControllerValue<Ogre::Real> > val;
+						Ogre::SharedPtr< Ogre::ControllerFunction<Ogre::Real> > func;
+
+						val.bind(OGRE_NEW Ogre::TextureAnimationControllerValue(datablockUnlit, 0));
+						ctrlVal = static_cast<Ogre::TextureAnimationControllerValue*>(val.get());
+
+						// Create function: use -speed since we're altering texture coords so they have reverse effect
+						func.bind(OGRE_NEW Ogre::ScaleControllerFunction(-speed, true));
+						ret = Ogre::ControllerManager::getSingleton().createController(Ogre::ControllerManager::getSingleton().getFrameTimeSource(), val, func);
+					}
+
+						ctrlVal->tiledAnimation(4, 4);
+					//ctrlVal->scrollAnimation(1, 1);
+					//	ctrlVal->scrollAnimation(0, 1);
+					//	ctrlVal->rotationAnimation(1);
+					//	ctrlVal->scaleAnimation(1, 0);
+
 
 					//	auto controller = Ogre::ControllerManager::getSingleton().createTextureUVScroller(? ? , 1.0f);
 					
@@ -400,7 +414,7 @@ namespace XE
 				std::string name = it->getDefinition()->getNameStr();
 
 				Ogre::SkeletonAnimation* skeletonAnimationPtr = &*it;
-
+		
 				//attention!! delete in mainthread 
 				std::vector< float* >* boneWeightPtrs = new std::vector< float* >();
 				std::vector< float >* boneWeightList = new std::vector< float >();
@@ -420,9 +434,10 @@ namespace XE
 						boneWeightList->push_back(0);
 					}
 				}
-
-				//do not use the iterator, else crash in mainthread ?!!
+				//do not use the iterator, else crash in mainthread ?!! 
+				//setloop only works with >getSkeletonInstance()->getAnimation returned _t_OgreItemPtr->getSkeletonInstance() instance???
 				Ogre::SkeletonAnimation* test = _t_OgreItemPtr->getSkeletonInstance()->getAnimation(name);
+
 				//		m_GraphicsManager.getFromRendererQueue().push([test, name, duration, &animationComponent, boneWeightPtrs, boneWeightList]() {
 
 				animationComponent._MT_setAnimationStatePtr(test, name, duration, boneWeightPtrs, boneWeightList);

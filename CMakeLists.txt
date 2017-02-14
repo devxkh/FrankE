@@ -13,6 +13,15 @@ cmake_minimum_required (VERSION 2.8)
 # as Visual Studio projects (.vcproj)
 project (FrankE)
 
+  set(SDL_STATIC TRUE)
+    set(SDL_SHARED FALSE)
+	  set(BUILD_SHARED_LIBS FALSE)
+	    set(OGRE_STATIC TRUE)
+		  set(SFML_USE_STATIC_STD_LIBS TRUE)
+		    set(OGRE_BUILD_COMPONENT_OVERLAY FALSE)
+			  set(OGRE_BUILD_TOOLS FALSE)
+			    set(OGRE_INSTALL_SAMPLES FALSE)
+				  set(OGRE_CONFIG_ENABLE_STBI TRUE)
  
 message("ProjectsourceDir- start " ${PROJECT_SOURCE_DIR})
 

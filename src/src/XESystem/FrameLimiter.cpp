@@ -14,14 +14,22 @@ namespace XE {
 
 	}
 
-	void FrameLimiter::ApplyFrameLimit(sf::Clock& clock, float wanted_fps)
+	void FrameLimiter::ApplyFrameLimit(sf::Time& elapsedTime, float wanted_fps)
 	{
 		//	float wanted_fps = (SDL_GetWindowFlags(m_window) & SDL_WINDOW_INPUT_FOCUS) != 0 ? 1000.0f : 5.0f;
 
+	//	long long targetMax = 1000000LL / wanted_fps;
 
-		if (clock.getElapsedTime().asMilliseconds() < 1 / wanted_fps)
+		//sf::Uint64 time = elapsedTime.asMicroseconds();
+		
+		double currentFPS = 1000000.0f / elapsedTime.asMicroseconds();
+
+		//auto t1 = elapsedTime.asMilliseconds();
+		//auto t2 = 1 / wanted_fps;
+		if (currentFPS < wanted_fps)
 		{
-			sf::Time delayTime = sf::milliseconds(Int32(1000 / wanted_fps - clock.getElapsedTime().asMilliseconds() * 1000));
+			//sf::Time delayTime = sf::milliseconds(Int32(1000 / wanted_fps - currentFPS * 1000));
+			sf::Time delayTime = sf::milliseconds(Int32(1000 / currentFPS - wanted_fps * 1000));
 			sf::sleep(delayTime);
 		}
 

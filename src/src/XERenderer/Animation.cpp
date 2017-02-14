@@ -189,12 +189,12 @@ namespace XE
 
 	void Animation::setLoop(const bool loop)
 	{
-		if (!_hasRenderAnimation)
-			return;
-
 		if (m_Loop != loop)
 		{
 			m_Loop = loop;
+
+			if (!_hasRenderAnimation)
+				return;
 
 			m_GraphicsManager.getIntoRendererQueue().push([this, loop](){
 				_t_animation->setLoop(loop);

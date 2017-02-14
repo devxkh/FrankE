@@ -193,7 +193,7 @@ namespace XE
 			{
 				animation->setLength(length);
 				animation->setAnimationPtr(animationPtr,boneWeightPtrs,boneWeightList);
-
+				animationPtr->setLoop(animation->getLoop());
 				return;
 			}
 		}

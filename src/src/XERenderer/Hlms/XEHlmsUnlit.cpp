@@ -674,19 +674,18 @@ namespace Ogre
 		uint32 * RESTRICT_ALIAS currentMappedConstBuffer = mCurrentMappedConstBuffer;
 		float * RESTRICT_ALIAS currentMappedTexBuffer = mCurrentMappedTexBuffer;
 
-		bool hasSkeletonAnimation = queuedRenderable.renderable->hasSkeletonAnimation();
+		const Matrix4 &worldMat = queuedRenderable.movableObject->_getParentNodeFullTransform();			
 
-		const Matrix4 &worldMat = queuedRenderable.movableObject->_getParentNodeFullTransform();
+		bool hasSkeletonAnimation = queuedRenderable.renderable->hasSkeletonAnimation();
 
 		//---------------------------------------------------------------------------
 		//                          ---- VERTEX SHADER ----
 		//---------------------------------------------------------------------------
-		bool exceedsConstBuffer = (size_t)((currentMappedConstBuffer - mStartMappedConstBuffer) + 4) >
-			mCurrentConstBufferSize;
-
 		if (!hasSkeletonAnimation)
 		{
-			
+			bool exceedsConstBuffer = (size_t)((currentMappedConstBuffer - mStartMappedConstBuffer) + 4) >
+				mCurrentConstBufferSize;
+
 			const size_t minimumTexBufferSize = 16;
 			bool exceedsTexBuffer = (currentMappedTexBuffer - mStartMappedTexBuffer) +
 				minimumTexBufferSize >= mCurrentTexBufferSize;
@@ -726,21 +725,23 @@ namespace Ogre
 				}
 			}
 #endif
-		}
-		else
-		{
+		}else{
+
+			bool exceedsConstBuffer = (size_t)((currentMappedConstBuffer - mStartMappedConstBuffer) + 4)
+				> mCurrentConstBufferSize;
+
 			SkeletonInstance *skeleton = queuedRenderable.movableObject->getSkeletonInstance();
 
 #if OGRE_DEBUG_MODE
 			assert(dynamic_cast<const RenderableAnimated*>(queuedRenderable.renderable));
 #endif
+
 			const RenderableAnimated *renderableAnimated = static_cast<const RenderableAnimated*>(
 				queuedRenderable.renderable);
-			
+
 			const RenderableAnimated::IndexMap *indexMap = renderableAnimated->getBlendIndexToBoneIndexMap();
 
-			const size_t minimumTexBufferSize = 16 * indexMap->size();
-
+			const size_t minimumTexBufferSize = 12 * indexMap->size();
 			bool exceedsTexBuffer = (currentMappedTexBuffer - mStartMappedTexBuffer) +
 				minimumTexBufferSize >= mCurrentTexBufferSize;
 
@@ -756,56 +757,24 @@ namespace Ogre
 				currentMappedTexBuffer = mCurrentMappedTexBuffer;
 			}
 
-			//uint worldMaterialIdx[]
-			size_t distToWorldMatStart = mCurrentMappedTexBuffer - mStartMappedTexBuffer;
-			distToWorldMatStart >>= 2;
-			*currentMappedConstBuffer = (distToWorldMatStart << 9) |
-				(datablock->getAssignedSlot() & 0x1FF);
+				//uint worldMaterialIdx[]
+			/*	size_t distToWorldMatStart = mCurrentMappedTexBuffer - mStartMappedTexBuffer;
+				distToWorldMatStart >>= 2;
+				*currentMappedConstBuffer = (distToWorldMatStart << 9) |
+					(datablock->getAssignedSlot() & 0x1FF);
 
-			RenderableAnimated::IndexMap::const_iterator itBone = indexMap->begin();
-			RenderableAnimated::IndexMap::const_iterator enBone = indexMap->end();
+				RenderableAnimated::IndexMap::const_iterator itBone = indexMap->begin();
+				RenderableAnimated::IndexMap::const_iterator enBone = indexMap->end();
 
-			while (itBone != enBone)
-			{
-				const SimpleMatrixAf4x3 &mat4x3 = skeleton->_getBoneFullTransform(*itBone);
-				mat4x3.streamTo4x3(currentMappedTexBuffer);
-				currentMappedTexBuffer += 12;
-
-				++itBone;
-			}
-
-			bool useIdentityProjection = queuedRenderable.renderable->getUseIdentityProjection();
-
-			//uint materialIdx[]
-			*currentMappedConstBuffer = datablock->getAssignedSlot();
-			*reinterpret_cast<float * RESTRICT_ALIAS>(currentMappedConstBuffer + 1) = datablock->
-				mShadowConstantBias;
-			*(currentMappedConstBuffer + 2) = useIdentityProjection;
-			currentMappedConstBuffer += 4;
-
-			//mat4 worldViewProj
-			Matrix4 tmp = mPreparedPass.viewProjMatrix[useIdentityProjection] * worldMat;
-#if !OGRE_DOUBLE_PRECISION
-			memcpy(currentMappedTexBuffer, &tmp, sizeof(Matrix4));
-			currentMappedTexBuffer += 16;
-#else
-			for (int y = 0; y < 4; ++y)
-			{
-				for (int x = 0; x < 4; ++x)
+				while (itBone != enBone)
 				{
-					*currentMappedTexBuffer++ = tmp[y][x];
-				}
+					const SimpleMatrixAf4x3 &mat4x3 = skeleton->_getBoneFullTransform(*itBone);
+					mat4x3.streamTo4x3(currentMappedTexBuffer);
+					currentMappedTexBuffer += 12;
+
+					++itBone;
+				}*/
 			}
-#endif
-			//If the next entity will not be skeletally animated, we'll need
-			//currentMappedTexBuffer to be 16/32-byte aligned.
-			//Non-skeletally animated objects are far more common than skeletal ones,
-			//so we do this here instead of doing it before rendering the non-skeletal ones.
-			size_t currentConstOffset = (size_t)(currentMappedTexBuffer - mStartMappedTexBuffer);
-			currentConstOffset = alignToNextMultiple(currentConstOffset, 16 + 16 * !casterPass);
-			currentConstOffset = std::min(currentConstOffset, mCurrentTexBufferSize);
-			currentMappedTexBuffer = mStartMappedTexBuffer + currentConstOffset;
-		}
 
 		//---------------------------------------------------------------------------
 		//                          ---- PIXEL SHADER ----
@@ -838,7 +807,8 @@ namespace Ogre
 		mCurrentMappedTexBuffer = currentMappedTexBuffer;
 
 		return ((mCurrentMappedConstBuffer - mStartMappedConstBuffer) >> 2) - 1;
-	}
+			}
+
 	//-----------------------------------------------------------------------------------
 	void XEHlmsUnlit::destroyAllBuffers(void)
 	{

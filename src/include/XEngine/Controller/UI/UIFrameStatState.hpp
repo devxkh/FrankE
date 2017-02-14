@@ -44,6 +44,7 @@ namespace XE {
 		//initialization order!
 		ScreenComponent*			m_screen;
 		CameraRenderable*			m_cameraRenderable;
+	//	ControllerComponent*		m_controller;
 
 		std::shared_ptr<Label>		m_FpsRendererThread;
 		std::shared_ptr<Label>		m_FpsAvqThread;

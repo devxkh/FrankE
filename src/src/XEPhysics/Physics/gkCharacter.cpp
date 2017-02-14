@@ -227,7 +227,7 @@ void gkCharacter::setWalkDirection(const Ogre::Vector3& wd, float timeInterval)
 
 	setVelocity(result, timeInterval);
 
-//----------	m_character->setWalkDirection(MathUtils::get(result)*walkSpeed);
+//---------- m_character->setWalkDirection(MathUtils::get(result) * 0.001);//;walkSpeed);
 
 	//m_character->setWalkDirection(btVector3(wd.x, wd.y, wd.z)*walkSpeed);
 	
