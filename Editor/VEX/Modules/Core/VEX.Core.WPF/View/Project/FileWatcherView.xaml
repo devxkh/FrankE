@@ -1,0 +1,124 @@
+﻿<UserControl x:Class="VEX.Core.View.Project.FileWatcherView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:VEX.Core.View.Tools"
+             mc:Ignorable="d" 
+                          
+             xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+             xmlns:xcdg="http://schemas.xceed.com/wpf/xaml/datagrid"
+             
+             d:DesignHeight="300" d:DesignWidth="300">
+    <Grid >
+        <Grid.Resources>
+            <xcdg:DataGridCollectionViewSource x:Key="cvsOrders" 
+                                               Source="{Binding FileItems}">
+                <xcdg:DataGridCollectionViewSource.GroupDescriptions>
+                    <!--<PropertyGroupDescription PropertyName="SourceFilePath" />
+                    <PropertyGroupDescription PropertyName="DestinationFolder" />
+                    <PropertyGroupDescription PropertyName="DestinationFileName" />-->
+                </xcdg:DataGridCollectionViewSource.GroupDescriptions>
+            </xcdg:DataGridCollectionViewSource>
+        </Grid.Resources>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition MinWidth="200" />
+            <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+
+        <xcdg:DataGridControl x:Name="_dataGrid" AutoCreateColumns="False" 
+                           AllowDrag="True" SelectionMode="Single" SelectionUnit="Row" MouseUp="_dataGrid_MouseUp"
+                           ItemsSource="{Binding Source={StaticResource cvsOrders}}"  >
+            <xcdg:DataGridControl.View>
+                <xcdg:TableflowView FixedColumnCount="2" />
+            </xcdg:DataGridControl.View>
+
+            <xcdg:DataGridControl.Columns>
+                <xcdg:Column FieldName="SourceFilePath"
+                             Title="SourceFilePath"
+                             Width="100" />
+                
+                <xcdg:Column FieldName="FileType"
+                             Title="FileType"
+                             Width="100" />
+                
+              <xcdg:Column FieldName="DestinationFolder"
+                             Title="DestinationFolder"
+                             Width="100" />
+                <!--<xcdg:Column FieldName="Entity.EntityID"
+                             Title="Watch"
+                             Width="80" />-->
+                <xcdg:Column FieldName="DestinationFileName"
+                             Title="DestinationFileName"
+                             Width="100" />
+               
+                <xcdg:Column FieldName="Watch"
+                             Title="Watch"
+                             Width="80" />
+                <!--Preconfigure the OrderID Column of the grid with CellValidationRule. -->
+                <!--<xcdg:Column FieldName="Entity.EntityID"
+                         IsMainColumn="True">
+                            -->
+                <!--<xcdg:Column.CellValidationRules>
+                                <local:UniqueIDCellValidationRule />
+                            </xcdg:Column.CellValidationRules>-->
+                <!--</xcdg:Column>-->
+            </xcdg:DataGridControl.Columns>
+        </xcdg:DataGridControl>
+
+
+        <ScrollViewer Grid.Row="1">
+            <StackPanel>
+
+                <!--<TextBox  Name="tbServerIP"/>
+            <Button Content="Start SocketServer"  Name="btnServerStart"/>
+            <Button Content="Stop SocketServer"  Name="btnServerStop" Click="btnServerStop_Click"/>-->
+                <StackPanel Orientation="Horizontal">
+                    <!--<Button Name="btn_Test" Content="Test" HorizontalAlignment="Left" VerticalAlignment="Bottom"/>
+                    <Button Name="btn_ExecuteEvent" Content="Execute Event" HorizontalAlignment="Left" VerticalAlignment="Bottom" Click="btn_ExecuteEvent_Click"/>-->
+                    <!--<Button Name="btnAddRemove" Content="Add/Remove" HorizontalAlignment="Left" VerticalAlignment="Bottom" Click="btnAddRemove_Click"/>-->
+                    <Button Name="btnForceTrigger" Content="Force trigger" HorizontalAlignment="Left" VerticalAlignment="Bottom" Click="btnForceTrigger_Click"/>
+                </StackPanel>
+
+                <!--<DataGrid ItemsSource="{Binding SceneItems}" AutoGenerateColumns="False">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Binding="{Binding Path=Entity.EntityID}" ClipboardContentBinding="{Binding ID}" Header="SceneID"/>
+                        <DataGridTextColumn Binding="{Binding Path=Entity.EntityID}" ClipboardContentBinding="{Binding ID}" Header="EntityID"/>
+                        <DataGridTextColumn Binding="{Binding Path=Entity.Name}" ClipboardContentBinding="{Binding Name}" Header="EntityName"/>
+                        <DataGridTextColumn Binding="{Binding Path=LocalFile.FilePath}"  Header="FilePath"/>
+                       -->
+                <!--<DataGridComboBoxColumn  Header="FileName" ItemsSource="{Binding Items}"
+                                    DisplayMemberPath="FileName"
+                                    SelectedValuePath="FileName"
+                                    SelectedValueBinding="{Binding FileName}" />-->
+                <!--<DataGridTextColumn Binding="{x:Null}" ClipboardContentBinding="{x:Null}" Header="Type"/>
+                        <DataGridTextColumn Binding="{x:Null}" ClipboardContentBinding="{x:Null}" Header="Path"/>-->
+                <!--
+                        <DataGridTextColumn Binding="{Binding Watch}" ClipboardContentBinding="{x:Null}" Header="Watch"/>
+                 </DataGrid.Columns>-->
+
+
+                <!--</DataGrid>-->
+                <!--<xctk:PropertyGrid SelectedObject="{Binding HostInfo}"/>-->
+                <!--<Button Content="convert" Name="btn_convert" Click="btn_convert_Click"/>-->
+            </StackPanel>
+            <!--<ListBox  Grid.Row="1" Grid.Column="2" Name="lbClients" ItemsSource="{Binding Clients}"/>
+
+        <avalonedit:TextEditor Grid.Column="0" Name="textEditor" Document="{Binding Document}" TextChanged="textEditor_TextChanged" 
+                               Background="{Binding Source={x:Static Settings:EditorOptions.Default}, Path=BackgroundColor}" 
+                               Foreground="{Binding Source={x:Static Settings:EditorOptions.Default}, Path=ForegroundColor}"
+                               ShowLineNumbers="{Binding Source={x:Static Settings:EditorOptions.Default}, Path=ShowLineNumbers}"
+                               WordWrap="{Binding Source={x:Static Settings:EditorOptions.Default}, Path=WordWrap}"
+                               FontFamily="{Binding Source={x:Static Settings:EditorOptions.Default}, Path=FontFamily}"
+                               FontSize="{Binding Source={x:Static Settings:EditorOptions.Default}, Path=FontSize}" />-->
+            <!--<GridSplitter HorizontalAlignment="Right" VerticalAlignment="Stretch" Grid.Column="1" ResizeBehavior="PreviousAndNext" Width="5" Background="#FFBCBCBC" />-->
+
+        </ScrollViewer>
+    </Grid>
+</UserControl>

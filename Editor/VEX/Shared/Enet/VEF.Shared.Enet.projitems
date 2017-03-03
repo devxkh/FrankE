@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>11f33e4a-f1ea-4de2-9ee0-dd9418d7be04</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>VEX.Enet</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)ENetCS\ENetException.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ENetCS\Event.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ENetCS\EventType.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ENetCS\Host.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ENetCS\Library.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ENetCS\Native\ENetApi.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ENetCS\Native\ENetApi.Linux.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ENetCS\Native\ENetApi.MacOS.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ENetCS\Native\ENetApi.X64.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ENetCS\Native\ENetApi.X86.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ENetCS\Native\Structs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ENetCS\Packet.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ENetCS\Packet.IList.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ENetCS\Packet.UserData.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ENetCS\PacketFlags.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ENetCS\Peer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ENetCS\PeerState.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Interface\Client.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Interface\HostInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="$(MSBuildThisFileDirectory)ReadMe.txt" />
+  </ItemGroup>
+</Project>

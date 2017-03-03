@@ -1,0 +1,28 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
+using System.Windows.Shapes;
+
+namespace VEX.Core.View.Project
+{
+    /// <summary>
+    /// Interaktionslogik für OIDEProjectView.xaml
+    /// </summary>
+    public partial class VEXProjectView : UserControl
+    {
+        public VEXProjectView()
+        {
+            InitializeComponent();
+        }
+    }
+}

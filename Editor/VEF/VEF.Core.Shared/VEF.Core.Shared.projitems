@@ -1,0 +1,74 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>302a2d9b-e375-415c-b6cd-bb4394329a29</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>VEF.Core</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Handler\XMLHandler.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Interfaces\Controls\ToolBarItemTemplateSelector.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Interfaces\Controls\VEFStatusbar.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Interfaces\Converters\BoolToInsertModeConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Interfaces\Converters\DatabindingDebugConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Interfaces\Converters\DocumentContextMenuMixingConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Interfaces\Converters\MenuVisibilityConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Interfaces\Converters\NullObjectToVisibiltyConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Interfaces\Converters\NullToBooleanConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Interfaces\Converters\PercentToFontSizeConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Interfaces\Converters\ViewConverters.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Interfaces\Service\IDataBaseService.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Interfaces\Service\IProjectTreeService.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Interfaces\Settings\IToolbarPositionSettings.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Interfaces\Themes\DarkTheme.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Interfaces\Themes\DefaultTheme.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Interfaces\Themes\LightTheme.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\Events\WindowClosingEvent.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\LoggerModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\OutputModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\PFExplorer\ProjectToolModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\Services\ContentHandlerRegistry.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\Services\LoggerService.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\Services\OpenDocumentService.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\Services\OutputService.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\Services\ProjectItemModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\Services\ProjectModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\Services\ProjectTreeManager.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\Services\ThemeManager.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\Services\ToolbarService.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\Settings\AbstractSettings.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\Settings\AbstractSettingsItem.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\Settings\RecentViewSettings.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\Settings\SettingsManager.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\Settings\ThemeSettings.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\Settings\ToolbarPositionSettings.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\Settings\ToolbarSettingItem.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\Settings\WindowPositionSettings.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\VEFWPFModule.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\XMLModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Service\DatabaseManager.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Settings\DBSettings.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Settings\DBSettingsItem.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Shell\ActiveDocumentConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Shell\LayoutInitializer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Shell\PanesStyleSelector.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Shell\PanesTemplateSelector.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Util\BitmapImage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Util\ItemProvider.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Util\KeyGesture.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Util\ObjectSerialize.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Util\TextBoxStreamWriter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ViewModel\LoggerToolViewModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ViewModel\OutputViewModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ViewModel\ProjectToolViewModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ViewModel\ProjectViewModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ViewModel\PropertiesToolViewModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ViewModel\XMLViewModel.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="$(MSBuildThisFileDirectory)ReadMe.txt" />
+  </ItemGroup>
+</Project>

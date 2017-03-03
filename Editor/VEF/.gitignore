@@ -1,0 +1,11 @@
+﻿################################################################################
+# Diese .gitignore-Datei wurde von Microsoft(R) Visual Studio automatisch erstellt.
+################################################################################
+
+/VEF.XForms/obj/Debug
+/VEF.Core.WPF
+/Themes/Themes.WPF.Default/obj/Debug
+/NodeEditor
+/build/Debug
+/VEF.XForms/obj/Release
+/VEF.XForms/bin/Release

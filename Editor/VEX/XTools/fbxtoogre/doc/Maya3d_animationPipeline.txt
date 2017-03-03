@@ -1,0 +1,74 @@
+http://www.ogre3d.org/forums/viewtopic.php?f=8&t=61785
+
+Anim problems:
+http://www.ogre3d.org/forums/viewtopic.php?f=2&t=85846
+http://www.ogre3d.org/forums/viewtopic.php?f=5&t=81624
+
+Animation Pipeline for Maya and OgreMax in to Ogre
+==================================================
+by MrFigaro
+
++ Pre-Requisites:
+    + Install Maya
+    + Install OgreMax (http://www.ogremax.com/downloads)
+
++ Model the character:
+    + Start with an empty maya file, e.g. Demon.mb
+    + Model the character using polygons.
+    + Texture it.
+        + The textures must be referred to relative to the maya file.  
+        + The textures must exist in the resource.cfg, with the same relative path.
+        + The easiest way to do this is to have the textures in the same folder as the maya and output files.
+    + Add a skeleton if required.
+        + The model MUST be skinned with soft bind skin ([Animation]->Skin->Bind Skin->Soft Bind).
+    + Create a Character Set.
+        + Select the mesh and ALL the bones (not just the top bone).
+        + [Animation]->Character->Create Character Set.
+        
++ Create an animation:
+    + In a SEPERATE Maya file (e.g Walk.mb or Run.mb), add a REFERENCE to the model file:
+        + File->Create Reference
+    + Animate the skeleton.  I think the animation needs to BAKED in, as animation clips need key frames before they can export.  
+        + This is only a problem if IK or other such animation helpers have been rigged up to the skeleton.
+        + There may be a way around this if you add any rig to the character set?  Needs experimenting with.
+    + When ready, export an Animation Clip:
+        + Select the Character Set
+        + Open the Trax Editor (Window->Animation Editors->Trax Editor)
+        + Create an Animation Clip (Create->Animation Clip)
+            + A clip of your animation should appear in the timeline.
+        + Name the clip to be the same name as your animation.
+        + Select the clip in the Trax Editor.
+        + Export it to the same file name as your animation, but with a .ma extension. (File->Export Animation Clip...)
+    
++ Export the model and animations:
+    + Create an empty Maya file for collecting the animations together, e.g. DemonAnimations.mb
+    + Add a REFERENCE to the model file (File->Create Reference)
+    + Open the Trax Editor (Window->Animation Editors->Trax Editor)
+    + Create a track for the character (Create->Animation Clip)
+        + This will not insert anything (and will moan about no keys being set, but ignore this - // Error: No clip created since character has no keys.)
+    + Import all the animations:
+        + File->Import Animation Clip To Characters...
+        + Add the Animation Clips (e.g. Walk.ma, Run.ma)
+    + Spread the animation clips out along the time line.
+        + DO NOT let them overlap or even but up against each other, otherwise the animations will "bleed" in to each other.  Leave a gap.
+    + Add the animation entries to the mesh object OgreMax data.
+        + Select the mesh.
+        + OgreMax->Object Settings...
+            + Select the Mesh Animations tab
+                + Mesh Animation Type: Skeleton
+                + Export Skeleton: Yes
+                + Export Animations to Seperate Skeleton Files: FALSE
+            + For each animation clip in the trax editor, press the Add... button
+                + Set the name (e.g. Walk, Run)
+                + Set the Start/End frames, as displayed in the Trax Editor for the clip (bottom left and right values)
+    + Once all the animations are in the list, you can export the model:
+        + Select the mesh.
+        + OgreMax->Export->Export Selected Objects...
+        + Choose a FileName (e.g. Demon.mesh)
+        + Save as type: OgreMax mesh (*.mesh)
+    
++ Import character in to Ogre:
+    + The export process will have generated a .mesh, .skeleton and a .material file.
+    + Copy these and any textures in to the Resources folder.  You could zip them first, e.g. Demon.zip
+    + Add a reference to the files in the resources.cfg file.
+    + The mesh should now be available in the game, and all the animations should be useable.

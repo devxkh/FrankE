@@ -1,0 +1,77 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>b0959330-2b58-45ba-adb8-a0ed5fcb2179</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>VEF.Shared</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Folder Include="$(MSBuildThisFileDirectory)PCL\Core\Commands\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)PCL\ComponentModel\IDataErrorInfo.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PCL\Core\Attributes\FileContentAttribute.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PCL\Core\Attributes\NewContentAttribute.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PCL\Core\CoreModule.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PCL\Core\Services\CommandManager.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PCL\Core\Services\ContentHandlerRegistry.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PCL\Core\Services\PItem.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PCL\Core\Services\ThemeManager.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PCL\Core\Settings\ThemeSettings.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PCL\Interfaces\AbstractWorkspace.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PCL\Interfaces\Base\AbstractPrioritizedTree.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PCL\Interfaces\Base\IBrush.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PCL\Interfaces\Base\ICommandable.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PCL\Interfaces\Base\IImage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PCL\Interfaces\Base\IImageSource.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PCL\Interfaces\Base\IKeyGesture.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PCL\Interfaces\Base\IPrioritizedTree.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PCL\Interfaces\Base\IToolBarTray.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PCL\Interfaces\ContentViewModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PCL\Interfaces\Controls\AbstractCommandable.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PCL\Interfaces\Controls\AbstractMenuItem.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PCL\Interfaces\Controls\AbstractToolbar.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PCL\Interfaces\Controls\IToolbar.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PCL\Interfaces\Controls\MenuItemViewModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PCL\Interfaces\Events\ThemeChangeEvent.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PCL\Interfaces\IContentView.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PCL\Interfaces\IModule.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PCL\Interfaces\IShell.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PCL\Interfaces\ITheme.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PCL\Interfaces\ITool.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PCL\Interfaces\IWorkspace.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PCL\Interfaces\ModuleConfiguration.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PCL\Interfaces\ModuleLoader.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PCL\Interfaces\Services\CollectionOfIItem.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PCL\Interfaces\Services\ICommandManager.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PCL\Interfaces\Services\IContentHandler.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PCL\Interfaces\Services\IContentHandlerRegistry.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PCL\Interfaces\Services\IItem.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PCL\Interfaces\Services\ILoggerService.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PCL\Interfaces\Services\IMenuItem.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PCL\Interfaces\Services\IMenuService.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PCL\Interfaces\Services\IStatusbarService.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PCL\Interfaces\Services\IThemeManager.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PCL\Interfaces\Services\IToolbarService.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PCL\Interfaces\Services\PaneLocation.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PCL\Interfaces\Settings\AbstractSettings.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PCL\Interfaces\Settings\IThemeSettings.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PCL\Interfaces\Settings\IWindowPositionSettings.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PCL\Interfaces\ToolModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PCL\Interfaces\ToolViewModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PCL\Utils\PropertyChangedEvent.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PCL\Utils\ViewModelBase.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PCL\VEF_Helpers\LogManager.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PCL\VEF_Helpers\VEF_Helper.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)WPF\Core\CoreModule.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)WPF\Core\Events\WindowClosingEvent.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)WPF\Core\Services\ContentHandlerRegistry.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)WPF\Core\Services\ThemeManager.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)WPF\Core\Settings\AbstractSettings.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)WPF\Core\Settings\WindowPositionSettings.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)WPF\ModuleLoader.cs" />
+  </ItemGroup>
+</Project>

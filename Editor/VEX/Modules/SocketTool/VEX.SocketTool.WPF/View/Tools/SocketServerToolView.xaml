@@ -1,0 +1,87 @@
+﻿<UserControl x:Class="VEX.SocketTool.WPF.View.Tools.SocketServerToolView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" Height="424.875" Width="564">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" MinWidth="200" />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" MinWidth="200" />
+        </Grid.ColumnDefinitions>
+        <StackPanel>
+            <TextBox  Name="tbServerIP"/>
+            <!--<Button Content="Start SocketServer"  Name="btnServerStart"/>
+            <Button Content="Stop SocketServer"  Name="btnServerStop" Click="btnServerStop_Click"/>-->
+            <Button Content="Connect to Server" Name="btnConnectToServer" Click="btnConnectToServer_Click"/>
+            <Button Content="Send to Client" Name="btnSendToClient" Click="btnSendToClient_Click"/>
+
+        </StackPanel>
+        <ListBox Grid.Column="2" Name="lbClients" ItemsSource="{Binding Clients}"/>
+
+        <!--<avalonedit:TextEditor Grid.Column="0" Name="textEditor" Document="{Binding Document}" TextChanged="textEditor_TextChanged" 
+                               Background="{Binding Source={x:Static Settings:EditorOptions.Default}, Path=BackgroundColor}" 
+                               Foreground="{Binding Source={x:Static Settings:EditorOptions.Default}, Path=ForegroundColor}"
+                               ShowLineNumbers="{Binding Source={x:Static Settings:EditorOptions.Default}, Path=ShowLineNumbers}"
+                               WordWrap="{Binding Source={x:Static Settings:EditorOptions.Default}, Path=WordWrap}"
+                               FontFamily="{Binding Source={x:Static Settings:EditorOptions.Default}, Path=FontFamily}"
+                               FontSize="{Binding Source={x:Static Settings:EditorOptions.Default}, Path=FontSize}" />-->
+        <!--<GridSplitter HorizontalAlignment="Right" VerticalAlignment="Stretch" Grid.Column="1" ResizeBehavior="PreviousAndNext" Width="5" Background="#FFBCBCBC" />-->
+
+        <Grid Grid.Row="1" Grid.ColumnSpan="3">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="103*"/>
+                <RowDefinition Height="84*"/>
+                <RowDefinition Height="59*"/>
+                <RowDefinition Height="54*"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="33*"/>
+                <ColumnDefinition Width="33*"/>
+                <ColumnDefinition Width="33*"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel  >
+                <Label Content="source"/>
+                <TextBox Text="mesh.fbx"/>
+                <CheckBox Content="convert autom. on change"/>
+                <Button Content="convert"/>
+            </StackPanel>
+            <StackPanel Grid.Column="1" >
+                <Label Content="destination"/>
+                <TextBox Text="Data/assets/ogre.mesh"/>
+                <TextBox Text="Data/assets/ogre.material"/>
+            </StackPanel>
+            <StackPanel Grid.Column="3" >
+                <Label Content="socketdest."/>
+                <ComboBox SelectedIndex="0">
+                    <ComboBoxItem Content="charentity"/>
+                </ComboBox>
+            </StackPanel>
+
+            <!--<StackPanel  Grid.Row="1" >
+                <Label Content="source"/>
+                <TextBox Text="mesh.fbx"/>
+                <CheckBox Content="convert autom. on change"/>
+                <Button Content="convert"/>
+            </StackPanel>
+            <StackPanel Grid.Column="1"   Grid.Row="1">
+                <Label Content="destination"/>
+                <TextBox Text="ogre.mesh"/>
+                <TextBox Text="ogre.material"/>
+            </StackPanel>
+
+            <StackPanel Grid.Column="3"  Grid.Row="1" >
+                <Label Content="socketdest."/>
+                <ComboBox SelectedIndex="0">
+                    <ComboBoxItem Content="charentity"/>
+                </ComboBox>
+            </StackPanel>-->
+
+        </Grid>
+    </Grid>
+</UserControl>

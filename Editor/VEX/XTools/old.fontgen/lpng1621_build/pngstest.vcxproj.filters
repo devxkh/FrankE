@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="F:\Projekte\coop\XTools\fontgen\lpng1621\contrib\libtests\pngstest.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="F:\Projekte\coop\XTools\fontgen\lpng1621\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{77400F1D-D380-39BA-B63A-B1B076E0FC0D}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

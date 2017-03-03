@@ -1,0 +1,250 @@
+﻿<ResourceDictionary x:Class="web_icons_xaml"
+ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+ 
+    
+    <!--<Canvas x:Key="appbar_acorn" Width="48" Height="48" Clip="F1 M 0,0L 48,0L 48,48L 0,48L 0,0">
+        <Path Width="22.3248" Height="25.8518" Canvas.Left="13.6757" Canvas.Top="11.4012" Stretch="Fill" Fill="{DynamicResource BlackBrush}" Data="F1 M 16.6309,18.6563C 17.1309,8.15625 29.8809,14.1563 29.8809,14.1563C 30.8809,11.1563 34.1308,11.4063 34.1308,11.4063C 33.5,12 34.6309,13.1563 34.6309,13.1563C 32.1309,13.1562 31.1309,14.9062 31.1309,14.9062C 41.1309,23.9062 32.6309,27.9063 32.6309,27.9062C 24.6309,24.9063 21.1309,22.1562 16.6309,18.6563 Z M 16.6309,19.9063C 21.6309,24.1563 25.1309,26.1562 31.6309,28.6562C 31.6309,28.6562 26.3809,39.1562 18.3809,36.1563C 18.3809,36.1563 18,38 16.3809,36.9063C 15,36 16.3809,34.9063 16.3809,34.9063C 16.3809,34.9063 10.1309,30.9062 16.6309,19.9063 Z "/>
+    </Canvas>-->
+
+    <Canvas x:Key="wi_aperture" >
+        <Path Fill="{DynamicResource BlackBrush}" >
+            <Path.Data>
+                <PathGeometry Figures="M4 0c-.69 0-1.34.19-1.91.5l3.22 2.34.75-2.25c-.6-.36-1.31-.59-2.06-.59zm-2.75 1.13c-.76.73-1.25 1.74-1.25 2.88 0 .25.02.48.06.72l3.09-2.22-1.91-1.38zm5.63.13l-1.22 3.75h2.19c.08-.32.16-.65.16-1 0-1.07-.44-2.03-1.13-2.75zm-4.72 3.22l-1.75 1.25c.55 1.13 1.6 1.99 2.88 2.22l-1.13-3.47zm1.56 1.53l.63 1.97c1.33-.12 2.46-.88 3.09-1.97h-3.72z" FillRule="NonZero"/>
+            </Path.Data>
+        </Path>
+    </Canvas>
+
+
+    <Canvas x:Key="wi_arrowcircle_bottom" >
+        <Path Fill="{DynamicResource BlackBrush}">
+            <Path.Data>
+                <PathGeometry Figures="M4 0c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm-1 1h2v3h2l-3 3-3-3h2v-3z" FillRule="NonZero"/>
+            </Path.Data>
+        </Path>
+    </Canvas>
+
+    <Canvas  x:Key="wi_arrowcircle_top">
+        <Path Fill="{DynamicResource BlackBrush}">
+            <Path.Data>
+                <PathGeometry Figures="M4 0c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm0 1l3 3h-2v3h-2v-3h-2l3-3z" FillRule="NonZero"/>
+            </Path.Data>
+        </Path>
+    </Canvas>
+
+    <Canvas  x:Key="wi_calculator">
+        <Path Fill="{DynamicResource BlackBrush}">
+            <Path.Data>
+                <PathGeometry Figures="M.09 0c-.06 0-.09.04-.09.09v7.81c0 .05.04.09.09.09h6.81c.05 0 .09-.04.09-.09v-7.81c0-.06-.04-.09-.09-.09h-6.81zm.91 1h5v2h-5v-2zm0 3h1v1h-1v-1zm2 0h1v1h-1v-1zm2 0h1v3h-1v-3zm-4 2h1v1h-1v-1zm2 0h1v1h-1v-1z" FillRule="NonZero"/>
+            </Path.Data>
+        </Path>
+    </Canvas>
+
+
+    <Canvas x:Key="wi_cog">
+        <Path  Fill="{DynamicResource BlackBrush}">
+            <Path.Data>
+                <PathGeometry Figures="M3.5 0l-.5 1.19c-.1.03-.19.08-.28.13l-1.19-.5-.72.72.5 1.19c-.05.1-.09.18-.13.28l-1.19.5v1l1.19.5c.04.1.08.18.13.28l-.5 1.19.72.72 1.19-.5c.09.04.18.09.28.13l.5 1.19h1l.5-1.19c.09-.04.19-.08.28-.13l1.19.5.72-.72-.5-1.19c.04-.09.09-.19.13-.28l1.19-.5v-1l-1.19-.5c-.03-.09-.08-.19-.13-.28l.5-1.19-.72-.72-1.19.5c-.09-.04-.19-.09-.28-.13l-.5-1.19h-1zm.5 2.5c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5-1.5-.67-1.5-1.5.67-1.5 1.5-1.5z" FillRule="NonZero"/>
+            </Path.Data>
+        </Path>
+    </Canvas>
+
+
+    <Canvas x:Key="wi_command">
+        <Path Fill="{DynamicResource BlackBrush}">
+            <Path.Data>
+                <PathGeometry Figures="M1.5 0c-.83 0-1.5.67-1.5 1.5s.67 1.5 1.5 1.5h.5v1h-.5c-.83 0-1.5.67-1.5 1.5s.67 1.5 1.5 1.5 1.5-.67 1.5-1.5v-.5h1v.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5-.67-1.5-1.5-1.5h-.5v-1h.5c.83 0 1.5-.67 1.5-1.5s-.67-1.5-1.5-1.5-1.5.67-1.5 1.5v.5h-1v-.5c0-.83-.67-1.5-1.5-1.5zm0 1c.28 0 .5.22.5.5v.5h-.5c-.28 0-.5-.22-.5-.5s.22-.5.5-.5zm4 0c.28 0 .5.22.5.5s-.22.5-.5.5h-.5v-.5c0-.28.22-.5.5-.5zm-2.5 2h1v1h-1v-1zm-1.5 2h.5v.5c0 .28-.22.5-.5.5s-.5-.22-.5-.5.22-.5.5-.5zm3.5 0h.5c.28 0 .5.22.5.5s-.22.5-.5.5-.5-.22-.5-.5v-.5z" FillRule="NonZero"/>
+            </Path.Data>
+        </Path>
+    </Canvas>
+
+
+    <Canvas x:Key="wi_dial">
+        <Path Fill="{DynamicResource BlackBrush}">
+            <Path.Data>
+                <PathGeometry Figures="M4 0c-2.2 0-4 1.8-4 4h1c0-1.66 1.34-3 3-3s3 1.34 3 3h1c0-2.2-1.8-4-4-4zm-.59 2.09c-.81.25-1.41 1.01-1.41 1.91 0 1.11.9 2 2 2 1.11 0 2-.89 2-2 0-.9-.59-1.65-1.41-1.91l-.59.88-.59-.88z" FillRule="NonZero"/>
+            </Path.Data>
+        </Path>
+    </Canvas>
+
+
+    <Canvas x:Key="wi_document">
+        <Path Fill="{DynamicResource BlackBrush}">
+            <Path.Data>
+                <PathGeometry Figures="M0 0v8h7v-4h-4v-4h-3zm4 0v3h3l-3-3zm-3 2h1v1h-1v-1zm0 2h1v1h-1v-1zm0 2h4v1h-4v-1z" FillRule="NonZero"/>
+            </Path.Data>
+        </Path>
+    </Canvas>
+
+    <Canvas x:Key="wi_ellipse">
+        <Path Fill="{DynamicResource BlackBrush}">
+            <Path.Data>
+                <PathGeometry Figures="M0 0v2h2v-2h-2zm3 0v2h2v-2h-2zm3 0v2h2v-2h-2z" FillRule="NonZero"/>
+            </Path.Data>
+        </Path>
+    </Canvas>
+
+    <Canvas x:Key="wi_excerpt">
+        <Path Fill="{DynamicResource BlackBrush}">
+            <Path.Data>
+                <PathGeometry Figures="M0 0v1h7v-1h-7zm0 2v1h5v-1h-5zm0 2v1h8v-1h-8zm0 2v1h1v-1h-1zm2 0v1h1v-1h-1zm2 0v1h1v-1h-1z" FillRule="NonZero"/>
+            </Path.Data>
+        </Path>
+    </Canvas>
+
+    <Canvas x:Key="wi_fabrik">
+        <Path Fill="{DynamicResource BlackBrush}">
+            <Path.Data>
+                <PathGeometry Figures="M12 10.846H0V5.262h1.031V1.225l2.291 1.43v-1.43l2.279 1.43v-1.43l2.221 1.43L8.824 0h2.068v5.262H12V10.846z    M10.652 7.278V0.199H9.059L7.963 3.135L5.865 1.729v1.406L3.586 1.729v1.406L1.277 1.729v5.549H10.652z M4.389 5.977H2.303V4.031   h2.086V5.977z M6.996 5.977H4.91V4.031h2.086V5.977z M9.609 5.977H7.523V4.031h2.086V5.977z" FillRule="NonZero"/>
+            </Path.Data>
+        </Path>
+    </Canvas>
+
+    <Canvas x:Key="wi_grid_four_up">
+        <Path Fill="{DynamicResource BlackBrush}">
+            <Path.Data>
+                <PathGeometry Figures="M0 0v1h1v-1h-1zm2 0v1h1v-1h-1zm2 0v1h1v-1h-1zm2 0v1h1v-1h-1zm-6 2v1h1v-1h-1zm2 0v1h1v-1h-1zm2 0v1h1v-1h-1zm2 0v1h1v-1h-1zm-6 2v1h1v-1h-1zm2 0v1h1v-1h-1zm2 0v1h1v-1h-1zm2 0v1h1v-1h-1zm-6 2v1h1v-1h-1zm2 0v1h1v-1h-1zm2 0v1h1v-1h-1zm2 0v1h1v-1h-1z" FillRule="NonZero"/>
+            </Path.Data>
+        </Path>
+    </Canvas>
+
+
+    <Canvas x:Key="wi_grid_three_up">
+        <Path Fill="{DynamicResource BlackBrush}">
+            <Path.Data>
+                <PathGeometry Figures="M0 0v2h2v-2h-2zm3 0v2h2v-2h-2zm3 0v2h2v-2h-2zm-6 3v2h2v-2h-2zm3 0v2h2v-2h-2zm3 0v2h2v-2h-2zm-6 3v2h2v-2h-2zm3 0v2h2v-2h-2zm3 0v2h2v-2h-2z" FillRule="NonZero"/>
+            </Path.Data>
+        </Path>
+    </Canvas>
+
+    <Canvas x:Key="wi_grid_two_up">
+        <Path Fill="{DynamicResource BlackBrush}">
+            <Path.Data>
+                <PathGeometry Figures="M0 0v3h3v-3h-3zm5 0v3h3v-3h-3zm-5 5v3h3v-3h-3zm5 0v3h3v-3h-3z" FillRule="NonZero"/>
+            </Path.Data>
+        </Path>
+    </Canvas>
+
+    <Canvas x:Key="wi_houses">
+        <Path Fill="{DynamicResource BlackBrush}">
+            <Path.Data>
+                <PathGeometry Figures="M12 10.723h-1.172c0-0.586-0.592-1.019-1.775-1.295C8.475 9.292 7.377 9.151 5.76 9.006   c-1.184-0.102-1.775-0.238-1.775-0.41c0-0.336 0.822-0.578 2.467-0.727H5.15C3.314 8.014 2.396 8.276 2.396 8.655   c0 0.332 0.395 0.576 1.184 0.732c0.73 0.129 1.461 0.258 2.191 0.387c0.789 0.202 1.184 0.519 1.184 0.949H0V5.145h0.844V4.307   L0.633 4.482L0.199 3.861l1.43-1.107V2.479L1.441 2.631L1.049 2.074L3.732 0l0.809 0.627V0h0.738v1.201l0.715 0.557l0.809-0.627   L7.148 1.4L8.83 0.094l0.902 0.697V0.094h0.814V1.43l1.248 0.967l-0.434 0.621l-0.211-0.17v2.297H12V10.723z M4.764 2.707V1.676   H4.195v0.855l-1.02-0.803L0.422 3.873L0.674 4.23l0.328-0.275v3.006H1.84V4.822h1.043v2.139H3.92V6.1H3.486V4.822H3.92V4.529   L3.662 4.74L3.123 3.973L4.764 2.707z M5.889 1.834L5.156 1.271V0.105H4.652v0.773l-0.92-0.721L1.254 2.086l0.223 0.322L1.77 2.156   v0.486l1.406-1.084l0.902 0.697V1.559h0.814v1.049L5.889 1.834z M10.189 3.99L8.76 2.871V1.277H8.063v1.055l-1.26-0.99L3.404 3.99   L3.709 4.43l0.41-0.34v3.704H5.15V5.162h1.289v2.631h3.035V4.09l0.41 0.34L10.189 3.99z M8.877 6.739H7.189V5.162h1.688V6.739z    M11.572 2.408L10.418 1.5V0.211H9.85v0.855L8.83 0.264L7.26 1.482l0.656 0.51V1.131h1.008v1.646l0.762 0.58h0.82v1.277h-0.498   L9.932 4.74L9.674 4.529v0.961h1.318v-3l0.334 0.275L11.572 2.408z" FillRule="NonZero"/>
+            </Path.Data>
+        </Path>
+    </Canvas>
+
+    <Canvas x:Key="wi_Layers">
+        <Path Fill="{DynamicResource BlackBrush}">
+            <Path.Data>
+                <PathGeometry Figures="M0 0v4h4v-4h-4zm5 2v3h-3v1h4v-4h-1zm2 2v3h-3v1h4v-4h-1z" FillRule="NonZero"/>
+            </Path.Data>
+        </Path>
+    </Canvas>
+
+    <Canvas x:Key="wi_list_rich">
+        <Path Fill="{DynamicResource BlackBrush}">
+            <Path.Data>
+                <PathGeometry Figures="M0 0v3h3v-3h-3zm4 0v1h4v-1h-4zm0 2v1h3v-1h-3zm-4 2v3h3v-3h-3zm4 0v1h4v-1h-4zm0 2v1h3v-1h-3z" FillRule="NonZero"/>
+            </Path.Data>
+        </Path>
+    </Canvas>
+
+    <Canvas x:Key="wi_person">
+        <Path Fill="{DynamicResource BlackBrush}">
+            <Path.Data>
+                <PathGeometry Figures="M4 0c-1.1 0-2 1.12-2 2.5s.9 2.5 2 2.5 2-1.12 2-2.5-.9-2.5-2-2.5zm-2.09 5c-1.06.05-1.91.92-1.91 2v1h8v-1c0-1.08-.84-1.95-1.91-2-.54.61-1.28 1-2.09 1-.81 0-1.55-.39-2.09-1z" FillRule="NonZero"/>
+            </Path.Data>
+        </Path>
+    </Canvas>
+
+    <Canvas x:Key="wi_chart">
+        <Path Fill="{DynamicResource BlackBrush}">
+            <Path.Data>
+                <PathGeometry Figures="M3.5 0c-.97 0-1.84.4-2.47 1.03l2.97 2.97v-3.97c-.16-.02-.33-.03-.5-.03zm1.5 1.06v3.41l-2.72 2.72c.61.5 1.37.81 2.22.81 1.93 0 3.5-1.57 3.5-3.5 0-1.76-1.31-3.19-3-3.44zm-4.09 1.31c-.56.54-.91 1.29-.91 2.13 0 .96.46 1.79 1.16 2.34l2.13-2.13-2.38-2.34z" FillRule="NonZero"/>
+            </Path.Data>
+        </Path>
+    </Canvas>
+
+    <Canvas x:Key="wi_project">
+        <Path Fill="{DynamicResource BlackBrush}">
+            <Path.Data>
+                <PathGeometry Figures="M0 0v7h1v-7h-1zm7 0v7h1v-7h-1zm-5 1v1h2v-1h-2zm1 2v1h2v-1h-2zm1 2v1h2v-1h-2z" FillRule="NonZero"/>
+            </Path.Data>
+        </Path>
+    </Canvas>
+
+    <Canvas x:Key="wi_pulse">
+        <Path Fill="{DynamicResource BlackBrush}">
+            <Path.Data>
+                <PathGeometry Figures="M3.25 0l-.47 1.53-.78 2.56-.03-.06-.09-.34h-1.88v1h1.1600000000000001l.38 1.16.47 1.47.47-1.5.78-2.5.78 2.5.41 1.34.53-1.28.59-1.47.13.28h2.31v-1h-1.69l-.38-.75-.5-.97-.41 1.03-.47 1.19-.84-2.66-.47-1.53z" FillRule="NonZero"/>
+            </Path.Data>
+        </Path>
+    </Canvas>
+
+    <Canvas x:Key="wi_puzzle_piece">
+        <Path  Fill="{DynamicResource BlackBrush}">
+            <Path.Data>
+                <PathGeometry Figures="M3 0c-.28 0-.54.1-.72.28-.18.18-.28.44-.28.72 0 .28.18.48.28.72.03.06.03.16.03.28h-2.31v6h2.31c0-.12-.01-.22-.03-.28-.1-.24-.28-.44-.28-.72 0-.28.1-.54.28-.72.18-.18.44-.28.72-.28.28 0 .54.1.72.28.18.18.28.44.28.72 0 .28-.18.48-.28.72-.03.06-.03.16-.03.28h2.31v-2.31c.12 0 .22.01.28.03.24.1.44.28.72.28.28 0 .54-.1.72-.28.18-.18.28-.44.28-.72 0-.28-.1-.54-.28-.72-.18-.18-.44-.28-.72-.28-.28 0-.48.18-.72.28-.06.03-.16.03-.28.03v-2.31h-2.31c0-.12.01-.22.03-.28.1-.24.28-.44.28-.72 0-.28-.1-.54-.28-.72-.18-.18-.44-.28-.72-.28z" FillRule="NonZero"/>
+            </Path.Data>
+        </Path>
+    </Canvas>
+
+
+    <Canvas x:Key="wi_random">
+        <Path Fill="{DynamicResource BlackBrush}">
+            <Path.Data>
+                <PathGeometry Figures="M6 0v1h-.5c-.35 0-.56.1-.78.38l-1.41 1.78-1.53-1.78c-.22-.26-.44-.38-.78-.38h-1v1h1c-.05 0 .01.04.03.03l1.63 1.91-1.66 2.06h-1v1h1c.35 0 .56-.1.78-.38l1.53-1.91 1.66 1.91c.22.26.44.38.78.38h.25v1l2-1.5-2-1.5v1h-.22c-.01-.01-.05-.04-.06-.03l-1.75-2.06 1.53-1.91h.5v1l2-1.5-2-1.5z" FillRule="NonZero"/>
+            </Path.Data>
+        </Path>
+    </Canvas>
+
+
+    <Canvas x:Key="wi_reload">
+        <Path Fill="{DynamicResource BlackBrush}">
+            <Path.Data>
+                <PathGeometry Figures="M4 0c-2.2 0-4 1.8-4 4s1.8 4 4 4c1.1 0 2.12-.43 2.84-1.16l-.72-.72c-.54.54-1.29.88-2.13.88-1.66 0-3-1.34-3-3s1.34-3 3-3c.83 0 1.55.36 2.09.91l-1.09 1.09h3v-3l-1.19 1.19c-.72-.72-1.71-1.19-2.81-1.19z" FillRule="NonZero"/>
+            </Path.Data>
+        </Path>
+    </Canvas>
+
+    <Canvas x:Key="wi_shared_box">
+        <Path  Fill="{DynamicResource BlackBrush}">
+            <Path.Data>
+                <PathGeometry Figures="M.75 0c-.41 0-.75.34-.75.75v5.5c0 .41.34.75.75.75h4.5c.41 0 .75-.34.75-.75v-1.25h-1v1h-4v-5h2v-1h-2.25zm5.25 0v1c-2.05 0-3.7 1.54-3.94 3.53.21-.88.99-1.53 1.94-1.53h2v1l2-2-2-2z" FillRule="NonZero"/>
+            </Path.Data>
+        </Path>
+    </Canvas>
+
+    <Canvas x:Key="wi_sort_asc">
+        <Path Fill="{DynamicResource BlackBrush}">
+            <Path.Data>
+                <PathGeometry Figures="M2 0v6h-2l2.5 2 2.5-2h-2v-6h-1zm2 0v1h2v-1h-2zm0 2v1h3v-1h-3zm0 2v1h4v-1h-4z" FillRule="NonZero"/>
+            </Path.Data>
+        </Path>
+    </Canvas>
+
+    <Canvas x:Key="wi_sort_desc">
+        <Path Fill="{DynamicResource BlackBrush}">
+            <Path.Data>
+                <PathGeometry Figures="M2 0v6H0l2.5 2L5 6H3V0H2z M4 0v1h4V0H4z M4 2v1h3V2H4z M4 4v1h2V4H4z" FillRule="NonZero"/>
+            </Path.Data>
+        </Path>
+    </Canvas>
+
+    <Canvas x:Key="wi_sun">
+        <Path Fill="{DynamicResource BlackBrush}">
+            <Path.Data>
+                <PathGeometry Figures="M4 0c-.28 0-.5.22-.5.5s.22.5.5.5.5-.22.5-.5-.22-.5-.5-.5zm-2.5 1c-.28 0-.5.22-.5.5s.22.5.5.5.5-.22.5-.5-.22-.5-.5-.5zm5 0c-.28 0-.5.22-.5.5s.22.5.5.5.5-.22.5-.5-.22-.5-.5-.5zm-2.5 1c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-3.5 1.5c-.28 0-.5.22-.5.5s.22.5.5.5.5-.22.5-.5-.22-.5-.5-.5zm7 0c-.28 0-.5.22-.5.5s.22.5.5.5.5-.22.5-.5-.22-.5-.5-.5zm-6 2.5c-.28 0-.5.22-.5.5s.22.5.5.5.5-.22.5-.5-.22-.5-.5-.5zm5 0c-.28 0-.5.22-.5.5s.22.5.5.5.5-.22.5-.5-.22-.5-.5-.5zm-2.5 1c-.28 0-.5.22-.5.5s.22.5.5.5.5-.22.5-.5-.22-.5-.5-.5z" FillRule="NonZero"/>
+            </Path.Data>
+        </Path>
+    </Canvas>
+
+    <Canvas x:Key="wi_vertical_align_bottom">
+        <Path Fill="{DynamicResource BlackBrush}">
+            <Path.Data>
+                <PathGeometry Figures="M.09 0c-.06 0-.09.04-.09.09v4.81c0 .05.04.09.09.09h1.81c.05 0 .09-.04.09-.09v-4.81c0-.06-.04-.09-.09-.09h-1.81zm6 0c-.05 0-.09.04-.09.09v4.81c0 .05.04.09.09.09h1.81c.05 0 .09-.04.09-.09v-4.81c0-.06-.04-.09-.09-.09h-1.81zm-3 2c-.06 0-.09.04-.09.09v2.81c0 .05.04.09.09.09h1.81c.05 0 .09-.04.09-.09v-2.81c0-.06-.04-.09-.09-.09h-1.81zm-3.09 4v1h8v-1h-8z" FillRule="NonZero"/>
+            </Path.Data>
+        </Path>
+    </Canvas>
+
+</ResourceDictionary>

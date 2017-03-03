@@ -1,0 +1,37 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <ResourceDictionary.MergedDictionaries>
+        <!--<ResourceDictionary Source="pack://application:,,,/Theme;component/Theme.Mahapps/Styles/Colors.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/Theme;component/Theme.Mahapps/Styles/Fonts.xaml" />
+
+        <ResourceDictionary Source="/Theme;component/Theme.Mahapps/Themes/DropDownButton.xaml" />
+        <ResourceDictionary Source="/Theme;component/Theme.Mahapps/Themes/Glow.xaml" />
+        <ResourceDictionary Source="/Theme;component/Theme.Mahapps/Themes/FlipView.xaml" />
+        <ResourceDictionary Source="/Theme;component/Theme.Mahapps/Themes/Flyout.xaml" />
+        <ResourceDictionary Source="/Theme;component/Theme.Mahapps/Themes/FlyoutsControl.xaml" />
+        <ResourceDictionary Source="/Theme;component/Theme.Mahapps/Themes/MetroContentControl.xaml" />
+        <ResourceDictionary Source="/Theme;component/Theme.Mahapps/Themes/MetroProgressBar.xaml" />
+        <ResourceDictionary Source="/Theme;component/Theme.Mahapps/Themes/MetroWindow.xaml" />
+        <ResourceDictionary Source="/Theme;component/Theme.Mahapps/Themes/NumericUpDown.xaml" />
+        <ResourceDictionary Source="/Theme;component/Theme.Mahapps/Themes/Pivot.xaml" />
+        <ResourceDictionary Source="/Theme;component/Theme.Mahapps/Themes/ProgressRing.xaml" />
+        <ResourceDictionary Source="/Theme;component/Theme.Mahapps/Themes/RangeSlider.xaml" />
+        <ResourceDictionary Source="/Theme;component/Theme.Mahapps/Themes/SplitButton.xaml" />
+        <ResourceDictionary Source="/Theme;component/Theme.Mahapps/Themes/MetroAnimatedTabControl.xaml" />
+        <ResourceDictionary Source="/Theme;component/Theme.Mahapps/Themes/MetroAnimatedSingleRowTabControl.xaml" />
+        <ResourceDictionary Source="/Theme;component/Theme.Mahapps/Themes/MetroTabControl.xaml" />
+        <ResourceDictionary Source="/Theme;component/Theme.Mahapps/Themes/MetroTabItem.xaml" />
+        <ResourceDictionary Source="/Theme;component/Theme.Mahapps/Themes/Tile.xaml" />
+        <ResourceDictionary Source="/Theme;component/Theme.Mahapps/Themes/ToggleSwitch.xaml" />
+        <ResourceDictionary Source="/Theme;component/Theme.Mahapps/Themes/TransitioningContentControl.xaml" />
+
+        <ResourceDictionary Source="/Theme;component/Theme.Mahapps/Themes/Dialogs/BaseMetroDialog.xaml" />
+
+        <ResourceDictionary Source="/Theme;component/Theme.Toolkit/Themes/Generic.xaml" />-->
+
+
+        <!--<ResourceDictionary Source="/Theme;component/Theme.AvalonDock/Themes/Generic.xaml" />-->
+
+    
+    </ResourceDictionary.MergedDictionaries>
+</ResourceDictionary>

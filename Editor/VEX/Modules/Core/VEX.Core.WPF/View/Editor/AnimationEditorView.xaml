@@ -1,0 +1,49 @@
+﻿<UserControl x:Class="VEX.Core.View.Components.AnimationEditorView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:VEX.Core.View.Components"
+             xmlns:NodeEditor="clr-namespace:DLL.NodeEditor.View;assembly=VEF.NodeEditor.WPF"
+             mc:Ignorable="d"  Focusable="True"
+             xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+             d:DesignHeight="500" d:DesignWidth="500" Loaded="UserControl_Loaded">
+    <UserControl.Resources>
+        
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="AnimationNodeTemplates.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+
+    </UserControl.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <Button Click="Button_Click">load</Button>
+        <!--<xctk:Zoombox 
+                  ViewStackIndex="0"
+                  ViewStackMode="Auto"
+                  ZoomOn="View" Grid.Row="1">
+            <xctk:Zoombox.ViewStack>
+                <xctk:ZoomboxView>Fit</xctk:ZoomboxView>
+            </xctk:Zoombox.ViewStack>-->
+            <!--<Ellipse Width="90" Height="90" Fill="Green" >
+
+            </Ellipse>-->
+            <NodeEditor:GraphControlView Name="GraphControl" Grid.Row="1"  PreviewMouseDown="GraphControl_PreviewMouseDown"
+                                         PreviewKeyDown="UserControl_PreviewKeyDown"
+                                            ContextMenuOpening="_GraphControl_ContextMenuOpening"              
+                                         >
+                <!--<NodeEditor:GraphControlView.Resources>
+                    <ContextMenu  x:Key="RowContextMenu" Opened="ContextMenu_Opened"    >
+                    </ContextMenu>
+                </NodeEditor:GraphControlView.Resources>-->
+            </NodeEditor:GraphControlView>
+
+            <!--<Image Source="Default.jpg" />-->
+        <!--</xctk:Zoombox>-->
+    </Grid>
+</UserControl>

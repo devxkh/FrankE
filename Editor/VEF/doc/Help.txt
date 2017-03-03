@@ -1,0 +1,18 @@
+http://www.geekchamp.com/articles/localizing-a-windows-phone-app-step-by-step
+
+
+EF Framework Code First Command in Nuget Console:
+Run the Add-Migration AddUrl command in Package Manager Console.
+
+
+Run the Update-Database command in Package Manager Console. This command will apply any pending migrations to the database. Our InitialCreate migration has already been applied so migrations will just apply our new AddUrl migration.
+
+Tip: You can use the –Verbose switch when calling Update-Database to see the SQL that is being executed against the database.
+
+
+
+
+
+portable libs:
+
+http://brianlagunas.com/first-look-at-the-prism-for-xamarin-forms-preview/

@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="F:\Projekte\coop\XTools\fontgen\lpng1621_build\CMakeFiles\46107399eac6362a27e572c68709cd8f\generate.stamp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{35B74F25-76D4-36EE-AE89-5303B013BE5C}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

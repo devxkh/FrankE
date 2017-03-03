@@ -1,0 +1,63 @@
+﻿<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:converters="clr-namespace:Gemini.Modules.GraphEditor.Converters;assembly=VEF.NodeEditor.WPF"               
+            xmlns:localHelper="clr-namespace:VEX.Core.View.Editor.Helper"
+         >
+    
+    
+    <DataTemplate x:Key="imageTemplate">
+        <StackPanel>
+            <Button Content="image"></Button>
+            <!--Width="{x:Static vm:ElementViewModel.PreviewSize}"
+																	Height="{x:Static vm:ElementViewModel.PreviewSize}"-->
+            <Image Source="{Binding PreviewImage}" Stretch="Fill" />
+        </StackPanel>
+    </DataTemplate>
+
+    <DataTemplate x:Key="colorTemplate">
+        <StackPanel>
+            <Button Content="color"></Button>
+            <!--Width="{x:Static vm:ElementViewModel.PreviewSize}"
+																	Height="{x:Static vm:ElementViewModel.PreviewSize}"-->
+            <Image Source="{Binding PreviewImage}" Stretch="Fill" />
+        </StackPanel>
+    </DataTemplate>
+
+    <DataTemplate x:Key="DefaultTemplate">
+        <StackPanel>
+            <TextBlock Text="{Binding Name}" />
+        </StackPanel>
+    </DataTemplate>
+
+    <DataTemplate x:Key="animationNodeTemplate">
+        <StackPanel>
+            <TextBlock Text="{Binding Path=Animation.Name}" />
+        </StackPanel>
+    </DataTemplate>
+
+    <DataTemplate x:Key="transistionSelectNodeTemplate">
+        <StackPanel>
+            <Button>Add Left</Button>
+        </StackPanel>
+    </DataTemplate>
+
+    <DataTemplate x:Key="outputNodeTemplate">
+    </DataTemplate>
+
+    <DataTemplate x:Key="parameterNodeTemplate">
+        <StackPanel>
+            <TextBox></TextBox>
+        </StackPanel>
+    </DataTemplate>
+
+    <localHelper:ElementViewTemplateSelector ImageTemplate="{StaticResource imageTemplate}"
+                                                 DefaultTemplate="{StaticResource DefaultTemplate}"
+                                                 ColorTemplate="{StaticResource colorTemplate}"
+                                                AnimationNodeTemplate="{StaticResource animationNodeTemplate}"
+                                                TransistionSelectNodeTemplate="{StaticResource transistionSelectNodeTemplate}"
+                                                OutputNodeTemplate="{StaticResource outputNodeTemplate}"
+                                                ParameterNodeTemplate="{StaticResource parameterNodeTemplate}"
+                                                  x:Key="elementViewTemplateSelector" />
+
+</ResourceDictionary>

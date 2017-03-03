@@ -1,0 +1,40 @@
+﻿<ResourceDictionary x:Class="resources_dialogs_xaml"
+ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+   xmlns:Dialog="clr-namespace:MahApps.Metro.Controls.Dialogs;assembly=MahApps.Metro"  >
+
+    <Dialog:CustomDialog x:Key="settingsDialog"
+                                 Title="Settings"
+                                 x:Name="settingsDialog">
+        <Grid >
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="55" />
+            </Grid.RowDefinitions>
+            <Grid Grid.Row="0">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="3*" />
+                        <ColumnDefinition Width="7*" />
+                    </Grid.ColumnDefinitions>
+                    <TreeView Name="settingsTreeView" Grid.Column="0" ItemsSource="{Binding Path=Children}" ScrollViewer.CanContentScroll="True">
+                        <TreeView.ItemTemplate>
+                            <HierarchicalDataTemplate ItemsSource="{Binding Children}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="{Binding Title}" Margin="4,0,4,0"/>
+                                </StackPanel>
+                            </HierarchicalDataTemplate>
+                        </TreeView.ItemTemplate>
+                    </TreeView>
+                    <ContentControl Grid.Column="1" DataContext="{Binding ElementName=settingsTreeView, Path=SelectedItem}" Content="{Binding Path=View}" ScrollViewer.CanContentScroll="True" />
+                </Grid>
+            </Grid>
+            <Grid Grid.Row="1">
+                <StackPanel Orientation="Horizontal" FlowDirection="RightToLeft">
+                    <Button Content="_Cancel" IsCancel="True" Width="85" Height="25" Margin="12" />
+                    <Button Content="_OK" IsDefault="True" Width="85" Height="25"  />
+                </StackPanel>
+            </Grid>
+        </Grid>
+    </Dialog:CustomDialog>
+</ResourceDictionary>
