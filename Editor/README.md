@@ -7,11 +7,11 @@ Visual editor for  [FrankE](https://github.com/devxkh/FrankE).
 - Node based animationstate editing
 - Realtime client / server editor (Enet networking and flatbuffer binary files)
 
-![VEX SocketServer](https://raw.githubusercontent.com/devxkh/VEX/master/doc/Screen_VEXSocketServer.png)
+![VEX SocketServer](https://raw.githubusercontent.com/devxkh/FrankE/master/Editor/VEX/doc/Screen_VEXSocketServer.png)
 
 - Texture Atlasgenerator
 
-![VEX AtlasGenerator](https://raw.githubusercontent.com/devxkh/VEX/master/doc/Screen_VEXAtlasGenerator.png)
+![VEX AtlasGenerator](https://raw.githubusercontent.com/devxkh/FrankE/master/Editor/VEX/doc/Screen_VEXAtlasGenerator.png)
 
 ### License
 
