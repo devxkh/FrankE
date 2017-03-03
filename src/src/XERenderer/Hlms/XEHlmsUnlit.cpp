@@ -677,7 +677,7 @@ namespace Ogre
 		const Matrix4 &worldMat = queuedRenderable.movableObject->_getParentNodeFullTransform();			
 
 		bool hasSkeletonAnimation = queuedRenderable.renderable->hasSkeletonAnimation();
-
+		hasSkeletonAnimation = false;
 		//---------------------------------------------------------------------------
 		//                          ---- VERTEX SHADER ----
 		//---------------------------------------------------------------------------
