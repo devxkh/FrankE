@@ -18,7 +18,7 @@ Frankenstein 3D Engine (MIT) - x64
  TODO: currently there are still some special [cmake settings](https://github.com/devxkh/FrankE/blob/master/doc/cmakeInfo.txt) necessary
 
 # EDITOR
-- [VEX](https://github.com/devxkh/VEX)  Client/Server Editor(WPF) for FrankE  
+- [VEX](https://github.com/FrankE/blob/master/Editor)  Client/Server Editor(WPF) for FrankE  
 
 # Examples
 
