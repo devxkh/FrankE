@@ -681,6 +681,10 @@ namespace Ogre {
 
         mGLInitialised = 0;
 
+        OCGE( glBindVertexArray( 0 ) );
+        OCGE( glDeleteVertexArrays( 1, &mGlobalVao ) );
+        mGlobalVao = 0;
+
         // RenderSystem::shutdown();
     }
 
@@ -1075,11 +1079,6 @@ namespace Ogre {
         _setTexture(unit, true, tex.get());
     }
 
-    void GL3PlusRenderSystem::_setComputeTexture( size_t unit, const TexturePtr &tex )
-    {
-        _setTexture(unit, true, tex.get());
-    }
-
     void GL3PlusRenderSystem::_setTessellationHullTexture( size_t unit, const TexturePtr &tex )
     {
         _setTexture(unit, true, tex.get());
@@ -1464,14 +1463,14 @@ namespace Ogre {
         if (!vp)
         {
             mActiveViewport = NULL;
-            _setRenderTarget(NULL, true);
+            _setRenderTarget(NULL, VP_RTT_COLOUR_WRITE);
         }
         else if (vp != mActiveViewport || vp->_isUpdated())
         {
             RenderTarget* target;
 
             target = vp->getTarget();
-            _setRenderTarget(target, vp->getColourWrite());
+            _setRenderTarget(target, vp->getViewportRenderTargetFlags());
             mActiveViewport = vp;
 
             GLsizei x, y, w, h;
@@ -2976,8 +2975,8 @@ namespace Ogre {
         RenderTarget* target = mActiveViewport->getTarget();
         bool scissorsNeeded = mActiveViewport->getActualLeft() != 0 ||
                                 mActiveViewport->getActualTop() != 0 ||
-                                mActiveViewport->getActualWidth() != target->getWidth() ||
-                                mActiveViewport->getActualHeight() != target->getHeight();
+                                mActiveViewport->getActualWidth() != (int)target->getWidth() ||
+                                mActiveViewport->getActualHeight() != (int)target->getHeight();
 
         if( scissorsNeeded )
         {
@@ -3286,7 +3285,7 @@ namespace Ogre {
         LogManager::getSingleton().logMessage("**************************************");
     }
 
-    void GL3PlusRenderSystem::_setRenderTarget(RenderTarget *target, bool colourWrite)
+    void GL3PlusRenderSystem::_setRenderTarget(RenderTarget *target, uint8 viewportRenderTargetFlags)
     {
         mActiveViewport = 0;
 
@@ -3329,9 +3328,10 @@ namespace Ogre {
 
             depthBuffer = static_cast<GL3PlusDepthBuffer*>(target->getDepthBuffer());
 
-            colourWrite &= !target->getForceDisableColourWrites();
+            if( target->getForceDisableColourWrites() )
+                viewportRenderTargetFlags &= ~VP_RTT_COLOUR_WRITE;
 
-            if( !colourWrite )
+            if( !(viewportRenderTargetFlags & VP_RTT_COLOUR_WRITE) )
             {
                 if( target->isRenderWindow() )
                 {

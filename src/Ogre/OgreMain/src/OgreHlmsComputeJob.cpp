@@ -61,6 +61,10 @@ namespace Ogre
     {
         memset( mThreadsPerGroup, 0, sizeof( mThreadsPerGroup ) );
         memset( mNumThreadGroups, 0, sizeof( mNumThreadGroups ) );
+
+        mThreadGroupsBasedDivisor[0] = 1;
+        mThreadGroupsBasedDivisor[1] = 1;
+        mThreadGroupsBasedDivisor[2] = 1;
     }
     //-----------------------------------------------------------------------------------
     HlmsComputeJob::~HlmsComputeJob()
@@ -92,15 +96,17 @@ namespace Ogre
         LwString propName = LwString::FromEmptyPointer( tmpData, sizeof(tmpData) );
 
         propName = propTexture; //It's either ComputeProperty::Texture or ComputeProperty::Uav
-        const size_t texturePropSize = propName.size() + 1u;
+        const size_t texturePropNameSize = propName.size();
 
         uint8 maxTexUnitReached = outMaxTexUnitReached;
 
         //Remove everything from any previous run.
         for( uint8 i=0; i<maxTexUnitReached; ++i )
         {
-            propName.resize( texturePropSize - 1u );
+            propName.resize( texturePropNameSize );
             propName.a( i );                        //texture0 or uav0
+
+            const size_t texturePropSize = propName.size();
 
             propName.a( "_width" );                 //texture0_width
             removeProperty( propName.c_str() );
@@ -176,8 +182,9 @@ namespace Ogre
             while( itor != end )
             {
                 const size_t slotIdx = itor - begin;
-                propName.resize( texturePropSize - 1u );
+                propName.resize( texturePropNameSize );
                 propName.a( static_cast<uint32>(slotIdx) ); //texture0 or uav0
+                const size_t texturePropSize = propName.size();
                 setProperty( propName.c_str(), 1 );
 
                 if( !itor->texture.isNull() )
@@ -229,15 +236,15 @@ namespace Ogre
                     setProperty( propName.c_str(), texture->getTextureType() == TEX_TYPE_2D_ARRAY );
                     propName.resize( texturePropSize );
 
+                    propName.a( "_pf_type" );           //uav0_pf_type
+                    const char *typeName = toShaderType->getPixelFormatType( texture->getFormat() );
+                    if( typeName )
+                        setPiece( propName.c_str(), typeName );
+                    propName.resize( texturePropSize );
+
                     //Note we're comparing pointers, not string comparison!
                     if( propTexture == ComputeProperty::Uav )
                     {
-                        propName.a( "_pf_type" );           //uav0_pf_type
-                        const char *typeName = toShaderType->getPixelFormatType( texture->getFormat() );
-                        if( typeName )
-                            setPiece( propName.c_str(), typeName );
-                        propName.resize( texturePropSize );
-
                         uint32 mipLevel = std::min<uint32>( itor->mipmapLevel,
                                                             texture->getNumMipmaps() );
 
@@ -326,10 +333,15 @@ namespace Ogre
         }
     }
     //-----------------------------------------------------------------------------------
-    void HlmsComputeJob::setNumThreadGroupsBasedOn( ThreadGroupsBasedOn source, uint8 texSlot )
+    void HlmsComputeJob::setNumThreadGroupsBasedOn( ThreadGroupsBasedOn source, uint8 texSlot,
+                                                    uint8 divisorX, uint8 divisorY, uint8 divisorZ )
     {
         mThreadGroupsBasedOnTexture = source;
         mThreadGroupsBasedOnTexSlot = texSlot;
+
+        mThreadGroupsBasedDivisor[0] = divisorX;
+        mThreadGroupsBasedDivisor[1] = divisorY;
+        mThreadGroupsBasedDivisor[2] = divisorZ;
     }
     //-----------------------------------------------------------------------------------
     void HlmsComputeJob::_calculateNumThreadGroupsBasedOnSetting()
@@ -354,10 +366,13 @@ namespace Ogre
                 if( tex->getTextureType() == TEX_TYPE_CUBE_MAP )
                     resolution[2] = tex->getNumFaces();
 
-                for( uint32 i=0; i<3u; ++i )
+                for( int i=0; i<3; ++i )
                 {
+                    resolution[i] = (resolution[i] + mThreadGroupsBasedDivisor[i] - 1u) /
+                                    mThreadGroupsBasedDivisor[i];
+
                     uint32 numThreadGroups = (resolution[i] + mThreadsPerGroup[i] - 1u) /
-                            mThreadsPerGroup[i];
+                                             mThreadsPerGroup[i];
                     if( mNumThreadGroups[i] != numThreadGroups )
                     {
                         mNumThreadGroups[i] = numThreadGroups;
@@ -668,6 +683,9 @@ namespace Ogre
         texSlot.access              = access;
         texSlot.mipmapLevel         = mipmapLevel;
         texSlot.pixelFormat         = pixelFormat;
+
+        if( pixelFormat == PF_UNKNOWN && !texture.isNull() )
+            texSlot.pixelFormat = texture->getFormat();
     }
     //-----------------------------------------------------------------------------------
     HlmsComputeJob* HlmsComputeJob::clone( const String &cloneName )

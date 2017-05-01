@@ -81,6 +81,19 @@ namespace Ogre
             For shadow nodes, when empty, it will use the receiver's lod camera.
         */
         IdString                mLodCameraName;
+        /// When empty, it implies mCameraName == mCullCameraName.
+        IdString                mCullCameraName;
+
+        /// Only used if mPrePassMode == PrePassUse
+        IdString        mPrePassTexture;
+        IdString        mPrePassDepthTexture;
+        IdString        mPrePassSsrTexture;
+
+        /// This is a depth pre-pass. Note: Implementations may write
+        /// to colour too for hybrid deferred & forward rendering.
+        /// If you modify this, you probably want to modify
+        /// mReadOnlyDepth & mReadOnlyStencil too
+        PrePassMode     mPrePassMode;
 
         /// First Render Queue ID to render. Inclusive
         uint8           mFirstRQ;
@@ -112,21 +125,28 @@ namespace Ogre
         */
         Real            mLodBias;
 
+        /** When true, the frustum culling is skipped in this pass. To cull objects, data from
+            the most recent frustum culling execution are used.
+        */
+        bool            mReuseCullData;
+
         /** The material scheme used for this pass. If no material scheme is set then
             it will use the default scheme
         */
         String          mMaterialScheme;
 
-        CompositorPassSceneDef( uint32 rtIndex ) :
-            CompositorPassDef( PASS_SCENE, rtIndex ),
+        CompositorPassSceneDef( CompositorTargetDef *parentTargetDef ) :
+            CompositorPassDef( PASS_SCENE, parentTargetDef ),
             mVisibilityMask( VisibilityFlags::RESERVED_VISIBILITY_FLAGS ),
             mShadowNodeRecalculation( SHADOW_NODE_FIRST_ONLY ),
+            mPrePassMode( PrePassNone ),
             mFirstRQ( 0 ),
             mLastRQ( -1 ),
             mEnableForwardPlus( true ),
             mCameraCubemapReorient( false ),
             mUpdateLodLists( true ),
             mLodBias( 1.0f ),
+            mReuseCullData( false ),
             mMaterialScheme(MaterialManager::DEFAULT_SCHEME_NAME)
         {
             //Change base defaults
@@ -136,6 +156,18 @@ namespace Ogre
         void setVisibilityMask( uint32 visibilityMask )
         {
             mVisibilityMask = visibilityMask & VisibilityFlags::RESERVED_VISIBILITY_FLAGS;
+        }
+
+        void setUseDepthPrePass( IdString textureName, IdString depthTextureName, IdString ssrTexture )
+        {
+            mPrePassMode = PrePassUse;
+            mPrePassTexture = textureName;
+            mPrePassDepthTexture = depthTextureName;
+            mPrePassSsrTexture = ssrTexture;
+            mExposedTextures.push_back( textureName );
+
+            mReadOnlyDepth = true;
+            mReadOnlyStencil = true;
         }
     };
 

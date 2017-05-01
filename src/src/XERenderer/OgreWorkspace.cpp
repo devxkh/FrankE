@@ -26,20 +26,20 @@
 
 namespace XE {
 
-	Ogre::IdString OgreCompositorPassProvider::mPassId = Ogre::IdString("MYGUI");
+	//Ogre::IdString OgreCompositorPassProvider::mPassId = Ogre::IdString("MYGUI");
 
-	MyGUIPass::MyGUIPass(const Ogre::CompositorPassDef *definition, const Ogre::CompositorChannel &target,
-		Ogre::CompositorNode *parentNode, GraphicsManager& graphicsMgr)
-		: Ogre::CompositorPass(definition, target, parentNode) ,m_GraphicsManager(graphicsMgr)
-	{
+	//MyGUIPass::MyGUIPass(const Ogre::CompositorPassDef *definition, const Ogre::CompositorChannel &target,
+	//	Ogre::CompositorNode *parentNode, GraphicsManager& graphicsMgr)
+	//	: Ogre::CompositorPass(definition, target, parentNode) ,m_GraphicsManager(graphicsMgr)
+	//{
 
-	}
+	//}
 
-	void MyGUIPass::execute(const Ogre::Camera *lodCameraconst)
-	{
-	//-----------------------------	m_GraphicsManager.getGUIRenderer()._t_update();
-	//todo!	static_cast<MyGUI::OgreRenderManager*>(MyGUI::RenderManager::getInstancePtr())->render();
-	}
+	//void MyGUIPass::execute(const Ogre::Camera *lodCameraconst)
+	//{
+	////-----------------------------	m_GraphicsManager.getGUIRenderer()._t_update();
+	////todo!	static_cast<MyGUI::OgreRenderManager*>(MyGUI::RenderManager::getInstancePtr())->render();
+	//}
 
 	OgreWorkspace::OgreWorkspace(XEngine& engine, GraphicsManager& graphicsMgr) :
 		mGraphicsManager(graphicsMgr),
@@ -202,7 +202,7 @@ namespace XE {
 
 		shadowNodeDef->setDefaultTechnique(SHADOWMAP_PSSM);
 
-		for (size_t i = 0; i<numShadowMaps; ++i)
+		/*for (size_t i = 0; i<numShadowMaps; ++i)
 		{
 			ShadowTextureDefinition *shadowTexDef =shadowNodeDef->addShadowTextureDefinition(lightIdx, split,StringConverter::toString(i), false);
 
@@ -231,7 +231,7 @@ namespace XE {
 				split = 0;
 				++lightIdx;
 			}
-		}
+		}*/
 
 		shadowNodeDef->setNumTargetPass(numShadowMaps);
 
@@ -317,11 +317,11 @@ namespace XE {
 
 		Ogre::CompositorManager2* m_compositorManager = this->mGraphicsManager.getRoot()->getCompositorManager2();
 
-			mPassProvider.reset(new OgreCompositorPassProvider(mGraphicsManager));
+		//###	mPassProvider.reset(new OgreCompositorPassProvider(mGraphicsManager));
 
 			// don't overwrite a custom pass provider that the user may have registered already
 	//KH		if (!m_compositorManager->getCompositorPassProvider())
-				m_compositorManager->setCompositorPassProvider(mPassProvider.get());
+	//###		m_compositorManager->setCompositorPassProvider(mPassProvider.get());
 
 
 			if (!m_compositorManager->hasWorkspaceDefinition("MyOwnWorkspace"))
@@ -347,7 +347,8 @@ namespace XE {
 						}
 						{
 							passScene = static_cast<Ogre::CompositorPassSceneDef*> (targetDef->addPass(Ogre::PASS_SCENE));
-							passScene->mShadowNode = IdString("myShadowNode"); // Ogre::IdString();
+							//passScene->mShadowNode = IdString("myShadowNode"); // Ogre::IdString();
+							//passScene->mShadowNode = IdString("ShadowMapDebuggingEsmShadowNodeCompute");
 							passScene->mVpWidth = 1.0;
 							passScene->mVpHeight = 1.0;
 							passScene->mVpLeft = 0.0f;
@@ -379,7 +380,7 @@ namespace XE {
 
 			//	this->mGraphicsManager.getRoot()->getHlmsManager()->setShadowMappingUseBackFaces(false);
 
-				setShadowMapping(nodeDef, true, 1 , 2048, true);
+			//	setShadowMapping(nodeDef, true, 1 , 2048, true);
 				//todo!	controller.getControllerView().getCameraController()._t_getOgreCamera();
 				Ogre::CompositorWorkspace*  myworkspace = m_compositorManager->addWorkspace(mEngine.getOgreSceneManager().__OgreSceneMgrPtr, renderWindow, camera, "MyOwnWorkspace", true);
 

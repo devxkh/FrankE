@@ -22,18 +22,22 @@ namespace XE {
 
 		//sf::Uint64 time = elapsedTime.asMicroseconds();
 		
-		double currentFPS = 1000000.0f / elapsedTime.asMicroseconds();
+		//sf::Time delayTime2 = sf::milliseconds(1500);
+		//sf::sleep(delayTime2);
+		//return;
 
-		//auto t1 = elapsedTime.asMilliseconds();
-		//auto t2 = 1 / wanted_fps;
-		if (currentFPS < wanted_fps)
-		{
-			//sf::Time delayTime = sf::milliseconds(Int32(1000 / wanted_fps - currentFPS * 1000));
-			sf::Time delayTime = sf::milliseconds(Int32(1000 / currentFPS - wanted_fps * 1000));
-			sf::sleep(delayTime);
-		}
+		//double currentFPS = 1000000.0f / elapsedTime.asMicroseconds();
 
-		return;
+		////auto t1 = elapsedTime.asMilliseconds();
+		////auto t2 = 1 / wanted_fps;
+		//if (currentFPS < wanted_fps)
+		//{
+		//	//sf::Time delayTime = sf::milliseconds(Int32(1000 / wanted_fps - currentFPS * 1000));
+		//	sf::Time delayTime = sf::milliseconds(Int32(currentFPS - (wanted_fps * 1000000)));
+		//	sf::sleep(delayTime);
+		//}
+
+		//return;
 
 	//	unsigned maxFps = m_maxFps;
 

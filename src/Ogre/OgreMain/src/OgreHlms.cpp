@@ -47,6 +47,7 @@ THE SOFTWARE.
 #include "OgreViewport.h"
 #include "OgreRenderTarget.h"
 #include "OgreDepthBuffer.h"
+#include "OgreLwString.h"
 
 #include "OgreHlmsListener.h"
 
@@ -107,11 +108,17 @@ namespace Ogre
 
     //Change per scene pass
     const IdString HlmsBaseProp::DualParaboloidMapping= IdString( "hlms_dual_paraboloid_mapping" );
-    const IdString HlmsBaseProp::NumShadowMaps      = IdString( "hlms_num_shadow_maps" );
+    const IdString HlmsBaseProp::NumShadowMapLights = IdString( "hlms_num_shadow_map_lights" );
+    const IdString HlmsBaseProp::NumShadowMapTextures= IdString("hlms_num_shadow_map_textures" );
     const IdString HlmsBaseProp::PssmSplits         = IdString( "hlms_pssm_splits" );
     const IdString HlmsBaseProp::ShadowCaster       = IdString( "hlms_shadowcaster" );
+    const IdString HlmsBaseProp::ShadowCasterPoint  = IdString( "hlms_shadowcaster_point" );
     const IdString HlmsBaseProp::ShadowUsesDepthTexture= IdString( "hlms_shadow_uses_depth_texture" );
     const IdString HlmsBaseProp::RenderDepthOnly    = IdString( "hlms_render_depth_only" );
+    const IdString HlmsBaseProp::PrePass            = IdString( "hlms_prepass" );
+    const IdString HlmsBaseProp::UsePrePass         = IdString( "hlms_use_prepass" );
+    const IdString HlmsBaseProp::UsePrePassMsaa     = IdString( "hlms_use_prepass_msaa" );
+    const IdString HlmsBaseProp::UseSsr             = IdString( "hlms_use_ssr" );
     const IdString HlmsBaseProp::EnableVpls         = IdString( "hlms_enable_vpls" );
     const IdString HlmsBaseProp::ForwardPlus        = IdString( "hlms_forwardplus" );
     const IdString HlmsBaseProp::ForwardPlusFlipY   = IdString( "hlms_forwardplus_flipY" );
@@ -262,7 +269,6 @@ namespace Ogre
         setProperty( HlmsBaseProp::UvCount1, 4 );
         setProperty( HlmsBaseProp::BonesPerVertex, 4 );
 
-        setProperty( HlmsBaseProp::NumShadowMaps, 3 );
         setProperty( HlmsBaseProp::PssmSplits, 3 );
         setProperty( HlmsBaseProp::ShadowCaster, 0 );
 
@@ -447,8 +453,15 @@ namespace Ogre
         else
         {
             syntaxError = true;
+
+            char tmpData[64];
+            memset( tmpData, 0, sizeof(tmpData) );
+            strncpy( tmpData, &(*outSubString.begin()),
+                     std::min<size_t>( 63u, outSubString.getSize() ) );
+
             printf( "Syntax Error at line %lu: start block (e.g. @foreach; @property) "
-                    "without matching @end\n", calculateLineCount( outSubString ) );
+                    "without matching @end\nNear: '%s'\n", calculateLineCount( outSubString ),
+                    tmpData );
         }
     }
     //-----------------------------------------------------------------------------------
@@ -1316,17 +1329,11 @@ namespace Ogre
 
             if( !syntaxError )
             {
-                IdString dstProperty;
-                IdString srcProperty;
-                int op1Value;
-                int op2Value;
-
                 if( argValues.size() == 1 )
                 {
-                    dstProperty = argValues[0];
-                    srcProperty = dstProperty;
-                    op1Value    = getProperty( srcProperty );
-                    op2Value    = op1Value;
+                    const IdString dstProperty = argValues[0];
+                    const IdString srcProperty = dstProperty;
+                    int op1Value = getProperty( srcProperty );
 
                     //@value & @counter write, the others are invisible
                     char tmp[16];
@@ -1651,17 +1658,24 @@ namespace Ogre
     {
         mPassCache.clear();
 
-        HlmsCacheVec::const_iterator itor = mShaderCache.begin();
-        HlmsCacheVec::const_iterator end  = mShaderCache.end();
+        //Empty mShaderCache so that mHlmsManager->destroyMacroblock would
+        //be harmless even if _notifyMacroblockDestroyed gets called.
+        HlmsCacheVec shaderCache;
+        shaderCache.swap( mShaderCache );
+        HlmsCacheVec::const_iterator itor = shaderCache.begin();
+        HlmsCacheVec::const_iterator end  = shaderCache.end();
 
         while( itor != end )
         {
             mRenderSystem->_hlmsPipelineStateObjectDestroyed( &(*itor)->pso );
+            if( (*itor)->pso.pass.strongMacroblock )
+                mHlmsManager->destroyMacroblock( (*itor)->pso.macroblock );
+
             delete *itor;
             ++itor;
         }
 
-        mShaderCache.clear();
+        shaderCache.clear();
     }
     //-----------------------------------------------------------------------------------
     void Hlms::processPieces( Archive *archive, const StringVector &pieceFiles )
@@ -1745,7 +1759,10 @@ namespace Ogre
             if( mDataFolder->exists( filename ) )
             {
                 if( mShaderProfile == "glsl" ) //TODO: String comparision
-                    setProperty( HlmsBaseProp::GL3Plus, 330 );
+                {
+                    setProperty( HlmsBaseProp::GL3Plus,
+                                 mRenderSystem->getNativeShadingLanguageVersion() );
+                }
 
                 setProperty( HlmsBaseProp::Syntax,  mShaderSyntax.mHash );
                 setProperty( HlmsBaseProp::Hlsl,    HlmsBaseProp::Hlsl.mHash );
@@ -1868,6 +1885,19 @@ namespace Ogre
         pso.macroblock = datablock->getMacroblock( casterPass );
         pso.blendblock = datablock->getBlendblock( casterPass );
         pso.pass = passCache.pso.pass;
+
+        if( !pso.macroblock->mDepthWrite )
+        {
+            //Depth writes is already off, we don't need to hold a strong reference.
+            pso.pass.strongMacroblock = false;
+        }
+        else if( pso.pass.strongMacroblock )
+        {
+            //This is a depth prepass, disable depth writes and keep a hard copy (strong ref.)
+            HlmsMacroblock prepassMacroblock = *pso.macroblock;
+            prepassMacroblock.mDepthWrite = false;
+            pso.macroblock = mHlmsManager->getMacroblock( prepassMacroblock );
+        }
 
         //TODO: Configurable somehow (likely should be in datablock).
         pso.sampleMask = 0xffffffff;
@@ -2077,19 +2107,126 @@ namespace Ogre
                     numPssmSplits = static_cast<int32>( pssmSplits->size() - 1 );
                 setProperty( HlmsBaseProp::PssmSplits, numPssmSplits );
 
-                size_t numShadowMaps = shadowNode->getNumShadowCastingLights();
+                const TextureVec &contiguousShadowMapTex = shadowNode->getContiguousShadowMapTex();
+
+                size_t numShadowMapLights = shadowNode->getNumActiveShadowCastingLights();
                 if( numPssmSplits )
-                    numShadowMaps += numPssmSplits - 1;
-                setProperty( HlmsBaseProp::NumShadowMaps, numShadowMaps );
+                    numShadowMapLights += numPssmSplits - 1;
+                setProperty( HlmsBaseProp::NumShadowMapLights, numShadowMapLights );
+                setProperty( HlmsBaseProp::NumShadowMapTextures, contiguousShadowMapTex.size() );
+
+                {
+                    const Ogre::CompositorShadowNodeDef *shadowNodeDef = shadowNode->getDefinition();
+
+                    char tmpBuffer[64];
+                    LwString propName( LwString::FromEmptyPointer( tmpBuffer, sizeof(tmpBuffer) ) );
+
+                    propName = "hlms_shadowmap";
+                    const size_t basePropNameSize = propName.size();
+
+                    size_t shadowMapTexIdx = 0;
+
+                    for( size_t i=0; i<numShadowMapLights; ++i )
+                    {
+                        //Skip inactive lights (e.g. no directional lights are available
+                        //and there's a shadow map that only accepts dir lights)
+                        while( !shadowNode->isShadowMapIdxActive( shadowMapTexIdx ) )
+                            ++shadowMapTexIdx;
+
+                        const Ogre::ShadowTextureDefinition *shadowTexDef =
+                                shadowNodeDef->getShadowTextureDefinition( shadowMapTexIdx );
+
+                        propName.resize( basePropNameSize );
+                        propName.a( (uint32)i ); //hlms_shadowmap0
+
+                        const size_t basePropSize = propName.size();
+
+                        setProperty( propName.c_str(),
+                                     shadowNode->getIndexToContiguousShadowMapTex( shadowMapTexIdx ) );
+
+                        if( shadowTexDef->uvOffset != Vector2::ZERO ||
+                            shadowTexDef->uvLength != Vector2::UNIT_SCALE )
+                        {
+                            propName.resize( basePropSize );
+                            propName.a( "_uvs_fulltex" );
+                            setProperty( propName.c_str(), 1 );
+                        }
+
+                        float intPart, fractPart;
+
+                        fractPart = modff( (float)shadowTexDef->uvOffset.x, &intPart );
+                        propName.resize( basePropSize );
+                        propName.a( "_uv_min_x_int" );
+                        setProperty( propName.c_str(), (int32)intPart );
+                        propName.resize( basePropSize );
+                        propName.a( "_uv_min_x_fract" );
+                        setProperty( propName.c_str(), (int32)(fractPart * 100000.0f) );
+
+                        fractPart = modff( (float)shadowTexDef->uvOffset.y, &intPart );
+                        propName.resize( basePropSize );
+                        propName.a( "_uv_min_y_int" );
+                        setProperty( propName.c_str(), (int32)intPart );
+                        propName.resize( basePropSize );
+                        propName.a( "_uv_min_y_fract" );
+                        setProperty( propName.c_str(), (int32)(fractPart * 100000.0f) );
+
+                        Vector2 uvMax = shadowTexDef->uvOffset + shadowTexDef->uvLength;
+                        fractPart = modff( (float)uvMax.x, &intPart );
+                        propName.resize( basePropSize );
+                        propName.a( "_uv_max_x_int" );
+                        setProperty( propName.c_str(), (int32)intPart );
+                        propName.resize( basePropSize );
+                        propName.a( "_uv_max_x_fract" );
+                        setProperty( propName.c_str(), (int32)(fractPart * 100000.0f) );
+
+                        fractPart = modff( (float)uvMax.y, &intPart );
+                        propName.resize( basePropSize );
+                        propName.a( "_uv_max_y_int" );
+                        setProperty( propName.c_str(), (int32)intPart );
+                        propName.resize( basePropSize );
+                        propName.a( "_uv_max_y_fract" );
+                        setProperty( propName.c_str(), (int32)(fractPart * 100000.0f) );
+
+                        propName.resize( basePropSize );
+                        propName.a( "_array_idx" );
+                        setProperty( propName.c_str(), shadowTexDef->arrayIdx );
+
+                        const Light *light = shadowNode->getLightAssociatedWith( shadowMapTexIdx );
+                        if( light->getType() == Light::LT_POINT )
+                        {
+                            propName.resize( basePropSize );
+                            propName.a( "_is_point_light" );
+                            setProperty( propName.c_str(), 1 );
+
+                            fractPart = modff( (float)shadowTexDef->uvLength.x, &intPart );
+                            propName.resize( basePropSize );
+                            propName.a( "_uv_length_x_int" );
+                            setProperty( propName.c_str(), (int32)intPart );
+                            propName.resize( basePropSize );
+                            propName.a( "_uv_length_x_fract" );
+                            setProperty( propName.c_str(), (int32)(fractPart * 100000.0f) );
+
+                            fractPart = modff( (float)shadowTexDef->uvLength.y, &intPart );
+                            propName.resize( basePropSize );
+                            propName.a( "_uv_length_y_int" );
+                            setProperty( propName.c_str(), (int32)intPart );
+                            propName.resize( basePropSize );
+                            propName.a( "_uv_length_y_fract" );
+                            setProperty( propName.c_str(), (int32)(fractPart * 100000.0f) );
+                        }
+
+                        ++shadowMapTexIdx;
+                    }
+                }
 
                 int usesDepthTextures = -1;
 
-                const CompositorChannelVec &shadowTextures = shadowNode->getLocalTextures();
-                for( size_t i=0; i<numShadowMaps; ++i )
+                const size_t numShadowMapTextures = contiguousShadowMapTex.size();
+                for( size_t i=0; i<numShadowMapTextures; ++i )
                 {
                     bool missmatch = false;
 
-                    if( PixelUtil::isDepth( shadowTextures[i].textures[0]->getFormat() ) )
+                    if( PixelUtil::isDepth( contiguousShadowMapTex[i]->getFormat() ) )
                     {
                         missmatch = usesDepthTextures == 0;
                         usesDepthTextures = 1;
@@ -2146,10 +2283,12 @@ namespace Ogre
                     LightClosestArray::const_iterator end  = lights.end();
                     while( itor != end )
                     {
-                        if( itor->light->getType() == Light::LT_DIRECTIONAL )
-                            ++shadowCasterDirectional;
-
-                        ++numLightsPerType[itor->light->getType()];
+                        if( itor->light )
+                        {
+                            if( itor->light->getType() == Light::LT_DIRECTIONAL )
+                                ++shadowCasterDirectional;
+                            ++numLightsPerType[itor->light->getType()];
+                        }
                         ++itor;
                     }
                 }
@@ -2179,7 +2318,7 @@ namespace Ogre
                     LightClosestArray::const_iterator end  = lights.end();
                     while( itor != end )
                     {
-                        if( itor->light->getType() == Light::LT_DIRECTIONAL )
+                        if( itor->light && itor->light->getType() == Light::LT_DIRECTIONAL )
                             ++shadowCasterDirectional;
                         ++itor;
                     }
@@ -2216,11 +2355,23 @@ namespace Ogre
         }
         else
         {
-            setProperty( HlmsBaseProp::ShadowCaster, casterPass );
+            setProperty( HlmsBaseProp::ShadowCaster, 1 );
+
+            const CompositorPass *pass = sceneManager->getCurrentCompositorPass();
+
+            if( pass )
+            {
+                const uint8 shadowMapIdx = pass->getDefinition()->mShadowMapIdx;
+                const Light *light = shadowNode->getLightAssociatedWith( shadowMapIdx );
+                if( light->getType() == Light::LT_POINT )
+                    setProperty( HlmsBaseProp::ShadowCasterPoint, 1 );
+            }
+
             setProperty( HlmsBaseProp::DualParaboloidMapping, dualParaboloid );
 
             setProperty( HlmsBaseProp::Forward3D,         0 );
-            setProperty( HlmsBaseProp::NumShadowMaps, 0 );
+            setProperty( HlmsBaseProp::NumShadowMapLights,0 );
+            setProperty( HlmsBaseProp::NumShadowMapTextures, 0 );
             setProperty( HlmsBaseProp::PssmSplits, 0 );
             setProperty( HlmsBaseProp::LightsAttenuation, 0 );
             setProperty( HlmsBaseProp::LightsSpotParams,  0 );
@@ -2238,6 +2389,24 @@ namespace Ogre
         RenderTarget *renderTarget = sceneManager->getCurrentViewport()->getTarget();
         setProperty( HlmsBaseProp::RenderDepthOnly,
                      renderTarget->getForceDisableColourWrites() ? 1 : 0 );
+
+        if( sceneManager->getCurrentPrePassMode() == PrePassCreate )
+            setProperty( HlmsBaseProp::PrePass, 1 );
+        else if( sceneManager->getCurrentPrePassMode() == PrePassUse )
+        {
+            setProperty( HlmsBaseProp::UsePrePass, 1 );
+            setProperty( HlmsBaseProp::VPos, 1 );
+
+            {
+                const TextureVec *prePassTextures = sceneManager->getCurrentPrePassTextures();
+                assert( prePassTextures && !prePassTextures->empty() );
+                if( (*prePassTextures)[0]->getFSAA() > 1 )
+                    setProperty( HlmsBaseProp::UsePrePassMsaa, (*prePassTextures)[0]->getFSAA() );
+            }
+
+            if( sceneManager->getCurrentSsrTexture() != 0 )
+                setProperty( HlmsBaseProp::UseSsr, 1 );
+        }
 
         mListener->preparePassHash( shadowNode, casterPass, dualParaboloid, sceneManager, this );
 
@@ -2284,6 +2453,8 @@ namespace Ogre
         passPso.multisampleCount   = std::max( renderTarget->getFSAA(), 1u );
         passPso.multisampleQuality = StringConverter::parseInt( renderTarget->getFSAAHint() );
         passPso.adapterId = 1; //TODO: Ask RenderSystem current adapter ID.
+
+        passPso.strongMacroblock = sceneManager->getCurrentPrePassMode() == PrePassUse;
 
         return passPso;
     }
@@ -2360,14 +2531,25 @@ namespace Ogre
     //-----------------------------------------------------------------------------------
     void Hlms::_notifyMacroblockDestroyed( uint16 id )
     {
+        bool wasUsedInWeakRefs = false;
+        bool hasPsosWithStrongRefs = false;
+        HlmsMacroblock macroblock;
         HlmsCacheVec::iterator itor = mShaderCache.begin();
         HlmsCacheVec::iterator end  = mShaderCache.end();
 
         while( itor != end )
         {
+            if( (*itor)->pso.pass.strongMacroblock )
+                hasPsosWithStrongRefs = true;
+
             if( (*itor)->pso.macroblock->mId == id )
             {
                 mRenderSystem->_hlmsPipelineStateObjectDestroyed( &(*itor)->pso );
+                if( !(*itor)->pso.pass.strongMacroblock )
+                {
+                    wasUsedInWeakRefs = true;
+                    macroblock = *(*itor)->pso.macroblock;
+                }
                 delete *itor;
                 itor = mShaderCache.erase( itor );
                 end  = mShaderCache.end();
@@ -2377,10 +2559,41 @@ namespace Ogre
                 ++itor;
             }
         }
+
+        if( hasPsosWithStrongRefs && wasUsedInWeakRefs )
+        {
+            //It's possible we made a hard clone of this macroblock with depth writes
+            //disabled. We need to remove these cloned PSOs to avoid wasting memory.
+            macroblock.mDepthWrite = false;
+            vector<const HlmsMacroblock*>::type macroblocksToDelete;
+            itor = mShaderCache.begin();
+            end  = mShaderCache.end();
+
+            while( itor != end )
+            {
+                if( (*itor)->pso.pass.strongMacroblock && *(*itor)->pso.macroblock == macroblock )
+                    macroblocksToDelete.push_back( (*itor)->pso.macroblock );
+                ++itor;
+            }
+
+            //We need to delete the macroblocks at the end because destroying a
+            //macroblock could trigger _notifyMacroblockDestroyed, thus invalidating
+            //iterators in mShaderCache.
+            vector<const HlmsMacroblock*>::type::const_iterator itMacroblock =
+                    macroblocksToDelete.begin();
+            vector<const HlmsMacroblock*>::type::const_iterator enMacroblock =
+                    macroblocksToDelete.end();
+            while( itMacroblock != enMacroblock )
+            {
+                mHlmsManager->destroyMacroblock( *itMacroblock );
+                ++itMacroblock;
+            }
+        }
     }
     //-----------------------------------------------------------------------------------
     void Hlms::_notifyBlendblockDestroyed( uint16 id )
     {
+        vector<const HlmsMacroblock*>::type macroblocksToDelete;
         HlmsCacheVec::iterator itor = mShaderCache.begin();
         HlmsCacheVec::iterator end  = mShaderCache.end();
 
@@ -2389,6 +2602,8 @@ namespace Ogre
             if( (*itor)->pso.blendblock->mId == id )
             {
                 mRenderSystem->_hlmsPipelineStateObjectDestroyed( &(*itor)->pso );
+                if( (*itor)->pso.pass.strongMacroblock )
+                    macroblocksToDelete.push_back( (*itor)->pso.macroblock );
                 delete *itor;
                 itor = mShaderCache.erase( itor );
                 end  = mShaderCache.end();
@@ -2398,10 +2613,22 @@ namespace Ogre
                 ++itor;
             }
         }
+
+        //We need to delete the macroblocks at the end because destroying a
+        //macroblock could trigger _notifyMacroblockDestroyed, thus invalidating
+        //iterators in mShaderCache.
+        vector<const HlmsMacroblock*>::type::const_iterator itMacroblock = macroblocksToDelete.begin();
+        vector<const HlmsMacroblock*>::type::const_iterator enMacroblock = macroblocksToDelete.end();
+        while( itMacroblock != enMacroblock )
+        {
+            mHlmsManager->destroyMacroblock( *itMacroblock );
+            ++itMacroblock;
+        }
     }
     //-----------------------------------------------------------------------------------
     void Hlms::_notifyInputLayoutDestroyed( uint16 id )
     {
+        vector<const HlmsMacroblock*>::type macroblocksToDelete;
         HlmsCacheVec::iterator itor = mShaderCache.begin();
         HlmsCacheVec::iterator end  = mShaderCache.end();
 
@@ -2415,6 +2642,8 @@ namespace Ogre
                 {
                     //This is a v2 input layout.
                     mRenderSystem->_hlmsPipelineStateObjectDestroyed( &(*itor)->pso );
+                    if( (*itor)->pso.pass.strongMacroblock )
+                        macroblocksToDelete.push_back( (*itor)->pso.macroblock );
                     delete *itor;
                     itor = mShaderCache.erase( itor );
                     end  = mShaderCache.end();
@@ -2429,10 +2658,22 @@ namespace Ogre
                 ++itor;
             }
         }
+
+        //We need to delete the macroblocks at the end because destroying a
+        //macroblock could trigger _notifyMacroblockDestroyed, thus invalidating
+        //iterators in mShaderCache.
+        vector<const HlmsMacroblock*>::type::const_iterator itMacroblock = macroblocksToDelete.begin();
+        vector<const HlmsMacroblock*>::type::const_iterator enMacroblock = macroblocksToDelete.end();
+        while( itMacroblock != enMacroblock )
+        {
+            mHlmsManager->destroyMacroblock( *itMacroblock );
+            ++itMacroblock;
+        }
     }
     //-----------------------------------------------------------------------------------
     void Hlms::_notifyV1InputLayoutDestroyed( uint16 id )
     {
+        vector<const HlmsMacroblock*>::type macroblocksToDelete;
         HlmsCacheVec::iterator itor = mShaderCache.begin();
         HlmsCacheVec::iterator end  = mShaderCache.end();
 
@@ -2446,6 +2687,8 @@ namespace Ogre
                 {
                     //This is a v1 input layout.
                     mRenderSystem->_hlmsPipelineStateObjectDestroyed( &(*itor)->pso );
+                    if( (*itor)->pso.pass.strongMacroblock )
+                        macroblocksToDelete.push_back( (*itor)->pso.macroblock );
                     delete *itor;
                     itor = mShaderCache.erase( itor );
                     end  = mShaderCache.end();
@@ -2460,6 +2703,22 @@ namespace Ogre
                 ++itor;
             }
         }
+
+        //We need to delete the macroblocks at the end because destroying a
+        //macroblock could trigger _notifyMacroblockDestroyed, thus invalidating
+        //iterators in mShaderCache.
+        vector<const HlmsMacroblock*>::type::const_iterator itMacroblock = macroblocksToDelete.begin();
+        vector<const HlmsMacroblock*>::type::const_iterator enMacroblock = macroblocksToDelete.end();
+        while( itMacroblock != enMacroblock )
+        {
+            mHlmsManager->destroyMacroblock( *itMacroblock );
+            ++itMacroblock;
+        }
+    }
+    //-----------------------------------------------------------------------------------
+    void Hlms::_clearShaderCache(void)
+    {
+        clearShaderCache();
     }
     //-----------------------------------------------------------------------------------
     void Hlms::_changeRenderSystem( RenderSystem *newRs )

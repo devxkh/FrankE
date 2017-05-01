@@ -361,7 +361,7 @@ namespace Ogre
         float getMetalness(void) const;
 
         /** Calculates fresnel (F0 in most books) based on the IOR.
-            The formula used is ( (1 - idx) / 1 + idx )²
+            The formula used is ( (1 - idx) / (1 + idx) )²
         @remarks
             If "separateFresnel" was different from the current setting, it will call
             @see HlmsDatablock::flushRenderables. If the another shader must be created,
@@ -527,7 +527,7 @@ namespace Ogre
             Default value is Vector4( 0, 0, 1, 1 )
         */
         void setDetailMapOffsetScale( uint8 detailMap, const Vector4 &offsetScale );
-        const Vector4& getDetailMapOffsetScale( uint8 detailMap ) const;
+        Vector4 getDetailMapOffsetScale( uint8 detailMap ) const;
 
         /// Returns the index to mBakedTextures. Returns NUM_PBSM_TEXTURE_TYPES if
         /// there is no texture assigned to texType

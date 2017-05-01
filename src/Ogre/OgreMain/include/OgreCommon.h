@@ -79,6 +79,16 @@ namespace Ogre {
         NumVertexPass
     };
 
+    enum PrePassMode
+    {
+        /// This is a normal pass.
+        PrePassNone,
+        /// This is a depth pre-pass. Note: Implementations may write
+        /// to colour too for hybrid deferred & forward rendering.
+        PrePassCreate,
+        /// This pass will be using the results of a previous pre-pass
+        PrePassUse
+    };
 
     /** Comparison functions used for the depth/stencil buffer operations and 
         others. */
@@ -167,9 +177,9 @@ namespace Ogre {
 
         StencilParams() :
             enabled( false ),
-            padding( 0 ),
             readMask( 0xFF ),
-            writeMask( 0xFF ) {}
+            writeMask( 0xFF ),
+            padding( 0 ) {}
 
         bool operator < ( const StencilParams &other ) const
         {
@@ -656,14 +666,22 @@ namespace Ogre {
     /// Used as the light list, sorted
     struct LightClosest
     {
-        Light const *light;
+        Light       *light;
+        /// Index to SceneManager::mGlobalLightList.
+        /// globalIndex may be == SceneManager::mGlobalLightList.size() if
+        /// it holds a static light (see CompositorShadowNode::setLightFixedToShadowMap)
+        /// that is not currently in camera.
         size_t      globalIndex; //Index to SceneManager::mGlobalLightList
         Real        distance;
+        bool        isStatic;
+        bool        isDirty;
 
-        LightClosest() : light( 0 ),globalIndex(0),distance( 0.0f ) {}
+        LightClosest() :
+            light( 0 ),globalIndex( 0 ),distance( 0.0f ),
+            isStatic( false ), isDirty( false ) {}
         LightClosest( Light *_light, size_t _globalIndex, Real _distance ) :
-            light( _light ), globalIndex( _globalIndex ),
-            distance( _distance ) {}
+            light( _light ), globalIndex( _globalIndex ), distance( _distance ),
+            isStatic( false ), isDirty( false ) {}
 
         inline bool operator < ( const LightClosest &right ) const
         {

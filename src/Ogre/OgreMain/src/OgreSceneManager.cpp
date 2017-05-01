@@ -95,12 +95,16 @@ SceneManager::SceneManager(const String& name, size_t numWorkerThreads,
                            InstancingThreadedCullingMethod threadedCullingMethod) :
 mStaticMinDepthLevelDirty( 0 ),
 mStaticEntitiesDirty( true ),
+mPrePassMode( PrePassNone ),
+mPrePassTextures( 0 ),
+mSsrTexture( 0 ),
 mName(name),
 mRenderQueue( 0 ),
 mForwardPlusSystem( 0 ),
 mForwardPlusImpl( 0 ),
 mCameraInProgress(0),
 mCurrentViewport(0),
+mCurrentPass(0),
 mCurrentShadowNode(0),
 mShadowNodeIsReused( false ),
 mSkyPlaneEntity(0),
@@ -415,17 +419,23 @@ void SceneManager::clearFrameData(void)
 //-----------------------------------------------------------------------
 Light* SceneManager::createLight()
 {
-    const size_t totalNumObjects = mLightMemoryManager.getTotalNumObjects() + 1;
-    if( mGlobalLightList.lights.capacity() < totalNumObjects )
+    //We need calculateTotalNumObjectDataIncludingFragmentedSlots instead of getTotalNumObjects
+    //because of the "skips" we perform when doing multithreading
+    //(see BuildLightListRequest::startLightIdx). And these skips include fragmented slots
+    //(unused slots). If we use getTotalNumObjects, we'll get memory corruption when writing
+    //to visibilityMask and boundingSphere from the last thread.
+    const size_t requiredCapacity =
+            mLightMemoryManager.calculateTotalNumObjectDataIncludingFragmentedSlots() + 1u;
+    if( mGlobalLightList.lights.capacity() < requiredCapacity )
     {
         assert( mGlobalLightList.lights.empty() &&
                 "Don't create objects in the middle of a scene update!" );
-        mGlobalLightList.lights.reserve( totalNumObjects );
+        mGlobalLightList.lights.reserve( requiredCapacity );
         OGRE_FREE_SIMD( mGlobalLightList.visibilityMask, MEMCATEGORY_SCENE_CONTROL );
         OGRE_FREE_SIMD( mGlobalLightList.boundingSphere, MEMCATEGORY_SCENE_CONTROL );
-        mGlobalLightList.visibilityMask = OGRE_ALLOC_T_SIMD( uint32, totalNumObjects,
+        mGlobalLightList.visibilityMask = OGRE_ALLOC_T_SIMD( uint32, requiredCapacity,
                                                             MEMCATEGORY_SCENE_CONTROL );
-        mGlobalLightList.boundingSphere = OGRE_ALLOC_T_SIMD( Sphere, totalNumObjects,
+        mGlobalLightList.boundingSphere = OGRE_ALLOC_T_SIMD( Sphere, requiredCapacity,
                                                             MEMCATEGORY_SCENE_CONTROL );
     }
 
@@ -919,6 +929,16 @@ void SceneManager::_setForwardPlusEnabledInPass( bool bEnable )
         mForwardPlusImpl = 0;
 }
 //-----------------------------------------------------------------------
+void SceneManager::_setPrePassMode( PrePassMode mode, const TextureVec *prepassTextures,
+                                    const TextureVec *prepassDepthTexture,
+                                    const TextureVec *ssrTexture )
+{
+    mPrePassMode = mode;
+    mPrePassTextures = prepassTextures;
+    mPrePassDepthTexture = prepassDepthTexture;
+    mSsrTexture = ssrTexture;
+}
+//-----------------------------------------------------------------------
 void SceneManager::prepareRenderQueue(void)
 {
     /* TODO: RENDER QUEUE
@@ -1034,12 +1054,17 @@ void SceneManager::_cullPhase01( Camera* camera, const Camera *lodCamera, Viewpo
             fireCullFrustumThreads( cullRequest );
         }
     } // end lock on scene graph mutex
+
+    Root::getSingleton()._popCurrentSceneManager(this);
 }
 //-----------------------------------------------------------------------
 void SceneManager::_renderPhase02(Camera* camera, const Camera *lodCamera, Viewport* vp,
                                   uint8 firstRq, uint8 lastRq, bool includeOverlays)
 {
     OgreProfileGroup("_renderPhase02", OGREPROF_GENERAL);
+
+    Root::getSingleton()._pushCurrentSceneManager(this);
+    mAutoParamDataSource->setCurrentSceneManager(this);
 
     // reset light hash so even if light list is the same, we refresh the content every frame
     LightList emptyLightList;
@@ -3481,6 +3506,11 @@ void SceneManager::removeRenderObjectListener(RenderObjectListener* delListener)
             break;
         }
     }
+}
+//---------------------------------------------------------------------
+void SceneManager::_setCurrentCompositorPass( CompositorPass *pass )
+{
+    mCurrentPass = pass;
 }
 //---------------------------------------------------------------------
 void SceneManager::_setCurrentShadowNode( CompositorShadowNode *shadowNode, bool isReused )

@@ -849,7 +849,6 @@ namespace Ogre
         */
         virtual void _setVertexTexture(size_t unit, const TexturePtr& tex);
         virtual void _setGeometryTexture(size_t unit, const TexturePtr& tex);
-        virtual void _setComputeTexture(size_t unit, const TexturePtr& tex);
         virtual void _setTessellationHullTexture(size_t unit, const TexturePtr& tex);
         virtual void _setTessellationDomainTexture(size_t unit, const TexturePtr& tex);
 
@@ -1004,6 +1003,10 @@ namespace Ogre
         */
         virtual void _convertProjectionMatrix(const Matrix4& matrix,
             Matrix4& dest, bool forGpuProgram = false) = 0;
+
+        /// OpenGL depth is in range [-1;1] so it returns 2.0f;
+        /// D3D11 & Metal are in range [0;1] so it returns 1.0f;
+        virtual Real getRSDepthRange(void) const { return 2.0f; }
 
         /** Builds a perspective projection matrix suitable for this render system.
         @remarks
@@ -1265,11 +1268,12 @@ namespace Ogre
 
         /**
          * Set current render target to target, enabling its device context if needed
-        @param colourWrite
-            False to disable colour writes. @see CompositorPassDef::mColourWrite
+        @param viewportRenderTargetFlags
+            See ViewportRenderTargetFlags
+            See CompositorPassDef::mColourWrite
             The RenderTarget is needed to know the depth/stencil information.
          */
-        virtual void _setRenderTarget(RenderTarget *target, bool colourWrite) = 0;
+        virtual void _setRenderTarget( RenderTarget *target, uint8 viewportRenderTargetFlags ) = 0;
 
         /** This function was created because of Metal. The Metal API doesn't have a
             'device->clear( texture )' function. Instead we must specify we want to

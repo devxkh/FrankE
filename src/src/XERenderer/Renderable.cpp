@@ -93,6 +93,7 @@ namespace XE
 
 		//Ogre::Vector3 interpPosition = Ogre::Math::lerp(_t_LastPosition, _t_CurrentPosition, weight);
 		
+		_t_OgreEntitySceneNodePtr->setPosition(m_scale);
 		_t_OgreEntitySceneNodePtr->setPosition(m_position);
 		_t_OgreEntitySceneNodePtr->setOrientation(m_rotation);
 		_t_OgreEntitySceneNodePtr->setVisible(m_isVisible);
@@ -104,6 +105,12 @@ namespace XE
 	void Renderable::setWorldPosition(const Ogre::Vector3& pos)
 	{
 		m_position = pos;
+		isDirty = true;
+	}
+
+	void Renderable::setScale(const Ogre::Vector3& scale)
+	{
+		m_scale = scale;
 		isDirty = true;
 	}
 
@@ -154,7 +161,7 @@ namespace XE
 			{
 				Ogre::v1::MeshPtr meshV1;
 				
-				//std::cout << "meshes:" << var->Name()->c_str() << std::endl;
+				//std::cout << "meshes:" << var->Name()->c_str() << std::endl;d
 				LOG(plog::info) << "Renderable:_t_createItem";
 				LOG(plog::info) << "mesh_type:" << EnumNameUMesh(var->mesh_type());
 
@@ -164,7 +171,7 @@ namespace XE
 					meshV1 = Ogre::v1::MeshManager::getSingleton().createPlane(
 						std::to_string(m_ID),
 						"General",
-						Ogre::Plane(Ogre::Vector3::UNIT_Y, 0), 250, 250, 25, 25, true, 1, 15, 15, Ogre::Vector3::UNIT_Z,
+						Ogre::Plane(Ogre::Vector3::UNIT_Y, 0), 650, 650, 25, 25, true, 1, 15, 15, Ogre::Vector3::UNIT_Z,
 						Ogre::v1::HardwareBuffer::HBU_STATIC,
 						Ogre::v1::HardwareBuffer::HBU_STATIC); //without Ogre::v1::HardwareBuffer::HBU_STATIC crash in planeMesh->importV1???
 
@@ -179,7 +186,8 @@ namespace XE
 					meshV1->unload();
 
 					_t_OgreItemPtr = m_Scene.getOgreSceneManager().__OgreSceneMgrPtr->createItem(manual, (Ogre::SceneMemoryMgrTypes)Ogre::SCENE_DYNAMIC); //renderable->memType()); //Ogre::SCENE_DYNAMIC);
-
+				
+					_t_OgreItemPtr->setLightMask(0x0000001);
 					Ogre::HlmsManager *hlmsManager = m_GraphicsManager.getRoot()->getHlmsManager();
 					m_datablock = hlmsManager->getDatablock("StonesPbs");
 					//_t_OgreItemPtr->setDatablock(datablock); //todo multiple materials per mesh	

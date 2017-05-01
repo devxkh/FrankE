@@ -71,6 +71,11 @@ namespace Ogre
         {
             NO_CORNERS,
             VIEW_SPACE_CORNERS,
+            /// When normalized, then the corner is divided by the far plane.
+            /// This causes vector.z to be always 1, but the length of the vector
+            /// itself may not be unit-length.
+            VIEW_SPACE_CORNERS_NORMALIZED,
+            VIEW_SPACE_CORNERS_NORMALIZED_LH,   /// Left-handed
             WORLD_SPACE_CORNERS,
             WORLD_SPACE_CORNERS_CENTERED,
             CAMERA_DIRECTION
@@ -103,8 +108,8 @@ namespace Ogre
         FrustumCorners  mFrustumCorners;
         IdString        mCameraName;
 
-        CompositorPassQuadDef( CompositorNodeDef *parentNodeDef, uint32 rtIndex ) :
-            CompositorPassDef( PASS_QUAD, rtIndex ),
+        CompositorPassQuadDef( CompositorNodeDef *parentNodeDef, CompositorTargetDef *parentTargetDef ) :
+            CompositorPassDef( PASS_QUAD, parentTargetDef ),
             mParentNodeDef( parentNodeDef ),
             mUseQuad( false ),
             mIsResolve( false ),

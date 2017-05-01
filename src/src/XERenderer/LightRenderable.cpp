@@ -105,7 +105,7 @@ namespace XE
 		if (lightData->directionVector())
 			m_light->setDirection(Ogre::Vector3(lightData->directionVector()->x(), lightData->directionVector()->y(), lightData->directionVector()->z()).normalisedCopy());
 		
-		//m_light->setDirection(Ogre::Vector3(0, -1,0).normalisedCopy());
+		//m_light->setDirection(Ogre::Vector3(-0.505, 3.4, 5.423867).normalisedCopy());
 
 		if (lightData->attenuation())
 			m_light->setAttenuation(lightData->attenuation()->range(),lightData->attenuation()->constant(),lightData->attenuation()->linear(),lightData->attenuation()->quadratic());
@@ -139,7 +139,7 @@ namespace XE
 		sceneNodeLines->attachObject(manualObject);*/
 
 		//m_Scene.getOgreSceneManager().__OgreSceneMgrPtr->setAmbientLight(Ogre::ColourValue(1.0f, 1.0f, 1.0f),
-		//Ogre::ColourValue(1.0f, 1.0f, 1.0f),
+		//Ogre::ColourValue(0, 0, 0),
 		//-m_light->getDirection() + Ogre::Vector3::UNIT_Y * 0.2f);
 
 		//----------------------------- InstantRadiosity

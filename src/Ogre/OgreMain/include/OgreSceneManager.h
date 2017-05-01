@@ -472,6 +472,11 @@ namespace Ogre {
         */
         bool                    mStaticEntitiesDirty;
 
+        PrePassMode             mPrePassMode;
+        TextureVec const        *mPrePassTextures;
+        TextureVec const        *mPrePassDepthTexture;
+        TextureVec const        *mSsrTexture;
+
         /// Instance name
         String mName;
 
@@ -530,7 +535,8 @@ namespace Ogre {
         /// Current Viewport
         Viewport* mCurrentViewport;
 
-        CompositorShadowNode*   mCurrentShadowNode;
+        CompositorPass          *mCurrentPass;
+        CompositorShadowNode    *mCurrentShadowNode;
         bool                    mShadowNodeIsReused;
 
         /// Root scene node
@@ -1322,6 +1328,15 @@ namespace Ogre {
         /// For internal use.
         /// @see CompositorPassSceneDef::mEnableForwardPlus
         void _setForwardPlusEnabledInPass( bool bEnable );
+
+        /// For internal use.
+        /// @see CompositorPassSceneDef::mPrePassMode
+        void _setPrePassMode( PrePassMode mode, const TextureVec *prepassTextures,
+                              const TextureVec *prepassDepthTexture, const TextureVec *ssrTexture );
+        PrePassMode getCurrentPrePassMode(void) const               { return mPrePassMode; }
+        const TextureVec* getCurrentPrePassTextures(void) const     { return mPrePassTextures; }
+        const TextureVec* getCurrentPrePassDepthTexture(void) const { return mPrePassDepthTexture; }
+        const TextureVec* getCurrentSsrTexture(void) const          { return mSsrTexture; }
 
         NodeMemoryManager& _getNodeMemoryManager(SceneMemoryMgrTypes sceneType)
                                                                 { return mNodeMemoryManager[sceneType]; }
@@ -2713,6 +2728,10 @@ namespace Ogre {
             techniques may be used for hardware fallback.
         */
         virtual void setShadowTextureCasterMaterial(const String& name);
+
+        void _setCurrentCompositorPass( CompositorPass *pass );
+        /// Note: May be null.
+        const CompositorPass* getCurrentCompositorPass(void) const      { return mCurrentPass; }
 
         void _setCurrentShadowNode( CompositorShadowNode *shadowNode, bool isReused );
         const CompositorShadowNode* getCurrentShadowNode(void) const    { return mCurrentShadowNode; }

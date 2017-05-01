@@ -626,6 +626,8 @@ namespace Ogre
         /// @copydoc _notifyMacroblockDestroyed
         void _notifyV1InputLayoutDestroyed( uint16 id );
 
+        void _clearShaderCache(void);
+
         virtual void _changeRenderSystem( RenderSystem *newRs );
 
         RenderSystem* getRenderSystem(void) const           { return mRenderSystem; }
@@ -670,11 +672,17 @@ namespace Ogre
 
         //Change per scene pass
         static const IdString DualParaboloidMapping;
-        static const IdString NumShadowMaps;
+        static const IdString NumShadowMapLights;
+        static const IdString NumShadowMapTextures;
         static const IdString PssmSplits;
         static const IdString ShadowCaster;
+        static const IdString ShadowCasterPoint;
         static const IdString ShadowUsesDepthTexture;
         static const IdString RenderDepthOnly;
+        static const IdString PrePass;
+        static const IdString UsePrePass;
+        static const IdString UsePrePassMsaa;
+        static const IdString UseSsr;
         static const IdString EnableVpls;
         static const IdString ForwardPlus;
         static const IdString ForwardPlusFlipY;
@@ -700,6 +708,7 @@ namespace Ogre
         static const IdString Metal;
         static const IdString GL3Plus;
         static const IdString iOS;
+        static const IdString GLVersion;
         static const IdString HighQuality;
         static const IdString TexGather;
         static const IdString DisableStage;

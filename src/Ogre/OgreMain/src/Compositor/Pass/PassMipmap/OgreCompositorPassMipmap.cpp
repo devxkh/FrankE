@@ -74,8 +74,17 @@ namespace Ogre
     //-----------------------------------------------------------------------------------
     CompositorPassMipmap::~CompositorPassMipmap()
     {
+        destroyComputeShaders();
+    }
+    //-----------------------------------------------------------------------------------
+    void CompositorPassMipmap::destroyComputeShaders(void)
+    {
+        if( !mJobs.empty() )
         {
             RenderSystem *renderSystem = mParentNode->getRenderSystem();
+
+            assert( dynamic_cast<HlmsCompute*>( mJobs[0].job->getCreator() ) );
+            HlmsCompute *hlmsCompute = static_cast<HlmsCompute*>( mJobs[0].job->getCreator() );
 
             vector<JobWithBarrier>::type::iterator itor = mJobs.begin();
             vector<JobWithBarrier>::type::iterator end  = mJobs.end();
@@ -83,6 +92,7 @@ namespace Ogre
             while( itor != end )
             {
                 renderSystem->_resourceTransitionDestroyed( &itor->resourceTransition );
+                hlmsCompute->destroyComputeJob( itor->job->getName() );
                 ++itor;
             }
 
@@ -103,6 +113,8 @@ namespace Ogre
     //-----------------------------------------------------------------------------------
     void CompositorPassMipmap::setupComputeShaders(void)
     {
+        destroyComputeShaders();
+
         HlmsManager *hlmsManager = Root::getSingleton().getHlmsManager();
         HlmsCompute *hlmsCompute = hlmsManager->getComputeHlms();
 
@@ -189,16 +201,22 @@ namespace Ogre
                     paramLodIdx.name = "srcLodIdx";
                     ShaderParams::Param paramOutputSize;
                     paramOutputSize.name = "g_f4OutputSize";
+                    ShaderParams::Param paramDstLodIdx;
+                    paramDstLodIdx.name = "dstLodIdx";
 
                     ShaderParams *shaderParams = 0;
 
                     paramLodIdx.setManualValue( (float)mip );
                     paramOutputSize.setManualValue( Vector4( (float)currWidth, (float)currHeight,
                                                              1.0f / currWidth, 1.0f / currHeight ) );
+                    paramDstLodIdx.setManualValue( (uint32)mip );
 
                     shaderParams = &blurH2->getShaderParams( "default" );
                     shaderParams->mParams.push_back( paramLodIdx );
                     shaderParams->mParams.push_back( paramOutputSize );
+                    shaderParams->setDirty();
+                    shaderParams = &blurH2->getShaderParams( "metal" );
+                    shaderParams->mParams.push_back( paramDstLodIdx );
                     shaderParams->setDirty();
 
                     blurH2->setProperty( "width_with_lod", currWidth );
@@ -207,10 +225,14 @@ namespace Ogre
                     currWidth = std::max( currWidth >> 1u, 1u );
                     paramOutputSize.setManualValue( Vector4( (float)currWidth, (float)currHeight,
                                                              1.0f / currWidth, 1.0f / currHeight ) );
+                    paramDstLodIdx.setManualValue( (uint32)(mip + 1u) );
 
                     shaderParams = &blurV2->getShaderParams( "default" );
                     shaderParams->mParams.push_back( paramLodIdx );
                     shaderParams->mParams.push_back( paramOutputSize );
+                    shaderParams->setDirty();
+                    shaderParams = &blurV2->getShaderParams( "metal" );
+                    shaderParams->mParams.push_back( paramDstLodIdx );
                     shaderParams->setDirty();
 
                     blurH2->setTexture( 0, texture );
@@ -254,7 +276,8 @@ namespace Ogre
     {
         assert( !(kernelRadius & 0x01) && "kernelRadius must be even!" );
 
-        job->setProperty( "kernel_radius", kernelRadius );
+        if( job->getProperty( "kernel_radius" ) != kernelRadius )
+            job->setProperty( "kernel_radius", kernelRadius );
         ShaderParams &shaderParams = job->getShaderParams( "default" );
 
         std::vector<float> weights( kernelRadius + 1u );
@@ -440,5 +463,17 @@ namespace Ogre
 
         //Do not use base class functionality at all.
         //CompositorPass::_placeBarriersAndEmulateUavExecution();
+    }
+    //-----------------------------------------------------------------------------------
+    void CompositorPassMipmap::notifyRecreated( const CompositorChannel &oldChannel,
+                                                const CompositorChannel &newChannel )
+    {
+        CompositorPass::notifyRecreated( oldChannel, newChannel );
+
+        if( mTextures == oldChannel.textures )
+        {
+            mTextures = newChannel.textures;
+            setupComputeShaders();
+        }
     }
 }

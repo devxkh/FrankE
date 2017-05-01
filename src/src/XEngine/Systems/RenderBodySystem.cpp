@@ -35,6 +35,7 @@ namespace XE
 					entityx::ComponentHandle<Renderable> renderable = entity.component<Renderable>();
 					renderable->setWorldPosition(body->getPosition());
 					renderable->setOrientation(body->getOrientation());
+					renderable->setScale(body->getScale());
 				}
 								
 				if (entity.has_component<LightRenderable>())

@@ -22,8 +22,198 @@
 
 #include <algorithm>
 
+
+
+
+
+#include "Compositor/OgreCompositorManager2.h"
+#include "Compositor/OgreCompositorWorkspace.h"
+#include "Compositor/OgreCompositorWorkspaceDef.h"
+#include "Compositor/OgreCompositorNode.h"
+#include "Compositor/OgreCompositorNodeDef.h"
+
+#include "Compositor/Pass/PassQuad/OgreCompositorPassQuadDef.h"
+
+
+
+
 namespace XE
 {
+
+	void _t_createExtraEffectsFromCode(Root *root)
+	{
+		CompositorManager2 *compositorManager = root->getCompositorManager2();
+
+		// Bloom compositor is loaded from script but here is the hard coded equivalent
+		if (!compositorManager->hasNodeDefinition("Bloom"))
+		{
+			CompositorNodeDef *bloomDef = compositorManager->addNodeDefinition("Bloom");
+
+			//Input channels
+			bloomDef->addTextureSourceName("rt_input", 0, Ogre::TextureDefinitionBase::TEXTURE_INPUT);
+			bloomDef->addTextureSourceName("rt_output", 1, Ogre::TextureDefinitionBase::TEXTURE_INPUT);
+
+			bloomDef->mCustomIdentifier = "Ogre/Postprocess";
+
+			//Local textures
+			bloomDef->setNumLocalTextureDefinitions(2);
+			{
+				TextureDefinitionBase::TextureDefinition *texDef = bloomDef->addTextureDefinition("rt0");
+				texDef->widthFactor = 0.25f;
+				texDef->heightFactor = 0.25f;
+				texDef->formatList.push_back(Ogre::PF_R8G8B8);
+
+				texDef = bloomDef->addTextureDefinition("rt1");
+				texDef->widthFactor = 0.25f;
+				texDef->heightFactor = 0.25f;
+				texDef->formatList.push_back(Ogre::PF_R8G8B8);
+			}
+
+			bloomDef->setNumTargetPass(4);
+
+			{
+				CompositorTargetDef *targetDef = bloomDef->addTargetPass("rt0");
+
+				{
+					CompositorPassQuadDef *passQuad;
+					passQuad = static_cast<CompositorPassQuadDef*>(targetDef->addPass(PASS_QUAD));
+					passQuad->mMaterialName = "Postprocess/BrightPass2";
+					passQuad->addQuadTextureSource(0, "rt_input", 0);
+				}
+			}
+			{
+				CompositorTargetDef *targetDef = bloomDef->addTargetPass("rt1");
+
+				{
+					CompositorPassQuadDef *passQuad;
+					passQuad = static_cast<CompositorPassQuadDef*>(targetDef->addPass(PASS_QUAD));
+					passQuad->mMaterialName = "Postprocess/BlurV";
+					passQuad->addQuadTextureSource(0, "rt0", 0);
+				}
+			}
+			{
+				CompositorTargetDef *targetDef = bloomDef->addTargetPass("rt0");
+
+				{
+					CompositorPassQuadDef *passQuad;
+					passQuad = static_cast<CompositorPassQuadDef*>(targetDef->addPass(PASS_QUAD));
+					passQuad->mMaterialName = "Postprocess/BluH";
+					passQuad->addQuadTextureSource(0, "rt1", 0);
+				}
+			}
+			{
+				CompositorTargetDef *targetDef = bloomDef->addTargetPass("rt_output");
+
+				{
+					CompositorPassQuadDef *passQuad;
+					passQuad = static_cast<CompositorPassQuadDef*>(targetDef->addPass(PASS_QUAD));
+					passQuad->mMaterialName = "Postprocess/BloomBlend2";
+					passQuad->addQuadTextureSource(0, "rt_input", 0);
+					passQuad->addQuadTextureSource(1, "rt0", 0);
+				}
+			}
+
+			//Output channels
+			bloomDef->setNumOutputChannels(2);
+			bloomDef->mapOutputChannel(0, "rt_output");
+			bloomDef->mapOutputChannel(1, "rt_input");
+		}
+
+		//Glass compositor is loaded from script but here is the hard coded equivalent
+		//if (!compositorManager->hasNodeDefinition("Glass"))
+		//{
+		//	CompositorNodeDef *glassDef = compositorManager->addNodeDefinition("Glass");
+
+		//	//Input channels
+		//	glassDef->addTextureSourceName("rt_input", 0, TextureDefinitionBase::TEXTURE_INPUT);
+		//	glassDef->addTextureSourceName("rt_output", 1, TextureDefinitionBase::TEXTURE_INPUT);
+
+		//	glassDef->mCustomIdentifier = "Ogre/Postprocess";
+
+		//	glassDef->setNumTargetPass(1);
+
+		//	{
+		//		CompositorTargetDef *targetDef = glassDef->addTargetPass("rt_output");
+
+		//		{
+		//			CompositorPassQuadDef *passQuad;
+		//			passQuad = static_cast<CompositorPassQuadDef*>(targetDef->addPass(PASS_QUAD));
+		//			passQuad->mMaterialName = "Postprocess/Glass";
+		//			passQuad->addQuadTextureSource(0, "rt_input", 0);
+		//		}
+		//	}
+
+		//	//Output channels
+		//	glassDef->setNumOutputChannels(2);
+		//	glassDef->mapOutputChannel(0, "rt_output");
+		//	glassDef->mapOutputChannel(1, "rt_input");
+		//}
+
+		//if (!compositorManager->hasNodeDefinition("Motion Blur"))
+		//{
+		//	/// Motion blur effect
+		//	CompositorNodeDef *motionBlurDef = compositorManager->addNodeDefinition("Motion Blur");
+
+		//	//Input channels
+		//	motionBlurDef->addTextureSourceName("rt_input", 0, TextureDefinitionBase::TEXTURE_INPUT);
+		//	motionBlurDef->addTextureSourceName("rt_output", 1, TextureDefinitionBase::TEXTURE_INPUT);
+
+		//	motionBlurDef->mCustomIdentifier = "Ogre/Postprocess";
+
+		//	//Local textures
+		//	motionBlurDef->setNumLocalTextureDefinitions(1);
+		//	{
+		//		TextureDefinitionBase::TextureDefinition *texDef =
+		//			motionBlurDef->addTextureDefinition("sum");
+		//		texDef->width = 0;
+		//		texDef->height = 0;
+		//		texDef->formatList.push_back(Ogre::PF_R8G8B8);
+		//	}
+
+		//	motionBlurDef->setNumTargetPass(3);
+
+		//	/// Initialisation pass for sum texture
+		//	{
+		//		CompositorTargetDef *targetDef = motionBlurDef->addTargetPass("sum");
+		//		{
+		//			CompositorPassQuadDef *passQuad;
+		//			passQuad = static_cast<CompositorPassQuadDef*>(targetDef->addPass(PASS_QUAD));
+		//			passQuad->mNumInitialPasses = 1;
+		//			passQuad->mMaterialName = "Ogre/Copy/4xFP32";
+		//			passQuad->addQuadTextureSource(0, "rt_input", 0);
+		//		}
+		//	}
+		//	/// Do the motion blur
+		//	{
+		//		CompositorTargetDef *targetDef = motionBlurDef->addTargetPass("rt_output");
+
+		//		{
+		//			CompositorPassQuadDef *passQuad;
+		//			passQuad = static_cast<CompositorPassQuadDef*>(targetDef->addPass(PASS_QUAD));
+		//			passQuad->mMaterialName = "Postprocess/Combine";
+		//			passQuad->addQuadTextureSource(0, "rt_input", 0);
+		//			passQuad->addQuadTextureSource(1, "sum", 0);
+		//		}
+		//	}
+		//	/// Copy back sum texture for the next frame
+		//	{
+		//		CompositorTargetDef *targetDef = motionBlurDef->addTargetPass("sum");
+
+		//		{
+		//			CompositorPassQuadDef *passQuad;
+		//			passQuad = static_cast<CompositorPassQuadDef*>(targetDef->addPass(PASS_QUAD));
+		//			passQuad->mMaterialName = "Ogre/Copy/4xFP32";
+		//			passQuad->addQuadTextureSource(0, "rt_output", 0);
+		//		}
+		//	}
+
+		//	//Output channels
+		//	motionBlurDef->setNumOutputChannels(2);
+		//	motionBlurDef->mapOutputChannel(0, "rt_output");
+		//	motionBlurDef->mapOutputChannel(1, "rt_input");
+		//}
+	}
+
 	//#define GRAPHICS_THREAD 1  //compile with graphics render thread
 
 	GraphicsManager::GraphicsManager(XE::XEngine* engine) :
@@ -227,6 +417,8 @@ namespace XE
 			//GpuProgramManager::getSingleton().setSaveMicrocodesToCache(true); //Make sure it's enabled.
 			//DataStreamPtr shaderCacheFile = mRoot->openFileStream("F:/Projekte/coop/XGame/data/MyCache.cache");
 			//GpuProgramManager::getSingleton().loadMicrocodeCache(shaderCacheFile);
+
+			_t_createExtraEffectsFromCode(mRoot);
 
 		});
 	}

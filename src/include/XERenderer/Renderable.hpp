@@ -31,6 +31,8 @@ namespace XE {
 
 		void destoyItems();
 
+		void setScale(const Ogre::Vector3& scale);
+			
 		void setWorldPosition(const Ogre::Vector3& pos);
 
 		void setOrientation(const Ogre::Quaternion& rot);
@@ -107,6 +109,7 @@ namespace XE {
 		Ogre::Vector3 _t_CurrentPosition;
 
 		bool m_isVisible;
+		Ogre::Vector3 m_scale;
 		Ogre::Vector3 m_position;
 		Ogre::Quaternion m_rotation;
 

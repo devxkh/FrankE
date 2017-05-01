@@ -758,7 +758,10 @@ namespace Ogre
                             }
                             else
                             {
-                                addError(CE_DUPLICATEOVERRIDE, node->file, node->line);
+                                //Ignore override duplicates in Compositors,
+                                //since passes don't have unique names
+                                if( source->file.find( ".compositor" ) == String::npos )
+                                    addError(CE_DUPLICATEOVERRIDE, node->file, node->line);
                             }
 
                             if(!wildcardMatch)
@@ -1259,9 +1262,12 @@ namespace Ogre
         mIds["uses_uav"]        = ID_USES_UAV;
         mIds["allow_write_after_write"] = ID_ALLOW_WRITE_AFTER_WRITE;
         mIds["expose"]          = ID_EXPOSE;
+        mIds["shadow_map_full_viewport"]= ID_SHADOW_MAP_FULL_VIEWPORT;
         mIds["lod_bias"]        = ID_LOD_BIAS;
         mIds["lod_update_list"] = ID_LOD_UPDATE_LIST;
         mIds["lod_camera"]      = ID_LOD_CAMERA;
+        mIds["cull_reuse_data"] = ID_CULL_REUSE_DATA;
+        mIds["cull_camera"]     = ID_CULL_CAMERA;
         mIds["material_scheme"] = ID_MATERIAL_SCHEME;
         mIds["visibility_mask"] = ID_VISIBILITY_MASK;
         mIds["shadows"]         = ID_SHADOWS_ENABLED;
@@ -1270,10 +1276,16 @@ namespace Ogre
         mIds["rq_last"]         = ID_LAST_RENDER_QUEUE;
         mIds["camera_cubemap_reorient"] = ID_CAMERA_CUBEMAP_REORIENT;
         mIds["enable_forwardplus"]= ID_ENABLE_FORWARDPLUS;
+        mIds["is_prepass"]      = ID_IS_PREPASS;
+        mIds["use_prepass"]     = ID_USE_PREPASS;
 
         mIds["use_quad"]        = ID_USE_QUAD;
         mIds["quad_normals"]    = ID_QUAD_NORMALS;
         mIds["camera_far_corners_view_space"]   = ID_CAMERA_FAR_CORNERS_VIEW_SPACE;
+        mIds["camera_far_corners_view_space_normalized"]
+                                = ID_CAMERA_FAR_CORNERS_VIEW_SPACE_NORMALIZED;
+        mIds["camera_far_corners_view_space_normalized_lh"]
+                                = ID_CAMERA_FAR_CORNERS_VIEW_SPACE_NORMALIZED_LH;
         mIds["camera_far_corners_world_space"]  = ID_CAMERA_FAR_CORNERS_WORLD_SPACE;
         mIds["camera_far_corners_world_space_centered"] = ID_CAMERA_FAR_CORNERS_WORLD_SPACE_CENTERED;
         mIds["camera_direction"]                = ID_CAMERA_DIRECTION;
@@ -1326,9 +1338,12 @@ namespace Ogre
         mIds["num_splits"]              = ID_NUM_SPLITS;
         mIds["pssm_split_padding"]      = ID_PSSM_SPLIT_PADDING;
         mIds["pssm_lambda"]             = ID_PSSM_LAMBDA;
+        mIds["shadow_map_target_type"]  = ID_SHADOW_MAP_TARGET_TYPE;
+        mIds["shadow_map_repeat"]       = ID_SHADOW_MAP_REPEAT;
         mIds["shadow_map"]              = ID_SHADOW_MAP;
-        mIds["shadow_atlas"]            = ID_SHADOW_ATLAS;
         mIds["fsaa"]                    = ID_FSAA;
+        mIds["uv"]                      = ID_UV;
+        mIds["array_index"]             = ID_ARRAY_INDEX;
         mIds["light"]                   = ID_LIGHT;
         mIds["split"]                   = ID_SPLIT;
 
