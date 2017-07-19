@@ -17,32 +17,103 @@
 #include <Ogre/OgreMain/include/Compositor/Pass/PassClear/OgreCompositorPassClear.h>
 #include <Ogre/OgreMain/include/Compositor/Pass/PassScene/OgreCompositorPassScene.h>
 
-#include <Ogre/OgreMain/include/Compositor/OgreCompositorWorkspaceListener.h>
-#include <Ogre/OgreMain/include/Compositor/OgreCompositorWorkspace.h>
 
+#include <Ogre/OgreMain/include/Compositor/OgreCompositorWorkspace.h>
+#include <Ogre/OgreMain/include/Compositor/OgreCompositorWorkspaceDef.h>
+#include <Ogre/OgreMain/include/Compositor/OgreCompositorNode.h>
+#include <Ogre/OgreMain/include/Compositor/OgreCompositorNodeDef.h>
+
+
+#include <Ogre/OgreMain/include/Compositor/OgreCompositorWorkspace.h>
+#include <Ogre/OgreMain/include/OgreCamera.h>
 
 #include <SDL_syswm.h>
 
+#include <XERenderer/Editor/ImgGuiRenderable.hpp>
+#include <ThirdParty/imgui/imgui.h>
 
 namespace XE {
 
-	//Ogre::IdString OgreCompositorPassProvider::mPassId = Ogre::IdString("MYGUI");
+	ImGuiCompositorWorkspaceListener::ImGuiCompositorWorkspaceListener() :m_ImgGuiRenderable(0) {}
 
-	//MyGUIPass::MyGUIPass(const Ogre::CompositorPassDef *definition, const Ogre::CompositorChannel &target,
+	ImGuiCompositorWorkspaceListener::ImGuiCompositorWorkspaceListener(Ogre::Camera* camera)
+		:m_ImgGuiRenderable(0) {
+		m_camera = camera;
+	}
+
+	void ImGuiCompositorWorkspaceListener::passPreExecute(Ogre::CompositorPass *pass) {
+
+		if (pass->getDefinition()->mIdentifier == 10010)
+		{
+			ImGuiIO& io = ImGui::GetIO();
+
+			//Needed later
+		//	Ogre::Viewport *vp = m_camera->getSceneManager()->getCurrentViewport();
+
+			Ogre::Matrix4 projMatrix(2.0f / io.DisplaySize.x, 0.0f, 0.0f, -1.0f,
+									0.0f, -2.0f / io.DisplaySize.y, 0.0f, 1.0f,
+									0.0f, 0.0f, -1.0f, 0.0f,
+									0.0f, 0.0f, 0.0f, 1.0f);
+
+			m_camera->setCustomProjectionMatrix(true, projMatrix);
+			
+			//render the object
+		/*	if(m_ImgGuiRenderable)
+			{
+				m_ImgGuiRenderable->m_sceneNodeLines->setPosition(m_camera->getPosition());
+				m_ImgGuiRenderable->m_sceneNodeLines->setOrientation(m_camera->getOrientation());
+			}*/
+		}
+		else
+		{
+			m_camera->setCustomProjectionMatrix(false);
+		}
+	}
+
+	//Ogre::IdString OgreCompositorPassProvider::mPassId = Ogre::IdString("ImGui");
+
+	//ImGuiPass::ImGuiPass(const Ogre::CompositorPassDef *definition, const Ogre::CompositorChannel &target,
 	//	Ogre::CompositorNode *parentNode, GraphicsManager& graphicsMgr)
 	//	: Ogre::CompositorPass(definition, target, parentNode) ,m_GraphicsManager(graphicsMgr)
 	//{
 
 	//}
 
-	//void MyGUIPass::execute(const Ogre::Camera *lodCameraconst)
+	//void ImGuiPass::execute(const Ogre::Camera *lodCameraconst)
 	//{
 	////-----------------------------	m_GraphicsManager.getGUIRenderer()._t_update();
 	////todo!	static_cast<MyGUI::OgreRenderManager*>(MyGUI::RenderManager::getInstancePtr())->render();
 	//}
 
+Ogre::IdString OgreCompositorPassProvider::mPassId = Ogre::IdString("MYGUI");
+
+MyGUIPass::MyGUIPass(const Ogre::CompositorPassDef *definition, const Ogre::CompositorChannel &target,
+	Ogre::CompositorNode *parentNode, GraphicsManager& graphicsMgr, Ogre::Camera* camera)
+	: Ogre::CompositorPass(definition, target, parentNode) 
+	,m_GraphicsManager(graphicsMgr),
+	m_camera(camera)
+{
+
+}
+
+void MyGUIPass::execute(const Ogre::Camera *lodCameraconst)
+{
+	ImGuiIO& io = ImGui::GetIO();
+
+	Ogre::Matrix4 projMatrix(2.0f / io.DisplaySize.x, 0.0f, 0.0f, -1.0f,
+		0.0f, -2.0f / io.DisplaySize.y, 0.0f, 1.0f,
+		0.0f, 0.0f, -1.0f, 0.0f,
+		0.0f, 0.0f, 0.0f, 1.0f);
+
+	m_camera->setCustomProjectionMatrix(true, projMatrix);
+
+//-----------------------------	m_GraphicsManager.getGUIRenderer()._t_update();
+//todo!	static_cast<MyGUI::OgreRenderManager*>(MyGUI::RenderManager::getInstancePtr())->render();
+}
+
 	OgreWorkspace::OgreWorkspace(XEngine& engine, GraphicsManager& graphicsMgr) :
 		mGraphicsManager(graphicsMgr),
+		m_imguilistener(),
 		//	mRenderWindow(nullptr),
 		//	mWindow(nullptr),
 		mEngine(engine)
@@ -138,8 +209,8 @@ namespace XE {
 
 			//params.insert(std::make_pair("title", windowTitle));
 			params.insert(std::make_pair("gamma", "true"));
-		//	params.insert(std::make_pair("FSAA", cfgOpts["FSAA"].currentValue));
-		//	params.insert(std::make_pair("vsync", cfgOpts["VSync"].currentValue));
+			//	params.insert(std::make_pair("FSAA", cfgOpts["FSAA"].currentValue));
+			//	params.insert(std::make_pair("vsync", cfgOpts["VSync"].currentValue));
 
 #if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
 			params.insert(std::make_pair("externalWindowHandle", winHandle));
@@ -148,10 +219,10 @@ namespace XE {
 #endif
 
 
-		//	unsigned long winHandle = reinterpret_cast<unsigned long>(window->getSystemHandle());
-			//unsigned long winGlContext = reinterpret_cast<unsigned long>(wglGetCurrentContext());
+			//	unsigned long winHandle = reinterpret_cast<unsigned long>(window->getSystemHandle());
+				//unsigned long winGlContext = reinterpret_cast<unsigned long>(wglGetCurrentContext());
 
-		//	misc["externalWindowHandle"] = Ogre::StringConverter::toString(winHandle);
+			//	misc["externalWindowHandle"] = Ogre::StringConverter::toString(winHandle);
 		}
 		else
 		{
@@ -164,8 +235,8 @@ namespace XE {
 //#endif
 
 		//--------------------------------
-	
-			Ogre::RenderWindow* renderWindow = Ogre::Root::getSingleton().createRenderWindow("Main", 0, 0, false, &params);
+
+		Ogre::RenderWindow* renderWindow = Ogre::Root::getSingleton().createRenderWindow("Main", 0, 0, false, &params);
 		//	}
 
 		//	view.mWindow = mWindow;
@@ -194,7 +265,7 @@ namespace XE {
 		size_t lightIdx = 0;
 
 		CompositorManager2 *compositorManager = Root::getSingleton().getCompositorManager2();
-	//	compositorManager->removeAllShadowNodeDefinitions();
+		//	compositorManager->removeAllShadowNodeDefinitions();
 
 		CompositorShadowNodeDef *shadowNodeDef = compositorManager->addShadowNodeDefinition("myShadowNode");
 
@@ -235,7 +306,7 @@ namespace XE {
 
 		shadowNodeDef->setNumTargetPass(numShadowMaps);
 
-		for (size_t i = 0; i<numShadowMaps; ++i)
+		for (size_t i = 0; i < numShadowMaps; ++i)
 		{
 			CompositorTargetDef *targetPassDef = shadowNodeDef->addTargetPass(StringConverter::toString(i));
 			targetPassDef->setNumPasses(2);
@@ -255,35 +326,35 @@ namespace XE {
 			}
 		}
 
-	//	CompositorNodeDef *nodeDef = compositorManager->getNodeDefinitionNonConst("DefaultNode");
+		//	CompositorNodeDef *nodeDef = compositorManager->getNodeDefinitionNonConst("DefaultNode");
 
-		//for (size_t i = 0; i<nodeDef->getNumTargetPasses(); ++i)
-		//{
-		//	CompositorTargetDef *targetDef = nodeDef->getTargetPass(i);
+			//for (size_t i = 0; i<nodeDef->getNumTargetPasses(); ++i)
+			//{
+			//	CompositorTargetDef *targetDef = nodeDef->getTargetPass(i);
 
-		//	const CompositorPassDefVec &passDefs = targetDef->getCompositorPasses();
-		//	CompositorPassDefVec::const_iterator itor = passDefs.begin();
-		//	CompositorPassDefVec::const_iterator end = passDefs.end();
+			//	const CompositorPassDefVec &passDefs = targetDef->getCompositorPasses();
+			//	CompositorPassDefVec::const_iterator itor = passDefs.begin();
+			//	CompositorPassDefVec::const_iterator end = passDefs.end();
 
-		//	while (itor != end)
-		//	{
-		//		CompositorPassDef *passDef = *itor;
+			//	while (itor != end)
+			//	{
+			//		CompositorPassDef *passDef = *itor;
 
-		//		//if (passDef->mIdentifier == 1000) //We actually flag which passes use a shadow node with an identifier
-		//		//{
-		//		if (passDef->getType() == Ogre::PASS_SCENE) {
-		//		//	assert(passDef->getType() == PASS_SCENE);
-		//			CompositorPassSceneDef *passSceneDef = static_cast<CompositorPassSceneDef*>(passDef);
-		//			passSceneDef->mShadowNode = shadowsEnabled ? IdString("myShadowNode") : IdString();
-		//		}
-		//		/*else
-		//		{
-		//			assert(passDef->getType() != PASS_SCENE);
-		//		}*/
+			//		//if (passDef->mIdentifier == 1000) //We actually flag which passes use a shadow node with an identifier
+			//		//{
+			//		if (passDef->getType() == Ogre::PASS_SCENE) {
+			//		//	assert(passDef->getType() == PASS_SCENE);
+			//			CompositorPassSceneDef *passSceneDef = static_cast<CompositorPassSceneDef*>(passDef);
+			//			passSceneDef->mShadowNode = shadowsEnabled ? IdString("myShadowNode") : IdString();
+			//		}
+			//		/*else
+			//		{
+			//			assert(passDef->getType() != PASS_SCENE);
+			//		}*/
 
-		//		++itor;
-		//	}
-		//}
+			//		++itor;
+			//	}
+			//}
 
 		Ogre::Root *root = Root::getSingletonPtr();
 		Ogre::HlmsManager *hlmsManager = root->getHlmsManager();
@@ -296,93 +367,105 @@ namespace XE {
 	void OgreWorkspace::_t_createWorkspace(Ogre::RenderWindow* renderWindow, Ogre::Camera* camera)
 	{
 
-	//	mGraphicsManager.getIntoRendererQueue().push([this, renderWindow, camera](){
+		//	mGraphicsManager.getIntoRendererQueue().push([this, renderWindow, camera](){
 
-			//create Camera
-			//wird in controller constructor gemacht	controller.setCamera(OGRE_NEW Camera(controller.getID(), &mEngine->getScene()));
+				//create Camera
+				//wird in controller constructor gemacht	controller.setCamera(OGRE_NEW Camera(controller.getID(), &mEngine->getScene()));
 
-			//std::stringstream camName;
-			//camName << "Cam" << controller.getID(); // camera wird in controller constructor erstellt
+				//std::stringstream camName;
+				//camName << "Cam" << controller.getID(); // camera wird in controller constructor erstellt
 
-			//view.mCamera->getCamera()->setNearClipDistance(0.7);
-			//view.mCamera->getCamera()->setAutoAspectRatio(true);
+				//view.mCamera->getCamera()->setNearClipDistance(0.7);
+				//view.mCamera->getCamera()->setAutoAspectRatio(true);
 
 
 
-			//new create compositor
-			//rendersystem intialize needed for compositor
-			//window needed for HardwareBufferManager!
-			// Create the compositor after the first RenderWindow has been created (D3D9 complains)
-			//KH ?????  mGraphicsManager->getRoot()->initialiseCompositor();
+				//new create compositor
+				//rendersystem intialize needed for compositor
+				//window needed for HardwareBufferManager!
+				// Create the compositor after the first RenderWindow has been created (D3D9 complains)
+				//KH ?????  mGraphicsManager->getRoot()->initialiseCompositor();
 
 		Ogre::CompositorManager2* m_compositorManager = this->mGraphicsManager.getRoot()->getCompositorManager2();
 
-		//###	mPassProvider.reset(new OgreCompositorPassProvider(mGraphicsManager));
+			//##### mPassProvider.reset(new OgreCompositorPassProvider(mGraphicsManager, camera));
 
 			// don't overwrite a custom pass provider that the user may have registered already
-	//KH		if (!m_compositorManager->getCompositorPassProvider())
-	//###		m_compositorManager->setCompositorPassProvider(mPassProvider.get());
+	//KH	
+		//##### if (!m_compositorManager->getCompositorPassProvider())
+		//##### 	m_compositorManager->setCompositorPassProvider(mPassProvider.get());
 
 
-			if (!m_compositorManager->hasWorkspaceDefinition("MyOwnWorkspace"))
+		if (!m_compositorManager->hasWorkspaceDefinition("MyOwnWorkspace"))
+		{
+			//funtzt ->>>
+			//	m_compositorManager->createBasicWorkspaceDef("MyOwnWorkspace", ColourValue(0.6f, 0.0f, 0.6f));
+
+			Ogre::CompositorNodeDef *nodeDef = m_compositorManager->addNodeDefinition("AutoGen " + (Ogre::IdString("MyOwnWorkspace") + Ogre::IdString("/Node")).getReleaseText());
+
+			//Input texture
+			nodeDef->addTextureSourceName("WindowRT", 0, Ogre::TextureDefinitionBase::TEXTURE_INPUT);
+
+			Ogre::CompositorPassSceneDef *passScene;
+
+			nodeDef->setNumTargetPass(1);
 			{
-				//funtzt ->>>
-				//	m_compositorManager->createBasicWorkspaceDef("MyOwnWorkspace", ColourValue(0.6f, 0.0f, 0.6f));
-
-				Ogre::CompositorNodeDef *nodeDef = m_compositorManager->addNodeDefinition("AutoGen " + (Ogre::IdString("MyOwnWorkspace") + Ogre::IdString("/Node")).getReleaseText());
-
-				//Input texture
-				nodeDef->addTextureSourceName("WindowRT", 0, Ogre::TextureDefinitionBase::TEXTURE_INPUT);
-
-				Ogre::CompositorPassSceneDef *passScene;
-
-				nodeDef->setNumTargetPass(1);
+				Ogre::CompositorTargetDef *targetDef = nodeDef->addTargetPass("WindowRT");
+				targetDef->setNumPasses(3);
 				{
-					Ogre::CompositorTargetDef *targetDef = nodeDef->addTargetPass("WindowRT");
-					targetDef->setNumPasses(3);
 					{
-						{
-							Ogre::CompositorPassClearDef *passClear = static_cast<Ogre::CompositorPassClearDef*> (targetDef->addPass(Ogre::PASS_CLEAR));
-							passClear->mColourValue = Ogre::ColourValue(0.6f, 0.0f, 0.6f);
-						}
-						{
-							passScene = static_cast<Ogre::CompositorPassSceneDef*> (targetDef->addPass(Ogre::PASS_SCENE));
-							//passScene->mShadowNode = IdString("myShadowNode"); // Ogre::IdString();
-							//passScene->mShadowNode = IdString("ShadowMapDebuggingEsmShadowNodeCompute");
-							passScene->mVpWidth = 1.0;
-							passScene->mVpHeight = 1.0;
-							passScene->mVpLeft = 0.0f;
-							passScene->mCameraName = camera->getName(); // "LeftCamera";
-
-							// For the MyGUI pass
-						//	targetDef->addPass(Ogre::PASS_CUSTOM, OgreCompositorPassProvider::mPassId);
-							
-						}
-
-
-						//{
-						//	Ogre::CompositorPassSceneDef *passScene = static_cast<Ogre::CompositorPassSceneDef*>
-						//		(targetDef->addPass(Ogre::PASS_SCENE));
-						//	passScene->mShadowNode = Ogre::IdString();
-						//	passScene->mVpWidth = 0.5;
-						//	passScene->mVpHeight = 0.5;
-						//	passScene->mVpLeft = 0.5f;
-						//	passScene->mCameraName = "RightCamera";
-						//}
+						Ogre::CompositorPassClearDef *passClear = static_cast<Ogre::CompositorPassClearDef*> (targetDef->addPass(Ogre::PASS_CLEAR));
+						passClear->mColourValue = Ogre::ColourValue(0.6f, 0.0f, 0.6f);
 					}
+					{
+						passScene = static_cast<Ogre::CompositorPassSceneDef*> (targetDef->addPass(Ogre::PASS_SCENE));
+						//passScene->mShadowNode = IdString("myShadowNode"); // Ogre::IdString();
+						//passScene->mShadowNode = IdString("ShadowMapDebuggingEsmShadowNodeCompute");
+						passScene->mVpWidth = 1.0;
+						passScene->mVpHeight = 1.0;
+						passScene->mVpLeft = 0.0f;
+						passScene->mCameraName = camera->getName(); // "LeftCamera";
+						passScene->mFirstRQ = 0;
+						passScene->mLastRQ = 250;
+						// For the MyGUI pass
+					//	targetDef->addPass(Ogre::PASS_CUSTOM, OgreCompositorPassProvider::mPassId);
+
+					}
+					{
+						passScene = static_cast<Ogre::CompositorPassSceneDef*> (targetDef->addPass(Ogre::PASS_SCENE));
+						passScene->mVpWidth = 1.0;
+						passScene->mVpHeight = 1.0;
+						passScene->mVpLeft = 0.0f;
+						passScene->mCameraName = camera->getName(); // "LeftCamera";
+						passScene->mFirstRQ = 250;
+						passScene->mLastRQ = 255;
+						passScene->mIdentifier = 10010;
+						//targetDef->addPass(Ogre::PASS_CUSTOM, OgreCompositorPassProvider::mPassId);
+					}
+
+					//{
+					//	Ogre::CompositorPassSceneDef *passScene = static_cast<Ogre::CompositorPassSceneDef*>
+					//		(targetDef->addPass(Ogre::PASS_SCENE));
+					//	passScene->mShadowNode = Ogre::IdString();
+					//	passScene->mVpWidth = 0.5;
+					//	passScene->mVpHeight = 0.5;
+					//	passScene->mVpLeft = 0.5f;
+					//	passScene->mCameraName = "RightCamera";
+					//}
 				}
-				//----	nodeDef->getTargetPass(0)->getCompositorPasses()->
-				//passScene->
-				
-				Ogre::CompositorWorkspaceDef *workDef = m_compositorManager->addWorkspaceDefinition(std::string("MyOwnWorkspace"));
-				//workDef->connectOutput(nodeDef->getName(), 0);
-				workDef->connectExternal(0, nodeDef->getName(),0);
+			}
+			//----	nodeDef->getTargetPass(0)->getCompositorPasses()->
+			//passScene->
+
+			Ogre::CompositorWorkspaceDef *workDef = m_compositorManager->addWorkspaceDefinition(std::string("MyOwnWorkspace"));
+			//workDef->connectOutput(nodeDef->getName(), 0);
+			workDef->connectExternal(0, nodeDef->getName(), 0);
 
 			//	this->mGraphicsManager.getRoot()->getHlmsManager()->setShadowMappingUseBackFaces(false);
 
 			//	setShadowMapping(nodeDef, true, 1 , 2048, true);
 				//todo!	controller.getControllerView().getCameraController()._t_getOgreCamera();
-				Ogre::CompositorWorkspace*  myworkspace = m_compositorManager->addWorkspace(mEngine.getOgreSceneManager().__OgreSceneMgrPtr, renderWindow, camera, "MyOwnWorkspace", true);
+			Ogre::CompositorWorkspace*  myworkspace = m_compositorManager->addWorkspace(mEngine.getOgreSceneManager().__OgreSceneMgrPtr, renderWindow, camera, "MyOwnWorkspace", true);
 
 			//	myworkspace->recreateAllNodes();
 			//	myworkspace->reconnectAllNodes();
@@ -390,23 +473,72 @@ namespace XE {
 
 				//passScene->
 				//myworkspace->getListener();
-				//CompositorPass * test;
-				//CompositorWorkspaceListener listener(test);
-				//myworkspace->setListener(&listener);
+			//	CompositorPass * test;
+		//	m_imguilistener.m_camera = camera;
+		//	mGraphicsManager.getGUIRenderer()._t_initimgui(&mEngine.getOgreSceneManager().__OgreSceneMgrPtr->_getEntityMemoryManager(Ogre::SCENE_DYNAMIC), mEngine.getOgreSceneManager().__OgreSceneMgrPtr, camera);
+		//	m_imguilistener.m_ImgGuiRenderable = mGraphicsManager.getGUIRenderer()._t_ImgGuiRenderable;
+		//	myworkspace->setListener(&m_imguilistener);
 
-			}
-	//	});
+
+		}
+		//	});
+
+				//Ogre::CompositorWorkspace*  workspace = m_compositorManager->addWorkspace(mEngine.getOgreSceneManager().__OgreSceneMgrPtr, renderWindow, camera, "MyOwnWorkspace", true);
+
+				//CompositorNode *node = workspace->findNode("Bloom");
+				//node->setEnabled(!node->getEnabled());
+
+				////The workspace instance can't return a non-const version of
+				////its definition, so we perform the lookup this way.
+				//CompositorWorkspaceDef *workspaceDef = m_compositorManager->getWorkspaceDefinition("MyOwnWorkspace");
+
+				////workspaceDef->clearAllInterNodeConnections();
+
+				//IdString finalCompositionId = "FinalComposition";
+				//const CompositorNodeVec &nodes = workspace->getNodeSequence();
+
+				//IdString lastInNode;
+				//CompositorNodeVec::const_iterator it = nodes.begin();
+				//CompositorNodeVec::const_iterator en = nodes.end();
+
+				//while (it != en)
+				//{
+				//	CompositorNode *outNode = *it;
+
+				//	if (outNode->getEnabled() && outNode->getName() != finalCompositionId)
+				//	{
+				//		//Look for the next enabled node we can connect to
+				//		CompositorNodeVec::const_iterator it2 = it + 1;
+				//		while (it2 != en && (!(*it2)->getEnabled() || (*it2)->getName() == finalCompositionId))
+				//			++it2;
+
+				//		if (it2 != en)
+				//		{
+				//			lastInNode = (*it2)->getName();
+				//			workspaceDef->connect(outNode->getName(), lastInNode);
+				//		}
+
+				//		it = it2 - 1;
+				//	}
+
+				//	++it;
+				//}
+
+				//if (lastInNode == IdString())
+				//	lastInNode = "PostprocessingSampleStdRenderer";
+
+				//workspaceDef->connect(lastInNode, 0, "FinalComposition", 1);
 
 
-		//TEST Ogre::CompositorNodeDef *nodeDef = m_compositorManager->addNodeDefinition("AutoGen " + (Ogre::IdString("MyOwnWorkspace") +	Ogre::IdString("/Node")).getReleaseText());
+			//TEST Ogre::CompositorNodeDef *nodeDef = m_compositorManager->addNodeDefinition("AutoGen " + (Ogre::IdString("MyOwnWorkspace") +	Ogre::IdString("/Node")).getReleaseText());
 
-		//needs node def!!
-		//TESTOgre::CompositorWorkspaceDef *workDef = m_compositorManager->addWorkspaceDefinition(std::string("MyOwnWorkspace"));
-		//TESTworkDef->connectOutput(nodeDef->getName(), 0);
+			//needs node def!!
+			//TESTOgre::CompositorWorkspaceDef *workDef = m_compositorManager->addWorkspaceDefinition(std::string("MyOwnWorkspace"));
+			//TESTworkDef->connectOutput(nodeDef->getName(), 0);
 
-		//needs initialiseCompositor !!
-		//needs  workDef!! e.g. MyOwnWorkspace
-		//TESTm_compositorManager->addWorkspace(mEngine->getScene().getSceneMgr(), mRenderWindow, view.mCamera->getCamera(), "MyOwnWorkspace", true);
+			//needs initialiseCompositor !!
+			//needs  workDef!! e.g. MyOwnWorkspace
+			//TESTm_compositorManager->addWorkspace(mEngine->getScene().getSceneMgr(), mRenderWindow, view.mCamera->getCamera(), "MyOwnWorkspace", true);
 
 	}
 

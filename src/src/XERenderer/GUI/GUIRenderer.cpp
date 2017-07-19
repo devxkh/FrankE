@@ -10,6 +10,9 @@
 #include "flatbuffers/idl.h"
 #include "flatbuffers/util.h"
 
+#include <Ogre/OgreMain/include/OgreTextureManager.h>
+#include <Ogre/OgreMain/include/OgreHlmsTextureManager.h>
+
 #include <XEUI/DAL/FB_UI_Atlas_generated.h>
 
 #include <ThirdParty/plog/Log.h>
@@ -19,14 +22,28 @@
 #include <XEScripts/LUAEngine.h>
 #include <XEUI/Glyph.hpp>
 
+#include <ThirdParty/imgui/imgui.h>
+
+#include <XERenderer/Editor/ImgGuiRenderable.hpp>
+#include <OgrePixelBox.h>
+
+#include <OgreHardwarePixelBuffer.h>
+
+
 #include <iostream>
+
+
+
+static double       g_Time = 0.0f;
+static float        g_MouseWheel = 0.0f;
+static bool         g_MousePressed[3] = { false, false, false };
 
 namespace XE
 {
 
 	GUIRenderer::GUIRenderer(GraphicsManager& graphicsManager)
 		: m_graphicsManager(graphicsManager)
-		, m_layerRenderer(graphicsManager)
+		, m_layerRenderer(graphicsManager)		
 	{
 		//create default atlas with id 0
 		std::unique_ptr<AtlasData> atlasData = std::unique_ptr<AtlasData>(new AtlasData());
@@ -36,20 +53,142 @@ namespace XE
 
 	GUIRenderer::~GUIRenderer()
 	{
+		while (_t_ImgGuiRenderables.size() > 0)
+		{
+			delete _t_ImgGuiRenderables.back();
+			_t_ImgGuiRenderables.pop_back();
+		}
+	}
+
+	void  GUIRenderer::_t_resizeRenderWindow(size_t w, size_t h)
+	{
+		m_ViewportSize = sf::Vector2f(w,h);
+
+		m_layerRenderer._t_onResizeRenderWindow(w, h);
+
+		Ogre::Matrix4 projMatrix(2.0f / w, 0.0f, 0.0f, -1.0f,
+			0.0f, -2.0f / h, 0.0f, 1.0f,
+			0.0f, 0.0f, -1.0f, 0.0f,
+			0.0f, 0.0f, 0.0f, 1.0f);
+
+		for each (auto renderable in _t_ImgGuiRenderables)
+		{
+			renderable->setCustomProjectionMatrix(true, projMatrix );
+		}		
 	}
 
 	void GUIRenderer::_t_init(TextureAtlas* atlas, Ogre::ObjectMemoryManager* objManager, Ogre::SceneManager* sceneMgr)
 	{
-		m_layerRenderer._t_initRenderer(atlas, objManager, sceneMgr);
+		m_layerRenderer._t_initRenderer(atlas, objManager, sceneMgr);		
+		_t_createFontTexture(); //imgui only
 	}
-
+	
 	void GUIRenderer::update()
 	{
 		m_layerRenderer.update();
 	}
 
-	void GUIRenderer::_t_update()
+	void GUIRenderer::_t_update(float delta)
 	{
+		ImGuiIO& io = ImGui::GetIO();
+		io.DeltaTime = delta;
+		// Setup display size (every frame to accommodate for window resizing)
+		io.DisplaySize = ImVec2(m_ViewportSize.x, m_ViewportSize.y);
+
+		// Setup time step
+		Uint32	time = SDL_GetTicks();
+		double current_time = time / 1000.0;
+		io.DeltaTime = g_Time > 0.0 ? (float)(current_time - g_Time) : (float)(1.0f / 60.0f);
+		g_Time = current_time;
+
+		// Setup inputs
+		// (we already got mouse wheel, keyboard keys & characters from SDL_PollEvent())
+		int mx, my;
+		Uint32 mouseMask = SDL_GetMouseState(&mx, &my);
+		//if (SDL_GetWindowFlags(window) & SDL_WINDOW_MOUSE_FOCUS)
+		io.MousePos = ImVec2((float)mx, (float)my);   // Mouse position, in pixels (set to -1,-1 if no mouse / on another screen, etc.)
+													  //	else
+													  //		io.MousePos = ImVec2(-1, -1);
+
+		io.MouseDown[0] = g_MousePressed[0] || (mouseMask & SDL_BUTTON(SDL_BUTTON_LEFT)) != 0;		// If a mouse press event came, always pass it as "mouse held this frame", so we don't miss click-release events that are shorter than 1 frame.
+		io.MouseDown[1] = g_MousePressed[1] || (mouseMask & SDL_BUTTON(SDL_BUTTON_RIGHT)) != 0;
+		io.MouseDown[2] = g_MousePressed[2] || (mouseMask & SDL_BUTTON(SDL_BUTTON_MIDDLE)) != 0;
+		g_MousePressed[0] = g_MousePressed[1] = g_MousePressed[2] = false;
+
+		io.MouseWheel = g_MouseWheel;
+		g_MouseWheel = 0.0f;
+
+		// Hide OS mouse cursor if ImGui is drawing it
+		SDL_ShowCursor(io.MouseDrawCursor ? 0 : 1);
+
+		ImGui::NewFrame();
+
+		bool show_test_window = true;
+
+		ImGui::ShowTestWindow(&show_test_window);
+
+		//Tell ImGui to create the buffers
+		ImGui::Render();
+
+		ImDrawData *draw_data = ImGui::GetDrawData();
+
+		if (!draw_data)
+			return;
+
+		int fb_width = (int)(io.DisplaySize.x * io.DisplayFramebufferScale.x);
+		int fb_height = (int)(io.DisplaySize.y * io.DisplayFramebufferScale.y);
+		if (fb_width == 0 || fb_height == 0)
+			return;
+		draw_data->ScaleClipRects(io.DisplayFramebufferScale);
+
+		int numberDraws = 0;
+
+		auto scenemgr = m_graphicsManager.getRoot()->getSceneManager("MyFirstSceneManager");
+
+		//iterate through all lists (at the moment every window has its own)
+		for (int n = 0; n < draw_data->CmdListsCount; n++)
+		{
+			const ImDrawList* drawList = draw_data->CmdLists[n];
+
+			const ImDrawVert* vtxBuf = drawList->VtxBuffer.Data;
+			const ImDrawIdx* idxBuf = drawList->IdxBuffer.Data;
+
+			unsigned int startIdx = 0;
+		
+			for (int i = 0; i < drawList->CmdBuffer.Size; i++)
+			{
+				numberDraws++;
+				
+				//create renderables if necessary
+				if (numberDraws >= _t_ImgGuiRenderables.size())
+				{
+					auto newRenderable = new ImgGuiRenderable(i,
+						m_graphicsManager.getGUIRenderer(),
+						&scenemgr->_getEntityMemoryManager(Ogre::SCENE_DYNAMIC)
+						, scenemgr);
+
+					_t_ImgGuiRenderables.push_back(newRenderable);
+
+					newRenderable->mFontTex = mFontTex;
+				}
+
+				//update their vertex buffers
+				const ImDrawCmd *drawCmd = &drawList->CmdBuffer[i];
+				_t_ImgGuiRenderables[numberDraws -1]->updateVertexData(vtxBuf, &idxBuf[startIdx], drawList->VtxBuffer.Size, drawCmd->ElemCount);
+
+				//increase start index of indexbuffer
+				startIdx += drawCmd->ElemCount;
+				
+			}			
+		}
+
+		//delete unused renderables
+		while (_t_ImgGuiRenderables.size() > numberDraws)
+		{
+			delete _t_ImgGuiRenderables.back();
+			_t_ImgGuiRenderables.pop_back();
+		}
+
 		//todo lock m_screens (dont add delete while renderonce is called)
 	/*		m_graphicsManager.getIntoRendererQueue().push([this]()
 		{*/
@@ -448,6 +587,88 @@ namespace XE
 	//return value only usable in renderthread
 	TextureAtlas* GUIRenderer::_t_getAtlas(const XE::Uint16 atlasId) {
 		return (*_t_atlas.find(atlasId)).second.get();
+	}
+
+
+	void GUIRenderer::_t_createFontTexture()
+	{
+		// Build texture atlas
+		ImGuiIO& io = ImGui::GetIO();
+		unsigned char* pixels;
+		int width, height;
+		io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
+
+		mFontTex = Ogre::TextureManager::getSingleton().createManual("ImguiFontTex", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::TEX_TYPE_2D, width, height, 1, 1, Ogre::PF_R8G8B8A8);
+
+		const Ogre::PixelBox & lockBox = mFontTex->getBuffer()->lock(Ogre::Image::Box(0, 0, width, height), Ogre::v1::HardwareBuffer::HBL_DISCARD);
+		size_t texDepth = Ogre::PixelUtil::getNumElemBytes(lockBox.format);
+
+		memcpy(lockBox.data, pixels, width*height*texDepth);
+		mFontTex->getBuffer()->unlock();
+
+		//Ogre::Image dst;
+		//mFontTex->convertToImage(dst, false);
+		//dst.save("f:/font.tga");
+
+		io.KeyMap[ImGuiKey_Tab] = SDLK_TAB;                     // Keyboard mapping. ImGui will use those indices to peek into the io.KeyDown[] array.
+		io.KeyMap[ImGuiKey_LeftArrow] = SDL_SCANCODE_LEFT;
+		io.KeyMap[ImGuiKey_RightArrow] = SDL_SCANCODE_RIGHT;
+		io.KeyMap[ImGuiKey_UpArrow] = SDL_SCANCODE_UP;
+		io.KeyMap[ImGuiKey_DownArrow] = SDL_SCANCODE_DOWN;
+		io.KeyMap[ImGuiKey_PageUp] = SDL_SCANCODE_PAGEUP;
+		io.KeyMap[ImGuiKey_PageDown] = SDL_SCANCODE_PAGEDOWN;
+		io.KeyMap[ImGuiKey_Home] = SDL_SCANCODE_HOME;
+		io.KeyMap[ImGuiKey_End] = SDL_SCANCODE_END;
+		io.KeyMap[ImGuiKey_Delete] = SDLK_DELETE;
+		io.KeyMap[ImGuiKey_Backspace] = SDLK_BACKSPACE;
+		io.KeyMap[ImGuiKey_Enter] = SDLK_RETURN;
+		io.KeyMap[ImGuiKey_Escape] = SDLK_ESCAPE;
+		io.KeyMap[ImGuiKey_A] = SDLK_a;
+		io.KeyMap[ImGuiKey_C] = SDLK_c;
+		io.KeyMap[ImGuiKey_V] = SDLK_v;
+		io.KeyMap[ImGuiKey_X] = SDLK_x;
+		io.KeyMap[ImGuiKey_Y] = SDLK_y;
+		io.KeyMap[ImGuiKey_Z] = SDLK_z;
+	}
+
+	bool GUIRenderer::ProcessSDLEvent(SDL_Event* event)
+	{
+		ImGuiIO& io = ImGui::GetIO();
+		switch (event->type)
+		{
+		case SDL_MOUSEWHEEL:
+		{
+			if (event->wheel.y > 0)
+				g_MouseWheel = 1;
+			if (event->wheel.y < 0)
+				g_MouseWheel = -1;
+			return true;
+		}
+		case SDL_MOUSEBUTTONDOWN:
+		{
+			if (event->button.button == SDL_BUTTON_LEFT) g_MousePressed[0] = true;
+			if (event->button.button == SDL_BUTTON_RIGHT) g_MousePressed[1] = true;
+			if (event->button.button == SDL_BUTTON_MIDDLE) g_MousePressed[2] = true;
+			return true;
+		}
+		case SDL_TEXTINPUT:
+		{
+			io.AddInputCharactersUTF8(event->text.text);
+			return true;
+		}
+		case SDL_KEYDOWN:
+		case SDL_KEYUP:
+		{
+			int key = event->key.keysym.sym & ~SDLK_SCANCODE_MASK;
+			io.KeysDown[key] = (event->type == SDL_KEYDOWN);
+			io.KeyShift = ((SDL_GetModState() & KMOD_SHIFT) != 0);
+			io.KeyCtrl = ((SDL_GetModState() & KMOD_CTRL) != 0);
+			io.KeyAlt = ((SDL_GetModState() & KMOD_ALT) != 0);
+			io.KeySuper = ((SDL_GetModState() & KMOD_GUI) != 0);
+			return true;
+		}
+		}
+		return false;
 	}
 
 

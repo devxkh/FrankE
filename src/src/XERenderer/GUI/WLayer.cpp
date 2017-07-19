@@ -9,6 +9,7 @@
 
 #include <Ogre/OgreMain/include/OgreRoot.h>
 
+#include <XERenderer/Editor/ImgGuiRenderable.hpp>
 
 namespace XE
 {
@@ -90,13 +91,13 @@ namespace XE
 	//		mVertexTransform.makeTransform(Ogre::Vector3::ZERO, mScale, Ogre::Quaternion(Ogre::Degree(180), Ogre::Vector3::UNIT_Z)); //bottom
 	//		mVertexTransform.makeTransform(Ogre::Vector3::ZERO, mScale, Ogre::Quaternion(Ogre::Degree(270), Ogre::Vector3::UNIT_Z)); //right side
 
-			int debugoiint = 0;
+			//int debugoiint = 0;
 
 			for each (auto renderableShape in m_renderableShapes)
 			{
 				if (!renderableShape->isVisible)
 					continue;
-
+							
 				std::vector<Vertex>& tmp = renderableShape->_update();
 
 				for (std::vector<Vertex>::iterator it = tmp.begin(); it != tmp.end(); ++it)
@@ -106,10 +107,10 @@ namespace XE
 					XE::Vertex& tmp = m_RenderBuffer.back();
 
 
-					tmp.position.x = ((tmp.position.x) * mInvWidth) *2- 0.99999;
-					tmp.position.y = ((tmp.position.y) * mInvHeight)  *-2 + 0.99999;
+					//tmp.position.x = ((tmp.position.x) * mInvWidth) *2- 0.99999;
+					//tmp.position.y = ((tmp.position.y) * mInvHeight)  *-2 + 0.99999;
 
-					debugoiint++;
+				//	debugoiint++;
 					//>>>>>-------------- 2D --------------------	
 				/*	tmp.position.x = ((tmp.position.x) * mInvWidth)  - 1;
 					tmp.position.y = ((tmp.position.y) * mInvHeight)  *-1 + 1;

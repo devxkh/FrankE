@@ -29,7 +29,7 @@ public:
 	virtual ~DrawDynamicLines();
 
   /// Add a point to the point list
-  void addPoint(const Ogre::Vector3 &p);
+  void addPoint(const Ogre::Vector3 &p, const Ogre::Vector3 &color);
   /// Add a point to the point list
   void addPoint(float x, float y, float z);
 

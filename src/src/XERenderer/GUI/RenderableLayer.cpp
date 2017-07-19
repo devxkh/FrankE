@@ -32,8 +32,8 @@ namespace XE {
 		,_initalizied(false)
 	{
 		//set renderqueue -> opengl error bind buffer after adding item??
-		sceneMgr->getRenderQueue()->setRenderQueueMode(6, Ogre::RenderQueue::Modes::FAST);
-		this->setRenderQueueGroup(6);
+		sceneMgr->getRenderQueue()->setRenderQueueMode(251, Ogre::RenderQueue::Modes::FAST);
+		this->setRenderQueueGroup(251);
 
 		m_sceneNodeLines = sceneMgr->getRootSceneNode(Ogre::SCENE_DYNAMIC)->createChildSceneNode(Ogre::SCENE_DYNAMIC);
 		m_sceneNodeLines->attachObject(this);
@@ -51,9 +51,15 @@ namespace XE {
 		mPolygonModeOverrideable = false;
 
 		//>>>>>-------------- 2D --------------------
+		Ogre::Matrix4 projMatrix(2.0f / 800, 0.0f, 0.0f, -1.0f,
+			0.0f, -2.0f / 600, 0.0f, 1.0f,
+			0.0f, 0.0f, -1.0f, 0.0f,
+			0.0f, 0.0f, 0.0f, 1.0f);
+
+		setCustomProjectionMatrix(true, projMatrix);
 		// use identity projection and view matrices
-		mUseIdentityProjection = true;
-		mUseIdentityView = true;
+	//	mUseCustomProjectionMatrix = true;
+	//	mUseIdentityView = true;
 		//<<<<<-------------- 2D --------------------
 
 	}

@@ -123,6 +123,7 @@ namespace XE {
 		for (int i = 0; i < size; i++)
 		{
 			position(_t_Points[i].x, _t_Points[i].y, _t_Points[i].z);
+		//	colour(Ogre::ColourValue::Blue);
 			index(i);
 			//		*mVertexBuffer++ = _t_Points[i].y;
 			//		*mVertexBuffer++ = _t_Points[i].z;

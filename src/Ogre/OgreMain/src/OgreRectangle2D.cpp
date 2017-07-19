@@ -52,7 +52,7 @@ namespace v1
     void Rectangle2D::initRectangle2D(void)
     {
         // use identity projection and view matrices
-        mUseIdentityProjection  = true;
+		mUseCustomProjectionMatrix = true;
         mUseIdentityView        = true;
 
         mRenderOp.vertexData = OGRE_NEW VertexData();

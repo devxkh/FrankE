@@ -156,7 +156,7 @@ namespace Ogre {
         */
         virtual bool getUseIdentityWorldMatrix(void) const          { return false; }
 
-        /** Returns whether the Hlms implementation should evaluate getUseIdentityProjection
+        /** Returns whether the Hlms implementation should evaluate getUseCustomProjectionMatrix
             per object at runtime, or if it can assume the Renderable will remain with
             the same setting until the datablock is flushed (performance optimization)
         @remarks
@@ -167,6 +167,8 @@ namespace Ogre {
         */
         virtual bool getUseIdentityViewProjMatrixIsDynamic(void) const  { return false; }
 
+		Matrix4& getCustomProjectionMatrix() { return mProjMatrix; };
+
         /** Sets whether or not to use an 'identity' projection.
         @remarks
             Usually Renderable objects will use a projection matrix as determined
@@ -174,11 +176,15 @@ namespace Ogre {
             and use an identity projection, which effectively projects in 2D using
             a {-1, 1} view space. Useful for overlay rendering. Normal renderables
             need not change this. The default is false.
-        @see Renderable::getUseIdentityProjection
+        @see Renderable::getUseCustomProjectionMatrix
         */
-        void setUseIdentityProjection(bool useIdentityProjection)
+		void setCustomProjectionMatrix(bool enable, const Matrix4& projMatrix = Matrix4::IDENTITY)
         {
-            mUseIdentityProjection = useIdentityProjection;
+			mUseCustomProjectionMatrix = enable;
+			if (enable)
+			{
+				mProjMatrix = projMatrix;
+			}
         }
 
         /** Returns whether or not to use an 'identity' projection.
@@ -190,7 +196,7 @@ namespace Ogre {
             need not change this.
         @see Renderable::setUseIdentityProjection
         */
-        bool getUseIdentityProjection(void) const { return mUseIdentityProjection; }
+        bool getUseCustomProjectionMatrix(void) const { return mUseCustomProjectionMatrix; }
 
         /** Sets whether or not to use an 'identity' view.
         @remarks
@@ -425,6 +431,8 @@ namespace Ogre {
         void setRenderQueueSubGroup( uint8 subGroup )   { mRenderQueueSubGroup = subGroup; }
         uint8 getRenderQueueSubGroup(void) const        { return mRenderQueueSubGroup; }
 
+		
+
     protected:
         typedef map<size_t, Vector4>::type CustomParameterMap;
         CustomParameterMap mCustomParameters;
@@ -451,9 +459,11 @@ namespace Ogre {
             Despite being public, Do NOT modify it manually.
         */
         public: uint32      mHlmsGlobalIndex;
+
     protected:
+		Matrix4 mProjMatrix;
         bool mPolygonModeOverrideable;
-        bool mUseIdentityProjection;
+		bool mUseCustomProjectionMatrix;
         bool mUseIdentityView;
         UserObjectBindings mUserObjectBindings;      /// User objects binding.
     };

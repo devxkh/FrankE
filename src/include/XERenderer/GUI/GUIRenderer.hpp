@@ -14,9 +14,13 @@
 #include <XERenderer/GUI/Font.hpp>
 #include <XERenderer/GUI/LayerRenderer.hpp>
 
+#include <OgreTexture.h>
+#include <ThirdParty/SDL/include/SDL.h>
+
 namespace Ogre {
 	class ObjectMemoryManager;
 	class SceneManager;
+	class Camera;
 }
 
 namespace sol { class state;  }
@@ -24,6 +28,7 @@ namespace sol { class state;  }
 namespace XE
 {
 	//forwarding
+	class ImgGuiRenderable;
 	class WScreenRenderable;
 	class WScreen;
 	class GraphicsManager;
@@ -49,7 +54,8 @@ namespace XE
 		GUIRenderer(GraphicsManager& graphicsManager);
 
 		~GUIRenderer();
-
+		
+		
 		void addScreen(WScreen* screen);	
 
 		GraphicsManager& getGraphicsManager() { return m_graphicsManager; }
@@ -74,15 +80,24 @@ namespace XE
 
 		//returned pointer only usable in renderthread
 		TextureAtlas* _t_getAtlas(const XE::Uint16 atlasId);
-		void _t_update();
+		void _t_update(float delta);
 		void _t_init(TextureAtlas* atlas, Ogre::ObjectMemoryManager* objManager, Ogre::SceneManager* sceneMgr);
 
+		void _t_resizeRenderWindow(size_t w, size_t h);
+
+		static bool ProcessSDLEvent(SDL_Event* event);
 
 		//internal
 		sf::Vector2f _whitePixelPos;
+		
+		sf::Vector2f m_ViewportSize;
 
 	private:
-		
+	
+		void _t_createFontTexture();
+
+		Ogre::FastArray<ImgGuiRenderable*> _t_ImgGuiRenderables;
+
 		LayerRenderer m_layerRenderer;
 
 		std::map<XE::Uint16, std::unique_ptr<TextureAtlas>> _t_atlas;
@@ -93,9 +108,11 @@ namespace XE
 
 		sf::Vector2f m_TexelOffset;
 	
+		Ogre::TexturePtr mFontTex;
+
+		
 		std::vector<WScreen*> m_screens;
 		GraphicsManager& m_graphicsManager;
-
 
 		std::map<XE::Uint16, std::unique_ptr<AtlasData>> _atlasData;
 

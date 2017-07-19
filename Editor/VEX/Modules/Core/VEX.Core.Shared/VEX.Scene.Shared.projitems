@@ -148,6 +148,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Settings\DALOptions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Settings\EditorOptions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Settings\ProjectSettingsItem.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Utility\ObjLoader.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utility\SocketHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ViewModel\Editor\AnimationEditorViewModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ViewModel\Editor\AnimationNodes\OutputNodeViewModel.cs" />

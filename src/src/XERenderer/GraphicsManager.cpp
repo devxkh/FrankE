@@ -40,6 +40,80 @@
 namespace XE
 {
 
+	void _t_createCustomTextures(Root *root, Ogre::RenderWindow* renderWindow)
+	{
+		TexturePtr tex = TextureManager::getSingleton().createManual(
+			"HalftoneVolume",
+			"General",
+			TEX_TYPE_3D,
+			64, 64, 64,
+			0,
+			PF_L8,
+			TU_DYNAMIC_WRITE_ONLY
+		);
+
+		if (!tex.isNull())
+		{
+			v1::HardwarePixelBufferSharedPtr ptr = tex->getBuffer(0, 0);
+			ptr->lock(v1::HardwareBuffer::HBL_DISCARD);
+			const PixelBox &pb = ptr->getCurrentLock();
+			Ogre::uint8 *data = static_cast<Ogre::uint8*>(pb.data);
+
+			size_t height = pb.getHeight();
+			size_t width = pb.getWidth();
+			size_t depth = pb.getDepth();
+			size_t rowPitch = pb.rowPitch;
+			size_t slicePitch = pb.slicePitch;
+
+			for (size_t z = 0; z < depth; ++z)
+			{
+				for (size_t y = 0; y < height; ++y)
+				{
+					for (size_t x = 0; x < width; ++x)
+					{
+						float fx = 32 - (float)x + 0.5f;
+						float fy = 32 - (float)y + 0.5f;
+						float fz = 32 - ((float)z) / 3 + 0.5f;
+						float distanceSquare = fx*fx + fy*fy + fz*fz;
+						data[slicePitch*z + rowPitch*y + x] = 0x00;
+						if (distanceSquare < 1024.0f)
+							data[slicePitch*z + rowPitch*y + x] += 0xFF;
+					}
+				}
+			}
+			ptr->unlock();
+		}
+
+		TexturePtr tex2 = TextureManager::getSingleton().createManual(
+			"DitherTex",
+			"General",
+			TEX_TYPE_2D,
+			renderWindow->getWidth(), renderWindow->getHeight(), 1,
+			0,
+			PF_L8,
+			TU_DYNAMIC_WRITE_ONLY
+		);
+
+		v1::HardwarePixelBufferSharedPtr ptr2 = tex2->getBuffer(0, 0);
+		ptr2->lock(v1::HardwareBuffer::HBL_DISCARD);
+		const PixelBox &pb2 = ptr2->getCurrentLock();
+		Ogre::uint8 *data2 = static_cast<Ogre::uint8*>(pb2.data);
+
+		size_t height2 = pb2.getHeight();
+		size_t width2 = pb2.getWidth();
+		size_t rowPitch2 = pb2.rowPitch;
+
+		for (size_t y = 0; y < height2; ++y)
+		{
+			for (size_t x = 0; x < width2; ++x)
+			{
+				data2[rowPitch2*y + x] = Ogre::Math::RangeRandom(64.0, 192);
+			}
+		}
+
+		ptr2->unlock();
+	}
+
 	void _t_createExtraEffectsFromCode(Root *root)
 	{
 		CompositorManager2 *compositorManager = root->getCompositorManager2();
@@ -297,8 +371,11 @@ namespace XE
 
 	void GraphicsManager::resizeRenderWindow(size_t w, size_t h)
 	{
+		
 		getIntoRendererQueue().push([this, w, h]() {
 
+			m_GUIRenderer._t_resizeRenderWindow(w, h);
+			
 			_t_RenderWindow->windowMovedOrResized();
 			//_t_RenderWindow->resize(w, h);
 		});
@@ -330,6 +407,8 @@ namespace XE
 		//sf::Window* window = mWindowManager.createWindow(sf::VideoMode(800, 600), title, sf::Style::Default);
 		
 		getIntoRendererQueue().push([this]() {
+			
+			m_GUIRenderer._t_resizeRenderWindow(800,600);
 
 			_t_RenderWindow = OgreWorkspace::_t_createRenderWindow(m_SdlWindow); //need window handle (else wnd is hidden), always a renderwindow is needed
 		});
@@ -418,7 +497,9 @@ namespace XE
 			//DataStreamPtr shaderCacheFile = mRoot->openFileStream("F:/Projekte/coop/XGame/data/MyCache.cache");
 			//GpuProgramManager::getSingleton().loadMicrocodeCache(shaderCacheFile);
 
+			_t_createCustomTextures(mRoot, _t_RenderWindow);
 			_t_createExtraEffectsFromCode(mRoot);
+
 
 		});
 	}
@@ -465,19 +546,23 @@ namespace XE
 			// ->>> old Vers. -> in pass
 			mEngine->getGraphicsManager().getGUIRenderer().update();
 		});
-
+				
 		if (mRoot->isInitialised())
 			mRoot->renderOneFrame();
-
 		
-		auto elapsedTimeMainThread = m_clock.restart();
+	//	auto elapsedTimeMainThread = m_clock.restart();
 
-		sf::Uint64 time = elapsedTimeMainThread.asMicroseconds();
+		//sf::Uint64 time = elapsedTimeMainThread.asMicroseconds();
+		auto time = mRoot->getTimer()->getMicroseconds();
+
 
 		double timeSinceLast = time / 1000000.0;
 		timeSinceLast = std::min(1.0, timeSinceLast); //Prevent from going haywire.
 
 		mAccumTimeSinceLastLogicFrame = timeSinceLast;
+		
+		
+		m_GUIRenderer._t_update(timeSinceLast);
 	}
 
 	void GraphicsManager::createRenderer()

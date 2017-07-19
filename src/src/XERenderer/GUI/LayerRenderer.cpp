@@ -35,6 +35,22 @@ namespace XE {
 		return _t_renderableLayerPtrs.back();
 	}
 
+	void LayerRenderer::_t_onResizeRenderWindow(size_t w, size_t h)
+	{
+		Ogre::Matrix4 projMatrix(2.0f / w, 0.0f, 0.0f, -1.0f,
+			0.0f, -2.0f / h, 0.0f, 1.0f,
+			0.0f, 0.0f, -1.0f, 0.0f,
+			0.0f, 0.0f, 0.0f, 1.0f);
+
+		for each (auto layer in _t_renderableLayerPtrs)
+		{
+			for each (auto renderable in layer->mRenderables)
+			{
+				renderable->setCustomProjectionMatrix(true, projMatrix);
+			}		
+		}
+	}
+
 	void LayerRenderer::_t_destroyRenderableLayer(RenderableLayer* layer)
 	{
 		_t_renderableLayerPtrs.erase(std::find(_t_renderableLayerPtrs.begin(), _t_renderableLayerPtrs.end(), layer));

@@ -30,6 +30,8 @@
 #include <iterator>
 #include <algorithm>
 
+#include <XERenderer/GUI/GUIRenderer.hpp>
+
 using namespace std::placeholders;
 
 #include <Thor/Input/Action.hpp>
@@ -94,7 +96,11 @@ namespace detail
 		SDL_Event event;
 
 		while (SDL_PollEvent(&event))
+		{
+			XE::GUIRenderer::ProcessSDLEvent(&event);
+
 			pushEvent(event);
+		}
 	}
 	
 	// ---------------------------------------------------------------------------------------------------------------------------

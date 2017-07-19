@@ -2052,7 +2052,7 @@ namespace Ogre
 
         if( renderable->getUseIdentityViewProjMatrixIsDynamic() )
             setProperty( HlmsBaseProp::IdentityViewProjDynamic, 1 );
-        else if( renderable->getUseIdentityProjection() )
+        else if( renderable->getUseCustomProjectionMatrix() ) //KH
             setProperty( HlmsBaseProp::IdentityViewProj, 1 );
 
         setProperty( HlmsPsoProp::Macroblock, renderable->getDatablock()->getMacroblock(false)->mId );

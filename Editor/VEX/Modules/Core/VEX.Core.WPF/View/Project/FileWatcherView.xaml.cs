@@ -20,6 +20,7 @@ using VEF.Interfaces.Services;
 using VEX.Core.Model;
 using VEX.Core.Shared.Model.Project;
 using VEX.Core.Shared.Service.FileWatcher;
+using VEX.Core.Shared.Utility;
 
 namespace VEX.Core.View.Project
 {
@@ -114,6 +115,12 @@ namespace VEX.Core.View.Project
 
 
             }
+        }
+
+        private void btnLoadObjFile_Click(object sender, RoutedEventArgs e)
+        {
+            ObjImporter imp = new ObjImporter();
+            imp.ImportFile(@"F:\Projekte\coop\obj2gltf\exp_1.obj");
         }
     }
 }

@@ -84,6 +84,7 @@
                     <Button Name="btn_ExecuteEvent" Content="Execute Event" HorizontalAlignment="Left" VerticalAlignment="Bottom" Click="btn_ExecuteEvent_Click"/>-->
                     <!--<Button Name="btnAddRemove" Content="Add/Remove" HorizontalAlignment="Left" VerticalAlignment="Bottom" Click="btnAddRemove_Click"/>-->
                     <Button Name="btnForceTrigger" Content="Force trigger" HorizontalAlignment="Left" VerticalAlignment="Bottom" Click="btnForceTrigger_Click"/>
+                    <Button Name="btnLoadObjFile" Content="LoadObjFile" HorizontalAlignment="Left" VerticalAlignment="Bottom" Click="btnLoadObjFile_Click"/>
                 </StackPanel>
 
                 <!--<DataGrid ItemsSource="{Binding SceneItems}" AutoGenerateColumns="False">

@@ -10,7 +10,6 @@
 #include "Controllers_generated.h"
 #include <functional>
 
-
 const float YAW_SENSITIVITY = 0.001f;
 
 namespace XET {
@@ -314,6 +313,7 @@ namespace XET {
 
 		for (entityx::Entity entity : es.entities_with_components(controller)) {
 			
+		
 			if (controller->get()->m_window)
 				controller->get()->actionmap.update(); //clearing events !!
 

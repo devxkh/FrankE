@@ -9,6 +9,8 @@
 #include <Ogre/OgreMain/include/Compositor/Pass/OgreCompositorPassDef.h>
 #include <Ogre/OgreMain/include/Compositor/Pass/OgreCompositorPassProvider.h>
 
+#include <Ogre/OgreMain/include/Compositor/OgreCompositorWorkspaceListener.h>
+
 class SDL_Window;
 
 namespace Ogre
@@ -22,6 +24,24 @@ namespace Ogre
 }
 
 namespace XE {
+	
+	class ImgGuiRenderable;
+
+	class ImGuiCompositorWorkspaceListener : public Ogre::CompositorWorkspaceListener
+	{
+	public:
+		ImGuiCompositorWorkspaceListener();
+		ImGuiCompositorWorkspaceListener(Ogre::Camera* camera);
+
+		void passPreExecute(Ogre::CompositorPass *pass);
+	
+		Ogre::Camera* m_camera;
+		ImgGuiRenderable* m_ImgGuiRenderable;
+	private:
+	
+
+	};
+
 
 	class Scene;
 //	class Controller;
@@ -29,10 +49,10 @@ namespace XE {
 	class GraphicsManager;
 	class OgreCamera;
 
-	//class MyGUIPassDef : public Ogre::CompositorPassDef
+	//class ImGuiPassDef : public Ogre::CompositorPassDef
 	//{
 	//public:
-	//	MyGUIPassDef(Ogre::uint32 rtIndex)
+	//	ImGuiPassDef(Ogre::uint32 rtIndex)
 	//		: Ogre::CompositorPassDef(Ogre::PASS_CUSTOM, rtIndex)
 	//	{
 	//	}
@@ -41,10 +61,10 @@ namespace XE {
 	//// TODO: The compositor manager allows adding this pass to any number of targets,
 	//// but MyGUI was designed to handle one window target only. For example,
 	//// when we add the pass to multiple targets, all RTTLayers would be unnecessarily updated multiple times.
-	//class MyGUIPass : public Ogre::CompositorPass
+	//class ImGuiPass : public Ogre::CompositorPass
 	//{
 	//public:
-	//	MyGUIPass(const Ogre::CompositorPassDef *definition, const Ogre::CompositorChannel &target,
+	//	ImGuiPass(const Ogre::CompositorPassDef *definition, const Ogre::CompositorChannel &target,
 	//		Ogre::CompositorNode *parentNode, GraphicsManager& graphicsMgr);
 
 	//	virtual void execute(const Ogre::Camera *lodCameraconst);
@@ -53,40 +73,70 @@ namespace XE {
 	//	GraphicsManager& m_GraphicsManager;
 	//};
 
-	//// The factory for the MyGUI compositor pass. Note that only one provider can be
-	//// registered with Ogre at a time, which is why we have exposed the MyGUIPass and MyGUIPassDef classes
-	//// publicly in this header. If users need their own custom passes, they can implement their own provider
-	//// which would return either a MyGUI pass or other custom passes depending on the customId.
-	//class OgreCompositorPassProvider : public Ogre::CompositorPassProvider
-	//{
-	//public:
 
-	//	OgreCompositorPassProvider(GraphicsManager& graphicsMgr) : m_GraphicsManager(graphicsMgr)
-	//	{
+	// TODO: The compositor manager allows adding this pass to any number of targets,
+	// but MyGUI was designed to handle one window target only. For example,
+	// when we add the pass to multiple targets, all RTTLayers would be unnecessarily updated multiple times.
+	class MyGUIPass : public Ogre::CompositorPass
+	{
+	public:
+		MyGUIPass(const Ogre::CompositorPassDef *definition, const Ogre::CompositorChannel &target,
+			Ogre::CompositorNode *parentNode, GraphicsManager& graphicsMgr, Ogre::Camera* camera);
 
-	//	}
+		virtual void execute(const Ogre::Camera *lodCameraconst);
 
-	//	Ogre::CompositorPassDef* addPassDef(Ogre::CompositorPassType passType,
-	//		Ogre::IdString customId,
-	//		Ogre::uint32 rtIndex,
-	//		Ogre::CompositorNodeDef *parentNodeDef)
-	//	{
-	//		if (customId == mPassId)
-	//			return OGRE_NEW MyGUIPassDef(rtIndex);
-	//	}
+	private:
+		GraphicsManager& m_GraphicsManager;
+		Ogre::Camera* m_camera;
+	};
 
-	//	Ogre::CompositorPass* addPass(const Ogre::CompositorPassDef *definition, Ogre::Camera *defaultCamera,
-	//		Ogre::CompositorNode *parentNode, const Ogre::CompositorChannel &target,
-	//		Ogre::SceneManager *sceneManager)
-	//	{
-	//		return OGRE_NEW MyGUIPass(definition, target, parentNode, m_GraphicsManager);
-	//	}
+	//CompositorPassDef(CompositorPassType passType, CompositorTargetDef *parentTargetDef) :
 
-	//	static Ogre::IdString mPassId;
+	class MyGUIPassDef : public Ogre::CompositorPassDef
+	{
+	public:
+		MyGUIPassDef(Ogre::CompositorTargetDef *parentTargetDef)
+			: Ogre::CompositorPassDef(Ogre::PASS_CUSTOM, parentTargetDef) //rtIndex)
+		{
+		}
+	};
+	// The factory for the MyGUI compositor pass. Note that only one provider can be
+	// registered with Ogre at a time, which is why we have exposed the MyGUIPass and MyGUIPassDef classes
+	// publicly in this header. If users need their own custom passes, they can implement their own provider
+	// which would return either a MyGUI pass or other custom passes depending on the customId.
+	class OgreCompositorPassProvider : public Ogre::CompositorPassProvider
+	{
+	public:
 
-	//private:
-	//	GraphicsManager& m_GraphicsManager;
-	//};
+		OgreCompositorPassProvider(GraphicsManager& graphicsMgr, Ogre::Camera* camera) :
+			m_GraphicsManager(graphicsMgr),
+			m_camera(camera)
+		{
+
+		}
+
+		Ogre::CompositorPassDef* addPassDef(Ogre::CompositorPassType passType,
+			Ogre::IdString customId,
+			Ogre::CompositorTargetDef *parentTargetDef,
+			Ogre::CompositorNodeDef *parentNodeDef)
+		{
+			if (customId == mPassId)
+				return OGRE_NEW MyGUIPassDef(parentTargetDef);
+		}
+
+		Ogre::CompositorPass* addPass(const Ogre::CompositorPassDef *definition, Ogre::Camera *defaultCamera,
+			Ogre::CompositorNode *parentNode, const Ogre::CompositorChannel &target,
+			Ogre::SceneManager *sceneManager)
+		{
+			return OGRE_NEW MyGUIPass(definition, target, parentNode, m_GraphicsManager, m_camera);
+		}
+
+		static Ogre::IdString mPassId;
+
+	private:
+		GraphicsManager& m_GraphicsManager;
+		Ogre::Camera* m_camera;
+	};
 
 	class OgreWorkspace
 	{
@@ -115,9 +165,10 @@ namespace XE {
 	private:
 
 
-		//std::auto_ptr<OgreCompositorPassProvider> mPassProvider;
+		std::auto_ptr<OgreCompositorPassProvider> mPassProvider;
 		//obsolete
 		//void createViewport(Controller& controller, Ogre::RenderWindow* renderWindow = nullptr, Ogre::RenderTarget* renderTarget = nullptr);
+		ImGuiCompositorWorkspaceListener m_imguilistener;
 
 		Ogre::TexturePtr mRtt_texture;
 

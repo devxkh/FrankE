@@ -702,17 +702,21 @@ namespace Ogre
 				currentMappedTexBuffer = mCurrentMappedTexBuffer;
 			}
 
-			bool useIdentityProjection = queuedRenderable.renderable->getUseIdentityProjection();
+			bool useCustomProjectionMatrix = queuedRenderable.renderable->getUseCustomProjectionMatrix();
 
 			//uint materialIdx[]
 			*currentMappedConstBuffer = datablock->getAssignedSlot();
 			*reinterpret_cast<float * RESTRICT_ALIAS>(currentMappedConstBuffer + 1) = datablock->
 				mShadowConstantBias;
-			*(currentMappedConstBuffer + 2) = useIdentityProjection;
+			*(currentMappedConstBuffer + 2) = useCustomProjectionMatrix;
 			currentMappedConstBuffer += 4;
-
+						
 			//mat4 worldViewProj
-			Matrix4 tmp = mPreparedPass.viewProjMatrix[useIdentityProjection] * worldMat;
+			if(useCustomProjectionMatrix)
+				mPreparedPass.viewProjMatrix[useCustomProjectionMatrix] = queuedRenderable.renderable->getCustomProjectionMatrix(); //KH
+
+			Matrix4 tmp = mPreparedPass.viewProjMatrix[useCustomProjectionMatrix] * worldMat;
+
 #if !OGRE_DOUBLE_PRECISION
 			memcpy(currentMappedTexBuffer, &tmp, sizeof(Matrix4));
 			currentMappedTexBuffer += 16;

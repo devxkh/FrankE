@@ -681,7 +681,7 @@ namespace Ogre
         //---------------------------------------------------------------------------
         //                          ---- VERTEX SHADER ----
         //---------------------------------------------------------------------------
-        bool useIdentityProjection = queuedRenderable.renderable->getUseIdentityProjection();
+        bool useIdentityProjection = queuedRenderable.renderable->getUseCustomProjectionMatrix();
 
         //uint materialIdx[]
         *currentMappedConstBuffer = datablock->getAssignedSlot();

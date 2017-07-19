@@ -17,6 +17,15 @@ namespace VEX.Interface.Scene.Services
         public float Y { get { return m_Y; } set { m_Y = value; RaisePropertyChanged("Y"); } }
         public float Z { get { return m_Z; } set { m_Z = value; RaisePropertyChanged("Z"); } }
 
+        public Vector3() { }
+
+        public Vector3(float x, float y, float z)
+        {
+            m_X = x;
+            m_Y = y;
+            m_Z = z;
+        }
+
         public override string ToString()
         {
             return string.Format("{0}, {1}, {2}", X, Y, Z);

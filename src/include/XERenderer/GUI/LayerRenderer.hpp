@@ -27,7 +27,8 @@ namespace XE
 		//----- Renderthread
 		void _t_initRenderer(TextureAtlas* atlas, Ogre::ObjectMemoryManager* objManager, Ogre::SceneManager* sceneMgr);
 		RenderableLayer* _t_createRenderableLayer(XE::Uint32 id, const XE::Uint16 atlasId = 0);
-		void _t_destroyRenderableLayer(RenderableLayer* layer);
+		void _t_destroyRenderableLayer(RenderableLayer* layer);	
+		void _t_onResizeRenderWindow(size_t w, size_t h);
 	//	void _t_update();
 		//-----------
 				
@@ -40,6 +41,7 @@ namespace XE
 		void redrawAllLayers();
 		//void swappedBuffer(bool swapped);
 		
+
 	private:
 		
 		bool _swappedBuffer;

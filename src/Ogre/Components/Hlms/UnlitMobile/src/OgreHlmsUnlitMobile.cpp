@@ -387,7 +387,7 @@ namespace Ogre
         assert( queuedRenderable.renderable->getNumWorldTransforms() == 1u );
         queuedRenderable.renderable->getWorldTransforms( &worldMat );
 
-        bool useIdentityProjection = queuedRenderable.renderable->getUseIdentityProjection();
+        bool useIdentityProjection = queuedRenderable.renderable->getUseCustomProjectionMatrix();
 
         //---------------------------------------------------------------------------
         //                          ---- VERTEX SHADER ----

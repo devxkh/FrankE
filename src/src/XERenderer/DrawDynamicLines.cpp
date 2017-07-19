@@ -121,7 +121,7 @@ namespace XE {
     }
 
     //------------------------------------------------------------------------------------------------
-	void DrawDynamicLines::addPoint(const Ogre::Vector3 &p)
+	void DrawDynamicLines::addPoint(const Ogre::Vector3 &p, const Ogre::Vector3 &color)
     {
 		if (_swapBuffer)
 			_PointsBuf1.push_back(p);

@@ -49,7 +49,7 @@ namespace Ogre
         mLodMaterial( &MovableObject::c_DefaultLodMesh ),
         mHlmsGlobalIndex( ~0 ),
         mPolygonModeOverrideable( true ),
-        mUseIdentityProjection( false ),
+		mUseCustomProjectionMatrix( false ),
         mUseIdentityView( false )
     {
     }

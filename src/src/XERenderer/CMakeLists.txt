@@ -15,6 +15,10 @@ set(XERenderer_SOURCES
 	${SRCROOT}/OgreWorkspace.cpp
 	${SRCROOT}/DrawDynamicLines.cpp
     ${SRCROOT}/Animation.cpp
+
+	${SRCROOT}/gltfAsset.cpp
+	${SRCROOT}/gltfAsset.h
+   
 )
 source_group("src" FILES ${XERenderer_SOURCES})
 
@@ -29,6 +33,7 @@ set(XERenderer_HEADER
 	 ${INCROOT}/OgreWorkspace.hpp
 	 ${INCROOT}/DrawDynamicLines.hpp
 	 ${INCROOT}/AnimationRenderable.hpp
+ 
 )
 source_group("include" FILES ${XERenderer_HEADER})
 
@@ -36,11 +41,23 @@ source_group("include" FILES ${XERenderer_HEADER})
 # ------------ Editor ---------------
 set(XERenderer_Editor_SOURCES   
      ${SRCROOT}/Editor/LightVisualHelper.cpp
+	 ${SRCROOT}/Editor/ImGuiRenderable.cpp	 
+	 ${SRCROOT}/Editor/ImGuizmo.h
+	 ${SRCROOT}/Editor/ImGuizmo.cpp
+	 ${SRCROOT}/../../Thirdparty/imgui/imgui.cpp		
+	 ${SRCROOT}/../../Thirdparty/imgui/imgui_draw.cpp 		
+	 ${SRCROOT}/../../Thirdparty/imgui/imgui_demo.cpp
 )
 source_group("src\\Editor" FILES ${XERenderer_Editor_SOURCES})
 
 set(XERenderer_Editor_HEADER
 	 ${INCROOT}/Editor/LightVisualHelper.hpp
+	
+	 ${INCROOT}/Editor/ImguiManager.cpp	 
+	 ${INCROOT}/Editor/ImguiManager.h	
+	 ${INCROOT}/Editor/ImguiRenderable.cpp	 
+	 
+	 ${INCROOT}/Editor/ImGuiRenderable.h
 )
 
 source_group("include\\Editor" FILES ${XERenderer_Editor_HEADER})
@@ -82,6 +99,7 @@ set(XERenderer_private_SOURCES
 		${SRCROOT}/private/DynamicRenderable.cpp
 		${SRCROOT}/private/DynamicLines.hpp
 		${SRCROOT}/private/DynamicRenderable.hpp
+		${SRCROOT}/private/gltf_loader.h
 	#	${SRCROOT}/private/OgreHelper.cpp
 	#	${SRCROOT}/private/OgreHelper.hpp
 )
