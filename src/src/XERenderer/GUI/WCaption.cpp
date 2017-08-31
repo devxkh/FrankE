@@ -73,12 +73,12 @@ namespace XE
 		return ((coordinates.x >= m_position.x && coordinates.x <= m_position.x + m_size.x) && (coordinates.y >= m_position.y - m_size.y  && coordinates.y <= m_position.y));
 	}
 
-	std::vector<Vertex>&   WCaption::_update()
+	std::vector<Vertex>&  WCaption::_update()
 	{
 		if (!RenderableShape::isDirty)
-			return RenderableShape::m_verticesBuffer;
+			return m_verticesBuffer;
 
-		RenderableShape::m_verticesBuffer.clear();
+		m_verticesBuffer.clear();
 		
 		float left = 0, top = 0, right = 0, bottom = 0, cursorX = 0, cursorY = 0, kerning = 0, texelOffsetX = m_layer.atlasData.texelOffset.x, texelOffsetY = m_layer.atlasData.texelOffset.y;
 		Ogre::Vector2 knownSize;
@@ -157,20 +157,20 @@ namespace XE
 			//PUSH_VERTEX(getVerticesBuffer(), temp, right, top, Ogre::Vector2(15, 0), m_color);    // Right/Top    1
 
 			// Triangle A
-			PUSH_VERTEX(RenderableShape::m_verticesBuffer, temp, left, bottom, glyph->texCoords[BottomLeft], m_color);  // Left/Bottom  3
-			PUSH_VERTEX(RenderableShape::m_verticesBuffer, temp, right, top, glyph->texCoords[TopRight], m_color);    // Right/Top    1
-			PUSH_VERTEX(RenderableShape::m_verticesBuffer, temp, left, top, glyph->texCoords[TopLeft], m_color);     // Left/Top     0
+			PUSH_VERTEX(m_verticesBuffer, temp, left, bottom, glyph->texCoords[BottomLeft], m_color);  // Left/Bottom  3
+			PUSH_VERTEX(m_verticesBuffer, temp, right, top, glyph->texCoords[TopRight], m_color);    // Right/Top    1
+			PUSH_VERTEX(m_verticesBuffer, temp, left, top, glyph->texCoords[TopLeft], m_color);     // Left/Top     0
 
 			// Triangle B
-			PUSH_VERTEX(RenderableShape::m_verticesBuffer, temp, left, bottom, glyph->texCoords[BottomLeft], m_color);  // Left/Bottom  3
-			PUSH_VERTEX(RenderableShape::m_verticesBuffer, temp, right, bottom, glyph->texCoords[BottomRight], m_color); // Right/Bottom 2
-			PUSH_VERTEX(RenderableShape::m_verticesBuffer, temp, right, top, glyph->texCoords[TopRight], m_color);    // Right/Top    1
+			PUSH_VERTEX(m_verticesBuffer, temp, left, bottom, glyph->texCoords[BottomLeft], m_color);  // Left/Bottom  3
+			PUSH_VERTEX(m_verticesBuffer, temp, right, bottom, glyph->texCoords[BottomRight], m_color); // Right/Bottom 2
+			PUSH_VERTEX(m_verticesBuffer, temp, right, top, glyph->texCoords[TopRight], m_color);    // Right/Top    1
 
 
 			RenderableShape::isDirty = false;
 		} // for
 
-		return RenderableShape::m_verticesBuffer;
+		return m_verticesBuffer;
 	}
 
 	float WCaption::_getAdvance(const FontGlyph* glyph, float kerning)

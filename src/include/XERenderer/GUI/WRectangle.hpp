@@ -24,6 +24,7 @@ namespace Colours
 
 namespace XE
 {
+	
 	//forwarding
 	class WLayer;
 	struct SpriteData;

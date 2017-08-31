@@ -147,7 +147,7 @@ public:
   ComponentHandle<C> component();
   
   template <typename C, typename = typename std::enable_if<!std::is_const<C>::value>::type>
-  C * Entity::getComponent();
+  C * getComponent();
 
   template <typename C, typename = typename std::enable_if<std::is_const<C>::value>::type>
   const ComponentHandle<C, const EntityManager> component() const;

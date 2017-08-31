@@ -11,6 +11,8 @@
 
 #include <Ogre/OgreMain/include/Compositor/OgreCompositorWorkspaceListener.h>
 
+#include <memory>
+
 class SDL_Window;
 
 namespace Ogre

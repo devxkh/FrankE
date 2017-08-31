@@ -59,13 +59,13 @@ namespace XE {
 		VkDeviceSize offset;
 		VkDeviceSize size;
 	};
-	struct Vertex
+	struct VertexGltf
 	{
 		Ogre::Vector3 pos;
 		Ogre::Vector3 normal;
 		Ogre::Vector2 texCoord;
 
-		bool operator==(const Vertex& other) const
+		bool operator==(const VertexGltf& other) const
 		{
 			return pos == other.pos &&
 				normal == other.normal &&
@@ -263,7 +263,7 @@ namespace XE {
 				}
 
 				// Geometry
-				std::vector<Vertex> hostVertices;
+				std::vector<VertexGltf> hostVertices;
 				std::vector<uint32_t> hostIndices;
 				uint32_t vertOffset = 0;
 				uint32_t indexOffset = 0;
@@ -407,11 +407,11 @@ namespace XE {
 
 				// Geometry
 				uint32_t vertCount = static_cast<uint32_t>(mesh.positions.size() / 3);
-				std::vector<Vertex> hostVertices(vertCount);
+				std::vector<VertexGltf> hostVertices(vertCount);
 
 				for (int i = 0; i < vertCount; ++i)
 				{
-					Vertex &vert = hostVertices[i];
+					VertexGltf &vert = hostVertices[i];
 					vert.pos = Ogre::Vector3(mesh.positions[3 * i], mesh.positions[3 * i + 1], mesh.positions[3 * i + 2]);
 					vert.normal = Ogre::Vector3(mesh.normals[3 * i], mesh.normals[3 * i + 1], mesh.normals[3 * i + 2]);
 					vert.texCoord = Ogre::Vector2(mesh.texCoords[i << 1], mesh.texCoords[(i << 1) + 1]);
@@ -441,6 +441,8 @@ namespace XE {
 
 	void Asset::load(const std::string& input_filename) {
 		
+		return;
+
 		std::vector<VMesh> meshes;
 		/*loadFromGLTF(meshes, input_filename);
 
@@ -503,7 +505,7 @@ namespace XE {
 				gBufferState[it->first] = state;*/
 			}
 
-			std::vector<Vertex> hostVertices;
+			std::vector<VertexGltf> hostVertices;
 			std::vector<uint32_t> hostIndices;
 			uint32_t vertOffset = 0;
 			uint32_t indexOffset = 0;

@@ -121,12 +121,27 @@ namespace XE
 		RenderableShape::isDirty = true;
 	}
 
+	//struct VertexTest
+	//{
+	//	VertexTest() {}
+	//	VertexTest(const Ogre::Vector3& pos, const Ogre::ColourValue& col)
+	//		: position(pos)
+	//		, colour(col)
+	//	{
+
+	//	}
+
+	//	Ogre::Vector3 position;
+	//	Ogre::ColourValue colour;
+	//	Ogre::Vector2 uv;
+	//};
+
 	std::vector<Vertex>&  WRectangle::_update()
 	{
 		if (!RenderableShape::isDirty)
-			return RenderableShape::m_verticesBuffer;
+			return m_verticesBuffer;
 
-		RenderableShape::m_verticesBuffer.clear();
+		m_verticesBuffer.clear();
 
 		float texelOffsetX = m_layer.atlasData.texelOffset.x,
 			texelOffsetY = m_layer.atlasData.texelOffset.y;
@@ -144,8 +159,8 @@ namespace XE
 		// Fill
 		if (_backgroundColor.a != 0)
 		{
-			Vertex temp;
-
+			//std::unique_ptr<Vertex> temp(new Vertex);
+		
 			// Triangle A
 			//PUSH_VERTEX(getVerticesBuffer(), temp,
 			//	-0.2, 0.2,
@@ -169,41 +184,101 @@ namespace XE
 			//	_UV[1], _backgroundColor);    // Right/Top     1
 
 			//return; // test
+		
+			{
+				//std::vector<Vertex> m_verticesBufferTest;
+				Vertex temp;
+				//m_verticesBufferTest.push_back(temp);
+				//m_verticesBufferTest.push_back(temp);
+				/*m_verticesBufferTest.push_back(temp);*/
+				// Triangle A
+				// Left/Top     0
+				temp.position.x = m_position.x + texelOffsetX;
+				temp.position.y = (m_position.y + m_size.y) + texelOffsetY;
+				temp.position.z = 0;
+				temp.uv.x = _UV[0].x;
+				temp.uv.y = _UV[0].y;
+				temp.colour = _backgroundColor;
+				m_verticesBuffer.push_back(temp);
+				// Right/Top    1
+				temp.position.x = (m_position.x + m_size.x) + texelOffsetX;
+				temp.position.y = (m_position.y + m_size.y) + texelOffsetY;
+				temp.position.z = 0;
+				temp.uv.x = _UV[1].x;
+				temp.uv.y = _UV[1].y;
+				temp.colour = _backgroundColor;
+				m_verticesBuffer.push_back(temp);
+				// Left/Bottom  3
+				temp.position.x = m_position.x + texelOffsetX;
+				temp.position.y = m_position.y + texelOffsetY;
+				temp.position.z = 0;
+				temp.uv.x = _UV[3].x;
+				temp.uv.y = _UV[3].y;
+				temp.colour = _backgroundColor;
+				m_verticesBuffer.push_back(temp);
 
-			// Triangle A
-			PUSH_VERTEX(m_verticesBuffer, temp,
-				m_position.x + texelOffsetX,
-				(m_position.y + m_size.y) + texelOffsetY,
-				_UV[0], _backgroundColor);    // Left/Top     0
-			PUSH_VERTEX(m_verticesBuffer, temp,
-				(m_position.x + m_size.x) + texelOffsetX,
-				(m_position.y + m_size.y) + texelOffsetY,
-				_UV[1], _backgroundColor);    // Right/Top    1
+				//// Triangle B
+				// Right/Top     1u		
+				temp.position.x = (m_position.x + m_size.x) + texelOffsetX;
+				temp.position.y = (m_position.y + m_size.y) + texelOffsetY;
+				temp.position.z = 0;
+				temp.uv.x = _UV[1].x;
+				temp.uv.y = _UV[1].y;
+				temp.colour = _backgroundColor;
+				m_verticesBuffer.push_back(temp);
+				// Right/Bottom  2
+				temp.position.x = (m_position.x + m_size.x) + texelOffsetX;
+				temp.position.y = m_position.y + texelOffsetY;
+				temp.position.z = 0;
+				temp.uv.x = _UV[2].x;
+				temp.uv.y = _UV[2].y;
+				temp.colour = _backgroundColor;
+				m_verticesBuffer.push_back(temp);
+				// Left/Bottom   3
+				temp.position.x = m_position.x + texelOffsetX;
+				temp.position.y = m_position.y + texelOffsetY;
+				temp.position.z = 0;
+				temp.uv.x = _UV[3].x;
+				temp.uv.y = _UV[3].y;
+				temp.colour = _backgroundColor;
+				m_verticesBuffer.push_back(temp);
 
-			PUSH_VERTEX(m_verticesBuffer, temp,
-				m_position.x + texelOffsetX,
-				m_position.y + texelOffsetY,
-				_UV[3], _backgroundColor);    // Left/Bottom  3
+			}
+				//PUSH_VERTEX(VERTICES, VERTEX, X, Y, UV, COLOUR)
+				// Triangle A
+				//PUSH_VERTEX(getVerticesBuffer(), temp,
+			//	m_position.x + texelOffsetX,
+			//	(m_position.y + m_size.y) + texelOffsetY,
+			//	_UV[0], _backgroundColor);    // Left/Top     0
+			//PUSH_VERTEX(getVerticesBuffer(), temp,
+			//	(m_position.x + m_size.x) + texelOffsetX,
+			//	(m_position.y + m_size.y) + texelOffsetY,
+			//	_UV[1], _backgroundColor);    // Right/Top    1
 
-			// Triangle B
-			PUSH_VERTEX(m_verticesBuffer, temp,
-				(m_position.x + m_size.x) + texelOffsetX,
-				(m_position.y + m_size.y) + texelOffsetY,
-				_UV[1], _backgroundColor);    // Right/Top     1u																		 
-			PUSH_VERTEX(m_verticesBuffer, temp,
-				(m_position.x + m_size.x) + texelOffsetX,
-				m_position.y + texelOffsetY,
-				_UV[2], _backgroundColor);    // Right/Bottom  2
+			//PUSH_VERTEX(getVerticesBuffer(), temp,
+			//	m_position.x + texelOffsetX,
+			//	m_position.y + texelOffsetY,
+			//	_UV[3], _backgroundColor);    // Left/Bottom  3
 
-			PUSH_VERTEX(m_verticesBuffer, temp,
-				m_position.x + texelOffsetX,
-				m_position.y + texelOffsetY,
-				_UV[3], _backgroundColor);    // Left/Bottom   3
+			//// Triangle B
+			//PUSH_VERTEX(getVerticesBuffer(), temp,
+			//	(m_position.x + m_size.x) + texelOffsetX,
+			//	(m_position.y + m_size.y) + texelOffsetY,
+			//	_UV[1], _backgroundColor);    // Right/Top     1u																		 
+			//PUSH_VERTEX(getVerticesBuffer(), temp,
+			//	(m_position.x + m_size.x) + texelOffsetX,
+			//	m_position.y + texelOffsetY,
+			//	_UV[2], _backgroundColor);    // Right/Bottom  2
+
+			//PUSH_VERTEX(getVerticesBuffer(), temp,
+			//	m_position.x + texelOffsetX,
+			//	m_position.y + texelOffsetY,
+			//	_UV[3], _backgroundColor);    // Left/Bottom   3
 
 			RenderableShape::isDirty = false;
 		}
 
-		return RenderableShape::m_verticesBuffer;
+		return m_verticesBuffer;
 	}
 
 } // namespace XE

@@ -98,13 +98,16 @@ namespace XE
 				if (!renderableShape->isVisible)
 					continue;
 							
-				std::vector<Vertex>& tmp = renderableShape->_update();
+				auto tmp = renderableShape->_update();
+				
+//				auto tmp = renderableShape->getVerticesBuffer();
 
-				for (std::vector<Vertex>::iterator it = tmp.begin(); it != tmp.end(); ++it)
+				for each (auto it in tmp)
+				//	for (auto it = tmp.begin(); it != tmp.end(); ++it)
 				{
-					m_RenderBuffer.push(*it);
+					m_RenderBuffer.push(it);
 
-					XE::Vertex& tmp = m_RenderBuffer.back();
+				//	XE::Vertex& tmp = m_RenderBuffer.back();
 
 
 					//tmp.position.x = ((tmp.position.x) * mInvWidth) *2- 0.99999;
@@ -120,8 +123,10 @@ namespace XE
 					//>>>>>-------------- 3D --------------------	
 					//	tmp.position.x = (tmp.position.x  -halfSize.x) * 0.01f;
 				//	tmp.position.y = (tmp.position.y  -halfSize.y ) *0.01f;
-				}
+			 }
 			}
+		
+			m_guiRenderer.getGraphicsManager().GetRenderTask(RenderTaskID::RenderGUI).isDone = false;
 
 			m_guiRenderer.getGraphicsManager().getIntoRendererQueue().push([this]() {			
 			
@@ -133,7 +138,6 @@ namespace XE
 				});
 			});
 
-			m_guiRenderer.getGraphicsManager().GetRenderTask(RenderTaskID::RenderGUI).isDone = false;
 		}
 	}
 
