@@ -1,5 +1,11 @@
 @property( hlms_forwardplus )
+@property( hlms_forwardplus_fine_light_mask )
+	@piece( andObjLightMaskFwdPlusCmp )&& ((objLightMask & floatBitsToUint( lightDiffuse.w )) != 0u)@end
+@end
 @piece( forward3dLighting )
+	@property( hlms_forwardplus_fine_light_mask && !hlms_fine_light_mask )
+		uint objLightMask = instance.worldMaterialIdx[inPs.drawId].z;
+	@end
 	@property( hlms_forwardplus == forward3d )
 		float f3dMinDistance	= passBuf.f3dData.x;
 		float f3dInvMaxDistance	= passBuf.f3dData.y;
@@ -58,26 +64,30 @@
 		sampleOffset *= @value( fwd_clustered_lights_per_cell )u;
 	@end
 
-	uint numLightsInGrid = texelFetch( f3dGrid, int(sampleOffset) ).x;
+	uint numLightsInGrid = bufferFetch( f3dGrid, int(sampleOffset) ).x;
 
 	@property( hlms_forwardplus_debug )uint totalNumLightsInGrid = numLightsInGrid;@end
 
 	for( uint i=0u; i<numLightsInGrid; ++i )
 	{
 		//Get the light index
-		uint idx = texelFetch( f3dGrid, int(sampleOffset + i + 3u) ).x;
+		uint idx = bufferFetch( f3dGrid, int(sampleOffset + i + 3u) ).x;
 
 		//Get the light
-		vec4 posAndType = texelFetch( f3dLightList, int(idx) );
+		vec4 posAndType = bufferFetch( f3dLightList, int(idx) );
 
-		vec3 lightDiffuse	= texelFetch( f3dLightList, int(idx + 1u) ).xyz;
-		vec3 lightSpecular	= texelFetch( f3dLightList, int(idx + 2u) ).xyz;
-		vec4 attenuation	= texelFetch( f3dLightList, int(idx + 3u) ).xyzw;
+	@property( !hlms_forwardplus_fine_light_mask )
+		vec3 lightDiffuse	= bufferFetch( f3dLightList, int(idx + 1u) ).xyz;
+	@end @property( hlms_forwardplus_fine_light_mask )
+		vec4 lightDiffuse	= bufferFetch( f3dLightList, int(idx + 1u) ).xyzw;
+	@end
+		vec3 lightSpecular	= bufferFetch( f3dLightList, int(idx + 2u) ).xyz;
+		vec4 attenuation	= bufferFetch( f3dLightList, int(idx + 3u) ).xyzw;
 
 		vec3 lightDir	= posAndType.xyz - inPs.pos;
 		float fDistance	= length( lightDir );
 
-		if( fDistance <= attenuation.x )
+		if( fDistance <= attenuation.x @insertpiece( andObjLightMaskFwdPlusCmp ) )
 		{
 			lightDir *= 1.0 / fDistance;
 			float atten = 1.0 / (0.5 + (attenuation.y + attenuation.z * fDistance) * fDistance );
@@ -86,34 +96,38 @@
 			@end
 
 			//Point light
-			vec3 tmpColour = BRDF( lightDir, viewDir, NdotV, lightDiffuse, lightSpecular );
+			vec3 tmpColour = BRDF( lightDir, viewDir, NdotV, lightDiffuse.xyz, lightSpecular );
 			finalColour += tmpColour * atten;
 		}
 	}
 
 	uint prevLightCount = numLightsInGrid;
-	numLightsInGrid		= texelFetch( f3dGrid, int(sampleOffset + 1u) ).x;
+	numLightsInGrid		= bufferFetch( f3dGrid, int(sampleOffset + 1u) ).x;
 
 	@property( hlms_forwardplus_debug )totalNumLightsInGrid += numLightsInGrid;@end
 
 	for( uint i=prevLightCount; i<numLightsInGrid; ++i )
 	{
 		//Get the light index
-		uint idx = texelFetch( f3dGrid, int(sampleOffset + i + 3u) ).x;
+		uint idx = bufferFetch( f3dGrid, int(sampleOffset + i + 3u) ).x;
 
 		//Get the light
-		vec4 posAndType = texelFetch( f3dLightList, int(idx) );
+		vec4 posAndType = bufferFetch( f3dLightList, int(idx) );
 
-		vec3 lightDiffuse	= texelFetch( f3dLightList, int(idx + 1u) ).xyz;
-		vec3 lightSpecular	= texelFetch( f3dLightList, int(idx + 2u) ).xyz;
-		vec4 attenuation	= texelFetch( f3dLightList, int(idx + 3u) ).xyzw;
-		vec3 spotDirection	= texelFetch( f3dLightList, int(idx + 4u) ).xyz;
-		vec3 spotParams		= texelFetch( f3dLightList, int(idx + 5u) ).xyz;
+	@property( !hlms_forwardplus_fine_light_mask )
+		vec3 lightDiffuse	= bufferFetch( f3dLightList, int(idx + 1u) ).xyz;
+	@end @property( hlms_forwardplus_fine_light_mask )
+		vec4 lightDiffuse	= bufferFetch( f3dLightList, int(idx + 1u) ).xyzw;
+	@end
+		vec3 lightSpecular	= bufferFetch( f3dLightList, int(idx + 2u) ).xyz;
+		vec4 attenuation	= bufferFetch( f3dLightList, int(idx + 3u) ).xyzw;
+		vec3 spotDirection	= bufferFetch( f3dLightList, int(idx + 4u) ).xyz;
+		vec3 spotParams		= bufferFetch( f3dLightList, int(idx + 5u) ).xyz;
 
 		vec3 lightDir	= posAndType.xyz - inPs.pos;
 		float fDistance	= length( lightDir );
 
-		if( fDistance <= attenuation.x )
+		if( fDistance <= attenuation.x @insertpiece( andObjLightMaskFwdPlusCmp ) )
 		{
 			lightDir *= 1.0 / fDistance;
 			float atten = 1.0 / (0.5 + (attenuation.y + attenuation.z * fDistance) * fDistance );
@@ -134,7 +148,7 @@
 
 			if( spotCosAngle >= spotParams.y )
 			{
-				vec3 tmpColour = BRDF( lightDir, viewDir, NdotV, lightDiffuse, lightSpecular );
+				vec3 tmpColour = BRDF( lightDir, viewDir, NdotV, lightDiffuse.xyz, lightSpecular );
 				finalColour += tmpColour * atten;
 			}
 		}
@@ -142,20 +156,20 @@
 
 @property( hlms_enable_vpls )
 	prevLightCount	= numLightsInGrid;
-	numLightsInGrid	= texelFetch( f3dGrid, int(sampleOffset + 2u) ).x;
+	numLightsInGrid	= bufferFetch( f3dGrid, int(sampleOffset + 2u) ).x;
 
 	@property( hlms_forwardplus_debug )totalNumLightsInGrid += numLightsInGrid;@end
 
 	for( uint i=prevLightCount; i<numLightsInGrid; ++i )
 	{
 		//Get the light index
-		uint idx = texelFetch( f3dGrid, int(sampleOffset + i + 3u) ).x;
+		uint idx = bufferFetch( f3dGrid, int(sampleOffset + i + 3u) ).x;
 
 		//Get the light
-		vec4 posAndType = texelFetch( f3dLightList, int(idx) );
+		vec4 posAndType = bufferFetch( f3dLightList, int(idx) );
 
-		vec3 lightDiffuse	= texelFetch( f3dLightList, int(idx + 1u) ).xyz;
-		vec4 attenuation	= texelFetch( f3dLightList, int(idx + 3u) ).xyzw;
+		vec3 lightDiffuse	= bufferFetch( f3dLightList, int(idx + 1u) ).xyz;
+		vec4 attenuation	= bufferFetch( f3dLightList, int(idx + 3u) ).xyzw;
 
 		vec3 lightDir	= posAndType.xyz - inPs.pos;
 		float fDistance	= length( lightDir );

@@ -196,7 +196,8 @@ namespace Ogre
                     mDestBlendFactorAlpha   != _r.mDestBlendFactorAlpha ||
                     mBlendOperation         != _r.mBlendOperation ||
                     mBlendOperationAlpha    != _r.mBlendOperationAlpha ||
-                    mAlphaToCoverageEnabled != _r.mAlphaToCoverageEnabled;
+                    mAlphaToCoverageEnabled != _r.mAlphaToCoverageEnabled ||
+                    mBlendChannelMask       != _r.mBlendChannelMask;
         }
     };
 
@@ -348,9 +349,9 @@ namespace Ogre
         virtual void setAlphaTestThreshold( float threshold );
         float getAlphaTestThreshold(void) const                         { return mAlphaTestThreshold; }
 
-        /// @see Hlms::getFullNameString. This operations is NOT fast. Might return null
+        /// @see Hlms::getNameStr. This operations is NOT fast. Might return null
         /// (if the datablock was removed from the Hlms but somehow is still alive)
-        const String* getFullName(void) const;
+        const String* getNameStr(void) const;
 
         /// @see Hlms::getFilenameAndResourceGroup. This operations is NOT fast. Might return
         /// null (if the datablock was removed from the Hlms but somehow is still alive)

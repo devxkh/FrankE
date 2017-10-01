@@ -2,6 +2,9 @@
 #define _RENDERABLELAYER_HPP
 
 #include <XESystem/SystemConfig.hpp>
+
+#include <XERenderer/private/ScreenRenderable.hpp>
+
 //#include <Ogre/OgreMain/include/OgreManualObject2.h>
 #include <Ogre/OgreMain/include/OgreMovableObject.h>
 #include <Ogre/OgreMain/include/OgreRenderable.h>
@@ -27,7 +30,7 @@ namespace XE {
 	class GUIRenderer;
 	class RenderableShape;
 
-	class RenderableLayer : public Ogre::MovableObject, public Ogre::Renderable//public Ogre::ManualObject
+	class RenderableLayer : public Ogre::MovableObject, public ScreenRenderable//public Ogre::ManualObject
 	{
 	public:
 		
@@ -73,7 +76,7 @@ namespace XE {
 		Ogre::IndexBufferPacked* m_indexBuffer;
 
 		GUIRenderer& m_guiRenderer;
-
+		
 		Uint32 m_currentVertexBufferSize;
 		Uint32 m_currentIndexBufferSize;
 		Ogre::SceneManager* m_sceneMgr;

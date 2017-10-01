@@ -1,5 +1,5 @@
 
-hlms HlmsUnlit1 unlit
+hlms HlmsUnlit1 projection
 {
 	diffuse_map			TestAtlas.png	
 	scene_blend			alpha_blend

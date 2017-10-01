@@ -40,6 +40,7 @@ THE SOFTWARE.
 #include "OgreSkeleton.h"
 #include "OgreLodStrategyManager.h"
 #include "OgrePixelCountLodStrategy.h"
+#include "OgreMovableObject.h"
 
 #include "Animation/OgreSkeletonDef.h"
 #include "Animation/OgreSkeletonManager.h"
@@ -98,7 +99,10 @@ namespace Ogre {
                         "Mesh::removeSubMesh");
         }
 
-        mSubMeshes.erase( mSubMeshes.begin() + index );
+        SubMeshVec::iterator itor = mSubMeshes.begin() + index;
+        OGRE_DELETE *itor;
+
+        mSubMeshes.erase( itor );
 
         if (isLoaded())
             _dirtyState();

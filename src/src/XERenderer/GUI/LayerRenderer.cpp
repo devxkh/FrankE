@@ -46,7 +46,7 @@ namespace XE {
 		{
 			for each (auto renderable in layer->mRenderables)
 			{
-				renderable->setCustomProjectionMatrix(true, projMatrix);
+				static_cast<ScreenRenderable*>(renderable)->setCustomProjectionMatrix(true, projMatrix);
 			}		
 		}
 	}

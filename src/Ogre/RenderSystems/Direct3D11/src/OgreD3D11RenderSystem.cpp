@@ -327,6 +327,7 @@ bail:
         ConfigOption optMaxFeatureLevels;
         ConfigOption optExceptionsErrorLevel;
         ConfigOption optDriverType;
+        ConfigOption optFastShaderBuildHack;
 #if OGRE_NO_QUAD_BUFFER_STEREO == 0
 		ConfigOption optStereoMode;
 #endif
@@ -481,6 +482,25 @@ bail:
         optDriverType.currentValue = "Hardware";
         optDriverType.immutable = false;
 
+        //This option improves shader compilation times by massive amounts
+        //(requires Hlms to be aware of it), making shader compile times comparable
+        //to GL (which is measured in milliseconds per shader, instead of seconds).
+        //There's two possible reasons to disable this hack:
+        //  1. Easier debugging. Shader structs like "Material m[256];" get declared
+        //     as "Material m[2];" which cause debuggers to show only 2 entires,
+        //     instead of all of them. Some debuggers (like RenderDoc) allow changing
+        //     the amount of elements displayed and workaround it; nonetheless
+        //     disabling it makes your life easier.
+        //  2. Troubleshooting an obscure GPU/driver combination. I tested this hack
+        //     with a lot of hardware and it seems to work. However the possibility
+        //     that it breaks with a specific GPU/driver combo always exists. In
+        //     such case, the end user should be able to turn this off.
+        optFastShaderBuildHack.name = "Fast Shader Build Hack";
+        optFastShaderBuildHack.possibleValues.push_back( "Yes" );
+        optFastShaderBuildHack.possibleValues.push_back( "No" );
+        optFastShaderBuildHack.currentValue = "Yes";
+        optFastShaderBuildHack.immutable = false;
+
 #if OGRE_NO_QUAD_BUFFER_STEREO == 0
 		optStereoMode.name = "Stereo Mode";
 		optStereoMode.possibleValues.push_back(StringConverter::toString(SMT_NONE));
@@ -504,12 +524,12 @@ bail:
         mOptions[optMaxFeatureLevels.name] = optMaxFeatureLevels;
         mOptions[optExceptionsErrorLevel.name] = optExceptionsErrorLevel;
         mOptions[optDriverType.name] = optDriverType;
+        mOptions[optFastShaderBuildHack.name] = optFastShaderBuildHack;
 
 		mOptions[optBackBufferCount.name] = optBackBufferCount;
 
         
         refreshD3DSettings();
-
     }
     //---------------------------------------------------------------------
     void D3D11RenderSystem::refreshD3DSettings()
@@ -674,9 +694,9 @@ bail:
                     optFSAA->possibleValues.push_back(StringConverter::toString(n));
 
                     // 8x could mean 8xCSAA, and we need other designation for 8xMSAA
-                    if(n == 8 && SUCCEEDED(device->CheckMultisampleQualityLevels(format, 4, &numLevels)) && numLevels > 8    // 8x CSAA
-                    || n == 16 && SUCCEEDED(device->CheckMultisampleQualityLevels(format, 4, &numLevels)) && numLevels > 16  // 16x CSAA
-                    || n == 16 && SUCCEEDED(device->CheckMultisampleQualityLevels(format, 8, &numLevels)) && numLevels > 16) // 16xQ CSAA
+                    if((n == 8 && SUCCEEDED(device->CheckMultisampleQualityLevels(format, 4, &numLevels)) && numLevels > 8)    // 8x CSAA
+                    || (n == 16 && SUCCEEDED(device->CheckMultisampleQualityLevels(format, 4, &numLevels)) && numLevels > 16)  // 16x CSAA
+                    || (n == 16 && SUCCEEDED(device->CheckMultisampleQualityLevels(format, 8, &numLevels)) && numLevels > 16)) // 16xQ CSAA
                     {
                         optFSAA->possibleValues.push_back(StringConverter::toString(n) + " [Quality]");
                     }
@@ -918,11 +938,12 @@ bail:
             {
                 temp = mActiveD3DDriver->getVideoModeList()->item(j)->getDescription();
 
-                // In full screen we only want to allow supported resolutions, so temp and opt->second.currentValue need to 
-                // match exactly, but in windowed mode we can allow for arbitrary window sized, so we only need
-                // to match the colour values
-                if(fullScreen && (temp == opt->second.currentValue) ||
-                  !fullScreen && (temp.substr(temp.rfind('@')+1) == colourDepth))
+                // In full screen we only want to allow supported resolutions, so temp and
+                // opt->second.currentValue need to match exactly, but in windowed mode we
+                // can allow for arbitrary window sized, so we only need to match the
+                // colour values
+                if( (fullScreen && (temp == opt->second.currentValue)) ||
+                    (!fullScreen && (temp.substr(temp.rfind('@')+1) == colourDepth)) )
                 {
                     videoMode = mActiveD3DDriver->getVideoModeList()->item(j);
                     break;
@@ -1163,9 +1184,12 @@ bail:
 
         rsc->setCapability(RSC_VBO);
         UINT formatSupport;
-        if(mFeatureLevel >= D3D_FEATURE_LEVEL_9_2
-        || SUCCEEDED(mDevice->CheckFormatSupport(DXGI_FORMAT_R32_UINT, &formatSupport)) && 0 != (formatSupport & D3D11_FORMAT_SUPPORT_IA_INDEX_BUFFER))
+        if( mFeatureLevel >= D3D_FEATURE_LEVEL_9_2 ||
+            (SUCCEEDED( mDevice->CheckFormatSupport(DXGI_FORMAT_R32_UINT, &formatSupport)) &&
+            0 != (formatSupport & D3D11_FORMAT_SUPPORT_IA_INDEX_BUFFER)) )
+        {
             rsc->setCapability(RSC_32BIT_INDEX);
+        }
 
         // Set number of texture units, always 16
         rsc->setNumTextureUnits(16);
@@ -1337,6 +1361,8 @@ bail:
 
         rsc->setCapability(RSC_VERTEX_BUFFER_INSTANCE_DATA);
         rsc->setCapability(RSC_CAN_GET_COMPILED_SHADER_BUFFER);
+
+        rsc->setCapability(RSC_CONST_BUFFER_SLOTS_IN_SHADER);
 
         return rsc;
 
@@ -3186,8 +3212,8 @@ bail:
         v1::HardwareVertexBufferSharedPtr globalInstanceVertexBuffer = getGlobalInstanceVertexBuffer();
         v1::VertexDeclaration* globalVertexDeclaration = getGlobalInstanceVertexBufferVertexDeclaration();
 
-        bool hasInstanceData = op.useGlobalInstancingVertexBufferIsAvailable &&
-                    !globalInstanceVertexBuffer.isNull() && globalVertexDeclaration != NULL 
+        bool hasInstanceData = (op.useGlobalInstancingVertexBufferIsAvailable &&
+                    !globalInstanceVertexBuffer.isNull() && globalVertexDeclaration != NULL)
                 || op.vertexData->vertexBufferBinding->getHasInstanceData();
 
         size_t numberOfInstances = op.numberOfInstances;
@@ -4360,7 +4386,7 @@ bail:
         {
             unsigned modeFSAA = std::max(mode->Count, mode->Quality);
             bool modeQuality = mode->Count >= 8 && mode->Quality != 0;
-            bool tooHQ = (modeFSAA > fsaa || modeFSAA == fsaa && modeQuality && !qualityHint);
+            bool tooHQ = (modeFSAA > fsaa || (modeFSAA == fsaa && modeQuality && !qualityHint));
             if(!tooHQ)
                 break;
         }

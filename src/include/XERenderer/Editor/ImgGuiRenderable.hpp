@@ -6,6 +6,7 @@
 #include <Ogre/OgreMain/include/OgreMovableObject.h>
 #include <Ogre/OgreMain/include/OgreRenderable.h>
 
+#include <XERenderer/private/ScreenRenderable.hpp>
 
 //Ogre::v1
 #include <Ogre/OgreMain/include/OgreRenderOperation.h>
@@ -38,7 +39,7 @@ namespace XE {
 	class GUIRenderer;
 	class RenderableShape;
 
-	class ImgGuiRenderable : public Ogre::MovableObject, public Ogre::Renderable
+	class ImgGuiRenderable : public Ogre::MovableObject, public ScreenRenderable
 	{
 	public:
 

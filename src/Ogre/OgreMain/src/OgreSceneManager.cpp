@@ -134,8 +134,8 @@ mFullScreenQuad(0),
 mShadowDirLightExtrudeDist(10000),
 mIlluminationStage(IRS_NONE),
 mLightClippingInfoMapFrameNumber(999),
-mDefaultShadowFarDist(0),
-mDefaultShadowFarDistSquared(0),
+mDefaultShadowFarDist(200),
+mDefaultShadowFarDistSquared(200*200),
 mShadowTextureOffset(0.6), 
 mShadowTextureFadeStart(0.7), 
 mShadowTextureFadeEnd(0.9),
@@ -162,6 +162,7 @@ mGpuParamsDirty((uint16)GPV_ALL)
 
     for( size_t i=0; i<NUM_SCENE_MEMORY_MANAGER_TYPES; ++i )
         mSceneRoot[i] = 0;
+    mSceneDummy = 0;
 
     setAmbientLight( ColourValue::Black, ColourValue::Black, Vector3::UNIT_Y, 1.0f );
 
@@ -230,6 +231,10 @@ mGpuParamsDirty((uint16)GPV_ALL)
         mSceneRoot[i]->setName( "Ogre/SceneRoot" + StringConverter::toString( i ) );
         mSceneRoot[i]->_getDerivedPositionUpdated();
     }
+
+    mSceneDummy = createSceneNodeImpl( (SceneNode*)0, &mNodeMemoryManager[SCENE_DYNAMIC] );
+    mSceneDummy->setName( "Ogre/SceneManager/Dummy");
+    mSceneDummy->_getDerivedPositionUpdated();
 }
 //-----------------------------------------------------------------------
 SceneManager::~SceneManager()
@@ -254,6 +259,9 @@ SceneManager::~SceneManager()
     }
 
     OGRE_DELETE mSkyBoxObj;
+
+    OGRE_DELETE mSceneDummy;
+    mSceneDummy = 0;
 
     for( size_t i=0; i<NUM_SCENE_MEMORY_MANAGER_TYPES; ++i )
     {
@@ -1049,7 +1057,7 @@ void SceneManager::_cullPhase01( Camera* camera, const Camera *lodCamera, Viewpo
             camera->_setRenderedRqs( realFirstRq, realLastRq );
 
             CullFrustumRequest cullRequest( realFirstRq, realLastRq,
-                                            mIlluminationStage == IRS_RENDER_TO_TEXTURE, true,
+                                            mIlluminationStage == IRS_RENDER_TO_TEXTURE, true, false,
                                             &mEntitiesMemoryManagerCulledList, camera, lodCamera );
             fireCullFrustumThreads( cullRequest );
         }
@@ -1198,6 +1206,9 @@ void SceneManager::_renderPhase02(Camera* camera, const Camera *lodCamera, Viewp
                               mIlluminationStage == IRS_RENDER_TO_TEXTURE, false );
     }
 
+    //Restore vertex winding
+    mDestRenderSystem->setInvertVertexWinding(false);
+
     // Notify camera of vis faces
     camera->_notifyRenderedFaces(mDestRenderSystem->_getFaceCount());
 
@@ -1211,7 +1222,7 @@ void SceneManager::cullLights( Camera *camera, Light::LightTypes startType,
                                Light::LightTypes endType, LightArray &outLights )
 {
     mVisibleObjects.swap( mTmpVisibleObjects );
-    CullFrustumRequest cullRequest( startType, endType, false, false,
+    CullFrustumRequest cullRequest( startType, endType, false, false, true,
                                     &mLightsMemoryManagerCulledList, camera, camera );
     fireCullFrustumThreads( cullRequest );
 
@@ -2242,6 +2253,13 @@ void SceneManager::cullFrustum( const CullFrustumRequest &request, size_t thread
 
     const Camera *camera    = request.camera;
     const Camera *lodCamera = request.lodCamera;
+
+    const uint32 visibilityMask = request.cullingLights ?
+                camera->getLastViewport()->getLightVisibilityMask() :
+                ((camera->getLastViewport()->getVisibilityMask() & this->getVisibilityMask()) |
+                 (camera->getLastViewport()->getVisibilityMask() &
+                                    ~VisibilityFlags::RESERVED_VISIBILITY_FLAGS));
+
     ObjectMemoryManagerVec::const_iterator it = request.objectMemManager->begin();
     ObjectMemoryManagerVec::const_iterator en = request.objectMemManager->end();
 
@@ -2273,11 +2291,8 @@ void SceneManager::cullFrustum( const CullFrustumRequest &request, size_t thread
             numObjs = std::min( numObjs, totalObjs - toAdvance );
             objData.advancePack( toAdvance / ARRAY_PACKED_REALS );
 
-            MovableObject::cullFrustum( numObjs, objData, camera,
-                    (camera->getLastViewport()->getVisibilityMask() & getVisibilityMask()) |
-                    (camera->getLastViewport()->getVisibilityMask() &
-                                        ~VisibilityFlags::RESERVED_VISIBILITY_FLAGS),
-                    outVisibleObjects, lodCamera );
+            MovableObject::cullFrustum( numObjs, objData, camera, visibilityMask,
+                                        outVisibleObjects, lodCamera );
 
             if( mRenderQueue->getRenderQueueMode(i) == RenderQueue::FAST && request.addToRenderQueue )
             {
@@ -2380,7 +2395,7 @@ void SceneManager::buildLightList()
             {
                 const size_t totalObjs = objMemoryManager->getFirstObjectData( objData, 0 );
 
-                for( size_t i=0; i<totalObjs; ++i )
+                for( size_t i=0; i<totalObjs; i += ARRAY_PACKED_REALS )
                 {
                     for( size_t j=0; j<ARRAY_PACKED_REALS; ++j )
                     {
@@ -3397,7 +3412,7 @@ void SceneManager::useRenderableViewProjMode(const Renderable* pRend, bool fixed
         mResetIdentityView = true;
     }
 
-    bool useIdentityProj = pRend->getUseCustomProjectionMatrix();
+    bool useIdentityProj = pRend->getUseIdentityProjection();
     if (useIdentityProj)
     {
         // Use identity projection matrix, still need to take RS depth into account.

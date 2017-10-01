@@ -32,6 +32,7 @@ THE SOFTWARE.
 #include "OgreHlmsDatablock.h"
 #include "OgreHlmsTextureManager.h"
 #include "OgreConstBufferPool.h"
+#include "OgreMatrix4.h"
 #include "OgreHeaderPrefix.h"
 
 namespace Ogre
@@ -82,6 +83,7 @@ namespace Ogre
         uint8   mUvSource[NUM_UNLIT_TEXTURE_TYPES];
         uint8   mBlendModes[NUM_UNLIT_TEXTURE_TYPES];
         bool    mEnabledAnimationMatrices[NUM_UNLIT_TEXTURE_TYPES];
+        bool    mEnablePlanarReflection[NUM_UNLIT_TEXTURE_TYPES];
 
         UnlitBakedTextureArray mBakedTextures;
         /// The way to read this variable is i.e. get diffuse texture 0,
@@ -265,6 +267,17 @@ namespace Ogre
 
         void setAnimationMatrix( uint8 textureUnit, const Matrix4 &matrix );
         const Matrix4 & getAnimationMatrix( uint8 textureUnit ) const;
+
+        /** Set to true if the texture at the given texture unit is a planar
+            reflection texture. UVs will be ignored for that texture unit.
+            Calling this function triggers a HlmsDatablock::flushRenderables.
+        @param textureUnit
+            Texture unit. Must be in range [0; NUM_UNLIT_TEXTURE_TYPES)
+        @param bEnable
+            Whether to enable or disable. Default is disabled.
+        */
+        void setEnablePlanarReflection( uint8 textureUnit, bool bEnable );
+        bool getEnablePlanarReflection( uint8 textureUnit ) const;
 
         /// Returns the index to mBakedTextures. Returns NUM_PBSM_TEXTURE_TYPES if
         /// there is no texture assigned to texType

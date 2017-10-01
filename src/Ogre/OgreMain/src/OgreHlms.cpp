@@ -42,6 +42,7 @@ THE SOFTWARE.
 #include "OgreSceneManager.h"
 #include "OgreLogManager.h"
 #include "OgreForward3D.h"
+#include "OgreCamera.h"
 //#include "OgreMovableObject.h"
 //#include "OgreRenderable.h"
 #include "OgreViewport.h"
@@ -97,7 +98,7 @@ namespace Ogre
     const IdString HlmsBaseProp::UvCount5           = IdString( "hlms_uv_count5" );
     const IdString HlmsBaseProp::UvCount6           = IdString( "hlms_uv_count6" );
     const IdString HlmsBaseProp::UvCount7           = IdString( "hlms_uv_count7" );
-
+    
     //Change per frame (grouped together with scene pass)
     const IdString HlmsBaseProp::LightsDirectional  = IdString( "hlms_lights_directional" );
     const IdString HlmsBaseProp::LightsDirNonCaster = IdString( "hlms_lights_directional_non_caster" );
@@ -107,6 +108,7 @@ namespace Ogre
     const IdString HlmsBaseProp::LightsSpotParams   = IdString( "hlms_lights_spotparams" );
 
     //Change per scene pass
+    const IdString HlmsBaseProp::GlobalClipDistances= IdString( "hlms_global_clip_distances" );
     const IdString HlmsBaseProp::DualParaboloidMapping= IdString( "hlms_dual_paraboloid_mapping" );
     const IdString HlmsBaseProp::NumShadowMapLights = IdString( "hlms_num_shadow_map_lights" );
     const IdString HlmsBaseProp::NumShadowMapTextures= IdString("hlms_num_shadow_map_textures" );
@@ -115,6 +117,7 @@ namespace Ogre
     const IdString HlmsBaseProp::ShadowCasterPoint  = IdString( "hlms_shadowcaster_point" );
     const IdString HlmsBaseProp::ShadowUsesDepthTexture= IdString( "hlms_shadow_uses_depth_texture" );
     const IdString HlmsBaseProp::RenderDepthOnly    = IdString( "hlms_render_depth_only" );
+    const IdString HlmsBaseProp::FineLightMask      = IdString( "hlms_fine_light_mask" );
     const IdString HlmsBaseProp::PrePass            = IdString( "hlms_prepass" );
     const IdString HlmsBaseProp::UsePrePass         = IdString( "hlms_use_prepass" );
     const IdString HlmsBaseProp::UsePrePassMsaa     = IdString( "hlms_use_prepass_msaa" );
@@ -125,6 +128,8 @@ namespace Ogre
     const IdString HlmsBaseProp::ForwardPlusDebug   = IdString( "hlms_forwardplus_debug" );
     const IdString HlmsBaseProp::ForwardPlusFadeAttenRange
                                                     = IdString( "hlms_forward_fade_attenuation_range" );
+    const IdString HlmsBaseProp::ForwardPlusFineLightMask
+                                                    = IdString( "hlms_forwardplus_fine_light_mask" );
     const IdString HlmsBaseProp::Forward3DNumSlices = IdString( "forward3d_num_slices" );
     const IdString HlmsBaseProp::FwdClusteredWidthxHeight  = IdString( "fwd_clustered_width_x_height" );
     const IdString HlmsBaseProp::FwdClusteredWidth         = IdString( "fwd_clustered_width" );
@@ -144,7 +149,9 @@ namespace Ogre
     const IdString HlmsBaseProp::Metal          = IdString( "metal" );
     const IdString HlmsBaseProp::GL3Plus        = IdString( "GL3+" );
     const IdString HlmsBaseProp::iOS            = IdString( "iOS" );
+    const IdString HlmsBaseProp::macOS          = IdString( "macOS" );
     const IdString HlmsBaseProp::HighQuality    = IdString( "hlms_high_quality" );
+    const IdString HlmsBaseProp::FastShaderBuildHack= IdString( "fast_shader_build_hack" );
     const IdString HlmsBaseProp::TexGather      = IdString( "hlms_tex_gather" );
     const IdString HlmsBaseProp::DisableStage   = IdString( "hlms_disable_stage" );
 
@@ -209,7 +216,9 @@ namespace Ogre
         mShaderSyntax( "unset!" ),
         mShaderFileExt( "unset!" ),
         mDebugOutput( true ),
+        mDebugOutputProperties( true ),
         mHighQuality( false ),
+        mFastShaderBuildHack( false ),
         mDefaultDatablock( 0 ),
         mType( type ),
         mTypeName( typeName ),
@@ -1543,7 +1552,7 @@ namespace Ogre
         return retVal;
     }
     //-----------------------------------------------------------------------------------
-    const String* Hlms::getFullNameString( IdString name ) const
+    const String* Hlms::getNameStr(IdString name) const
     {
         String const *retVal = 0;
         HlmsDatablockMap::const_iterator itor = mDatablocks.find( name );
@@ -1668,7 +1677,7 @@ namespace Ogre
         while( itor != end )
         {
             mRenderSystem->_hlmsPipelineStateObjectDestroyed( &(*itor)->pso );
-            if( (*itor)->pso.pass.strongMacroblock )
+            if( (*itor)->pso.pass.hasStrongMacroblock() )
                 mHlmsManager->destroyMacroblock( (*itor)->pso.macroblock );
 
             delete *itor;
@@ -1711,6 +1720,85 @@ namespace Ogre
                 this->parseCounter(inString, outString);
             }
             ++itor;
+        }
+    }
+    //-----------------------------------------------------------------------------------
+    void Hlms::dumpProperties( std::ofstream &outFile )
+    {
+        outFile.write( "#if 0", sizeof( "#if 0" ) - 1u );
+
+        char tmpBuffer[64];
+        char friendlyText[32];
+        LwString value( LwString::FromEmptyPointer( tmpBuffer, sizeof(tmpBuffer) ) );
+
+        {
+            HlmsPropertyVec::const_iterator itor = mSetProperties.begin();
+            HlmsPropertyVec::const_iterator end  = mSetProperties.end();
+
+            while( itor != end )
+            {
+                itor->keyName.getFriendlyText( friendlyText, 32 );
+                value.clear();
+                value.a( itor->value );
+
+                outFile.write( "\n\t***\t", sizeof( "\n\t***\t" ) - 1u );
+                outFile.write( friendlyText, strnlen( friendlyText, 32 ) );
+                outFile.write( "\t", sizeof( "\t" ) - 1u );
+                outFile.write( value.c_str(), value.size() );
+                ++itor;
+            }
+        }
+
+        outFile.write( "\n\tDONE DUMPING PROPERTIES",
+                       sizeof( "\n\tDONE DUMPING PROPERTIES" ) - 1u );
+
+        {
+            PiecesMap::const_iterator itor = mPieces.begin();
+            PiecesMap::const_iterator end  = mPieces.end();
+
+            while( itor != end )
+            {
+                itor->first.getFriendlyText( friendlyText, 32 );
+                outFile.write( "\n\t***\t", sizeof( "\n\t***\t" ) - 1u );
+                outFile.write( friendlyText, strnlen( friendlyText, 32 ) );
+                outFile.write( "\t", sizeof( "\t" ) - 1u );
+                outFile.write( itor->second.c_str(), itor->second.size() );
+                ++itor;
+            }
+        }
+
+        outFile.write( "\n\tDONE DUMPING PIECES\n#endif\n",
+                       sizeof( "\n\tDONE DUMPING PIECES\n#endif\n" ) - 1u );
+    }
+    //-----------------------------------------------------------------------------------
+    void Hlms::applyStrongMacroblockRules( HlmsPso &pso )
+    {
+        if( !pso.macroblock->mDepthWrite )
+        {
+            //Depth writes is already off, we don't need to hold a strong reference.
+            pso.pass.strongMacroblockBits &= ~HlmsPassPso::ForceDisableDepthWrites;
+        }
+        if( pso.macroblock->mCullMode == CULL_NONE )
+        {
+            //Without culling there's nothing to invert, we don't need to hold a strong reference.
+            pso.pass.strongMacroblockBits &= ~HlmsPassPso::InvertVertexWinding;
+        }
+
+        if( pso.pass.hasStrongMacroblock() )
+        {
+            HlmsMacroblock prepassMacroblock = *pso.macroblock;
+
+            //This is a depth prepass, disable depth writes and keep a hard copy (strong ref.)
+            if( pso.pass.strongMacroblockBits & HlmsPassPso::ForceDisableDepthWrites )
+                prepassMacroblock.mDepthWrite = false;
+            //We need to invert culling mode.
+            if( pso.pass.strongMacroblockBits & HlmsPassPso::InvertVertexWinding )
+            {
+                prepassMacroblock.mCullMode = prepassMacroblock.mCullMode == CULL_CLOCKWISE ?
+                            CULL_ANTICLOCKWISE : CULL_CLOCKWISE;
+            }
+
+            pso.macroblock = mHlmsManager->getMacroblock( prepassMacroblock );
         }
     }
     //-----------------------------------------------------------------------------------
@@ -1773,7 +1861,29 @@ namespace Ogre
 #if OGRE_PLATFORM == OGRE_PLATFORM_APPLE_IOS
                 setProperty( HlmsBaseProp::iOS, 1 );
 #endif
+#if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
+                setProperty( HlmsBaseProp::macOS, 1 );
+#endif
                 setProperty( HlmsBaseProp::HighQuality, mHighQuality );
+
+                if( mFastShaderBuildHack )
+                    setProperty( HlmsBaseProp::FastShaderBuildHack, 1 );
+
+                String debugFilenameOutput;
+                std::ofstream debugDumpFile;
+                if( mDebugOutput )
+                {
+                    debugFilenameOutput = mOutputPath + "./" +
+                                            StringConverter::toString( finalHash ) +
+                                            ShaderFiles[i] + mShaderFileExt;
+                    debugDumpFile.open( debugFilenameOutput.c_str(), std::ios::out | std::ios::binary );
+
+                    //We need to dump the properties before processing the files, as these
+                    //may be overwritten or polñuted by the files, thus hiding why we
+                    //got this permutation.
+                    if( mDebugOutputProperties )
+                        dumpProperties( debugDumpFile );
+                }
 
                 //Library piece files first
                 LibraryVec::const_iterator itor = mLibrary.begin();
@@ -1824,17 +1934,9 @@ namespace Ogre
                                                            ShaderFiles[i] );
                 }
 
-                String debugFilenameOutput;
-
+                //Now dump the processed file.
                 if( mDebugOutput )
-                {
-                    debugFilenameOutput = mOutputPath + "./" +
-                                            StringConverter::toString( finalHash ) +
-                                            ShaderFiles[i] + mShaderFileExt;
-                    std::ofstream outFile( debugFilenameOutput.c_str(),
-                                           std::ios::out | std::ios::binary );
-                    outFile.write( &outString[0], outString.size() );
-                }
+                    debugDumpFile.write( &outString[0], outString.size() );
 
                 //Don't create and compile if template requested not to
                 if( !getProperty( HlmsBaseProp::DisableStage ) )
@@ -1886,18 +1988,10 @@ namespace Ogre
         pso.blendblock = datablock->getBlendblock( casterPass );
         pso.pass = passCache.pso.pass;
 
-        if( !pso.macroblock->mDepthWrite )
-        {
-            //Depth writes is already off, we don't need to hold a strong reference.
-            pso.pass.strongMacroblock = false;
-        }
-        else if( pso.pass.strongMacroblock )
-        {
-            //This is a depth prepass, disable depth writes and keep a hard copy (strong ref.)
-            HlmsMacroblock prepassMacroblock = *pso.macroblock;
-            prepassMacroblock.mDepthWrite = false;
-            pso.macroblock = mHlmsManager->getMacroblock( prepassMacroblock );
-        }
+        applyStrongMacroblockRules( pso );
+
+        const size_t numGlobalClipDistances = (size_t)getProperty( HlmsBaseProp::GlobalClipDistances );
+        pso.clipDistances = (1u << numGlobalClipDistances) - 1u;
 
         //TODO: Configurable somehow (likely should be in datablock).
         pso.sampleMask = 0xffffffff;
@@ -2052,7 +2146,7 @@ namespace Ogre
 
         if( renderable->getUseIdentityViewProjMatrixIsDynamic() )
             setProperty( HlmsBaseProp::IdentityViewProjDynamic, 1 );
-        else if( renderable->getUseCustomProjectionMatrix() ) //KH
+        else if( renderable->getUseIdentityProjection() )
             setProperty( HlmsBaseProp::IdentityViewProj, 1 );
 
         setProperty( HlmsPsoProp::Macroblock, renderable->getDatablock()->getMacroblock(false)->mId );
@@ -2386,6 +2480,10 @@ namespace Ogre
                          renderTarget->getForceDisableColourWrites() ? 1 : 0 );
         }
 
+        Camera *camera = sceneManager->getCameraInProgress();
+        if( camera && camera->isReflected() )
+            setProperty( HlmsBaseProp::GlobalClipDistances, 1 );
+
         RenderTarget *renderTarget = sceneManager->getCurrentViewport()->getTarget();
         setProperty( HlmsBaseProp::RenderDepthOnly,
                      renderTarget->getForceDisableColourWrites() ? 1 : 0 );
@@ -2454,7 +2552,16 @@ namespace Ogre
         passPso.multisampleQuality = StringConverter::parseInt( renderTarget->getFSAAHint() );
         passPso.adapterId = 1; //TODO: Ask RenderSystem current adapter ID.
 
-        passPso.strongMacroblock = sceneManager->getCurrentPrePassMode() == PrePassUse;
+        if( sceneManager->getCurrentPrePassMode() == PrePassUse )
+            passPso.strongMacroblockBits |= HlmsPassPso::ForceDisableDepthWrites;
+
+        const bool invertVertexWinding = mRenderSystem->getInvertVertexWinding();
+
+        if( (renderTarget->requiresTextureFlipping() && !invertVertexWinding) ||
+            (!renderTarget->requiresTextureFlipping() && invertVertexWinding) )
+        {
+            passPso.strongMacroblockBits |= HlmsPassPso::InvertVertexWinding;
+        }
 
         return passPso;
     }
@@ -2496,10 +2603,11 @@ namespace Ogre
         return lastReturnedValue;
     }
     //-----------------------------------------------------------------------------------
-    void Hlms::setDebugOutputPath( bool enableDebugOutput, const String &path )
+    void Hlms::setDebugOutputPath( bool enableDebugOutput, bool outputProperties, const String &path )
     {
-        mDebugOutput	= enableDebugOutput;
-        mOutputPath		= path;
+        mDebugOutput            = enableDebugOutput;
+        mDebugOutputProperties  = outputProperties;
+        mOutputPath             = path;
     }
     //-----------------------------------------------------------------------------------
     void Hlms::setListener( HlmsListener *listener )
@@ -2539,13 +2647,13 @@ namespace Ogre
 
         while( itor != end )
         {
-            if( (*itor)->pso.pass.strongMacroblock )
+            if( (*itor)->pso.pass.hasStrongMacroblock() )
                 hasPsosWithStrongRefs = true;
 
             if( (*itor)->pso.macroblock->mId == id )
             {
                 mRenderSystem->_hlmsPipelineStateObjectDestroyed( &(*itor)->pso );
-                if( !(*itor)->pso.pass.strongMacroblock )
+                if( !(*itor)->pso.pass.hasStrongMacroblock() )
                 {
                     wasUsedInWeakRefs = true;
                     macroblock = *(*itor)->pso.macroblock;
@@ -2571,7 +2679,7 @@ namespace Ogre
 
             while( itor != end )
             {
-                if( (*itor)->pso.pass.strongMacroblock && *(*itor)->pso.macroblock == macroblock )
+                if( (*itor)->pso.pass.hasStrongMacroblock() && *(*itor)->pso.macroblock == macroblock )
                     macroblocksToDelete.push_back( (*itor)->pso.macroblock );
                 ++itor;
             }
@@ -2602,7 +2710,7 @@ namespace Ogre
             if( (*itor)->pso.blendblock->mId == id )
             {
                 mRenderSystem->_hlmsPipelineStateObjectDestroyed( &(*itor)->pso );
-                if( (*itor)->pso.pass.strongMacroblock )
+                if( (*itor)->pso.pass.hasStrongMacroblock() )
                     macroblocksToDelete.push_back( (*itor)->pso.macroblock );
                 delete *itor;
                 itor = mShaderCache.erase( itor );
@@ -2642,7 +2750,7 @@ namespace Ogre
                 {
                     //This is a v2 input layout.
                     mRenderSystem->_hlmsPipelineStateObjectDestroyed( &(*itor)->pso );
-                    if( (*itor)->pso.pass.strongMacroblock )
+                    if( (*itor)->pso.pass.hasStrongMacroblock() )
                         macroblocksToDelete.push_back( (*itor)->pso.macroblock );
                     delete *itor;
                     itor = mShaderCache.erase( itor );
@@ -2687,7 +2795,7 @@ namespace Ogre
                 {
                     //This is a v1 input layout.
                     mRenderSystem->_hlmsPipelineStateObjectDestroyed( &(*itor)->pso );
-                    if( (*itor)->pso.pass.strongMacroblock )
+                    if( (*itor)->pso.pass.hasStrongMacroblock() )
                         macroblocksToDelete.push_back( (*itor)->pso.macroblock );
                     delete *itor;
                     itor = mShaderCache.erase( itor );
@@ -2733,6 +2841,14 @@ namespace Ogre
 
         if( mRenderSystem )
         {
+            {
+                mFastShaderBuildHack = false;
+                const ConfigOptionMap &rsConfigOptions = newRs->getConfigOptions();
+                ConfigOptionMap::const_iterator itor = rsConfigOptions.find( "Fast Shader Build Hack" );
+                if( itor != rsConfigOptions.end() )
+                    mFastShaderBuildHack = StringConverter::parseBool( itor->second.currentValue );
+            }
+
             //Prefer glsl over glsles
             const String shaderProfiles[4] = { "hlsl", "glsles", "glsl", "metal" };
             const RenderSystemCapabilities *capabilities = mRenderSystem->getCapabilities();
@@ -2769,6 +2885,28 @@ namespace Ogre
 
                 if( mRenderSystem->checkExtension( "GL_AMD_shader_trinary_minmax" ) )
                     mRsSpecificExtensions.push_back( HlmsBaseProp::GlAmdTrinaryMinMax );
+
+                struct Extensions
+                {
+                    const char *extName;
+                    uint32 minGlVersion;
+                };
+
+                Extensions extensions[] =
+                {
+                    { "GL_ARB_base_instance",               420 },
+                    { "GL_ARB_shading_language_420pack",    420 },
+                    { "GL_ARB_texture_buffer_range",        430 },
+                };
+
+                for( size_t i=0; i<sizeof(extensions) / sizeof(extensions[0]); ++i )
+                {
+                    if( mRenderSystem->getNativeShadingLanguageVersion() >= extensions[i].minGlVersion ||
+                        mRenderSystem->checkExtension( extensions[i].extName ) )
+                    {
+                        mRsSpecificExtensions.push_back( extensions[i].extName );
+                    }
+                }
             }
 
             if( !mDefaultDatablock )

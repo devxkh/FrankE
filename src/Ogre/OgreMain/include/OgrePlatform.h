@@ -158,7 +158,11 @@ namespace Ogre {
 #   ifdef OGRE_BUILD_RENDERSYSTEM_GL3PLUS
 #       error OpenGL is not supported on NaCl (OGRE_BUILD_RENDERSYSTEM_GL3PLUS=false in CMake)
 #   endif
-#   ifndef OGRE_BUILD_RENDERSYSTEM_GLES2
+#   ifdef OGRE_BUILD_RENDERSYSTEM_GLES2
+#       if OGRE_NO_GLES3_SUPPORT
+#           define OGRE_TEXTURE_ATLAS
+#       endif
+#   else
 #       error GLES2 render system is required for NaCl (OGRE_BUILD_RENDERSYSTEM_GLES2=false in CMake)
 #   endif
 #else
@@ -491,7 +495,7 @@ typedef signed char int8;
 // We have this issue in OgreMemorySTLAlloc.h - so we see it over and over
 #   pragma warning (disable : 4345)
 #endif
-
+    
 }
 
 #endif

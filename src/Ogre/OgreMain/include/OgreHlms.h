@@ -156,7 +156,9 @@ namespace Ogre
         String          mShaderFileExt; /// Either glsl or hlsl
         String          mOutputPath;
         bool            mDebugOutput;
+        bool            mDebugOutputProperties;
         bool            mHighQuality;
+        bool            mFastShaderBuildHack;
 
         /// The default datablock occupies the name IdString(); which is not the same as IdString("")
         HlmsDatablock   *mDefaultDatablock;
@@ -273,6 +275,15 @@ namespace Ogre
         virtual void clearShaderCache(void);
 
         void processPieces( Archive *archive, const StringVector &pieceFiles );
+
+        void dumpProperties( std::ofstream &outFile );
+
+        /** Modifies the PSO's macroblock if there are reasons to do that, and creates
+            a strong reference to the macroblock that the PSO will own.
+        @param pso [in/out]
+            PSO to (potentially) modify.
+        */
+        void applyStrongMacroblockRules( HlmsPso &pso );
 
         /** Creates a shader based on input parameters. Caller is responsible for ensuring
             this shader hasn't already been created.
@@ -438,7 +449,7 @@ namespace Ogre
         /// The reason this String doesn't live in HlmsDatablock is to prevent
         /// cache trashing (datablocks are hot iterated every frame, and the
         /// full name is rarely ever used)
-        const String* getFullNameString( IdString name ) const;
+        const String* getNameStr(IdString name) const;
 
         /// Returns the filaname & resource group a datablock was created from, and
         /// is associated with its hashed name (this was passed as in @createDatablock).
@@ -575,11 +586,18 @@ namespace Ogre
             You should call this function at start up
         @param enableDebugOutput
             Whether to enable or disable dumping the shaders into a folder
+        @param outputProperties
+            Whether to dump properties and pieces at the beginning of the shader file.
+            This is very useful for determining what caused Ogre to compile a new variation.
+            Note that this setting may not always produce valid shader code in the dumped files
+            (but it we'll still produce valid shader code while at runtime)
+            If you want to compile the dumped file and it is invalid, just strip this info.
         @param path
             Path location on where to dump it. Should end with slash for proper concatenation
             (i.e. C:/path/ instead of C:/path; or /home/user/ instead of /home/user)
         */
-        void setDebugOutputPath( bool enableDebugOutput, const String &path = BLANKSTRING );
+        void setDebugOutputPath( bool enableDebugOutput, bool outputProperties,
+                                 const String &path = BLANKSTRING );
 
         /** Sets a listener to extend an existing Hlms implementation's with custom code,
             without having to rewrite it or modify the source code directly.
@@ -661,7 +679,7 @@ namespace Ogre
         static const IdString UvCount5;
         static const IdString UvCount6;
         static const IdString UvCount7;
-
+        
         //Change per frame (grouped together with scene pass)
         static const IdString LightsDirectional;
         static const IdString LightsDirNonCaster;
@@ -671,6 +689,7 @@ namespace Ogre
         static const IdString LightsSpotParams;
 
         //Change per scene pass
+        static const IdString GlobalClipDistances;
         static const IdString DualParaboloidMapping;
         static const IdString NumShadowMapLights;
         static const IdString NumShadowMapTextures;
@@ -679,6 +698,7 @@ namespace Ogre
         static const IdString ShadowCasterPoint;
         static const IdString ShadowUsesDepthTexture;
         static const IdString RenderDepthOnly;
+        static const IdString FineLightMask;
         static const IdString PrePass;
         static const IdString UsePrePass;
         static const IdString UsePrePassMsaa;
@@ -688,6 +708,7 @@ namespace Ogre
         static const IdString ForwardPlusFlipY;
         static const IdString ForwardPlusDebug;
         static const IdString ForwardPlusFadeAttenRange;
+        static const IdString ForwardPlusFineLightMask;
         static const IdString Forward3DNumSlices;
         static const IdString FwdClusteredWidthxHeight;
         static const IdString FwdClusteredWidth;
@@ -708,8 +729,10 @@ namespace Ogre
         static const IdString Metal;
         static const IdString GL3Plus;
         static const IdString iOS;
+        static const IdString macOS;
         static const IdString GLVersion;
         static const IdString HighQuality;
+        static const IdString FastShaderBuildHack;
         static const IdString TexGather;
         static const IdString DisableStage;
 

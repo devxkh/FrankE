@@ -37,6 +37,8 @@ THE SOFTWARE.
 
 #include "OgreLwString.h"
 
+#include "OgreStringConverter.h"
+
 #include "rapidjson/document.h"
 
 namespace Ogre
@@ -82,7 +84,7 @@ namespace Ogre
 	{
 		bool setTex = false;
 		HlmsTextureManager::TextureLocation texLocation;
-		const HlmsSamplerblock* samplerBlock;
+		HlmsSamplerblock const * samplerBlock = 0;
 		rapidjson::Value::ConstMemberIterator itor = json.FindMember( "texture" );
 		if ( itor != json.MemberEnd() && itor->value.IsString() )
 		{

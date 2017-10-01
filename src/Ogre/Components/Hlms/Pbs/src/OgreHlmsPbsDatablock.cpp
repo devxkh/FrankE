@@ -62,6 +62,7 @@ namespace Ogre
         mTwoSided( false ),
         mUseAlphaFromTextures( true ),
         mWorkflow( SpecularWorkflow ),
+        mReceiveShadows( true ),
         mTransparencyMode( None ),
         mkDr( 0.318309886f ), mkDg( 0.318309886f ), mkDb( 0.318309886f ), //Max Diffuse = 1 / PI
         _padding0( 1 ),
@@ -463,9 +464,14 @@ namespace Ogre
         {
             HlmsTextureManager::TEXTURE_TYPE_DIFFUSE,
             HlmsTextureManager::TEXTURE_TYPE_NORMALS,
-            HlmsTextureManager::TEXTURE_TYPE_DIFFUSE,
+
+            mWorkflow == MetallicWorkflow
+                ? HlmsTextureManager::TEXTURE_TYPE_MONOCHROME
+                : HlmsTextureManager::TEXTURE_TYPE_DIFFUSE,
+
             HlmsTextureManager::TEXTURE_TYPE_MONOCHROME,
             HlmsTextureManager::TEXTURE_TYPE_NON_COLOR_DATA,
+#ifdef OGRE_TEXTURE_ATLAS
             HlmsTextureManager::TEXTURE_TYPE_DETAIL,
             HlmsTextureManager::TEXTURE_TYPE_DETAIL,
             HlmsTextureManager::TEXTURE_TYPE_DETAIL,
@@ -474,6 +480,16 @@ namespace Ogre
             HlmsTextureManager::TEXTURE_TYPE_DETAIL_NORMAL_MAP,
             HlmsTextureManager::TEXTURE_TYPE_DETAIL_NORMAL_MAP,
             HlmsTextureManager::TEXTURE_TYPE_DETAIL_NORMAL_MAP,
+#else
+            HlmsTextureManager::TEXTURE_TYPE_DIFFUSE,
+            HlmsTextureManager::TEXTURE_TYPE_DIFFUSE,
+            HlmsTextureManager::TEXTURE_TYPE_DIFFUSE,
+            HlmsTextureManager::TEXTURE_TYPE_DIFFUSE,
+            HlmsTextureManager::TEXTURE_TYPE_NORMALS,
+            HlmsTextureManager::TEXTURE_TYPE_NORMALS,
+            HlmsTextureManager::TEXTURE_TYPE_NORMALS,
+            HlmsTextureManager::TEXTURE_TYPE_NORMALS,
+#endif
             HlmsTextureManager::TEXTURE_TYPE_ENV_MAP
         };
 
@@ -521,7 +537,7 @@ namespace Ogre
     //-----------------------------------------------------------------------------------
     void HlmsPbsDatablock::setDiffuse( const Vector3 &diffuseColour )
     {
-        const float invPI = 0.318309886f;
+        const float invPI = getBrdf() == PbsBrdf::BlinnPhongFullLegacy ? 1.0f : 0.318309886f;
         mkDr = diffuseColour.x * invPI;
         mkDg = diffuseColour.y * invPI;
         mkDb = diffuseColour.z * invPI;
@@ -530,20 +546,24 @@ namespace Ogre
     //-----------------------------------------------------------------------------------
     Vector3 HlmsPbsDatablock::getDiffuse(void) const
     {
-        return Vector3( mkDr, mkDg, mkDb ) * Ogre::Math::PI;
+        const Real pi = getBrdf() == PbsBrdf::BlinnPhongFullLegacy ? 1.0f : Math::PI;
+        return Vector3( mkDr, mkDg, mkDb ) * pi;
     }
     //-----------------------------------------------------------------------------------
     void HlmsPbsDatablock::setSpecular( const Vector3 &specularColour )
     {
-        mkSr = specularColour.x;
-        mkSg = specularColour.y;
-        mkSb = specularColour.z;
+        const float invPI = getBrdf() == PbsBrdf::BlinnPhongLegacyMath ? 0.318309886f : 1.0f;
+
+        mkSr = specularColour.x * invPI;
+        mkSg = specularColour.y * invPI;
+        mkSb = specularColour.z * invPI;
         scheduleConstBufferUpdate();
     }
     //-----------------------------------------------------------------------------------
     Vector3 HlmsPbsDatablock::getSpecular(void) const
     {
-        return Vector3( mkSr, mkSg, mkSb );
+        const Real pi = getBrdf() == PbsBrdf::BlinnPhongLegacyMath ? Math::PI : 1.0f;
+        return Vector3( mkSr, mkSg, mkSb ) * pi;
     }
     //-----------------------------------------------------------------------------------
     void HlmsPbsDatablock::setRoughness( float roughness )
@@ -659,7 +679,7 @@ namespace Ogre
                 textures[i].samplerBlock = hlmsManager->getSamplerblock( samplerBlockRef );
             }
 
-            mSamplerblocks[i] = packedTextures[i].samplerblock;
+            mSamplerblocks[i] = textures[i].samplerBlock;
         }
 
         bakeTextures( textures );
@@ -972,14 +992,14 @@ namespace Ogre
             if( mTransparencyMode == None && mBlendblock[0]->mIsTransparent )
             {
                 LogManager::getSingleton().logMessage(
-                            "WARNING: PBS Datablock '" + *getFullName() +
+                            "WARNING: PBS Datablock '" + *getNameStr() +
                             "' disabling transparency but forcing a blendblock to"
                             " keep using alpha blending. Performance will be affected." );
             }
             else if( mTransparencyMode != None && !mBlendblock[0]->mIsTransparent )
             {
                 LogManager::getSingleton().logMessage(
-                            "WARNING: PBS Datablock '" + *getFullName() +
+                            "WARNING: PBS Datablock '" + *getNameStr() +
                             "' enabling transparency but forcing a blendblock to avoid"
                             " alpha blending. Results may not look as expected." );
             }
@@ -988,6 +1008,20 @@ namespace Ogre
         scheduleConstBufferUpdate();
         if( mustFlush )
             flushRenderables();
+    }
+    //-----------------------------------------------------------------------------------
+    void HlmsPbsDatablock::setReceiveShadows( bool receiveShadows )
+    {
+        if( mReceiveShadows != receiveShadows )
+        {
+            mReceiveShadows = receiveShadows;
+            flushRenderables();
+        }
+    }
+    //-----------------------------------------------------------------------------------
+    bool HlmsPbsDatablock::getReceiveShadows(void) const
+    {
+        return mReceiveShadows;
     }
     //-----------------------------------------------------------------------------------
     void HlmsPbsDatablock::setCubemapProbe( CubemapProbe *probe )
@@ -1020,7 +1054,22 @@ namespace Ogre
     {
         if( mBrdf != brdf )
         {
+            const PbsBrdf::PbsBrdf oldBrdf = (PbsBrdf::PbsBrdf)getBrdf();
+            const PbsBrdf::PbsBrdf newBrdf = brdf;
             mBrdf = brdf;
+
+            //BlinnPhongFullLegacy expects diffuse in range [0; 1]; we have it in range [0; 1 / PI]
+            if( oldBrdf == PbsBrdf::BlinnPhongFullLegacy && newBrdf != PbsBrdf::BlinnPhongFullLegacy )
+                setDiffuse( Vector3( mkDr, mkDg, mkDb ) ); //Will be divided by PI.
+            if( oldBrdf != PbsBrdf::BlinnPhongFullLegacy && newBrdf == PbsBrdf::BlinnPhongFullLegacy )
+                setDiffuse( Vector3( mkDr, mkDg, mkDb ) * Math::PI ); //Increase by PI, won't be divided.
+
+            //BlinnPhongLegacyMath expects specular in range [0; 1 / PI]; we have it in range [0; 1]
+            if( oldBrdf == PbsBrdf::BlinnPhongLegacyMath && newBrdf != PbsBrdf::BlinnPhongLegacyMath )
+                setSpecular( Vector3( mkSr, mkSg, mkSb ) * Math::PI );
+            if( oldBrdf != PbsBrdf::BlinnPhongLegacyMath && newBrdf == PbsBrdf::BlinnPhongLegacyMath )
+                setSpecular( Vector3( mkSr, mkSg, mkSb ) );
+
             flushRenderables();
         }
     }
@@ -1084,8 +1133,17 @@ namespace Ogre
         {
         default:
         case PBSM_DIFFUSE:
-        case PBSM_SPECULAR:
             retVal = HlmsTextureManager::TEXTURE_TYPE_DIFFUSE;
+            break;
+        case PBSM_SPECULAR:
+            if( mWorkflow == MetallicWorkflow )
+            {
+                retVal = HlmsTextureManager::TEXTURE_TYPE_MONOCHROME;
+            }
+            else
+            {
+                retVal = HlmsTextureManager::TEXTURE_TYPE_DIFFUSE;
+            }
             break;
         case PBSM_DETAIL_WEIGHT:
             retVal = HlmsTextureManager::TEXTURE_TYPE_NON_COLOR_DATA;
@@ -1094,15 +1152,25 @@ namespace Ogre
         case PBSM_DETAIL1:
         case PBSM_DETAIL2:
         case PBSM_DETAIL3:
+#ifdef OGRE_TEXTURE_ATLAS
             retVal = HlmsTextureManager::TEXTURE_TYPE_DETAIL;
+#else
+            retVal = HlmsTextureManager::TEXTURE_TYPE_DIFFUSE;
+#endif
             break;
 
         case PBSM_NORMAL:
+            retVal = HlmsTextureManager::TEXTURE_TYPE_NORMALS;
+            break;
         case PBSM_DETAIL0_NM:
         case PBSM_DETAIL1_NM:
         case PBSM_DETAIL2_NM:
         case PBSM_DETAIL3_NM:
+#ifdef OGRE_TEXTURE_ATLAS
+            retVal = HlmsTextureManager::TEXTURE_TYPE_DETAIL_NORMAL_MAP;
+#else
             retVal = HlmsTextureManager::TEXTURE_TYPE_NORMALS;
+#endif
             break;
 
         case PBSM_ROUGHNESS:

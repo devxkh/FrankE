@@ -342,7 +342,7 @@ namespace Ogre {
         {
             // NB use API-independent projection matrix since GPU programs
             // bypass the API-specific handedness and use right-handed coords
-            if (mCurrentRenderable && mCurrentRenderable->getUseCustomProjectionMatrix())
+            if (mCurrentRenderable && mCurrentRenderable->getUseIdentityProjection())
             {
                 // Use identity projection matrix, still need to take RS depth into account.
                 RenderSystem* rs = Root::getSingleton().getRenderSystem();
@@ -352,7 +352,6 @@ namespace Ogre {
             {
                 mProjectionMatrix = mCurrentCamera->getProjectionMatrixWithRSDepth();
             }
-
             if (mCurrentRenderTarget && mCurrentRenderTarget->requiresTextureFlipping())
             {
                 // Because we're not using setProjectionMatrix, this needs to be done here
@@ -364,8 +363,6 @@ namespace Ogre {
             }
             mProjMatrixDirty = false;
         }
-
-
         return mProjectionMatrix;
     }
     //-----------------------------------------------------------------------------

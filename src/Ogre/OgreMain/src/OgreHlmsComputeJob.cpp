@@ -156,10 +156,18 @@ namespace Ogre
             removeProperty( propName.c_str() );
             propName.resize( texturePropSize );
 
+            propName.a( "_pf_type" );               //uav0_pf_type
+            removePiece( propName.c_str() );
+            propName.resize( texturePropSize );
+
             //Note we're comparing pointers, not string comparison!
             if( propTexture == ComputeProperty::Uav )
             {
-                propName.a( "_pf_type" );           //uav0_pf_type
+                propName.a( "_width_with_lod" );    //uav0_width_with_lod
+                removePiece( propName.c_str() );
+                propName.resize( texturePropSize );
+
+                propName.a( "_height_with_lod" );   //uav0_height_with_lod
                 removePiece( propName.c_str() );
                 propName.resize( texturePropSize );
             }
@@ -705,5 +713,16 @@ namespace Ogre
         IdString originalName = dstJob->mName;
         *dstJob = *this;
         dstJob->mName = originalName;
+
+        HlmsManager *hlmsManager = mCreator->getHlmsManager();
+        TextureSlotVec::const_iterator itor = dstJob->mTextureSlots.begin();
+        TextureSlotVec::const_iterator end  = dstJob->mTextureSlots.end();
+
+        while( itor != end )
+        {
+            if( itor->samplerblock )
+                hlmsManager->addReference( itor->samplerblock );
+            ++itor;
+        }
     }
 }

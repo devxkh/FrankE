@@ -14,11 +14,7 @@ set(XERenderer_SOURCES
     ${SRCROOT}/GraphicsManager.cpp
 	${SRCROOT}/OgreWorkspace.cpp
 	${SRCROOT}/DrawDynamicLines.cpp
-    ${SRCROOT}/Animation.cpp
-
-	${SRCROOT}/gltfAsset.cpp
-	${SRCROOT}/gltfAsset.h
-   
+    ${SRCROOT}/Animation.cpp   
 )
 source_group("src" FILES ${XERenderer_SOURCES})
 
@@ -36,6 +32,22 @@ set(XERenderer_HEADER
  
 )
 source_group("include" FILES ${XERenderer_HEADER})
+
+set(XERenderer_Resources_SOURCES
+   
+	${SRCROOT}/Resource/gltfAsset.cpp
+   	${SRCROOT}/Resource/XEMesh.cpp
+    ${SRCROOT}/Resource/XEMaterial.cpp
+)
+source_group("src\\resource" FILES ${XERenderer_Resources_SOURCES})
+
+set(XERenderer_Resources_HEADER
+ 
+	${INCROOT}/Resource/gltfAsset.h
+	${INCROOT}/Resource/XEMesh.hpp
+	${INCROOT}/Resource/XEMaterial.hpp
+)
+source_group("include\\resource" FILES ${XERenderer_Resources_HEADER})
 
 
 # ------------ Editor ---------------
@@ -64,6 +76,7 @@ source_group("include\\Editor" FILES ${XERenderer_Editor_HEADER})
 
 # ------------ Hlms ---------------
 set(XERenderer_Hlms_SOURCES   
+     ${SRCROOT}/Hlms/XEHlmsProjection.cpp
      ${SRCROOT}/Hlms/XEHlmsUnlit.cpp
 	 ${SRCROOT}/Hlms/XEHlmsUnlitDatablock.cpp
 	 ${SRCROOT}/Hlms/XEHlmsJsonUnlit.cpp
@@ -71,6 +84,7 @@ set(XERenderer_Hlms_SOURCES
 source_group("src\\Hlms" FILES ${XERenderer_Hlms_SOURCES})
 
 set(XERenderer_Hlms_HEADER
+	 ${INCROOT}/Hlms/XEHlmsProjection.hpp
 	 ${INCROOT}/Hlms/XEHlmsUnlit.hpp
 	 ${INCROOT}/Hlms/XEHlmsUnlitDatablock.hpp
 	 ${INCROOT}/Hlms/XEHlmsJsonUnlit.hpp
@@ -99,7 +113,8 @@ set(XERenderer_private_SOURCES
 		${SRCROOT}/private/DynamicRenderable.cpp
 		${SRCROOT}/private/DynamicLines.hpp
 		${SRCROOT}/private/DynamicRenderable.hpp
-		${SRCROOT}/private/gltf_loader.h
+		${SRCROOT}/private/ScreenRenderable.hpp
+	#	${SRCROOT}/private/gltf_loader.h
 	#	${SRCROOT}/private/OgreHelper.cpp
 	#	${SRCROOT}/private/OgreHelper.hpp
 )
@@ -147,7 +162,7 @@ enable_unity_build(XERenderer  ${XERenderer_SOURCES} ${XERenderer_private_SOURCE
 
 sfml_add_library(XERenderer 
 	SOURCES ${XERenderer_SOURCES} ${XERenderer_HEADER} ${XERenderer_private_SOURCES} ${XEGraphics_HEADER} ${XEGraphics_SOURCES} ${XERenderer_Editor_HEADER} ${XERenderer_Editor_SOURCES}
-	 ${XERenderer_Hlms_HEADER} ${XERenderer_Hlms_SOURCES} ${XERenderer_Animation_HEADER} ${XERenderer_Animation_SOURCES}
+	 ${XERenderer_Hlms_HEADER} ${XERenderer_Hlms_SOURCES} ${XERenderer_Animation_HEADER} ${XERenderer_Animation_SOURCES} ${XERenderer_Resources_SOURCES} ${XERenderer_Resources_HEADER}
 	DEPENDS OgreMain XEDAL 
 	RenderSystem_GL3Plus 
 #	RenderSystem_Direct3D11

@@ -74,6 +74,8 @@ namespace Ogre
     {
         FLAG_UNCORRELATED                           = 0x80000000,
         FLAG_SPERATE_DIFFUSE_FRESNEL                = 0x40000000,
+        FLAG_LEGACY_MATH                            = 0x20000000,
+        FLAG_FULL_LEGACY                            = 0x08000000,
         BRDF_MASK                                   = 0x00000FFF,
 
         /// Most physically accurate BRDF we have. Good for representing
@@ -94,6 +96,13 @@ namespace Ogre
         ///
         /// Ideal for silk (use high roughness values), synthetic fabric
         CookTorrance    = 0x00000001,
+
+        /// Implements Normalized Blinn Phong using a normalization
+        /// factor of (n + 8) / (8 * pi)
+        /// The main reason to use this BRDF is performance. It's cheaper,
+        /// while still looking somewhat similar to Default.
+        /// If you still need more performance, see BlinnPhongLegacy
+        BlinnPhong      = 0x00000002,
 
         /// Same as Default, but the geometry term is not height-correlated
         /// which most notably causes edges to be dimmer and is less correct.
@@ -127,6 +136,46 @@ namespace Ogre
         /// Ideal for shiny objects like glass toy marbles, some types of rubber.
         /// silk, synthetic fabric.
         CookTorranceSeparateDiffuseFresnel  = CookTorrance|FLAG_SPERATE_DIFFUSE_FRESNEL,
+
+        /// Like DefaultSeparateDiffuseFresnel, but uses BlinnPhong as base.
+        BlinnPhongSeparateDiffuseFresnel    = BlinnPhong|FLAG_SPERATE_DIFFUSE_FRESNEL,
+
+        /// Implements traditional / the original non-PBR blinn phong:
+        ///     * Looks more like a 2000-2005's game
+        ///     * Ignores fresnel completely.
+        ///     * Works with Roughness in range (0; 1]. We automatically convert
+        ///       this parameter for you to shininess.
+        ///     * Assumes your Light power is set to PI (or a multiple) like with
+        ///       most other Brdfs.
+        ///     * Diffuse & Specular will automatically be
+        ///       multiplied/divided by PI for you (assuming you
+        ///       set your Light power to PI).
+        /// The main scenario to use this BRDF is:
+        ///     * Performance. This is the fastest BRDF.
+        ///     * You were using Default, but are ok with how this one looks,
+        ///       so you switch to this one instead.
+        BlinnPhongLegacyMath                = BlinnPhong|FLAG_LEGACY_MATH,
+
+        /// Implements traditional / the original non-PBR blinn phong:
+        ///     * Looks more like a 2000-2005's game
+        ///     * Ignores fresnel completely.
+        ///     * Roughness is actually the shininess parameter; which is in range (0; inf)
+        ///       although most used ranges are in (0; 500].
+        ///     * Assumes your Light power is set to 1.0.
+        ///     * Diffuse & Specular is unmodified.
+        /// There are two possible reasons to use this BRDF:
+        ///     * Performance. This is the fastest BRDF.
+        ///     * You're porting your app from Ogre 1.x and want to maintain that
+        ///       Fixed-Function look for some odd reason, and your materials
+        ///       already dealt in shininess, and your lights are already calibrated.
+        ///
+        /// Important: If switching from Default to BlinnPhongFullLegacy, you'll probably see
+        /// that your scene is too bright. This is probably because Default divides diffuse
+        /// by PI and you usually set your lights' power to a multiple of PI to compensate.
+        /// If your scene is too bright, kist divide your lights by PI.
+        /// BlinnPhongLegacyMath performs that conversion for you automatically at
+        /// material level instead of doing it at light level.
+        BlinnPhongFullLegacy                = BlinnPhongLegacyMath|FLAG_FULL_LEGACY,
     };
     }
 
@@ -179,6 +228,7 @@ namespace Ogre
         bool    mTwoSided;
         bool    mUseAlphaFromTextures;
         uint8	mWorkflow;
+        bool    mReceiveShadows;
         TransparencyModes mTransparencyMode;
 
         float	mBgDiffuse[4];
@@ -585,6 +635,18 @@ namespace Ogre
         TransparencyModes getTransparencyMode(void) const           { return mTransparencyMode; }
         bool getUseAlphaFromTextures(void) const                    { return mUseAlphaFromTextures; }
 
+        /** When false, objects with this material will not receive shadows (independent of
+            whether they case shadows or not)
+        @remarks
+            Changing this parameter will cause a flushRenderables
+            Shadow casting lights (which are normally processed in a Forward way)
+            will still lit the object, it just won't have shadows in it.
+        @param receiveShadows
+            Whether to enable or disable receiving shadows.
+        */
+        void setReceiveShadows( bool receiveShadows );
+        bool getReceiveShadows(void) const;
+
         /** Manually set a probe to affect this particular material.
         @remarks
             PCC (Parallax Corrected Cubemaps) have two main forms of operation: Auto and manual.
@@ -665,7 +727,7 @@ namespace Ogre
             You could create an alias however, and thus have two copies of the same texture with
             different loading parameters.
         */
-        static HlmsTextureManager::TextureMapType suggestMapTypeBasedOnTextureType(
+        HlmsTextureManager::TextureMapType suggestMapTypeBasedOnTextureType(
                                                                 PbsTextureTypes type );
 
         virtual void calculateHash();

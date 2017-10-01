@@ -76,6 +76,7 @@ namespace Ogre
             bool                    reflection;
             /// Cameras can change their AR depending on the RTT they're rendering to.
             Real                    aspectRatio;
+            uint32                  visibilityMask;
             /// Cameras w/out shadows have a different light list from cameras that do.
             CompositorShadowNode const *shadowNode;
             /// Last frame this cache was updated.
@@ -105,6 +106,9 @@ namespace Ogre
         bool    mFadeAttenuationRange;
         /// VPLs = Virtual Point Lights. Used by InstantRadiosity.
         bool    mEnableVpls;
+#if !OGRE_NO_FINE_LIGHT_MASK_GRANULARITY
+        bool    mFineLightMaskGranularity;
+#endif
 
         void fillGlobalLightListBuffer( Camera *camera, TexBufferPacked *globalLightListBuffer );
 
@@ -178,6 +182,21 @@ namespace Ogre
 
         void setEnableVpls( bool enable )                               { mEnableVpls = enable; }
         bool getEnableVpls(void) const                                  { return mEnableVpls; }
+
+#if !OGRE_NO_FINE_LIGHT_MASK_GRANULARITY
+        /// Toggles whether light masks will be obeyed per object & per light by doing:
+        /// if( movableObject->getLightMask() & light->getLightMask() )
+        ///     doLighting( movableObject light );
+        /// Note this toggle only affects Forward+ lights.
+        /// You may want to see HlmsPbs::setFineLightMaskGranularity
+        /// for control over Forward lights.
+        /// If you only need coarse granularity control over Forward+ lights, you
+        /// may get higher performance via CompositorPassSceneDef::mLightVisibilityMask
+        /// (light_visibility_mask keyword in scripts).
+        void setFineLightMaskGranularity( bool useFineGranularity )
+                                                    { mFineLightMaskGranularity = useFineGranularity; }
+        bool getFineLightMaskGranularity(void) const{ return mFineLightMaskGranularity; }
+#endif
     };
 
     /** @} */

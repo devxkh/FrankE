@@ -23,7 +23,7 @@
 @property( syntax == glsl )
 	#define SH_HALF2 vec2
 	#define SH_HALF float
-	#define OGRE_SAMPLE_SHADOW( tex, sampler, uv, depth ) texture( tex, vec3( uv, fDepth ) ).x
+	#define OGRE_SAMPLE_SHADOW( tex, sampler, uv, depth ) texture( tex, vec3( uv, fDepth ) )
 	#define OGRE_SAMPLE_SHADOW_ESM( tex, sampler, uv ) textureLod( tex, uv, 0 ).x
 	#define PASSBUF_ARG_DECL
 	#define PASSBUF_ARG
@@ -187,7 +187,12 @@
 
 		@property( pcf_3x3 || pcf_4x4 )
 			SH_HALF2 offsets[@value(pcf_iterations)] =
-			{
+            @property( syntax == glsl )
+                SH_HALF2[@value(pcf_iterations)](
+            @end
+            @property( syntax != glsl )
+            {
+            @end
 			@property( pcf_3x3 )
 				SH_HALF2( 0, 0 ),	//0, 0
 				SH_HALF2( 1, 0 ),	//1, 0
@@ -207,7 +212,12 @@
 				SH_HALF2( 1, 0 ),	//1, 2
 				SH_HALF2( 1, 0 )	//2, 2
 			@end
+            @property( syntax == glsl )
+            );
+            @end
+            @property( syntax != glsl )
 			};
+            @end
 		@end
 
 		@insertpiece( regularTexturePcfGlSampling )
@@ -255,95 +265,65 @@
 		float3 debugPssmSplit = float3( 0, 0, 0 );
 	@end
 	float fShadow = 1.0;
-	if( inPs.depth <= passBuf.pssmSplitPoints@value(CurrentShadowMap) )
-	{
-		fShadow = getShadow( hlms_shadowmap@value(CurrentShadowMap), @insertpiece( UseSamplerShadow )
-							 inPs.posL0,
-							 passBuf.shadowRcv[@value(CurrentShadowMap)].invShadowMapSize
-							 hlms_shadowmap@counter(CurrentShadowMap)_uv_param );
-		@property( debug_pssm_splits )
-			debugPssmSplit = float3( 0.0, 1.0, 0.0 );
-		@end
-	}
-	@foreach( hlms_pssm_splits, n, 1 )
-	else if( inPs.depth <= passBuf.pssmSplitPoints@value(CurrentShadowMap) )
-	{
-		fShadow = getShadow( hlms_shadowmap@value(CurrentShadowMap), @insertpiece( UseSamplerShadow )
-							 inPs.posL@n,
-							 passBuf.shadowRcv[@value(CurrentShadowMap)].invShadowMapSize
-							 hlms_shadowmap@counter(CurrentShadowMap)_uv_param );
-		@property( debug_pssm_splits )
-			@property( @n == 1 )
-				debugPssmSplit = float3( 0.0, 0.0, 1.0 );
-			@end @property( @n == 2 )
-				debugPssmSplit = float3( 1.0, 0.0, 0.0 );
-			@end @property( @n >= 3 )
-				debugPssmSplit = float3( 1.0, 0.435, 0.0 );
+	@property( receive_shadows )
+		if( inPs.depth <= passBuf.pssmSplitPoints@value(CurrentShadowMap) )
+		{
+			fShadow = getShadow( hlms_shadowmap@value(CurrentShadowMap), @insertpiece( UseSamplerShadow )
+								 inPs.posL0,
+								 passBuf.shadowRcv[@value(CurrentShadowMap)].invShadowMapSize
+								 hlms_shadowmap@counter(CurrentShadowMap)_uv_param );
+			@property( debug_pssm_splits )
+				debugPssmSplit = float3( 0.0, 1.0, 0.0 );
 			@end
-		@end
-	}@end
+		}
+		@foreach( hlms_pssm_splits, n, 1 )
+		else if( inPs.depth <= passBuf.pssmSplitPoints@value(CurrentShadowMap) )
+		{
+			fShadow = getShadow( hlms_shadowmap@value(CurrentShadowMap), @insertpiece( UseSamplerShadow )
+								 inPs.posL@n,
+								 passBuf.shadowRcv[@value(CurrentShadowMap)].invShadowMapSize
+								 hlms_shadowmap@counter(CurrentShadowMap)_uv_param );
+			@property( debug_pssm_splits )
+				@property( @n == 1 )
+					debugPssmSplit = float3( 0.0, 0.0, 1.0 );
+				@end @property( @n == 2 )
+					debugPssmSplit = float3( 1.0, 0.0, 0.0 );
+				@end @property( @n >= 3 )
+					debugPssmSplit = float3( 1.0, 0.435, 0.0 );
+				@end
+			@end
+		}@end
+	@end
 @end @property( !hlms_pssm_splits && hlms_num_shadow_map_lights && hlms_lights_directional )
-	float fShadow = getShadow( hlms_shadowmap@value(CurrentShadowMap), @insertpiece( UseSamplerShadow )
-							   inPs.posL0,
-							   passBuf.shadowRcv[@value(CurrentShadowMap)].invShadowMapSize
-							   hlms_shadowmap@counter(CurrentShadowMap)_uv_param );
+	@property( receive_shadows )
+		float fShadow = getShadow( hlms_shadowmap@value(CurrentShadowMap), @insertpiece( UseSamplerShadow )
+								   inPs.posL0,
+								   passBuf.shadowRcv[@value(CurrentShadowMap)].invShadowMapSize
+								   hlms_shadowmap@counter(CurrentShadowMap)_uv_param );
+	@end @property( !receive_shadows )
+		float fShadow = 1.0;
+	@end
 @end
 @end
 
-@piece( DarkenWithShadowFirstLight )* fShadow@end
-
-@piece( DarkenWithShadow )
+@property( receive_shadows )
+	@piece( DarkenWithShadowFirstLight )* fShadow@end
+	@piece( DarkenWithShadow )
 		* getShadow( hlms_shadowmap@value(CurrentShadowMap), @insertpiece( UseSamplerShadow )
 					 inPs.posL@value(CurrentShadowMap),
 					 passBuf.shadowRcv[@value(CurrentShadowMap)].invShadowMapSize
 					 hlms_shadowmap@counter(CurrentShadowMap)_uv_param )
-@end
+	@end
 
-@pset( CurrentPointLight, hlms_lights_directional_non_caster )
-@piece( DarkenWithShadowPoint )
+	/// Note: pset ignores property branch (it will always be set at the beginning of parsing)
+	@pset( CurrentPointLight, hlms_lights_directional_non_caster )
+	@piece( DarkenWithShadowPoint )
 		* getShadowPoint( hlms_shadowmap@value(CurrentShadowMap), @insertpiece( UseSamplerShadow )
 						  inPs.pos.xyz, passBuf.lights[@counter(CurrentPointLight)].position.xyz,
 						  passBuf.shadowRcv[@value(CurrentShadowMap)].invShadowMapSize,
 						  passBuf.shadowRcv[@value(CurrentShadowMap)].shadowDepthRange.xy
 						  hlms_shadowmap@counter(CurrentShadowMap)_uv_param PASSBUF_ARG )
-@end
-
-@end
-
-///--------------------------------------------------------------------------------------
-/// Caster
-///--------------------------------------------------------------------------------------
-
-@piece( DeclShadowCasterMacros )
-	@property( syntax == glsl )
-		@property( !hlms_render_depth_only )
-			@property( GL3+ )
-				#define outDepth outColour
-			@end
-			@property( !GL3+ )
-				#define outDepth gl_FragColor
-			@end
-		@end
-		@property( hlms_render_depth_only )
-			#define outDepth gl_FragDepth
-		@end
 	@end
+@end ///!receive_shadows
 
-	@property( syntax == hlsl || syntax == metal )
-		#define outDepth outPs.colour0
-	@end
-@end
-
-@piece( DoShadowCastPS )
-	@property( !hlms_shadowcaster_point )
-		outDepth = inPs.depth;
-	@end
-	@property( hlms_shadowcaster_point )
-		float distanceToCamera = length( inPs.toCameraWS );
-		@property( !exponential_shadow_maps )
-			outDepth = (distanceToCamera - passBuf.depthRange.x) * passBuf.depthRange.y + inPs.constBias;
-		@end @property( exponential_shadow_maps )
-			outDepth = (distanceToCamera - passBuf.depthRange.x) * passBuf.depthRange.y;
-		@end
-	@end
 @end

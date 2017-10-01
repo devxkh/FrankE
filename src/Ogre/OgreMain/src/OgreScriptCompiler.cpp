@@ -32,6 +32,7 @@ THE SOFTWARE.
 #include "OgreScriptTranslator.h"
 #include "OgreResourceGroupManager.h"
 #include "OgreLogManager.h"
+#include "OgreStringConverter.h"
 
 namespace Ogre
 {
@@ -1270,6 +1271,7 @@ namespace Ogre
         mIds["cull_camera"]     = ID_CULL_CAMERA;
         mIds["material_scheme"] = ID_MATERIAL_SCHEME;
         mIds["visibility_mask"] = ID_VISIBILITY_MASK;
+        mIds["light_visibility_mask"] = ID_LIGHT_VISIBILITY_MASK;
         mIds["shadows"]         = ID_SHADOWS_ENABLED;
         mIds["camera"]          = ID_CAMERA;
         mIds["rq_first"]        = ID_FIRST_RENDER_QUEUE;

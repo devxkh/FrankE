@@ -92,7 +92,8 @@ namespace Ogre
 
         HlmsTextureManager  *mTextureManager;
 
-        typedef std::map<IdString, HlmsDatablock*> HlmsDatablockMap;
+        public: typedef std::map<IdString, HlmsDatablock*> HlmsDatablockMap;
+    protected:
         HlmsDatablockMap mRegisteredDatablocks;
 
         HlmsTypes           mDefaultHlmsType;
@@ -114,6 +115,9 @@ namespace Ogre
 
         /// Returns a registered HLMS based on type. May be null.
         Hlms* getHlms( HlmsTypes type )                 { return mRegisteredHlms[type]; }
+
+        /// Returns a registered HLMS based on name. May be null.
+        Hlms* getHlms( IdString name );
 
         HlmsCompute* getComputeHlms(void)               { return mComputeHlms; }
 

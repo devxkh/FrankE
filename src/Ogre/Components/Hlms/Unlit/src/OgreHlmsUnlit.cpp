@@ -38,6 +38,7 @@ THE SOFTWARE.
 
 #include "OgreViewport.h"
 #include "OgreRenderTarget.h"
+#include "OgreCamera.h"
 #include "OgreHighLevelGpuProgramManager.h"
 #include "OgreHighLevelGpuProgram.h"
 
@@ -47,6 +48,9 @@ THE SOFTWARE.
 #include "Vao/OgreConstBufferPacked.h"
 #include "Vao/OgreTexBufferPacked.h"
 #include "Vao/OgreStagingBuffer.h"
+
+#include "OgreHlmsManager.h"
+#include "OgreLogManager.h"
 
 #include "CommandBuffer/OgreCommandBuffer.h"
 #include "CommandBuffer/OgreCbTexture.h"
@@ -63,7 +67,9 @@ namespace Ogre
                          ExtraBufferParams( 64 * NUM_UNLIT_TEXTURE_TYPES ) ),
         mCurrentPassBuffer( 0 ),
         mLastBoundPool( 0 ),
-        mLastTextureHash( 0 )
+        mLastTextureHash( 0 ),
+        mUsingExponentialShadowMaps( false ),
+        mEsmK( 600u )
     {
         //Override defaults
         mLightGatheringMode = LightGatherNone;
@@ -78,7 +84,9 @@ namespace Ogre
         ExtraBufferParams(64 * NUM_UNLIT_TEXTURE_TYPES)),
         mCurrentPassBuffer(0),
         mLastBoundPool(0),
-        mLastTextureHash(0)
+        mLastTextureHash(0),
+        mUsingExponentialShadowMaps( false ),
+        mEsmK( 600u )
     {
         //Override defaults
         mLightGatheringMode = LightGatherNone;
@@ -187,6 +195,14 @@ namespace Ogre
             mRenderSystem->bindGpuProgramParameters( GPT_FRAGMENT_PROGRAM, psParams, GPV_ALL );
         }
 
+        if( !mRenderSystem->getCapabilities()->hasCapability( RSC_CONST_BUFFER_SLOTS_IN_SHADER ) )
+        {
+            //Setting it to the vertex shader will set it to the PSO actually.
+            retVal->pso.vertexShader->setUniformBlockBinding( "PassBuffer", 0 );
+            retVal->pso.vertexShader->setUniformBlockBinding( "MaterialBuf", 1 );
+            retVal->pso.vertexShader->setUniformBlockBinding( "InstanceBuffer", 2 );
+        }
+
         return retVal;
     }
     //-----------------------------------------------------------------------------------
@@ -260,6 +276,7 @@ namespace Ogre
 
         bool hasAnimationMatrices = false;
         UvOutputVec uvOutputs;
+        bool hasPlanarReflection = false;
 
         for( uint8 i=0; i<NUM_UNLIT_TEXTURE_TYPES; ++i )
         {
@@ -281,10 +298,20 @@ namespace Ogre
                              "HlmsUnlit::calculateHashForPreCreate" );
             }
 
-            if( !texture.isNull() && texture->getTextureType() == TEX_TYPE_2D_ARRAY )
+            if( !texture.isNull() )
             {
-                IdString diffuseMapNArray( diffuseMapNStr + "_array" );
-                setProperty( diffuseMapNArray, 1 );
+                if( texture->getTextureType() == TEX_TYPE_2D_ARRAY )
+                {
+                    IdString diffuseMapNArray( diffuseMapNStr + "_array" );
+                    setProperty( diffuseMapNArray, 1 );
+                }
+
+                if( datablock->getEnablePlanarReflection( i ) )
+                {
+                    IdString diffuseMapNReflection( diffuseMapNStr + "_reflection" );
+                    setProperty( diffuseMapNReflection, 1 );
+                    hasPlanarReflection = true;
+                }
             }
 
             //Set the blend mode
@@ -365,6 +392,12 @@ namespace Ogre
         if( hasAnimationMatrices )
             setProperty( UnlitProperty::TextureMatrix, 1 );
 
+        if( hasPlanarReflection )
+        {
+            setProperty( HlmsBaseProp::VPos, 1 );
+            setProperty( UnlitProperty::HasPlanarReflections, 1 );
+        }
+
         size_t halfUvOutputs = (uvOutputs.size() + 1u) >> 1u;
         setProperty( UnlitProperty::OutUvCount, static_cast<int32>( uvOutputs.size() ) );
         setProperty( UnlitProperty::OutUvHalfCount, static_cast<int32>( halfUvOutputs ) );
@@ -389,9 +422,10 @@ namespace Ogre
             inOutPieces[VertexShader][outPrefix + "_swizzle"] = i % 2 ? "zw" : "xy";
         }
 
-        String slotsPerPoolStr = StringConverter::toString( mSlotsPerPool );
-        inOutPieces[VertexShader][UnlitProperty::MaterialsPerBuffer] = slotsPerPoolStr;
-        inOutPieces[PixelShader][UnlitProperty::MaterialsPerBuffer]  = slotsPerPoolStr;
+        if( mFastShaderBuildHack )
+            setProperty( UnlitProperty::MaterialsPerBuffer, static_cast<int>( 2 ) );
+        else
+            setProperty( UnlitProperty::MaterialsPerBuffer, static_cast<int>( mSlotsPerPool ) );
     }
     //-----------------------------------------------------------------------------------
     void HlmsUnlit::calculateHashForPreCaster( Renderable *renderable, PiecesMap *inOutPieces )
@@ -421,9 +455,10 @@ namespace Ogre
             }
         }
 
-        String slotsPerPoolStr = StringConverter::toString( mSlotsPerPool );
-        inOutPieces[VertexShader][UnlitProperty::MaterialsPerBuffer] = slotsPerPoolStr;
-        inOutPieces[PixelShader][UnlitProperty::MaterialsPerBuffer] = slotsPerPoolStr;
+        if( mFastShaderBuildHack )
+            setProperty( UnlitProperty::MaterialsPerBuffer, static_cast<int>( 2 ) );
+        else
+            setProperty( UnlitProperty::MaterialsPerBuffer, static_cast<int>( mSlotsPerPool ) );
     }
     //-----------------------------------------------------------------------------------
     HlmsCache HlmsUnlit::preparePassHash( const CompositorShadowNode *shadowNode, bool casterPass,
@@ -433,13 +468,30 @@ namespace Ogre
 
         //Set the properties and create/retrieve the cache.
         if( casterPass )
+        {
             setProperty( HlmsBaseProp::ShadowCaster, 1 );
+            if( mUsingExponentialShadowMaps )
+                setProperty( UnlitProperty::ExponentialShadowMaps, mEsmK );
+
+            const CompositorPass *pass = sceneManager->getCurrentCompositorPass();
+            if( pass )
+            {
+                const uint8 shadowMapIdx = pass->getDefinition()->mShadowMapIdx;
+                const Light *light = shadowNode->getLightAssociatedWith( shadowMapIdx );
+                if( light->getType() == Light::LT_POINT )
+                    setProperty( HlmsBaseProp::ShadowCasterPoint, 1 );
+            }
+        }
 
         RenderTarget *renderTarget = sceneManager->getCurrentViewport()->getTarget();
         setProperty( HlmsBaseProp::ShadowUsesDepthTexture,
                      renderTarget->getForceDisableColourWrites() ? 1 : 0 );
         setProperty( HlmsBaseProp::RenderDepthOnly,
                      renderTarget->getForceDisableColourWrites() ? 1 : 0 );
+
+        Camera *camera = sceneManager->getCameraInProgress();
+        if( camera && camera->isReflected() )
+            setProperty( HlmsBaseProp::GlobalClipDistances, 1 );
 
         mListener->preparePassHash( shadowNode, casterPass, dualParaboloid, sceneManager, this );
 
@@ -463,7 +515,6 @@ namespace Ogre
         retVal.setProperties = mSetProperties;
         retVal.pso.pass = passCache.passPso;
 
-        Camera *camera = sceneManager->getCameraInProgress();
         Matrix4 viewMatrix = camera->getViewMatrix(true);
 
         Matrix4 projectionMatrix = camera->getProjectionMatrixWithRSDepth();
@@ -490,14 +541,32 @@ namespace Ogre
 
         mSetProperties.clear();
 
-        //mat4 viewProj[2];
-        size_t mapSize = (16 + 16) * 4;
+        bool isShadowCastingPointLight = false;
+
+        //mat4 viewProj[2] + vec4 invWindowSize;
+        size_t mapSize = (16 + 16 + 4) * 4;
+
+        const bool isCameraReflected = camera->isReflected();
+        //mat4 invViewProj
+        if( isCameraReflected || (casterPass && (mUsingExponentialShadowMaps || isShadowCastingPointLight)) )
+            mapSize += 16 * 4;
 
         if( casterPass )
         {
-            //vec2 depthRange; (+padding)
-            mapSize += 4 * 4;
+            isShadowCastingPointLight = getProperty( HlmsBaseProp::ShadowCasterPoint ) != 0;
+
+            //vec4 viewZRow
+            if( mUsingExponentialShadowMaps )
+                mapSize += 4 * 4;
+            //vec4 depthRange
+            mapSize += (2 + 2) * 4;
+            //vec4 cameraPosWS
+            if( isShadowCastingPointLight )
+                mapSize += 4 * 4;
         }
+        //vec4 clipPlane0
+        if( isCameraReflected )
+            mapSize += 4 * 4;
 
         mapSize += mListener->getPassBufferSize( shadowNode, casterPass,
                                                  dualParaboloid, sceneManager );
@@ -531,8 +600,36 @@ namespace Ogre
         for( size_t i=0; i<16; ++i )
             *passBufferPtr++ = (float)mPreparedPass.viewProjMatrix[1][0][i];
 
+        //vec4 clipPlane0
+        if( isCameraReflected )
+        {
+            const Plane &reflPlane = camera->getReflectionPlane();
+            *passBufferPtr++ = (float)reflPlane.normal.x;
+            *passBufferPtr++ = (float)reflPlane.normal.y;
+            *passBufferPtr++ = (float)reflPlane.normal.z;
+            *passBufferPtr++ = (float)reflPlane.d;
+        }
+
+        if( isCameraReflected || (casterPass && (mUsingExponentialShadowMaps || isShadowCastingPointLight)) )
+        {
+            //We don't care about the inverse of the identity proj because that's not
+            //really compatible with shadows anyway.
+            Matrix4 invViewProj = mPreparedPass.viewProjMatrix[0].inverse();
+            for( size_t i=0; i<16; ++i )
+                *passBufferPtr++ = (float)invViewProj[0][i];
+        }
+
         if( casterPass )
         {
+            //vec4 viewZRow
+            if( mUsingExponentialShadowMaps )
+            {
+                *passBufferPtr++ = viewMatrix[2][0];
+                *passBufferPtr++ = viewMatrix[2][1];
+                *passBufferPtr++ = viewMatrix[2][2];
+                *passBufferPtr++ = viewMatrix[2][3];
+            }
+
             //vec2 depthRange;
             Real fNear, fFar;
             shadowNode->getMinMaxDepthRange( camera, fNear, fFar );
@@ -540,7 +637,23 @@ namespace Ogre
             *passBufferPtr++ = fNear;
             *passBufferPtr++ = 1.0f / depthRange;
             passBufferPtr += 2;
+
+            //vec4 cameraPosWS;
+            if( isShadowCastingPointLight )
+            {
+                const Vector3 &camPos = camera->getDerivedPosition();
+                *passBufferPtr++ = (float)camPos.x;
+                *passBufferPtr++ = (float)camPos.y;
+                *passBufferPtr++ = (float)camPos.z;
+                *passBufferPtr++ = 1.0f;
+            }
         }
+
+        //vec4 invWindowSize;
+        *passBufferPtr++ = 1.0f / (float)renderTarget->getWidth();
+        *passBufferPtr++ = 1.0f / (float)renderTarget->getHeight();
+        *passBufferPtr++ = 1.0f;
+        *passBufferPtr++ = 1.0f;
 
         passBufferPtr = mListener->preparePassBuffer( shadowNode, casterPass, dualParaboloid,
                                                       sceneManager, passBufferPtr );
@@ -603,7 +716,7 @@ namespace Ogre
         const HlmsUnlitDatablock *datablock = static_cast<const HlmsUnlitDatablock*>(
                                                 queuedRenderable.renderable->getDatablock() );
 
-        if( OGRE_EXTRACT_HLMS_TYPE_FROM_CACHE_HASH( lastCacheHash ) != HLMS_UNLIT )
+        if( OGRE_EXTRACT_HLMS_TYPE_FROM_CACHE_HASH( lastCacheHash ) != mType )
         {
             //We changed HlmsType, rebind the shared textures.
             mLastTextureHash = 0;
@@ -612,6 +725,10 @@ namespace Ogre
             //layout(binding = 0) uniform PassBuffer {} pass
             ConstBufferPacked *passBuffer = mPassBuffers[mCurrentPassBuffer-1];
             *commandBuffer->addCommand<CbShaderBuffer>() = CbShaderBuffer( VertexShader,
+                                                                           0, passBuffer, 0,
+                                                                           passBuffer->
+                                                                           getTotalSizeBytes() );
+            *commandBuffer->addCommand<CbShaderBuffer>() = CbShaderBuffer( PixelShader,
                                                                            0, passBuffer, 0,
                                                                            passBuffer->
                                                                            getTotalSizeBytes() );
@@ -681,7 +798,7 @@ namespace Ogre
         //---------------------------------------------------------------------------
         //                          ---- VERTEX SHADER ----
         //---------------------------------------------------------------------------
-        bool useIdentityProjection = queuedRenderable.renderable->getUseCustomProjectionMatrix();
+        bool useIdentityProjection = queuedRenderable.renderable->getUseIdentityProjection();
 
         //uint materialIdx[]
         *currentMappedConstBuffer = datablock->getAssignedSlot();
@@ -764,6 +881,46 @@ namespace Ogre
     {
         HlmsBufferManager::frameEnded();
         mCurrentPassBuffer  = 0;
+    }
+    //-----------------------------------------------------------------------------------
+    void HlmsUnlit::setShadowSettings( bool useExponentialShadowMaps )
+    {
+        mUsingExponentialShadowMaps = useExponentialShadowMaps;
+
+        if( mUsingExponentialShadowMaps && mHlmsManager->getShadowMappingUseBackFaces() )
+        {
+            LogManager::getSingleton().logMessage(
+                        "QUALITY WARNING: It is highly recommended that you call "
+                        "mHlmsManager->setShadowMappingUseBackFaces( false ) when using Exponential "
+                        "Shadow Maps (HlmsUnlit::setShadowSettings)" );
+        }
+    }
+    //-----------------------------------------------------------------------------------
+    void HlmsUnlit::setEsmK( uint16 K )
+    {
+        assert( K != 0 && "A value of K = 0 is invalid!" );
+        mEsmK = K;
+    }
+    //-----------------------------------------------------------------------------------
+    void HlmsUnlit::getDefaultPaths( String &outDataFolderPath, StringVector &outLibraryFoldersPaths )
+    {
+        //We need to know what RenderSystem is currently in use, as the
+        //name of the compatible shading language is part of the path
+        RenderSystem *renderSystem = Root::getSingleton().getRenderSystem();
+        String shaderSyntax = "GLSL";
+        if( renderSystem->getName() == "Direct3D11 Rendering Subsystem" )
+            shaderSyntax = "HLSL";
+        else if( renderSystem->getName() == "Metal Rendering Subsystem" )
+            shaderSyntax = "Metal";
+
+        //Fill the library folder paths with the relevant folders
+        outLibraryFoldersPaths.clear();
+        outLibraryFoldersPaths.push_back( "Hlms/Common/" + shaderSyntax );
+        outLibraryFoldersPaths.push_back( "Hlms/Common/Any" );
+        outLibraryFoldersPaths.push_back( "Hlms/Unlit/Any" );
+
+        //Fill the data folder path
+        outDataFolderPath = "Hlms/Unlit/" + shaderSyntax;
     }
 #if !OGRE_NO_JSON
 	//-----------------------------------------------------------------------------------

@@ -34,11 +34,15 @@ THE SOFTWARE.
 #include "OgreException.h"
 #include "OgreHardwareBufferManager.h"
 #include "OgreLogManager.h"
+#include "OgreBitwise.h"
 
 #include "Vao/OgreVaoManager.h"
 #include "Vao/OgreAsyncTicket.h"
 
+#include "OgreMesh.h"
+
 #include "OgreVertexShadowMapHelper.h"
+#include "OgreStringConverter.h"
 
 namespace Ogre {
     //-----------------------------------------------------------------------
@@ -94,7 +98,7 @@ namespace Ogre {
 
             maxBonesPerVertex = std::max( maxBonesPerVertex, bonesPerVertex );
 
-            if( itor == end || itor->vertexIndex != i )
+            if( first == end || first->vertexIndex != i )
             {
                 existsNonSkinnedVertices = true;
             }
@@ -112,12 +116,18 @@ namespace Ogre {
 
                 itor = first;
                 while( itor != end && (itor - first) < bonesPerVertex )
+                {
                     totalWeight += itor->weight;
+                    ++itor;
+                }
 
                 totalWeight = 1.0f / totalWeight;
                 itor = first;
                 while( itor != end && (itor - first) < bonesPerVertex )
+                {
                     itor->weight *= totalWeight;
+                    ++itor;
+                }
             }
         }
 
@@ -215,6 +225,8 @@ namespace Ogre {
                                                                     numVertices * newVertexSize,
                                                                     MEMCATEGORY_GEOMETRY ) );
             FreeOnDestructor dataPtrContainer( newVertexBufData );
+            uint8 *newVertexBufDataStart = newVertexBufData;
+
 
             mVao[VpNormal][0]->readRequests( readRequests );
             mVao[VpNormal][0]->mapAsyncTickets( readRequests );
@@ -265,8 +277,11 @@ namespace Ogre {
 
             const BufferType bufferType = mVao[VpNormal][0]->getVertexBuffers()[0]->getBufferType();
             const bool keepAsShadow = mVao[VpNormal][0]->getVertexBuffers()[0]->getShadowCopy() != 0;
+
+
             VertexBufferPacked *vertexBuffer = mParent->mVaoManager->createVertexBuffer(
-                        newVertexDeclaration, numVertices, bufferType, newVertexBufData, keepAsShadow );
+                        newVertexDeclaration, numVertices, bufferType, newVertexBufDataStart, keepAsShadow );
+
             if( !keepAsShadow )
                 dataPtrContainer.ptr = 0;
 

@@ -28,7 +28,7 @@ namespace XE {
 	ImgGuiRenderable::ImgGuiRenderable(Uint32 id, GUIRenderer& guiRenderer,
 		Ogre::ObjectMemoryManager* objManager, Ogre::SceneManager* sceneMgr)
 		: MovableObject(id, objManager, sceneMgr, 0)
-		, Renderable()
+		, ScreenRenderable()
 		, m_guiRenderer(guiRenderer)
 
 		, m_sceneMgr(sceneMgr)

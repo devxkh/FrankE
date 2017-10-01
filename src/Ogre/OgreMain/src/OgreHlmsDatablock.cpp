@@ -32,6 +32,7 @@ THE SOFTWARE.
 #include "OgreHlms.h"
 #include "OgreHlmsManager.h"
 #include "OgreTexture.h"
+#include "OgreStringConverter.h"
 #include "OgreLogManager.h"
 
 #include "OgrePass.h"
@@ -311,9 +312,9 @@ namespace Ogre
         mAlphaTestThreshold = threshold;
     }
     //-----------------------------------------------------------------------------------
-    const String* HlmsDatablock::getFullName(void) const
+    const String* HlmsDatablock::getNameStr(void) const
     {
-        return mCreator->getFullNameString( mName );
+        return mCreator->getNameStr(mName);
     }
     //-----------------------------------------------------------------------------------
     void HlmsDatablock::getFilenameAndResourceGroup( String const * *outFilename,

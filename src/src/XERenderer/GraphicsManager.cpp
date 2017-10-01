@@ -14,7 +14,7 @@
 #include <Ogre/OgreMain/include/OgreLog.h>
 #include <Ogre/OgreMain/include/OgreLogManager.h>
 
-
+#include <XERenderer/Hlms/XEHlmsProjection.hpp>
 #include <XERenderer/Hlms/XEHlmsUnlit.hpp>
 
 #include <plog/Appenders/ConsoleAppender.h>
@@ -481,14 +481,28 @@ namespace XE
 			//Ogre::Archive *archiveUnlit = Ogre::ArchiveManager::getSingletonPtr()->load(dataFolder + "/XEUnlit/" + shaderSyntax, "FileSystem", true);
 			Ogre::Archive *archivePbs = Ogre::ArchiveManager::getSingletonPtr()->load(dataFolder + "/Pbs/" + shaderSyntax, "FileSystem", true);
 
+			Ogre::Archive *archiveLibraryAny = Ogre::ArchiveManager::getSingletonPtr()->load(dataFolder + "/Common/Any","FileSystem", true);
+			Ogre::Archive *archivePbsLibraryAny = Ogre::ArchiveManager::getSingletonPtr()->load(dataFolder + "/Pbs/Any","FileSystem", true);
+			Ogre::Archive *archiveUnlitLibraryAny = Ogre::ArchiveManager::getSingletonPtr()->load(dataFolder + "/Unlit/Any", "FileSystem", true);
+
 			Ogre::ArchiveVec library;
 			library.push_back(archiveLibrary);
-			
-		//org	Ogre::HlmsUnlit *hlmsUnlit = OGRE_NEW Ogre::HlmsUnlit(archiveUnlit, &library);
-			XEHlmsUnlit *hlmsUnlit = OGRE_NEW XEHlmsUnlit(archiveUnlit, &library);
+			library.push_back(archiveLibraryAny);
+			library.push_back(archiveUnlitLibraryAny);
+
+			XEHlmsProjection *xeHlmsUnlit = OGRE_NEW XEHlmsProjection(archiveUnlit, &library, Ogre::HLMS_USER0, "projection");
+			mRoot->getHlmsManager()->registerHlms(xeHlmsUnlit);
+
+			Ogre::HlmsUnlit *hlmsUnlit = OGRE_NEW Ogre::HlmsUnlit(archiveUnlit, &library);
 			mRoot->getHlmsManager()->registerHlms(hlmsUnlit);
 
-			Ogre::HlmsPbs *hlmsPbs = OGRE_NEW Ogre::HlmsPbs(archivePbs, &library);
+
+			Ogre::ArchiveVec libraryPbs;
+			libraryPbs.push_back(archiveLibrary);
+			libraryPbs.push_back(archiveLibraryAny);
+			libraryPbs.push_back(archivePbsLibraryAny);
+			
+			Ogre::HlmsPbs *hlmsPbs = OGRE_NEW Ogre::HlmsPbs(archivePbs, &libraryPbs);
 			mRoot->getHlmsManager()->registerHlms(hlmsPbs);
 
 

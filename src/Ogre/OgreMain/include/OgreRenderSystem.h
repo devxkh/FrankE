@@ -949,6 +949,13 @@ namespace Ogre
         /// Called once per frame, regardless of how many active workspaces there are
         void _update(void);
 
+        /// This gives the renderer a chance to perform the compositor update in a special way.
+        /// When the render system is ready to perform the actual update it should just
+        /// compositorManager->_updateImplementation.
+        virtual void updateCompositorManager( CompositorManager2 *compositorManager,
+                                              SceneManagerEnumerator &sceneManagers,
+                                              HlmsManager *hlmsManager );
+
         /**
         Sets the provided viewport as the active one for future
         rendering operations. This viewport is aware of it's own
@@ -1110,6 +1117,8 @@ namespace Ogre
         virtual void _render( const CbDrawCallStrip *cmd ) = 0;
         virtual void _renderEmulated( const CbDrawCallIndexed *cmd ) = 0;
         virtual void _renderEmulated( const CbDrawCallStrip *cmd ) = 0;
+        virtual void _renderEmulatedNoBaseInstance( const CbDrawCallIndexed *cmd ) {}
+        virtual void _renderEmulatedNoBaseInstance( const CbDrawCallStrip *cmd ) {}
 
         /// May override the current VertexArrayObject!
         virtual void _startLegacyV1Rendering(void) {}
@@ -1117,6 +1126,8 @@ namespace Ogre
         /// Renders a V1 RenderOperation. Assumes _setRenderOperation has already been called.
         virtual void _render( const v1::CbDrawCallIndexed *cmd ) = 0;
         virtual void _render( const v1::CbDrawCallStrip *cmd ) = 0;
+        virtual void _renderNoBaseInstance( const v1::CbDrawCallIndexed *cmd ) {}
+        virtual void _renderNoBaseInstance( const v1::CbDrawCallStrip *cmd ) {}
 
         virtual void _renderUsingReadBackAsTexture(unsigned int secondPass,Ogre::String variableName,unsigned int StartSlot);
 
@@ -1181,7 +1192,7 @@ namespace Ogre
 
         /** Sets whether or not vertex windings set should be inverted; this can be important
         for rendering reflections. */
-        virtual void setInvertVertexWinding(bool invert);
+        void setInvertVertexWinding(bool invert);
 
         /** Indicates whether or not the vertex windings set will be inverted for the current render (e.g. reflections)
         @see RenderSystem::setInvertVertexWinding
@@ -1446,7 +1457,7 @@ namespace Ogre
         virtual bool checkExtension( const String &ext ) const      { return false; }
 
         virtual const PixelFormatToShaderType* getPixelFormatToShaderType(void) const = 0;
-
+   
     protected:
 
         void cleanReleasedDepthBuffers(void);

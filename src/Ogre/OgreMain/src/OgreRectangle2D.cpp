@@ -28,8 +28,11 @@ THE SOFTWARE.
 #include "OgreStableHeaders.h"
 #include "OgreRectangle2D.h"
 
+#include "OgreVertexIndexData.h"
+
 #include "OgreHardwareBufferManager.h"
 #include "OgreMaterialManager.h"
+#include "OgreStringConverter.h"
 
 namespace Ogre
 {
@@ -52,7 +55,7 @@ namespace v1
     void Rectangle2D::initRectangle2D(void)
     {
         // use identity projection and view matrices
-		mUseCustomProjectionMatrix = true;
+        mUseIdentityProjection  = true;
         mUseIdentityView        = true;
 
         mRenderOp.vertexData = OGRE_NEW VertexData();

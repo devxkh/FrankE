@@ -34,7 +34,9 @@ THE SOFTWARE.
 #include "OgreHlmsJsonCompute.h"
 #include "OgreHlmsManager.h"
 #include "OgreHlms.h"
+#include "OgreVector2.h"
 #include "OgreLwString.h"
+#include "OgreStringConverter.h"
 #include "OgreLogManager.h"
 
 #include "rapidjson/document.h"
@@ -157,9 +159,9 @@ namespace Ogre
         if( !strcmp( value, "not_equal" ) )
             return CMPF_NOT_EQUAL;
         if( !strcmp( value, "greater_equal" ) )
-            return CMPF_GREATER;
-        if( !strcmp( value, "greater" ) )
             return CMPF_GREATER_EQUAL;
+        if( !strcmp( value, "greater" ) )
+            return CMPF_GREATER;
         if( !strcmp( value, "never" ) )
             return CMPF_ALWAYS_FAIL;
         if( !strcmp( value, "always" ) )
@@ -454,7 +456,12 @@ namespace Ogre
             const rapidjson::Value& array = itor->value;
             const rapidjson::SizeType arraySize = array.Size();
             if( arraySize > 0 && array[0].IsString() )
-                datablock->setAlphaTest( parseCompareFunction( array[0].GetString() ) );
+            {
+                CompareFunction alphaTestCmp = parseCompareFunction( array[0].GetString() );
+                if( alphaTestCmp == NUM_COMPARE_FUNCTIONS )
+                    alphaTestCmp = CMPF_ALWAYS_PASS;
+                datablock->setAlphaTest( alphaTestCmp );
+            }
 
             if( arraySize > 1 && array[1].IsNumber() )
                 datablock->setAlphaTestThreshold( static_cast<float>( array[1].GetDouble() ) );
@@ -1160,7 +1167,7 @@ namespace Ogre
             String datablockName = "[Unnamed]";
 
             {
-                const String *fullName = datablock->getFullName();
+                const String *fullName = datablock->getNameStr();
                 if( fullName )
                     datablockName = *fullName;
             }

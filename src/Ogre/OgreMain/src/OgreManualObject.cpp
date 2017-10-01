@@ -206,7 +206,7 @@ namespace v1 {
 
         mCurrentSection = OGRE_NEW ManualObjectSection(this, materialName, opType, groupName);
         mCurrentUpdating = false;
-        mCurrentSection->setCustomProjectionMatrix(mUseIdentityProjection);
+        mCurrentSection->setUseIdentityProjection(mUseIdentityProjection);
         mCurrentSection->setUseIdentityView(mUseIdentityView);
         mSectionList.push_back(mCurrentSection);
         mFirstVertex = true;
@@ -859,7 +859,7 @@ namespace v1 {
         // Set existing
         for (SectionList::iterator i = mSectionList.begin(); i != mSectionList.end(); ++i)
         {
-            (*i)->setCustomProjectionMatrix(useIdentityProjection);
+            (*i)->setUseIdentityProjection(useIdentityProjection);
         }
         
         // Save setting for future sections

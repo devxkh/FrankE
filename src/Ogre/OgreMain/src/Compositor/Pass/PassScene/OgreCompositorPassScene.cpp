@@ -123,6 +123,10 @@ namespace Ogre
             --mNumPassesLeft;
         }
 
+        CompositorWorkspaceListener *listener = mParentNode->getWorkspace()->getListener();
+        if( listener )
+            listener->passEarlyPreExecute( this );
+
         Camera const *usedLodCamera = mLodCamera;
         if( lodCamera && mCamera == mLodCamera )
             usedLodCamera = lodCamera;
@@ -164,12 +168,11 @@ namespace Ogre
                                                                                     SHADOW_NODE_REUSE );
         }
 
-        mViewport->_setVisibilityMask( mDefinition->mVisibilityMask );
+        mViewport->_setVisibilityMask( mDefinition->mVisibilityMask, mDefinition->mLightVisibilityMask );
 
         //Fire the listener in case it wants to change anything
-        CompositorWorkspaceListener *listener = mParentNode->getWorkspace()->getListener();
         if( listener )
-            listener->passPreExecute( this );        
+            listener->passPreExecute( this );
 
         if( mUpdateShadowNode && shadowNode )
         {
@@ -178,6 +181,7 @@ namespace Ogre
 
             //Save the value in case the listener changed it
             const uint32 oldVisibilityMask = mViewport->getVisibilityMask();
+            const uint32 oldLightVisibilityMask = mViewport->getLightVisibilityMask();
 
             shadowNode->_update( mCamera, usedLodCamera, sceneManager );
 
@@ -185,7 +189,7 @@ namespace Ogre
             sceneManager->_setCurrentShadowNode( shadowNode, mDefinition->mShadowNodeRecalculation ==
                                                                                     SHADOW_NODE_REUSE );
             sceneManager->_setCompositorTarget( mTargetTexture );
-            mViewport->_setVisibilityMask( oldVisibilityMask );
+            mViewport->_setVisibilityMask( oldVisibilityMask, oldLightVisibilityMask );
             mCamera->_notifyViewport( mViewport );
 
             //We need to restore the previous RT's update

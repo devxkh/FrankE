@@ -6,6 +6,9 @@
 
 #include "../DAL/Netmsg_generated.h"
 
+#include <XERenderer/Resource/XEMesh.hpp>
+#include <XERenderer/Resource/gltfAsset.h>
+
 ControllerState::ControllerState(XE::XEngine& engine, bool replace)
 	: XE::XEState(engine, replace)
 {
@@ -34,6 +37,20 @@ ControllerState::ControllerState(XE::XEngine& engine, bool replace)
 
 	ctrlSystem->setBasicInputEvents(*ctrl);
 	ctrl->setActionMap(*ctrl);
+
+	m_engine.getGraphicsManager().getIntoRendererQueue().push([this]()
+	{
+		//load gltf
+		gltf::Asset asset;
+		gltf::load("F:/Projekte/coop/FrankE/data/assets/DamagedHelmet/DamagedHelmet.gltf", asset);
+		//gltf::load("F:/Projekte/coop/glTF-Sample-Models/2.0/DamagedHelmet/glTF/DamagedHelmet.gltf", asset);
+
+		XE::XEMesh mesh;
+		mesh.buildMesh(asset, m_engine.getGraphicsManager(), m_engine.getScene().getOgreSceneManager().__OgreSceneMgrPtr);
+
+
+
+	});
 
 	LOG(XE::info) << "InitState - Initialized";
 }

@@ -98,6 +98,7 @@ namespace Ogre {
     GLSLMonolithicProgram::~GLSLMonolithicProgram(void)
     {
         OGRE_CHECK_GL_ERROR(glDeleteProgram(mGLProgramHandle));
+        mGLProgramHandle = 0;
     }
 
 
@@ -224,6 +225,7 @@ namespace Ogre {
 
         if(mLinked)
         {
+            setupBaseInstance( mGLProgramHandle );
             if ( GpuProgramManager::getSingleton().getSaveMicrocodesToCache() )
             {
                 // add to the microcode to the cache
@@ -490,7 +492,6 @@ namespace Ogre {
 
         } // End for
     }
-
 
     void GLSLMonolithicProgram::updateUniformBlocks(GpuProgramParametersSharedPtr params,
                                                     uint16 mask, GpuProgramType fromProgType)

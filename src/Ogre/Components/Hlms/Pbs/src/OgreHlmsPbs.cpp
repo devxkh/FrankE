@@ -40,6 +40,7 @@ THE SOFTWARE.
 
 #include "OgreViewport.h"
 #include "OgreRenderTarget.h"
+#include "OgreCamera.h"
 #include "OgreHighLevelGpuProgramManager.h"
 #include "OgreHighLevelGpuProgram.h"
 #include "OgreForward3D.h"
@@ -58,6 +59,10 @@ THE SOFTWARE.
 
 #include "Animation/OgreSkeletonInstance.h"
 
+#ifdef OGRE_BUILD_COMPONENT_PLANAR_REFLECTIONS
+    #include "OgrePlanarReflections.h"
+#endif
+
 #include "OgreLogManager.h"
 
 namespace Ogre
@@ -68,6 +73,7 @@ namespace Ogre
     const IdString PbsProperty::MaterialsPerBuffer= IdString( "materials_per_buffer" );
     const IdString PbsProperty::LowerGpuOverhead  = IdString( "lower_gpu_overhead" );
     const IdString PbsProperty::DebugPssmSplits   = IdString( "debug_pssm_splits" );
+    const IdString PbsProperty::HasPlanarReflections=IdString( "has_planar_reflections" );
 
     const IdString PbsProperty::NumTextures     = IdString( "num_textures" );
     const char *PbsProperty::DiffuseMap         = "diffuse_map";
@@ -92,6 +98,8 @@ namespace Ogre
     const IdString PbsProperty::FresnelWorkflow   = IdString( "fresnel_workflow" );
     const IdString PbsProperty::MetallicWorkflow  = IdString( "metallic_workflow" );
     const IdString PbsProperty::TwoSidedLighting  = IdString( "two_sided_lighting" );
+    const IdString PbsProperty::ReceiveShadows    = IdString( "receive_shadows" );
+    const IdString PbsProperty::UsePlanarReflections=IdString( "use_planar_reflections" );
 
     const IdString PbsProperty::NormalWeight          = IdString( "normal_weight" );
     const IdString PbsProperty::NormalWeightTex       = IdString( "normal_weight_tex" );
@@ -148,8 +156,11 @@ namespace Ogre
 
     const IdString PbsProperty::BrdfDefault       = IdString( "BRDF_Default" );
     const IdString PbsProperty::BrdfCookTorrance  = IdString( "BRDF_CookTorrance" );
+    const IdString PbsProperty::BrdfBlinnPhong    = IdString( "BRDF_BlinnPhong" );
     const IdString PbsProperty::FresnelSeparateDiffuse  = IdString( "fresnel_separate_diffuse" );
     const IdString PbsProperty::GgxHeightCorrelated     = IdString( "GGX_height_correlated" );
+    const IdString PbsProperty::LegacyMathBrdf          = IdString( "legacy_math_brdf" );
+    const IdString PbsProperty::RoughnessIsShininess    = IdString( "roughness_is_shininess" );
 
     const IdString *PbsProperty::UvSourcePtrs[NUM_PBSM_SOURCES] =
     {
@@ -218,8 +229,17 @@ namespace Ogre
         mPrePassTextures( 0 ),
         mSsrTexture( 0 ),
         mIrradianceVolume( 0 ),
+#ifdef OGRE_BUILD_COMPONENT_PLANAR_REFLECTIONS
+        mPlanarReflections( 0 ),
+        mPlanarReflectionsSamplerblock( 0 ),
+        mHasPlanarReflections( false ),
+        mLastBoundPlanarReflection( 0u ),
+#endif
         mLastBoundPool( 0 ),
         mLastTextureHash( 0 ),
+#if !OGRE_NO_FINE_LIGHT_MASK_GRANULARITY
+        mFineLightMaskGranularity( true ),
+#endif
         mDebugPssmSplits( false ),
         mShadowFilter( PCF_3x3 ),
         mEsmK( 600u ),
@@ -288,6 +308,22 @@ namespace Ogre
 
             if( !mShadowmapCmpSamplerblock )
                 mShadowmapCmpSamplerblock = mHlmsManager->getSamplerblock( samplerblock );
+
+#ifdef OGRE_BUILD_COMPONENT_PLANAR_REFLECTIONS
+            if( !mPlanarReflectionsSamplerblock )
+            {
+                samplerblock.mMinFilter     = FO_LINEAR;
+                samplerblock.mMagFilter     = FO_LINEAR;
+                samplerblock.mMipFilter     = FO_LINEAR;
+                samplerblock.mCompareFunction   = NUM_COMPARE_FUNCTIONS;
+
+                samplerblock.mU             = TAM_CLAMP;
+                samplerblock.mV             = TAM_CLAMP;
+                samplerblock.mW             = TAM_CLAMP;
+
+                mPlanarReflectionsSamplerblock = mHlmsManager->getSamplerblock( samplerblock );
+            }
+#endif
         }
     }
     //-----------------------------------------------------------------------------------
@@ -338,19 +374,25 @@ namespace Ogre
 
             if( !mPreparedPass.shadowMaps.empty() )
             {
-                char tmpData[32];
-                LwString texName = LwString::FromEmptyPointer( tmpData, sizeof(tmpData) );
-                texName = "texShadowMap";
-                const size_t baseTexSize = texName.size();
-
-                vector<int>::type shadowMaps;
-                shadowMaps.reserve( mPreparedPass.shadowMaps.size() );
-                for( size_t i=0; i<mPreparedPass.shadowMaps.size(); ++i )
+                if( getProperty( HlmsBaseProp::NumShadowMapLights ) != 0 )
                 {
-                    texName.resize( baseTexSize );
-                    texName.a( (uint32)i );   //texShadowMap0
-                    psParams->setNamedConstant( texName.c_str(), &texUnit, 1, 1 );
-                    shadowMaps.push_back( texUnit++ );
+                    char tmpData[32];
+                    LwString texName = LwString::FromEmptyPointer( tmpData, sizeof(tmpData) );
+                    texName = "texShadowMap";
+                    const size_t baseTexSize = texName.size();
+
+                    for( size_t i=0; i<mPreparedPass.shadowMaps.size(); ++i )
+                    {
+                        texName.resize( baseTexSize );
+                        texName.a( (uint32)i );   //texShadowMap0
+                        psParams->setNamedConstant( texName.c_str(), &texUnit, 1, 1 );
+                        ++texUnit;
+                    }
+                }
+                else
+                {
+                    //No visible lights casting shadow maps.
+                    texUnit += mPreparedPass.shadowMaps.size();
                 }
             }
 
@@ -359,6 +401,15 @@ namespace Ogre
             if( parallaxCorrectCubemaps )
                 cubemapTexUnit = texUnit++;
 
+#ifdef OGRE_BUILD_COMPONENT_PLANAR_REFLECTIONS
+            if( mHasPlanarReflections )
+            {
+                const bool usesPlanarReflections = getProperty( PbsProperty::UsePlanarReflections ) != 0;
+                if( usesPlanarReflections )
+                    psParams->setNamedConstant( "planarReflectionTex", texUnit );
+                ++texUnit;
+            }
+#endif
             assert( dynamic_cast<const HlmsPbsDatablock*>( queuedRenderable.renderable->getDatablock() ) );
             const HlmsPbsDatablock *datablock = static_cast<const HlmsPbsDatablock*>(
                                                         queuedRenderable.renderable->getDatablock() );
@@ -395,6 +446,14 @@ namespace Ogre
         {
             GpuProgramParametersSharedPtr psParams = retVal->pso.pixelShader->getDefaultParameters();
             mRenderSystem->bindGpuProgramParameters( GPT_FRAGMENT_PROGRAM, psParams, GPV_ALL );
+        }
+
+        if( !mRenderSystem->getCapabilities()->hasCapability( RSC_CONST_BUFFER_SLOTS_IN_SHADER ) )
+        {
+            //Setting it to the vertex shader will set it to the PSO actually.
+            retVal->pso.vertexShader->setUniformBlockBinding( "PassBuffer", 0 );
+            retVal->pso.vertexShader->setUniformBlockBinding( "MaterialBuf", 1 );
+            retVal->pso.vertexShader->setUniformBlockBinding( "InstanceBuffer", 2 );
         }
 
         return retVal;
@@ -512,6 +571,9 @@ namespace Ogre
         if( datablock->getTwoSidedLighting() )
             setProperty( PbsProperty::TwoSidedLighting, 1 );
 
+        if( datablock->getReceiveShadows() )
+            setProperty( PbsProperty::ReceiveShadows, 1 );
+
         uint32 brdf = datablock->getBrdf();
         if( (brdf & PbsBrdf::BRDF_MASK) == PbsBrdf::Default )
         {
@@ -522,9 +584,16 @@ namespace Ogre
         }
         else if( (brdf & PbsBrdf::BRDF_MASK) == PbsBrdf::CookTorrance )
             setProperty( PbsProperty::BrdfCookTorrance, 1 );
+        else if( (brdf & PbsBrdf::BRDF_MASK) == PbsBrdf::BlinnPhong )
+            setProperty( PbsProperty::BrdfBlinnPhong, 1 );
 
         if( brdf & PbsBrdf::FLAG_SPERATE_DIFFUSE_FRESNEL )
             setProperty( PbsProperty::FresnelSeparateDiffuse, 1 );
+
+        if( brdf & PbsBrdf::FLAG_LEGACY_MATH )
+            setProperty( PbsProperty::LegacyMathBrdf, 1 );
+        if( brdf & PbsBrdf::FLAG_FULL_LEGACY )
+            setProperty( PbsProperty::RoughnessIsShininess, 1 );
 
         for( size_t i=0; i<PBSM_REFLECTION; ++i )
         {
@@ -626,9 +695,20 @@ namespace Ogre
                 setProperty( PbsProperty::TransparentMode, 1 );
         }
 
-        String slotsPerPoolStr = StringConverter::toString( mSlotsPerPool );
-        inOutPieces[VertexShader][PbsProperty::MaterialsPerBuffer] = slotsPerPoolStr;
-        inOutPieces[PixelShader][PbsProperty::MaterialsPerBuffer] = slotsPerPoolStr;
+#ifdef OGRE_BUILD_COMPONENT_PLANAR_REFLECTIONS
+        if( mPlanarReflections && mPlanarReflections->hasPlanarReflections( renderable ) )
+        {
+            if( !mPlanarReflections->_isUpdatingRenderablesHlms() )
+                mPlanarReflections->_notifyRenderableFlushedHlmsDatablock( renderable );
+            else
+                setProperty( PbsProperty::UsePlanarReflections, 1 );
+        }
+#endif
+
+        if( mFastShaderBuildHack )
+            setProperty( PbsProperty::MaterialsPerBuffer, static_cast<int>( 2 ) );
+        else
+            setProperty( PbsProperty::MaterialsPerBuffer, static_cast<int>( mSlotsPerPool ) );
     }
     //-----------------------------------------------------------------------------------
     void HlmsPbs::calculateHashForPreCaster( Renderable *renderable, PiecesMap *inOutPieces )
@@ -697,9 +777,10 @@ namespace Ogre
             }
         }
 
-        String slotsPerPoolStr = StringConverter::toString( mSlotsPerPool );
-        inOutPieces[VertexShader][PbsProperty::MaterialsPerBuffer] = slotsPerPoolStr;
-        inOutPieces[PixelShader][PbsProperty::MaterialsPerBuffer] = slotsPerPoolStr;
+        if( mFastShaderBuildHack )
+            setProperty( PbsProperty::MaterialsPerBuffer, static_cast<int>( 2 ) );
+        else
+            setProperty( PbsProperty::MaterialsPerBuffer, static_cast<int>( mSlotsPerPool ) );
     }
     //-----------------------------------------------------------------------------------
     bool HlmsPbs::requiredPropertyByAlphaTest( IdString keyName )
@@ -850,6 +931,23 @@ namespace Ogre
 
             if( mIrradianceVolume )
                 setProperty( PbsProperty::IrradianceVolumes, 1 );
+
+#ifdef OGRE_BUILD_COMPONENT_PLANAR_REFLECTIONS
+            mHasPlanarReflections = false;
+            mLastBoundPlanarReflection = 0u;
+            if( mPlanarReflections &&
+                mPlanarReflections->cameraMatches( sceneManager->getCameraInProgress() ) )
+            {
+                mHasPlanarReflections = true;
+                setProperty( PbsProperty::HasPlanarReflections,
+                             mPlanarReflections->getMaxActiveActors() );
+            }
+#endif
+
+#if !OGRE_NO_FINE_LIGHT_MASK_GRANULARITY
+            if( mFineLightMaskGranularity )
+                setProperty( HlmsBaseProp::FineLightMask, 1 );
+#endif
         }
 
         if( mOptimizationStrategy == LowerGpuOverhead )
@@ -862,8 +960,9 @@ namespace Ogre
 
         const RenderSystemCapabilities *capabilities = mRenderSystem->getCapabilities();
         setProperty( PbsProperty::HwGammaRead, capabilities->hasCapability( RSC_HW_GAMMA ) );
-        setProperty( PbsProperty::HwGammaWrite, capabilities->hasCapability( RSC_HW_GAMMA ) &&
-                                                        renderTarget->isHardwareGammaEnabled() );
+//        setProperty( PbsProperty::HwGammaWrite, capabilities->hasCapability( RSC_HW_GAMMA ) &&
+//                                                        renderTarget->isHardwareGammaEnabled() );
+        setProperty( PbsProperty::HwGammaWrite, 1 );
         setProperty( PbsProperty::SignedIntTex, capabilities->hasCapability(
                                                             RSC_TEXTURE_SIGNED_INT ) );
         retVal.setProperties = mSetProperties;
@@ -938,11 +1037,15 @@ namespace Ogre
             if( mIrradianceVolume )
                 mapSize += (4 + 4 + 4*4) * 4;
 
+#ifdef OGRE_BUILD_COMPONENT_PLANAR_REFLECTIONS
+            if( mHasPlanarReflections )
+                mapSize += mPlanarReflections->getConstBufferSize();
+#endif
             //float pssmSplitPoints N times.
             mapSize += numPssmSplits * 4;
             mapSize = alignToNextMultiple( mapSize, 16 );
 
-            if( shadowNode )
+            if( numShadowMapLights > 0 )
             {
                 //Six variables * 4 (padded vec3) * 4 (bytes) * numLights
                 mapSize += ( 6 * 4 * 4 ) * numLights;
@@ -962,9 +1065,14 @@ namespace Ogre
             //vec4 viewZRow
             if( mShadowFilter == ExponentialShadowMaps )
                 mapSize += 4 * 4;
-            //vec3 depthRange
+            //vec4 depthRange
             mapSize += (2 + 2) * 4;
         }
+
+        const bool isCameraReflected = camera->isReflected();
+        //vec4 clipPlane0
+        if( isCameraReflected )
+            mapSize += 4 * 4;
 
         mapSize += mListener->getPassBufferSize( shadowNode, casterPass, dualParaboloid,
                                                  sceneManager );
@@ -995,6 +1103,16 @@ namespace Ogre
         Matrix4 viewProjMatrix = projectionMatrix * viewMatrix;
         for( size_t i=0; i<16; ++i )
             *passBufferPtr++ = (float)viewProjMatrix[0][i];
+
+        //vec4 clipPlane0
+        if( isCameraReflected )
+        {
+            const Plane &reflPlane = camera->getReflectionPlane();
+            *passBufferPtr++ = (float)reflPlane.normal.x;
+            *passBufferPtr++ = (float)reflPlane.normal.y;
+            *passBufferPtr++ = (float)reflPlane.normal.z;
+            *passBufferPtr++ = (float)reflPlane.d;
+        }
 
         //vec4 cameraPosWS;
         if( isShadowCastingPointLight )
@@ -1166,7 +1284,7 @@ namespace Ogre
 
             passBufferPtr += alignToNextMultiple( numPssmSplits, 4 ) - numPssmSplits;
 
-            if( shadowNode )
+            if( numShadowMapLights > 0 )
             {
                 //All directional lights (caster and non-caster) are sent.
                 //Then non-directional shadow-casting shadow lights are sent.
@@ -1214,6 +1332,9 @@ namespace Ogre
                     *passBufferPtr++ = lightPos.x;
                     *passBufferPtr++ = lightPos.y;
                     *passBufferPtr++ = lightPos.z;
+#if !OGRE_NO_FINE_LIGHT_MASK_GRANULARITY
+                    *reinterpret_cast<uint32 * RESTRICT_ALIAS>( passBufferPtr ) = light->getLightMask();
+#endif
                     ++passBufferPtr;
 
                     //vec3 lights[numLights].diffuse
@@ -1256,17 +1377,6 @@ namespace Ogre
                     *passBufferPtr++ = light->getSpotlightFalloff();
                     ++passBufferPtr;
                 }
-
-                mPreparedPass.shadowMaps.reserve( contiguousShadowMapTex.size() );
-
-                TextureVec::const_iterator itShadowMap = contiguousShadowMapTex.begin();
-                TextureVec::const_iterator enShadowMap = contiguousShadowMapTex.end();
-
-                while( itShadowMap != enShadowMap )
-                {
-                    mPreparedPass.shadowMaps.push_back( itShadowMap->get() );
-                    ++itShadowMap;
-                }
             }
             else
             {
@@ -1284,6 +1394,10 @@ namespace Ogre
                     *passBufferPtr++ = lightPos.x;
                     *passBufferPtr++ = lightPos.y;
                     *passBufferPtr++ = lightPos.z;
+#if !OGRE_NO_FINE_LIGHT_MASK_GRANULARITY
+                    *reinterpret_cast<uint32 * RESTRICT_ALIAS>( passBufferPtr ) =
+                            globalLightList.lights[i]->getLightMask();
+#endif
                     ++passBufferPtr;
 
                     //vec3 lights[numLights].diffuse
@@ -1303,6 +1417,20 @@ namespace Ogre
                 }
             }
 
+            if( shadowNode )
+            {
+                mPreparedPass.shadowMaps.reserve( contiguousShadowMapTex.size() );
+
+                TextureVec::const_iterator itShadowMap = contiguousShadowMapTex.begin();
+                TextureVec::const_iterator enShadowMap = contiguousShadowMapTex.end();
+
+                while( itShadowMap != enShadowMap )
+                {
+                    mPreparedPass.shadowMaps.push_back( itShadowMap->get() );
+                    ++itShadowMap;
+                }
+            }
+
             ForwardPlusBase *forwardPlus = sceneManager->_getActivePassForwardPlus();
             if( forwardPlus )
             {
@@ -1310,6 +1438,14 @@ namespace Ogre
                 passBufferPtr += forwardPlus->getConstBufferSize() >> 2u;
             }
 
+#ifdef OGRE_BUILD_COMPONENT_PLANAR_REFLECTIONS
+            if( mHasPlanarReflections )
+            {
+                mPlanarReflections->fillConstBufferData( renderTarget, camera,
+                                                         projectionMatrix, passBufferPtr );
+                passBufferPtr += mPlanarReflections->getConstBufferSize() >> 2u;
+            }
+#endif
             if( mParallaxCorrectedCubemap )
             {
                 mParallaxCorrectedCubemap->fillConstBufferData( viewMatrix, passBufferPtr );
@@ -1373,8 +1509,14 @@ namespace Ogre
             mTexUnitSlotStart += 1;
         if( mPrePassTextures )
             mTexUnitSlotStart += 2;
+        if( mPrePassMsaaDepthTexture )
+            mTexUnitSlotStart += 1;
         if( mSsrTexture )
             mTexUnitSlotStart += 1;
+#ifdef OGRE_BUILD_COMPONENT_PLANAR_REFLECTIONS
+        if( mHasPlanarReflections )
+            mTexUnitSlotStart += 1;
+#endif
 
         uploadDirtyDatablocks();
 
@@ -1417,7 +1559,7 @@ namespace Ogre
         const HlmsPbsDatablock *datablock = static_cast<const HlmsPbsDatablock*>(
                                                 queuedRenderable.renderable->getDatablock() );
 
-        if( OGRE_EXTRACT_HLMS_TYPE_FROM_CACHE_HASH( lastCacheHash ) != HLMS_PBS )
+        if( OGRE_EXTRACT_HLMS_TYPE_FROM_CACHE_HASH( lastCacheHash ) != mType )
         {
             //layout(binding = 0) uniform PassBuffer {} pass
             ConstBufferPacked *passBuffer = mPassBuffers[mCurrentPassBuffer-1];
@@ -1516,6 +1658,9 @@ namespace Ogre
 
             rebindTexBuffer( commandBuffer );
 
+#ifdef OGRE_BUILD_COMPONENT_PLANAR_REFLECTIONS
+            mLastBoundPlanarReflection = 0u;
+#endif
             mListener->hlmsTypeChanged( casterPass, commandBuffer, datablock );
         }
 
@@ -1729,6 +1874,12 @@ namespace Ogre
 
         *reinterpret_cast<float * RESTRICT_ALIAS>( currentMappedConstBuffer+1 ) = datablock->
                                                                                     mShadowConstantBias;
+#if !OGRE_NO_FINE_LIGHT_MASK_GRANULARITY
+        *( currentMappedConstBuffer+2u ) = queuedRenderable.movableObject->getLightMask();
+#endif
+#ifdef OGRE_BUILD_COMPONENT_PLANAR_REFLECTIONS
+        *( currentMappedConstBuffer+3u ) = queuedRenderable.renderable->mCustomParameter & 0x7F;
+#endif
         currentMappedConstBuffer += 4;
 
         //---------------------------------------------------------------------------
@@ -1737,6 +1888,19 @@ namespace Ogre
 
         if( !casterPass || datablock->getAlphaTest() != CMPF_ALWAYS_PASS )
         {
+#ifdef OGRE_BUILD_COMPONENT_PLANAR_REFLECTIONS
+            if( mHasPlanarReflections &&
+                (queuedRenderable.renderable->mCustomParameter & 0x80) &&
+                mLastBoundPlanarReflection != queuedRenderable.renderable->mCustomParameter )
+            {
+                const uint8 activeActorIdx = queuedRenderable.renderable->mCustomParameter & 0x7F;
+                TexturePtr planarReflTex = mPlanarReflections->getTexture( activeActorIdx );
+                *commandBuffer->addCommand<CbTexture>() =
+                        CbTexture( mTexUnitSlotStart - 1u, true, planarReflTex.get(),
+                                   mPlanarReflectionsSamplerblock );
+                mLastBoundPlanarReflection = queuedRenderable.renderable->mCustomParameter;
+            }
+#endif
             if( datablock->mTextureHash != mLastTextureHash )
             {
                 //Rebind textures
@@ -1796,7 +1960,7 @@ namespace Ogre
         if( mPrePassMsaaDepthTexture )
         {
             //We need to unbind the depth texture, it may be used as a depth buffer later.
-            size_t texUnit = mGridBuffer ? 1 : 3;
+            size_t texUnit = mGridBuffer ? 3 : 1;
             if( mPrePassTextures )
                 texUnit += 2;
 
@@ -1808,6 +1972,27 @@ namespace Ogre
     {
         HlmsBufferManager::frameEnded();
         mCurrentPassBuffer  = 0;
+    }
+    //-----------------------------------------------------------------------------------
+    void HlmsPbs::getDefaultPaths( String &outDataFolderPath, StringVector &outLibraryFoldersPaths )
+    {
+        //We need to know what RenderSystem is currently in use, as the
+        //name of the compatible shading language is part of the path
+        Ogre::RenderSystem *renderSystem = Ogre::Root::getSingleton().getRenderSystem();
+        Ogre::String shaderSyntax = "GLSL";
+        if (renderSystem->getName() == "Direct3D11 Rendering Subsystem")
+            shaderSyntax = "HLSL";
+        else if (renderSystem->getName() == "Metal Rendering Subsystem")
+            shaderSyntax = "Metal";
+
+        //Fill the library folder paths with the relevant folders
+        outLibraryFoldersPaths.clear();
+        outLibraryFoldersPaths.push_back( "Hlms/Common/" + shaderSyntax );
+        outLibraryFoldersPaths.push_back( "Hlms/Common/Any" );
+        outLibraryFoldersPaths.push_back( "Hlms/Pbs/Any" );
+
+        //Fill the data folder path
+        outDataFolderPath = "Hlms/Pbs/" + shaderSyntax;
     }
     //-----------------------------------------------------------------------------------
     void HlmsPbs::setDebugPssmSplits( bool bDebug )
@@ -1838,6 +2023,18 @@ namespace Ogre
     {
         mAmbientLightMode = mode;
     }
+#ifdef OGRE_BUILD_COMPONENT_PLANAR_REFLECTIONS
+    //-----------------------------------------------------------------------------------
+    void HlmsPbs::setPlanarReflections( PlanarReflections *planarReflections )
+    {
+        mPlanarReflections = planarReflections;
+    }
+    //-----------------------------------------------------------------------------------
+    PlanarReflections* HlmsPbs::getPlanarReflections(void) const
+    {
+        return mPlanarReflections;
+    }
+#endif
 #if !OGRE_NO_JSON
     //-----------------------------------------------------------------------------------
     void HlmsPbs::_loadJson( const rapidjson::Value &jsonValue, const HlmsJson::NamedBlocks &blocks,

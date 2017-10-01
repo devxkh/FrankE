@@ -385,7 +385,7 @@ namespace XE
 			{
 				Ogre::ResourceGroupManager& lRgMgr = Ogre::ResourceGroupManager::getSingleton();
 
-				lRgMgr.initialiseResourceGroup(lNameOfResourceGroup);
+				lRgMgr.initialiseResourceGroup(lNameOfResourceGroup,false);
 				lRgMgr.loadResourceGroup(lNameOfResourceGroup);
 			}
 		});

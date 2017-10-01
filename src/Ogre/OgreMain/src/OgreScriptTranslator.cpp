@@ -61,6 +61,7 @@ THE SOFTWARE.
 #include "Compositor/Pass/PassScene/OgreCompositorPassSceneDef.h"
 #include "Compositor/Pass/PassStencil/OgreCompositorPassStencilDef.h"
 #include "Compositor/Pass/PassUav/OgreCompositorPassUavDef.h"
+#include "Compositor/Pass/OgreCompositorPassProvider.h"
 
 namespace Ogre{
 
@@ -8433,6 +8434,26 @@ namespace Ogre{
                         }
                     }
                     break;
+                case ID_LIGHT_VISIBILITY_MASK:
+                {
+                    if(prop->values.empty())
+                    {
+                        compiler->addError(ScriptCompiler::CE_STRINGEXPECTED, prop->file, prop->line);
+                        return;
+                    }
+
+                    uint32 var;
+                    AbstractNodeList::const_iterator it0 = prop->values.begin();
+                    if( getHex( *it0, &var ) )
+                    {
+                        passScene->setLightVisibilityMask( var );
+                    }
+                    else
+                    {
+                         compiler->addError(ScriptCompiler::CE_NUMBEREXPECTED, prop->file, prop->line);
+                    }
+                }
+                break;
                 case ID_SHADOWS_ENABLED:
                     {
                         if(prop->values.empty())
@@ -9616,6 +9637,14 @@ namespace Ogre{
             }
 
             mPassDef = target->addPass( PASS_CUSTOM, customId );
+
+            //allow the custom pass provider to add any custom properties to pass definition
+            CompositorManager2* compMgr = Root::getSingleton().getCompositorManager2();
+            CompositorPassProvider* passProv = compMgr->getCompositorPassProvider();
+            if (passProv)
+            {
+                passProv->translateCustomPass(node, mPassDef);
+            }
         }
         else
         {

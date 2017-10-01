@@ -183,6 +183,7 @@ namespace Ogre {
         mMinFilter = FO_LINEAR;
         mMipFilter = FO_POINT;
         mSwIndirectBufferPtr = 0;
+        mClipDistances = 0;
         mPso = 0;
         mCurrentComputeShader = 0;
         mLargestSupportedAnisotropy = 1;
@@ -559,6 +560,12 @@ namespace Ogre {
         // Check if render to vertex buffer (transform feedback in OpenGL)
         rsc->setCapability(RSC_HWRENDER_TO_VERTEX_BUFFER);
 
+        if( mDriverVersion.hasMinVersion( 4, 2 ) ||
+            mGLSupport->checkExtension("GL_ARB_shading_language_420pack" ) )
+        {
+            rsc->setCapability(RSC_CONST_BUFFER_SLOTS_IN_SHADER);
+        }
+
         return rsc;
     }
 
@@ -679,11 +686,14 @@ namespace Ogre {
         // delete mTextureManager;
         // mTextureManager = 0;
 
-        mGLInitialised = 0;
+        if( mGlobalVao )
+        {
+            OCGE( glBindVertexArray( 0 ) );
+            OCGE( glDeleteVertexArrays( 1, &mGlobalVao ) );
+            mGlobalVao = 0;
+        }
 
-        OCGE( glBindVertexArray( 0 ) );
-        OCGE( glDeleteVertexArrays( 1, &mGlobalVao ) );
-        mGlobalVao = 0;
+        mGLInitialised = 0;
 
         // RenderSystem::shutdown();
     }
@@ -752,24 +762,35 @@ namespace Ogre {
         {
             initialiseContext(win);
 
+            mDriverVersion = mGLSupport->getGLVersion();
+
+            if( !mDriverVersion.hasMinVersion( 3, 3 ) )
+            {
+                OGRE_EXCEPT( Exception::ERR_RENDERINGAPI_ERROR,
+                             "OpenGL 3.3 or greater required. Try updating your drivers.",
+                             "GL3PlusRenderSystem::_createRenderWindow" );
+            }
+
             assert( !mVaoManager );
-            mVaoManager = OGRE_NEW GL3PlusVaoManager(
-                                            mGLSupport->checkExtension("GL_ARB_buffer_storage"),
-                                            mGLSupport->checkExtension("GL_ARB_multi_draw_indirect"),
-                                            mGLSupport->checkExtension("GL_ARB_shader_storage_buffer_object") );
+            bool supportsArbBufferStorage   = mDriverVersion.hasMinVersion( 4, 4 ) ||
+                    mGLSupport->checkExtension("GL_ARB_buffer_storage");
+            bool emulateTexBuffers          = !(mHasGL43 ||
+                    mGLSupport->checkExtension("GL_ARB_buffer_storage"));
+            bool supportsIndirectBuffers    = mDriverVersion.hasMinVersion( 4, 6 ) ||
+                    mGLSupport->checkExtension("GL_ARB_multi_draw_indirect");
+            bool supportsBaseInstance       = mDriverVersion.hasMinVersion( 4, 2 ) ||
+                    mGLSupport->checkExtension("GL_ARB_base_instance");
+            bool supportsSsbo               = mHasGL43 ||
+                    mGLSupport->checkExtension("GL_ARB_shader_storage_buffer_object");
+            mVaoManager = OGRE_NEW GL3PlusVaoManager( supportsArbBufferStorage, emulateTexBuffers,
+                                                      supportsIndirectBuffers, supportsBaseInstance,
+                                                      supportsSsbo );
 
             //Bind the Draw ID
             OCGE( glGenVertexArrays( 1, &mGlobalVao ) );
             OCGE( glBindVertexArray( mGlobalVao ) );
             static_cast<GL3PlusVaoManager*>( mVaoManager )->bindDrawId();
             OCGE( glBindVertexArray( 0 ) );
-
-            mDriverVersion = mGLSupport->getGLVersion();
-
-            if (mDriverVersion.major < 3)
-                OGRE_EXCEPT(Exception::ERR_RENDERINGAPI_ERROR,
-                            "Driver does not support at least OpenGL 3.0.",
-                            "GL3PlusRenderSystem::_createRenderWindow");
 
             const char* shadingLangVersion = (const char*)glGetString(GL_SHADING_LANGUAGE_VERSION);
             StringVector tokens = StringUtil::split(shadingLangVersion, ". ");
@@ -1276,7 +1297,7 @@ namespace Ogre {
         }
         else
         {
-            glBindImageTexture( 0, 0, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_R32UI );
+            glBindImageTexture( slot, 0, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_R32UI );
         }
     }
 
@@ -1579,6 +1600,9 @@ namespace Ogre {
 
     void GL3PlusRenderSystem::_executeResourceTransition( ResourceTransition *resTransition )
     {
+        if( !glMemoryBarrier )
+            return;
+
         GLbitfield barriers = static_cast<GLbitfield>( reinterpret_cast<intptr_t>(
                                                            resTransition->mRsData ) );
 
@@ -1600,17 +1624,14 @@ namespace Ogre {
         switch( newBlock->macroblock->mCullMode )
         {
         case CULL_NONE:
-            pso->cullMode[0] = 0;
-            pso->cullMode[1] = 0;
+            pso->cullMode = 0;
             break;
         default:
         case CULL_CLOCKWISE:
-            pso->cullMode[0] = GL_FRONT;
-            pso->cullMode[1] = GL_BACK;
+            pso->cullMode = GL_BACK;
             break;
         case CULL_ANTICLOCKWISE:
-            pso->cullMode[0] = GL_BACK;
-            pso->cullMode[1] = GL_FRONT;
+            pso->cullMode = GL_FRONT;
             break;
         }
 
@@ -1873,23 +1894,14 @@ namespace Ogre {
 
 
         //Cull mode
-        if( pso->cullMode[0] == 0 )
+        if( pso->cullMode == 0 )
         {
             OCGE( glDisable( GL_CULL_FACE ) );
         }
         else
         {
-            // NB: Because two-sided stencil API dependence of the front face, we must
-            // use the same 'winding' for the front face everywhere. As the OGRE default
-            // culling mode is clockwise, we also treat anticlockwise winding as front
-            // face for consistently. On the assumption that, we can't change the front
-            // face by glFrontFace anywhere.
-            size_t cullIdx = !(mActiveRenderTarget &&
-                    ((mActiveRenderTarget->requiresTextureFlipping() && !mInvertVertexWinding) ||
-                     (!mActiveRenderTarget->requiresTextureFlipping() && mInvertVertexWinding)));
-
             OCGE( glEnable( GL_CULL_FACE ) );
-            OCGE( glCullFace( pso->cullMode[cullIdx] ) );
+            OCGE( glCullFace( pso->cullMode ) );
         }
 
         //Polygon mode
@@ -2003,6 +2015,29 @@ namespace Ogre {
         GLSLShader::unbindAll();
 
         RenderSystem::_setPipelineStateObject( pso );
+
+        uint8 newClipDistances = 0;
+        if( pso )
+            newClipDistances = pso->clipDistances;
+
+        if( mClipDistances != newClipDistances )
+        {
+            for( size_t i=0; i<8u; ++i )
+            {
+                const uint8 bitFlag = 1u << i;
+                bool oldClipSet = (mClipDistances & bitFlag) != 0;
+                bool newClipSet = (newClipDistances & bitFlag) != 0;
+                if( oldClipSet != newClipSet )
+                {
+                    if( newClipSet )
+                        glEnable( GL_CLIP_DISTANCE0 + i );
+                    else
+                        glDisable( GL_CLIP_DISTANCE0 + i );
+                }
+            }
+
+            mClipDistances = newClipDistances;
+        }
 
         mUseAdjacency   = false;
         mPso            = 0;
@@ -2576,9 +2611,8 @@ namespace Ogre {
                                                  static_cast<v1::GL3PlusHardwareIndexBuffer*>(op.indexData->indexBuffer.get())->getGLBufferId()));
                 void *pBufferData = GL_BUFFER_OFFSET(op.indexData->indexStart *
                                                      op.indexData->indexBuffer->getIndexSize());
-                GLuint indexEnd = op.indexData->indexCount - op.indexData->indexStart;
                 GLenum indexType = (op.indexData->indexBuffer->getType() == v1::HardwareIndexBuffer::IT_32BIT) ? GL_UNSIGNED_BYTE : GL_UNSIGNED_SHORT;
-                OGRE_CHECK_GL_ERROR(glDrawRangeElements(GL_PATCHES, op.indexData->indexStart, indexEnd, op.indexData->indexCount, indexType, pBufferData));
+                OGRE_CHECK_GL_ERROR(glDrawElements(GL_PATCHES, op.indexData->indexCount, indexType, pBufferData));
                 //OGRE_CHECK_GL_ERROR(glDrawElements(GL_PATCHES, op.indexData->indexCount, indexType, pBufferData));
                 //                OGRE_CHECK_GL_ERROR(glDrawArraysInstanced(GL_PATCHES, 0, primCount, 1));
             }
@@ -2611,14 +2645,14 @@ namespace Ogre {
                                   mDerivedDepthBiasSlopeScale);
                 }
 
-                GLuint indexEnd = op.indexData->indexCount - op.indexData->indexStart;
                 if(hasInstanceData)
                 {
                     OGRE_CHECK_GL_ERROR(glDrawElementsInstancedBaseVertex(primType, op.indexData->indexCount, indexType, pBufferData, numberOfInstances, op.vertexData->vertexStart));
                 }
                 else
                 {
-                    OGRE_CHECK_GL_ERROR(glDrawRangeElementsBaseVertex(primType, op.indexData->indexStart, indexEnd, op.indexData->indexCount, indexType, pBufferData, op.vertexData->vertexStart));
+                    OGRE_CHECK_GL_ERROR( glDrawElementsBaseVertex( primType, op.indexData->indexCount, indexType,
+                                                                   pBufferData, op.vertexData->vertexStart ) );
                 }
             } while (updatePassIterationRenderState());
         }
@@ -2710,7 +2744,7 @@ namespace Ogre {
     {
         const GL3PlusVertexArrayObject *vao = static_cast<const GL3PlusVertexArrayObject*>( cmd->vao );
         GLenum mode = mPso->domainShader ? GL_PATCHES : vao->mPrimType[mUseAdjacency];
-
+        
         OCGE( glMultiDrawArraysIndirect( mode, cmd->indirectBufferOffset,
                                          cmd->numDraws, sizeof(CbDrawStrip) ) );
     }
@@ -2727,7 +2761,7 @@ namespace Ogre {
                                     mSwIndirectBufferPtr + (size_t)cmd->indirectBufferOffset );
 
         const size_t bytesPerIndexElement = vao->mIndexBuffer->getBytesPerElement();
-
+        
         for( uint32 i=cmd->numDraws; i--; )
         {
             OCGE( glDrawElementsInstancedBaseVertexBaseInstance(
@@ -2749,7 +2783,7 @@ namespace Ogre {
 
         CbDrawStrip *drawCmd = reinterpret_cast<CbDrawStrip*>(
                                     mSwIndirectBufferPtr + (size_t)cmd->indirectBufferOffset );
-
+        
         for( uint32 i=cmd->numDraws; i--; )
         {
             OCGE( glDrawArraysInstancedBaseInstance(
@@ -2758,6 +2792,63 @@ namespace Ogre {
                       drawCmd->primCount,
                       drawCmd->instanceCount,
                       drawCmd->baseInstance ) );
+            ++drawCmd;
+        }
+    }
+
+    void GL3PlusRenderSystem::_renderEmulatedNoBaseInstance( const CbDrawCallIndexed *cmd )
+    {
+        const GL3PlusVertexArrayObject *vao = static_cast<const GL3PlusVertexArrayObject*>( cmd->vao );
+        GLenum mode = mPso->domainShader ? GL_PATCHES : vao->mPrimType[mUseAdjacency];
+
+        GLenum indexType = vao->mIndexBuffer->getIndexType() == IndexBufferPacked::IT_16BIT ?
+                                                            GL_UNSIGNED_SHORT : GL_UNSIGNED_INT;
+
+        CbDrawIndexed *drawCmd = reinterpret_cast<CbDrawIndexed*>(
+                                    mSwIndirectBufferPtr + (size_t)cmd->indirectBufferOffset );
+
+        const size_t bytesPerIndexElement = vao->mIndexBuffer->getBytesPerElement();
+
+        GLSLMonolithicProgram *activeLinkProgram =
+                GLSLMonolithicProgramManager::getSingleton().getActiveMonolithicProgram();
+
+        for( uint32 i=cmd->numDraws; i--; )
+        {
+            OCGE( glUniform1ui( activeLinkProgram->mBaseInstanceLocation,
+                                static_cast<GLuint>( drawCmd->baseInstance ) ) );
+
+            OCGE( glDrawElementsInstancedBaseVertex(
+                    mode,
+                    drawCmd->primCount,
+                    indexType,
+                    reinterpret_cast<void*>( drawCmd->firstVertexIndex * bytesPerIndexElement ),
+                    drawCmd->instanceCount,
+                    drawCmd->baseVertex ) );
+            ++drawCmd;
+        }
+    }
+
+    void GL3PlusRenderSystem::_renderEmulatedNoBaseInstance( const CbDrawCallStrip *cmd )
+    {
+        const GL3PlusVertexArrayObject *vao = static_cast<const GL3PlusVertexArrayObject*>( cmd->vao );
+        GLenum mode = mPso->domainShader ? GL_PATCHES : vao->mPrimType[mUseAdjacency];
+
+        CbDrawStrip *drawCmd = reinterpret_cast<CbDrawStrip*>(
+                                    mSwIndirectBufferPtr + (size_t)cmd->indirectBufferOffset );
+
+        GLSLMonolithicProgram *activeLinkProgram =
+                GLSLMonolithicProgramManager::getSingleton().getActiveMonolithicProgram();
+
+        for( uint32 i=cmd->numDraws; i--; )
+        {
+            OCGE( glUniform1ui( activeLinkProgram->mBaseInstanceLocation,
+                                static_cast<GLuint>( drawCmd->baseInstance ) ) );
+
+            OCGE( glDrawArraysInstanced(
+                    mode,
+                    drawCmd->firstVertexIndex,
+                    drawCmd->primCount,
+                    drawCmd->instanceCount ) );
             ++drawCmd;
         }
     }
@@ -2935,6 +3026,43 @@ namespace Ogre {
                     cmd->primCount,
                     cmd->instanceCount,
                     cmd->baseInstance ) );
+    }
+
+    void GL3PlusRenderSystem::_renderNoBaseInstance( const v1::CbDrawCallIndexed *cmd )
+    {
+        GLenum indexType = mCurrentIndexBuffer->indexBuffer->getType() ==
+                            v1::HardwareIndexBuffer::IT_16BIT ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT;
+
+        const size_t bytesPerIndexElement = mCurrentIndexBuffer->indexBuffer->getIndexSize();
+
+        GLSLMonolithicProgram *activeLinkProgram =
+                GLSLMonolithicProgramManager::getSingleton().getActiveMonolithicProgram();
+
+        OCGE( glUniform1ui( activeLinkProgram->mBaseInstanceLocation,
+                            static_cast<GLuint>( cmd->baseInstance ) ) );
+
+        OCGE( glDrawElementsInstancedBaseVertex(
+                    mCurrentPolygonMode,
+                    cmd->primCount,
+                    indexType,
+                    reinterpret_cast<void*>(cmd->firstVertexIndex * bytesPerIndexElement),
+                    cmd->instanceCount,
+                    mCurrentVertexBuffer->vertexStart ) );
+    }
+
+    void GL3PlusRenderSystem::_renderNoBaseInstance( const v1::CbDrawCallStrip *cmd )
+    {
+        GLSLMonolithicProgram *activeLinkProgram =
+                GLSLMonolithicProgramManager::getSingleton().getActiveMonolithicProgram();
+
+        OCGE( glUniform1ui( activeLinkProgram->mBaseInstanceLocation,
+                            static_cast<GLuint>( cmd->baseInstance ) ) );
+
+        OCGE( glDrawArraysInstanced(
+                    mCurrentPolygonMode,
+                    cmd->firstVertexIndex,
+                    cmd->primCount,
+                    cmd->instanceCount ) );
     }
 
     void GL3PlusRenderSystem::clearFrameBuffer(unsigned int buffers,
@@ -3345,7 +3473,7 @@ namespace Ogre {
                     {
                         //Attach the depth buffer to this no-colour framebuffer
                         depthBuffer->bindToFramebuffer();
-                    }
+                     }
                     else
                     {
                         //Detach all depth buffers from this no-colour framebuffer
@@ -3361,7 +3489,8 @@ namespace Ogre {
 
                         OCGE( glFramebufferParameteri( GL_FRAMEBUFFER, GL_FRAMEBUFFER_DEFAULT_SAMPLES,
                                                        target->getFSAA() > 1 ? target->getFSAA() : 0 ) );
-                    }
+                        
+                     }
                 }
 
                 //Do not render to colour Render Targets.

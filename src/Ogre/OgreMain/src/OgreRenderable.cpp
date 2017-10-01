@@ -43,13 +43,14 @@ namespace Ogre
         mHlmsHash( 0 ),
         mHlmsCasterHash( 0 ),
         mHlmsDatablock( 0 ),
+        mCustomParameter( 0 ),
         mRenderQueueSubGroup( 0 ),
         mHasSkeletonAnimation( false ),
         mCurrentMaterialLod( 0 ),
         mLodMaterial( &MovableObject::c_DefaultLodMesh ),
         mHlmsGlobalIndex( ~0 ),
         mPolygonModeOverrideable( true ),
-		mUseCustomProjectionMatrix( false ),
+        mUseIdentityProjection( false ),
         mUseIdentityView( false )
     {
     }
@@ -154,13 +155,20 @@ namespace Ogre
     //-----------------------------------------------------------------------------------
     void Renderable::setMaterialName( const String& name, const String& groupName )
     {
-        MaterialPtr material = MaterialManager::getSingleton().getByName( name, groupName );
+        MaterialPtr material;
+
+        if( !name.empty() )
+            material = MaterialManager::getSingleton().getByName( name, groupName );
 
         if( material.isNull() )
         {
-            LogManager::getSingleton().logMessage( "Can't assign material " + name +
-                " because this Material does not exist. Have you forgotten to define it in a "
-                ".material script?", LML_CRITICAL );
+            if( !name.empty() )
+            {
+                LogManager::getSingleton().logMessage( "Can't assign material " + name +
+                                                       " because this Material does not exist. "
+                                                       "Have you forgotten to define it in a "
+                                                       ".material script?", LML_CRITICAL );
+            }
 
             HlmsManager *hlmsManager = Root::getSingleton().getHlmsManager();
             setDatablock( hlmsManager->getDefaultDatablock() );

@@ -60,13 +60,15 @@ THE SOFTWARE.
 
 #include <Ogre/OgreMain/include/Animation/OgreSkeletonInstance.h>
 
+#include <XERenderer/private/ScreenRenderable.hpp>
+
 namespace Ogre
 {
 
 	extern const String c_unlitBlendModes[];
 
 	XEHlmsUnlit::XEHlmsUnlit(Archive *dataFolder, ArchiveVec *libraryFolders) :
-		HlmsBufferManager(HLMS_UNLIT, "unlit", dataFolder, libraryFolders),
+		HlmsBufferManager(HLMS_USER0, "XEUnlit", dataFolder, libraryFolders),
 		ConstBufferPool(XEHlmsUnlitDatablock::MaterialSizeInGpuAligned,
 			ExtraBufferParams(64 * NUM_UNLIT_TEXTURE_TYPES)),
 		mCurrentPassBuffer(0),
@@ -702,7 +704,7 @@ namespace Ogre
 				currentMappedTexBuffer = mCurrentMappedTexBuffer;
 			}
 
-			bool useCustomProjectionMatrix = queuedRenderable.renderable->getUseCustomProjectionMatrix();
+			bool useCustomProjectionMatrix = static_cast<XE::ScreenRenderable*>(queuedRenderable.renderable)->getUseCustomProjectionMatrix();
 
 			//uint materialIdx[]
 			*currentMappedConstBuffer = datablock->getAssignedSlot();
@@ -713,7 +715,7 @@ namespace Ogre
 						
 			//mat4 worldViewProj
 			if(useCustomProjectionMatrix)
-				mPreparedPass.viewProjMatrix[useCustomProjectionMatrix] = queuedRenderable.renderable->getCustomProjectionMatrix(); //KH
+				mPreparedPass.viewProjMatrix[useCustomProjectionMatrix] = static_cast<XE::ScreenRenderable*>(queuedRenderable.renderable)->getCustomProjectionMatrix(); //KH
 
 			Matrix4 tmp = mPreparedPass.viewProjMatrix[useCustomProjectionMatrix] * worldMat;
 

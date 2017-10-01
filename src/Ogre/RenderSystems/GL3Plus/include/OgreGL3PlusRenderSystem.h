@@ -167,7 +167,8 @@ namespace Ogre {
 
         unsigned char *mSwIndirectBufferPtr;
 
-        GL3PlusHlmsPso const *mPso;
+        uint8                   mClipDistances;
+        GL3PlusHlmsPso const    *mPso;
         GLSLShader *mCurrentComputeShader;
 
         struct Uav
@@ -482,11 +483,15 @@ namespace Ogre {
         virtual void _render( const CbDrawCallStrip *cmd );
         virtual void _renderEmulated( const CbDrawCallIndexed *cmd );
         virtual void _renderEmulated( const CbDrawCallStrip *cmd );
+        virtual void _renderEmulatedNoBaseInstance( const CbDrawCallIndexed *cmd );
+        virtual void _renderEmulatedNoBaseInstance( const CbDrawCallStrip *cmd );
 
         virtual void _startLegacyV1Rendering(void);
         virtual void _setRenderOperation( const v1::CbRenderOp *cmd );
         virtual void _render( const v1::CbDrawCallIndexed *cmd );
         virtual void _render( const v1::CbDrawCallStrip *cmd );
+        virtual void _renderNoBaseInstance( const v1::CbDrawCallIndexed *cmd );
+        virtual void _renderNoBaseInstance( const v1::CbDrawCallStrip *cmd );
 
         virtual void clearFrameBuffer( unsigned int buffers,
                                        const ColourValue& colour = ColourValue::Black,

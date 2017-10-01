@@ -20,7 +20,7 @@ namespace XE {
 
 		: //ManualObject(id, objManager, sceneMgr) //renderqueueID
 		MovableObject(id, objManager, sceneMgr, 0)
-		, Renderable()
+		, ScreenRenderable()
 		, m_guiRenderer(guiRenderer)
 
 		, m_sceneMgr(sceneMgr)

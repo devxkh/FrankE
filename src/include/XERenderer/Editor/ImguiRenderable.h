@@ -2,11 +2,9 @@
 
 #include <OgreRenderable.h>
 #include <OgreRenderOperation.h>
+#include <XERenderer/private/ScreenRenderable.hpp>
 
-struct ImDrawList;
-
-
-class ImguiRenderable : public Ogre::Renderable
+class ImguiRenderable : public XE::ScreenRenderable
 {
 public:
 	ImguiRenderable();

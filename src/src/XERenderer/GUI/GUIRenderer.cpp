@@ -125,7 +125,7 @@ namespace XE
 
 		bool show_test_window = true;
 
-		ImGui::ShowTestWindow(&show_test_window);
+	//####	ImGui::ShowTestWindow(&show_test_window);
 
 		//Tell ImGui to create the buffers
 		ImGui::Render();
@@ -210,8 +210,8 @@ namespace XE
 
 	const SpriteData* GUIRenderer::getSprite(const std::string& spriteName)
 	{
-		if (_sprites.find(spriteName) == _sprites.end());
-		LOG(plog::error) << "sprite not found: " << spriteName;
+		if (_sprites.find(spriteName) == _sprites.end())
+			LOG(plog::error) << "sprite not found: " << spriteName;
 
 		return _sprites[spriteName].get();
 	}
