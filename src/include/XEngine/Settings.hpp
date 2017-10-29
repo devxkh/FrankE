@@ -4,19 +4,80 @@
 
 #include <string>
 
-#include <XEDAL/Objects/FB_Settings_generated.h>
+//#include <XEDAL/Objects/FB_Settings_generated.h>
+
+
+#include <ThirdParty/cereal/cereal.hpp>
+
 #include <vector>
+
 
 namespace XE {
 
-	/// Settings as Meyers Singleton http://www.codeproject.com/Articles/4750/Singleton-Pattern-A-review-and-analysis-of-existin
-	class Settings {
+	struct XESettings {
 
 	public:
 
-		Settings();
+		enum FSAA
+		{
+			none = 0,
+			x8 = 8,
+			x16 = 16,
+			x32 = 32
+		};
 
-		~Settings();
+		struct Graphics
+		{
+			bool fullscreen;
+
+			FSAA fsaa;
+
+
+			template <class Archive>
+			void serialize(Archive & ar)
+			{
+				ar(CEREAL_NVP(fullscreen), CEREAL_NVP(fsaa));
+			}
+		};
+
+		///resource folders
+		struct ResourceData
+		{
+			std::string hlmsDataFolder;// folder for hlms shader script files
+			std::string dbDataFolder;// folder contains lua scripts/flatbuffer files
+			std::string assetsFolder;//folder contains 3d assets used in renderthread
+			std::string dbFileName;//sqlite dbfilename contains scene, entity, node data
+
+			template <class Archive>
+			void serialize(Archive & ar)
+			{
+				ar(CEREAL_NVP(hlmsDataFolder) , CEREAL_NVP(dbDataFolder) , CEREAL_NVP(assetsFolder) , CEREAL_NVP(dbFileName));
+			}
+		};
+
+		Graphics graphics;
+		ResourceData resourceData;
+		
+		///Path to the data folder
+		std::string dataRootFolder;
+		std::string windowTitle; // window title 
+		std::string inputMapFilename; //fb binary filepath with input mappings
+
+
+		template<class Archive>
+		void serialize(Archive & archive) 
+		{
+			archive(CEREAL_NVP(dataRootFolder)
+				,CEREAL_NVP(graphics),
+				CEREAL_NVP(resourceData),
+				CEREAL_NVP(windowTitle),
+				CEREAL_NVP(inputMapFilename)
+			);
+		}
+
+		XESettings();
+
+		~XESettings();
 
 		//// Diese statische Methode erzeugt die einzige Instanz.
 		//// Nur über diese Methode erhalten Anwender den Zugriff auf
@@ -28,10 +89,8 @@ namespace XE {
 		//	return S;
 		//}
 
-		///Path to the data folder
-		std::string dataRootFolder;
-
-		bool fullscreen;
+		
+	//	bool fullscreen;
 
 		////dbData searchpath for physfs -> "F:/Projekte/coop/XGame/data/dbData"
 		//std::string dbDataFolder;
@@ -46,13 +105,15 @@ namespace XE {
 	
 		//std::string hlmsDataFolder;
 
-		const FBSettings::Settings * FBSettings();
+//		const FBSettings::Settings * FBSettings();
 
-		void load(const std::string& dataRootFolder);
+		void load(const std::string& settingsfilepath);
+
+
 
 	private:
 		
-		std::vector<char> m_buffer;
+	//	std::vector<char> m_buffer;
 		// Standard- und Copykonstruktor sind private. 
 		// Nur Methoden dieser Klasse können auf sie zugreifen.
 	//	Settings();

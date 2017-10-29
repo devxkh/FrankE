@@ -33,7 +33,7 @@ void IDAL::open()
 	char *zErrMsg = 0;
 
 	//Attempt to open database. If it does not exist create it.
-	mSQLCode = sqlite3_open((m_engine.settings.dataRootFolder + "/dbData.s3db").c_str(), &mDB);
+	mSQLCode = sqlite3_open(m_engine.settings.resourceData.dbFileName.c_str(), &mDB);
 
 	if (mSQLCode){
 		fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(mDB));

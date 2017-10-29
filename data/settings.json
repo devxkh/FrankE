@@ -1,0 +1,17 @@
+{
+  "value0": {
+    "dataRootFolder": "F:/Projekte/coop/FrankE/data",
+    "graphics": {
+      "fullscreen": true,
+      "fsaa": 8
+    },
+    "resourceData": {
+      "hlmsDataFolder": "F:\\Projekte\\coop\\FrankE\\data\\Hlms",
+      "dbDataFolder": "F:\\Projekte\\coop\\FrankE\\data\\dbData",
+      "assetsFolder": "F:\\Projekte\\coop\\FrankE\\data\\assets",
+      "dbFileName": "F:\\Projekte\\coop\\FrankE\\data\\dbData.s3db"
+    },
+    "windowTitle": "todo translation file",
+    "inputMapFilename": "inputMap.fbbin"
+  }
+}

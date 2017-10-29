@@ -206,19 +206,19 @@ source_group("src\\components" FILES ${XEComponents_SOURCES})
 
 #---------------- Extern ----------------------
 # all source files
-#set(XEEngineExtern_SOURCES
-#   
-#     ${SRCROOT}/XEngine/Extern/Extern.cpp
-# 
-#)
-#source_group("src\\extern" FILES ${XEEngineExtern_SOURCES})
-#
-## all header files
-#set(XEEngineExtern_HEADER
-#	 ${INCROOT}/XEngine/Extern/Extern.h
-#)
-#
-#source_group("include\\extern" FILES ${XEEngineExtern_HEADER})
+set(XEEngineExtern_SOURCES
+   
+     ${SRCROOT}/XEngine/Extern/Extern.cpp
+ 
+)
+source_group("src\\extern" FILES ${XEEngineExtern_SOURCES})
+
+# all header files
+set(XEEngineExtern_HEADER
+	 ${INCROOT}/XEngine/Extern/Extern.h
+)
+
+source_group("include\\extern" FILES ${XEEngineExtern_HEADER})
 
 
 #--------------------------------------
@@ -363,7 +363,7 @@ sfml_add_library(XEngine
 		 ${XEComponents_HEADER} ${XEComponents_SOURCES} ${XESystems_HEADER} ${XESystems_SOURCES}
 		${XEngine_main_INCLUDES} ${XEngine_main_SOURCES} ${XEngine_math_INCLUDES}
 			${XEEngineAnimation_HEADER} ${XEEngineAnimation_SOURCES}
-		#	${XEEngineExtern_HEADER} ${XEEngineExtern_SOURCES}
+			${XEEngineExtern_HEADER} ${XEEngineExtern_SOURCES}
 				 ${XEAudio_SOURCES} ${XEAudio_HEADER} 
 			${XEScripts_SOURCES} ${XEScripts_HEADER} ${XEScripts_LUASRC} ${XEScripts_LUAHEADER}
 	 ${XEController_SOURCES} ${XEController_HEADER} ${XEController_UI_SOURCES} ${XEController_UI_HEADER}

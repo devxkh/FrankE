@@ -38,7 +38,8 @@ include_directories (${FrankESource}/src/ThirdParty/google/flatbuffers/include)
 
 include_directories (${FrankESource}/src/include/XESystem/Math)
 
-include_directories(${FrankESource}/src/ThirdParty/rapidjson/include)
+#include_directories(${FrankESource}/src/ThirdParty/rapidjson/include)
+include_directories(${FrankESource}/src/ThirdParty/cereal/external)
 
 include_directories(${FrankESource}/src/ThirdParty/enet/include)
 include_directories(${FrankESource}/src/ThirdParty/SDL/include)

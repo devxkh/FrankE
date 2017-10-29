@@ -157,7 +157,7 @@ namespace XE
 		}
 
 
-		Settings settings;
+		XESettings settings;
 
 		sf::Time elapsedTimeMainThread;
 

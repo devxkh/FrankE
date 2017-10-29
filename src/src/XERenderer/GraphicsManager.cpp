@@ -464,7 +464,7 @@ namespace XE
 	{
 		getIntoRendererQueue().push([this]() {
 
-			Ogre::String dataFolder = mEngine->settings.dataRootFolder + "/Hlms";
+			Ogre::String dataFolder = mEngine->settings.resourceData.hlmsDataFolder;
 
 			if (dataFolder.empty())
 				dataFolder = "./";

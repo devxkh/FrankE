@@ -9,7 +9,7 @@ int main(int argc, char **argv)
 	// leaving the scope of 'game' will cleanup the engine
 	XE::XEngine game;
 
-	game.settings.load("F:/Projekte/coop/FrankE/data/");
+	game.settings.load("F:/Projekte/coop/FrankE/data/settings.json");
 	game.setDAL(std::unique_ptr<XET::TestDAL>(new XET::TestDAL(game)));
 	game.init();
 	game.setScene(std::unique_ptr<XET::TestScene>(new XET::TestScene(game)));

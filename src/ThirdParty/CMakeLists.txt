@@ -7,7 +7,7 @@
 #add_subdirectory(LuaJIT)
 add_subdirectory(Lua)
 add_subdirectory(enet)
-add_subdirectory(rapidjson)
+#add_subdirectory(rapidjson)
 add_subdirectory(SDL)
 add_subdirectory(FreeImage)
 ##endif ()

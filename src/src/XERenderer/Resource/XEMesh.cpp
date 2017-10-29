@@ -209,11 +209,17 @@ namespace XE {
 
 				//vertexbuffer
 				{
+					auto positions = reinterpret_cast<float*>(primitiveInf.position.buffer.data);
+					auto normals = reinterpret_cast<float*>(primitiveInf.normal.buffer.data);
+					auto texCoords = reinterpret_cast<float*>(primitiveInf.texCoords.buffer.data);
+
 					Ogre::VertexElement2Vec vertexElements;
 					vertexElements.push_back(Ogre::VertexElement2(Ogre::VET_FLOAT3, Ogre::VES_POSITION));
 					vertexElements.push_back(Ogre::VertexElement2(Ogre::VET_FLOAT4, Ogre::VES_DIFFUSE));
 					vertexElements.push_back(Ogre::VertexElement2(Ogre::VET_FLOAT3, Ogre::VES_NORMAL));
-					vertexElements.push_back(Ogre::VertexElement2(Ogre::VET_FLOAT2, Ogre::VES_TEXTURE_COORDINATES));
+
+					if(texCoords)
+						vertexElements.push_back(Ogre::VertexElement2(Ogre::VET_FLOAT2, Ogre::VES_TEXTURE_COORDINATES));
 
 					size_t vertexSize = vaoManager->calculateVertexSize(vertexElements);
 
@@ -242,10 +248,7 @@ namespace XE {
 					//char* vtx_dst = reinterpret_cast<char*>(pVertexBuffer->map(0, accessor.count));
 					float* vtx_dst = reinterpret_cast<float*>(pVertexBuffer->map(0, primitiveInf.position.buffer.elementsCount));
 
-					auto positions = reinterpret_cast<float*>(primitiveInf.position.buffer.data);
-					auto normals = reinterpret_cast<float*>(primitiveInf.normal.buffer.data);
-					auto texCoords = reinterpret_cast<float*>(primitiveInf.texCoords.buffer.data);
-
+					
 					Ogre::ColourValue colour(0, 1, 0, 1);
 
 					for (uint32_t i = 0; i < primitiveInf.position.buffer.elementsCount; ++i)
@@ -265,8 +268,11 @@ namespace XE {
 						*vtx_dst++ = *normals++;
 
 						//texture
-						*vtx_dst++ = *texCoords++;//vertex.uv.x;
-						*vtx_dst++ = *texCoords++; // vertex.uv.y;
+						if (texCoords)
+						{
+							*vtx_dst++ = *texCoords++;//vertex.uv.x;
+							*vtx_dst++ = *texCoords++; // vertex.uv.y;
+						}
 					}
 
 					//	memcpy(vtx_dst, static_cast<const char*>(data), componentSize * accessor.count); // vtxCount * sizeof(char*));
@@ -301,15 +307,20 @@ namespace XE {
 				// Material
 				{
 					const gltf::Material& gltfMaterial = asset.materials[gltfPrimitive.material];
+					auto hlmspbs = gMgr.getRoot()->getHlmsManager()->getHlms(Ogre::HlmsTypes::HLMS_PBS);
 
-					Ogre::HlmsPbsDatablock *datablock = static_cast<Ogre::HlmsPbsDatablock*>(gMgr.getRoot()->getHlmsManager()->getHlms(Ogre::HlmsTypes::HLMS_PBS)->createDatablock(gltfMaterial.name,
-						gltfMaterial.name,
-						Ogre::HlmsMacroblock(),
-						Ogre::HlmsBlendblock(),
-						Ogre::HlmsParamVec()));
+					Ogre::HlmsPbsDatablock *datablock = static_cast<Ogre::HlmsPbsDatablock*>(hlmspbs->getDatablock(gltfMaterial.name));
 
-				//	Ogre::HlmsPbsDatablock *datablock = static_cast<Ogre::HlmsPbsDatablock*>(gMgr.getRoot()->getHlmsManager()->getDatablock("StonesPbs"));
-				
+					if (!datablock)
+					{
+						datablock = static_cast<Ogre::HlmsPbsDatablock*>(hlmspbs->createDatablock(gltfMaterial.name,
+							gltfMaterial.name,
+							Ogre::HlmsMacroblock(),
+							Ogre::HlmsBlendblock(),
+							Ogre::HlmsParamVec()));
+					}
+					//	Ogre::HlmsPbsDatablock *datablock = static_cast<Ogre::HlmsPbsDatablock*>(gMgr.getRoot()->getHlmsManager()->getDatablock("StonesPbs"));
+
 
 					auto r = gltfMaterial.pbr.baseColorFactor[0];
 					auto g = gltfMaterial.pbr.baseColorFactor[1];
@@ -336,12 +347,14 @@ namespace XE {
 							Ogre::TEX_TYPE_2D_ARRAY, 1024, 768, 0, Ogre::PF_A8R8G8B8, Ogre::TU_DYNAMIC_WRITE_ONLY);
 
 						Ogre::HlmsTextureManager::TextureLocation texLocation =
-							hlmsTextureManager->createOrRetrieveTexture("DamagedHelmet/textures/Default_albedo.jpg", "MyTexture", Ogre::HlmsTextureManager::TEXTURE_TYPE_DIFFUSE);
+							hlmsTextureManager->createOrRetrieveTexture("TestAtlas.png", "MyTexture", Ogre::HlmsTextureManager::TEXTURE_TYPE_DIFFUSE);
 
-						texLocation.texture = myTexture;
+					//	datablock->setTexture(1, texLocation.xIdx, texLocation.texture);
+
+						//texLocation.texture = myTexture;
 					
 						////datablock->setTexture(0, texLocation.xIdx, texLocation.texture);
-						datablock->setTexture(Ogre::PBSM_DETAIL0, 0, myTexture);//Ogre::PBSM_DIFFUSE, texLocation.xIdx, texLocation.texture);
+						datablock->setTexture(Ogre::PBSM_DIFFUSE, texLocation.xIdx, texLocation.texture);//Ogre::PBSM_DIFFUSE, texLocation.xIdx, texLocation.texture);
 
 					/*	Ogre::TexturePtr myTexture = Ogre::TextureManager::getSingletonPtr()->createManual(
 							"Default_albedo",

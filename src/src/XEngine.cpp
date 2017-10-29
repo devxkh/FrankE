@@ -75,7 +75,7 @@ namespace XE
 		//texturemanager initialized in createrenderwindow!!!
 		//renderwindow is create from current rendersystem!
 		//Step 1 - RenderWindow
-		mGraphicsManager.createRenderWindow(settings.FBSettings()->windowTitle()->c_str());// controller->getCameraController().getOgreCamera().__OgreCameraPtr);
+		mGraphicsManager.createRenderWindow(settings.windowTitle);// controller->getCameraController().getOgreCamera().__OgreCameraPtr);
 
 												   //Step 1 Hlms
 		mGraphicsManager.registerHlms(); //needs initialized root and renderwindow from rendersytem for vaomanager
