@@ -42,8 +42,8 @@ ControllerState::ControllerState(XE::XEngine& engine, bool replace)
 	{
 		//load gltf
 		gltf::Asset asset;
-		gltf::load("F:/Projekte/coop/XGame/data/assets/Impact/impact_ground_1.gltf", asset);
-	//	gltf::load("F:/Projekte/coop/FrankE/data/assets/DamagedHelmet/DamagedHelmet.gltf", asset);
+		//gltf::load("F:/Projekte/coop/XGame/data/assets/Impact/impact_ground_1.gltf", asset);
+		gltf::load("F:/Projekte/coop/FrankE/data/assets/DamagedHelmet/DamagedHelmet.gltf", asset);
 		//gltf::load("F:/Projekte/coop/glTF-Sample-Models/2.0/DamagedHelmet/glTF/DamagedHelmet.gltf", asset);
 
 		XE::XEMesh mesh;

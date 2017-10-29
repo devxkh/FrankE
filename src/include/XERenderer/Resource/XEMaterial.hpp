@@ -24,6 +24,7 @@ namespace Ogre {
 
 namespace XE
 {
+	struct XENamedBlocks;
 
 	/** \addtogroup Component
 	*  @{
@@ -48,7 +49,7 @@ namespace XE
 		const rapidjson::Value &jsonArray,
 		const ColourValue &defaultValue = ColourValue::White);*/
 
-		void loadTexture(const gltf::Asset& asset, const gltf::Material& gltfMaterial,
+		void loadTexture(const gltf::Asset& asset, const gltf::Material& gltfMaterial, const Ogre::HlmsSamplerblock* samplerblock,
 			Ogre::PbsTextureTypes textureType, int32_t gltfTexIdx, Ogre::HlmsPbsDatablock *datablock,
 			Ogre::PackedTexture textures[Ogre::NUM_PBSM_TEXTURE_TYPES]);
 

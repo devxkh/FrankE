@@ -4,7 +4,6 @@
 
 #include <XERenderer/GraphicsManager.hpp>
 
-
 #include <Ogre/OgreMain/include/OgreMatrix4.h>
 #include <Ogre/Components/Hlms/Unlit/include/OgreHlmsUnlitDatablock.h>
 #include <Ogre/Components/Hlms/Pbs/include/OgreHlmsPbsDatablock.h>
@@ -17,7 +16,6 @@
 #include <Ogre/OgreMain/include/OgreItem.h>
 #include <Ogre/OgreMain/include/OgreColourValue.h>
 #include <Ogre/OgreMain/include/OgreTextureManager.h>
-
 
 #include <XERenderer/Resource/XEMaterial.hpp>
 
@@ -38,31 +36,17 @@ namespace XE {
 			} buffer;
 		};
 
-		//AttributeInformation* indices{ nullptr };
 		AttributeInformation position;
 		AttributeInformation normal;
 		//	AttributeInformation colour;
 		AttributeInformation texCoords;
-		/*std::vector<AttributeInformation*> texCoords{};
-		std::vector<AttributeInformation*> colors{};*/
+		AttributeInformation tangents;
 	};
 
 	void XEMesh::buildMesh(const gltf::Asset& asset, GraphicsManager& gMgr, Ogre::SceneManager* sceneMgr) {
 
 		Ogre::Item* item{nullptr};
 
-		//Ogre::String datablockName = "DebugLineMat";
-
-		//Ogre::HlmsUnlitDatablock *datablock = static_cast<Ogre::HlmsUnlitDatablock*>(gMgr.getRoot()->getHlmsManager()->getDatablock("BillBoardTest"));
-		//Ogre::HlmsPbsDatablock *datablock = static_cast<Ogre::HlmsPbsDatablock*>(gMgr.getRoot()->getHlmsManager()->getDatablock(""));
-
-		//	Ogre::HlmsUnlitDatablock *datablock = static_cast<Ogre::HlmsUnlitDatablock*>(gMgr.getRoot()->getHlmsManager()->getHlms(Ogre::HlmsTypes::HLMS_UNLIT)->createDatablock(datablockName,
-			//	datablockName,
-			//	Ogre::HlmsMacroblock(),
-			//	Ogre::HlmsBlendblock(),
-			//	Ogre::HlmsParamVec()));
-
-			//Ogre::Root *root = Ogre::Root::getSingletonPtr();
 		Ogre::RenderSystem *renderSystem = gMgr.getRoot()->getRenderSystem();
 		Ogre::VaoManager *vaoManager = renderSystem->getVaoManager();
 
@@ -173,26 +157,12 @@ namespace XE {
 						positions.data = data;
 						positions.accessorCount = accessor.count;
 					}
-
-					//	primitiveSet->addAttributeBuffer(data, componentSize, accessor.count, type);
-
-					//------- not needed !!!
-					//gltf::PrimitiveSet::Attribute attribute;
-
-					//attribute.type = type;
-					//attribute.buffer.size = componentSize * accessor.count; //elementSize * elementsCount;
-					//attribute.buffer.data = new char[attribute.buffer.size];
-					//attribute.buffer.elementsCount = accessor.count;
-
-					//std::memcpy(attribute.buffer.data, static_cast<const char*>(data), attribute.buffer.size);
-					//------- not needed !!!
-
+					
 					PrimitiveInformation::AttributeInformation attributeInf;
 					attributeInf.buffer.data = data;
 					attributeInf.buffer.size = componentSize * accessor.count;
 					attributeInf.buffer.elementsCount = accessor.count;
 
-					//primitiveSet.attributes.push_back(std::move(attribute));
 					if (type == gltf::PrimitiveSet::Attribute::Type::Normal)
 					{
 						primitiveInf.normal = std::move(attributeInf);
@@ -205,6 +175,10 @@ namespace XE {
 					{
 						primitiveInf.texCoords = std::move(attributeInf);
 					}
+					else if (type == gltf::PrimitiveSet::Attribute::Type::Tangent)
+					{
+						primitiveInf.tangents = std::move(attributeInf);
+					}
 				}
 
 				//vertexbuffer
@@ -212,6 +186,7 @@ namespace XE {
 					auto positions = reinterpret_cast<float*>(primitiveInf.position.buffer.data);
 					auto normals = reinterpret_cast<float*>(primitiveInf.normal.buffer.data);
 					auto texCoords = reinterpret_cast<float*>(primitiveInf.texCoords.buffer.data);
+					auto tangents = reinterpret_cast<float*>(primitiveInf.tangents.buffer.data);
 
 					Ogre::VertexElement2Vec vertexElements;
 					vertexElements.push_back(Ogre::VertexElement2(Ogre::VET_FLOAT3, Ogre::VES_POSITION));
@@ -220,6 +195,8 @@ namespace XE {
 
 					if(texCoords)
 						vertexElements.push_back(Ogre::VertexElement2(Ogre::VET_FLOAT2, Ogre::VES_TEXTURE_COORDINATES));
+					if(tangents)
+						vertexElements.push_back(Ogre::VertexElement2(Ogre::VET_FLOAT3, Ogre::VES_TANGENT));
 
 					size_t vertexSize = vaoManager->calculateVertexSize(vertexElements);
 
@@ -243,12 +220,10 @@ namespace XE {
 					sceneNode->attachObject(item);
 					sceneNode->setPosition(0, 10, -20);
 					sceneNode->rotate(Ogre::Vector3::UNIT_Y, Ogre::Radian(180));
-
-
+					
 					//char* vtx_dst = reinterpret_cast<char*>(pVertexBuffer->map(0, accessor.count));
 					float* vtx_dst = reinterpret_cast<float*>(pVertexBuffer->map(0, primitiveInf.position.buffer.elementsCount));
-
-					
+										
 					Ogre::ColourValue colour(0, 1, 0, 1);
 
 					for (uint32_t i = 0; i < primitiveInf.position.buffer.elementsCount; ++i)
@@ -273,37 +248,18 @@ namespace XE {
 							*vtx_dst++ = *texCoords++;//vertex.uv.x;
 							*vtx_dst++ = *texCoords++; // vertex.uv.y;
 						}
+						//tangents
+						if (tangents)
+						{
+							*vtx_dst++ = *tangents++;
+							*vtx_dst++ = *tangents++;
+							*vtx_dst++ = *tangents++;
+						}
 					}
-
-					//	memcpy(vtx_dst, static_cast<const char*>(data), componentSize * accessor.count); // vtxCount * sizeof(char*));
 
 					if (pVertexBuffer->isCurrentlyMapped()) pVertexBuffer->unmap(Ogre::UO_KEEP_PERSISTENT);
 				}
-
-				// Generate flat normals if there is not any
-				//if (!hasNormals) {
-				//	void* data = gltf::generateNormals((float*)positions.data, positions.accessorCount);
-				//	if (!data) {
-				//		//return nullptr;
-				//	}
-				//	//primitiveSet->addAttributeBuffer(
-				//	//	data, sizeof(Ogre::Vector3), positions.accessorCount,
-				//	//	PrimitiveSet::Attribute::Type::Normal
-				//	//);
-
-				//	gltf::PrimitiveSet::Attribute attribute;
-
-				//	attribute.type = gltf::PrimitiveSet::Attribute::Type::Normal;
-				//	attribute.buffer.size = sizeof(Ogre::Vector3) * positions.accessorCount; //elementSize * elementsCount;
-				//	attribute.buffer.data = new char[attribute.buffer.size];
-				//	attribute.buffer.elementsCount = positions.accessorCount;
-
-				//	std::memcpy(attribute.buffer.data, static_cast<const char*>(data), attribute.buffer.size);
-
-				//	//primitiveSet.attributes.push_back(std::move(attribute));
-
-				//}
-
+				
 				// Material
 				{
 					const gltf::Material& gltfMaterial = asset.materials[gltfPrimitive.material];
@@ -313,11 +269,14 @@ namespace XE {
 
 					if (!datablock)
 					{
+						Ogre::HlmsParamVec params;
+					//	params.push_back(std::pair<Ogre::IdString, Ogre::String>("normal_map", ""));
+
 						datablock = static_cast<Ogre::HlmsPbsDatablock*>(hlmspbs->createDatablock(gltfMaterial.name,
 							gltfMaterial.name,
 							Ogre::HlmsMacroblock(),
 							Ogre::HlmsBlendblock(),
-							Ogre::HlmsParamVec()));
+							params));
 					}
 					//	Ogre::HlmsPbsDatablock *datablock = static_cast<Ogre::HlmsPbsDatablock*>(gMgr.getRoot()->getHlmsManager()->getDatablock("StonesPbs"));
 
@@ -331,134 +290,115 @@ namespace XE {
 					//	gltfMaterial.emissiveFactor[1],
 					//	gltfMaterial.emissiveFactor[2]
 
-					if (gltfMaterial.pbr.baseColorTexture.index != -1) {
-						
-						const gltf::Texture& gltfTexture = asset.textures[gltfMaterial.pbr.baseColorTexture.index];		
-						auto path = asset.images[gltfTexture.source].uri;
-						auto texCoord = gltfMaterial.pbr.baseColorTexture.texCoord;
+					//if (gltfMaterial.pbr.baseColorTexture.index != -1) {
+					//	
+					//	const gltf::Texture& gltfTexture = asset.textures[gltfMaterial.pbr.baseColorTexture.index];		
+					//	auto path = asset.images[gltfTexture.source].uri;
+					//	auto texCoord = gltfMaterial.pbr.baseColorTexture.texCoord;
 
-						//---------------------------------------
-						Ogre::HlmsManager *hlmsManager = gMgr.getRoot()->getHlmsManager();
-						Ogre::HlmsTextureManager *hlmsTextureManager = hlmsManager->getTextureManager();
+					//	//---------------------------------------
+					//	Ogre::HlmsManager *hlmsManager = gMgr.getRoot()->getHlmsManager();
+					//	Ogre::HlmsTextureManager *hlmsTextureManager = hlmsManager->getTextureManager();
 
-						Ogre::TexturePtr myTexture = Ogre::TextureManager::getSingletonPtr()->createManual(
-							"MyTexture",
-							Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-							Ogre::TEX_TYPE_2D_ARRAY, 1024, 768, 0, Ogre::PF_A8R8G8B8, Ogre::TU_DYNAMIC_WRITE_ONLY);
+					//	Ogre::TexturePtr myTexture = Ogre::TextureManager::getSingletonPtr()->createManual(
+					//		"MyTexture",
+					//		Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+					//		Ogre::TEX_TYPE_2D_ARRAY, 1024, 768, 0, Ogre::PF_A8R8G8B8, Ogre::TU_DYNAMIC_WRITE_ONLY);
 
-						Ogre::HlmsTextureManager::TextureLocation texLocation =
-							hlmsTextureManager->createOrRetrieveTexture("TestAtlas.png", "MyTexture", Ogre::HlmsTextureManager::TEXTURE_TYPE_DIFFUSE);
+					//	Ogre::HlmsTextureManager::TextureLocation texLocation =
+					//		hlmsTextureManager->createOrRetrieveTexture("TestAtlas.png", "MyTexture", Ogre::HlmsTextureManager::TEXTURE_TYPE_DIFFUSE);
 
-					//	datablock->setTexture(1, texLocation.xIdx, texLocation.texture);
+					////	datablock->setTexture(1, texLocation.xIdx, texLocation.texture);
 
-						//texLocation.texture = myTexture;
-					
-						////datablock->setTexture(0, texLocation.xIdx, texLocation.texture);
-						datablock->setTexture(Ogre::PBSM_DIFFUSE, texLocation.xIdx, texLocation.texture);//Ogre::PBSM_DIFFUSE, texLocation.xIdx, texLocation.texture);
+					//	//texLocation.texture = myTexture;
+					//
+					//	////datablock->setTexture(0, texLocation.xIdx, texLocation.texture);
+					//	datablock->setTexture(Ogre::PBSM_DIFFUSE, texLocation.xIdx, texLocation.texture);//Ogre::PBSM_DIFFUSE, texLocation.xIdx, texLocation.texture);
 
-					/*	Ogre::TexturePtr myTexture = Ogre::TextureManager::getSingletonPtr()->createManual(
-							"Default_albedo",
-							Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-							Ogre::TEX_TYPE_2D_ARRAY, 1024, 768, 1, 0, Ogre::PF_A8R8G8B8, Ogre::TU_DYNAMIC_WRITE_ONLY);
-					*/
-					//	datablock->setTexture(Ogre::PBSM_DIFFUSE, 0, myTexture);
+					///*	Ogre::TexturePtr myTexture = Ogre::TextureManager::getSingletonPtr()->createManual(
+					//		"Default_albedo",
+					//		Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+					//		Ogre::TEX_TYPE_2D_ARRAY, 1024, 768, 1, 0, Ogre::PF_A8R8G8B8, Ogre::TU_DYNAMIC_WRITE_ONLY);
+					//*/
+					////	datablock->setTexture(Ogre::PBSM_DIFFUSE, 0, myTexture);
 
-						//---------------------------------------
+					//	//---------------------------------------
 
-						if (gltfTexture.sampler != -1) {
-							const gltf::Sampler& sampler = asset.samplers[gltfTexture.sampler];
+					//	if (gltfTexture.sampler != -1) {
+					//		const gltf::Sampler& sampler = asset.samplers[gltfTexture.sampler];
 
-							switch (sampler.magFilter) {
-							/*case gltf::Sampler::MagFilter::None:
-								break;
-							case gltf::Sampler::MagFilter::Nearest:
-								textureBuilder.setMagFilter(Render::Texture::Filter::Nearest);
-								break;
-							case gltf::Sampler::MagFilter::Linear:
-								textureBuilder.setMagFilter(Render::Texture::Filter::Linear);
-								break;*/
-							}
+					//		switch (sampler.magFilter) {
+					//		/*case gltf::Sampler::MagFilter::None:
+					//			break;
+					//		case gltf::Sampler::MagFilter::Nearest:
+					//			textureBuilder.setMagFilter(Render::Texture::Filter::Nearest);
+					//			break;
+					//		case gltf::Sampler::MagFilter::Linear:
+					//			textureBuilder.setMagFilter(Render::Texture::Filter::Linear);
+					//			break;*/
+					//		}
 
-							switch (sampler.minFilter) {
-						/*	case gltf::Sampler::MinFilter::None:
-								break;
-							case gltf::Sampler::MinFilter::Nearest:
-								textureBuilder.setMinFilter(Render::Texture::Filter::Nearest);
-								break;
-							case gltf::Sampler::MinFilter::Linear:
-								textureBuilder.setMinFilter(Render::Texture::Filter::Linear);
-								break;
-							case gltf::Sampler::MinFilter::NearestMipMapNearest:
-								textureBuilder.setMinFilter(Render::Texture::Filter::Nearest);
-								textureBuilder.setMipMapFilter(Render::Texture::Filter::Nearest);
-								break;
-							case gltf::Sampler::MinFilter::LinearMipMapNearest:
-								textureBuilder.setMinFilter(Render::Texture::Filter::Linear);
-								textureBuilder.setMipMapFilter(Render::Texture::Filter::Nearest);
-								break;
-							case gltf::Sampler::MinFilter::NearestMipMapLinear:
-								textureBuilder.setMinFilter(Render::Texture::Filter::Nearest);
-								textureBuilder.setMipMapFilter(Render::Texture::Filter::Linear);
-								break;
-							case gltf::Sampler::MinFilter::LinearMipMapLinear:
-								textureBuilder.setMinFilter(Render::Texture::Filter::Linear);
-								textureBuilder.setMipMapFilter(Render::Texture::Filter::Linear);
-								break;*/
-							}
+					//		switch (sampler.minFilter) {
+					//	/*	case gltf::Sampler::MinFilter::None:
+					//			break;
+					//		case gltf::Sampler::MinFilter::Nearest:
+					//			textureBuilder.setMinFilter(Render::Texture::Filter::Nearest);
+					//			break;
+					//		case gltf::Sampler::MinFilter::Linear:
+					//			textureBuilder.setMinFilter(Render::Texture::Filter::Linear);
+					//			break;
+					//		case gltf::Sampler::MinFilter::NearestMipMapNearest:
+					//			textureBuilder.setMinFilter(Render::Texture::Filter::Nearest);
+					//			textureBuilder.setMipMapFilter(Render::Texture::Filter::Nearest);
+					//			break;
+					//		case gltf::Sampler::MinFilter::LinearMipMapNearest:
+					//			textureBuilder.setMinFilter(Render::Texture::Filter::Linear);
+					//			textureBuilder.setMipMapFilter(Render::Texture::Filter::Nearest);
+					//			break;
+					//		case gltf::Sampler::MinFilter::NearestMipMapLinear:
+					//			textureBuilder.setMinFilter(Render::Texture::Filter::Nearest);
+					//			textureBuilder.setMipMapFilter(Render::Texture::Filter::Linear);
+					//			break;
+					//		case gltf::Sampler::MinFilter::LinearMipMapLinear:
+					//			textureBuilder.setMinFilter(Render::Texture::Filter::Linear);
+					//			textureBuilder.setMipMapFilter(Render::Texture::Filter::Linear);
+					//			break;*/
+					//		}
 
-							switch (sampler.wrapS) {
-							/*case gltf::Sampler::WrappingMode::ClampToEdge:
-								textureBuilder.setWrapS(Render::Texture::WrappingMode::ClampToEdge);
-								break;
-							case gltf::Sampler::WrappingMode::MirroredRepeat:
-								textureBuilder.setWrapS(Render::Texture::WrappingMode::MirroredRepeat);
-								break;
-							case gltf::Sampler::WrappingMode::Repeat:
-								textureBuilder.setWrapS(Render::Texture::WrappingMode::Repeat);
-								break;*/
-							}
+					//		switch (sampler.wrapS) {
+					//		/*case gltf::Sampler::WrappingMode::ClampToEdge:
+					//			textureBuilder.setWrapS(Render::Texture::WrappingMode::ClampToEdge);
+					//			break;
+					//		case gltf::Sampler::WrappingMode::MirroredRepeat:
+					//			textureBuilder.setWrapS(Render::Texture::WrappingMode::MirroredRepeat);
+					//			break;
+					//		case gltf::Sampler::WrappingMode::Repeat:
+					//			textureBuilder.setWrapS(Render::Texture::WrappingMode::Repeat);
+					//			break;*/
+					//		}
 
-							switch (sampler.wrapT) {
-							/*case gltf::Sampler::WrappingMode::ClampToEdge:
-								textureBuilder.setWrapT(Render::Texture::WrappingMode::ClampToEdge);
-								break;
-							case gltf::Sampler::WrappingMode::MirroredRepeat:
-								textureBuilder.setWrapT(Render::Texture::WrappingMode::MirroredRepeat);
-								break;
-							case gltf::Sampler::WrappingMode::Repeat:
-								textureBuilder.setWrapT(Render::Texture::WrappingMode::Repeat);
-								break;*/
-							}
-						}
-
-						/*Resource::SharedPtr<Render::Texture> texture = createTexture(renderer, asset, loadedAssets, gltfMaterial.pbr.baseColorTexture.index);
-						if (!texture) {
-							LUG_LOG.error("GltfLoader::createMaterial Can't create the texture resource");
-							return nullptr;
-						}
-
-						materialBuilder.setBaseColorTexture(texture, gltfMaterial.pbr.baseColorTexture.texCoord);*/
-					}
+					//		switch (sampler.wrapT) {
+					//		/*case gltf::Sampler::WrappingMode::ClampToEdge:
+					//			textureBuilder.setWrapT(Render::Texture::WrappingMode::ClampToEdge);
+					//			break;
+					//		case gltf::Sampler::WrappingMode::MirroredRepeat:
+					//			textureBuilder.setWrapT(Render::Texture::WrappingMode::MirroredRepeat);
+					//			break;
+					//		case gltf::Sampler::WrappingMode::Repeat:
+					//			textureBuilder.setWrapT(Render::Texture::WrappingMode::Repeat);
+					//			break;*/
+					//		}
+					//	}
+					//}
 
 
-					item->setDatablock(datablock);
 					item->setCastShadows(true);
-					//datablock->setTexture(0, 0, mFontTex);
-					//datablock->setTexture("Default_albedo", Ogre::PbsTextureTypes::PBSM_DIFFUSE);
 
-					if (gltfMaterial.pbr.metallicRoughnessTexture.index != -1) {
+					/*if (gltfMaterial.pbr.metallicRoughnessTexture.index != -1) {
 						
 						const gltf::Texture& gltfTexture = asset.textures[gltfMaterial.pbr.metallicRoughnessTexture.index];
 						auto path = asset.images[gltfTexture.source].uri;
 						auto texCoord = gltfMaterial.pbr.metallicRoughnessTexture.texCoord;
-
-						/*Resource::SharedPtr<Render::Texture> texture = createTexture(renderer, asset, loadedAssets, gltfMaterial.pbr.metallicRoughnessTexture.index);
-						if (!texture) {
-							LUG_LOG.error("GltfLoader::createMaterial Can't create the texture resource");
-							return nullptr;
-						}
-
-						materialBuilder.setMetallicRoughnessTexture(texture, gltfMaterial.pbr.metallicRoughnessTexture.texCoord);*/
 					}
 
 					if (gltfMaterial.normalTexture.index != -1) {
@@ -466,14 +406,6 @@ namespace XE {
 						const gltf::Texture& gltfTexture = asset.textures[gltfMaterial.normalTexture.index];
 						auto path = asset.images[gltfTexture.source].uri;
 						auto texCoord = gltfMaterial.normalTexture.texCoord;
-
-					/*	Resource::SharedPtr<Render::Texture> texture = createTexture(renderer, asset, loadedAssets, gltfMaterial.normalTexture.index);
-						if (!texture) {
-							LUG_LOG.error("GltfLoader::createMaterial Can't create the texture resource");
-							return nullptr;
-						}
-
-						materialBuilder.setNormalTexture(texture, gltfMaterial.normalTexture.texCoord);*/
 					}
 
 					if (gltfMaterial.occlusionTexture.index != -1) {
@@ -481,14 +413,6 @@ namespace XE {
 						const gltf::Texture& gltfTexture = asset.textures[gltfMaterial.occlusionTexture.index];
 						auto path = asset.images[gltfTexture.source].uri;
 						auto texCoord = gltfMaterial.occlusionTexture.texCoord;
-
-						/*Resource::SharedPtr<Render::Texture> texture = createTexture(renderer, asset, loadedAssets, gltfMaterial.occlusionTexture.index);
-						if (!texture) {
-							LUG_LOG.error("GltfLoader::createMaterial Can't create the texture resource");
-							return nullptr;
-						}
-
-						materialBuilder.setOcclusionTexture(texture, gltfMaterial.occlusionTexture.texCoord);*/
 					}
 
 					if (gltfMaterial.emissiveTexture.index != -1) {
@@ -497,49 +421,17 @@ namespace XE {
 						const gltf::Texture& gltfTexture = asset.textures[gltfMaterial.emissiveTexture.index];
 						auto path = asset.images[gltfTexture.source].uri;
 						auto texCoord = gltfMaterial.emissiveTexture.texCoord;
-
-					/*	Resource::SharedPtr<Render::Texture> texture = createTexture(renderer, asset, loadedAssets, gltfMaterial.emissiveTexture.index);
-						if (!texture) {
-							LUG_LOG.error("GltfLoader::createMaterial Can't create the texture resource");
-							return nullptr;
-						}
-
-						materialBuilder.setEmissiveTexture(texture, gltfMaterial.emissiveTexture.texCoord);*/
-					}
+					}*/
 					gltfMaterial.pbr.metallicFactor;
 					gltfMaterial.pbr.roughnessFactor;
-
-					/*for each (auto& tex in asset.textures[index])
-						{
-
-						};*/
 
 
 					XE::XEMaterial material(gMgr.getRoot()->getHlmsManager());
 					material.loadMaterial(asset, gltfMaterial,datablock);
-				}
-				/*Resource::SharedPtr<Render::Material> material = createMaterial(renderer, asset, loadedAssets, gltfPrimitive.material);
-				if (!material) {
-				LUG_LOG.error("GltfLoader::createMesh Can't create the material resource");
-				return nullptr;
-				}
 
-				primitiveSet->setMaterial(material);*/
-
-
-				//	mesh.primitiveSets.push_back(std::move(primitiveSet));
-
-
-
-					/*if (loadedAssets.meshes[index]) {
-					return loadedAssets.meshes[index];
-					}*/
-					//auto mesh = createMesh(renderer, asset, loadedAssets, gltfNode.mesh);
-					//if (!mesh) {
-					//	LUG_LOG.error("GltfLoader::createNode Can't create the mesh resource");
-					//	return false;
-					//}
-					//node->attachMeshInstance(mesh);
+					//do it at last! here the texture baking happens! needed for normal maps etc.
+					item->setDatablock(datablock);
+				}				
 			}
 		}
 	}
