@@ -30,7 +30,10 @@
 #include <iterator>
 #include <algorithm>
 
-#include <XERenderer/GUI/GUIRenderer.hpp>
+
+#ifdef CompileEditor
+#include <XERenderer/Editor/EditorUIRenderer.hpp>
+#endif
 
 using namespace std::placeholders;
 
@@ -97,7 +100,10 @@ namespace detail
 
 		while (SDL_PollEvent(&event))
 		{
-			XE::GUIRenderer::ProcessSDLEvent(&event);
+
+#ifdef CompileEditor
+			XE::EditorUIRenderer::ProcessSDLEvent(&event);
+#endif
 
 			pushEvent(event);
 		}

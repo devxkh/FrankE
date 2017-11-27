@@ -40,6 +40,8 @@
 #include "OgreViewport.h"
 #include "OgrePixelBox.h"
 
+#include "OgreProfiler.h"
+
 #include <iostream>
 #include <algorithm>
 #include <sys/time.h>
@@ -294,6 +296,7 @@ namespace Ogre
 #if OGRE_NO_QUAD_BUFFER_STEREO == 0
 				GLX_STEREO, mStereoEnabled ? True : False,
 #endif
+                GLX_FRAMEBUFFER_SRGB_CAPABLE_EXT, gamma,
                 None
             };
 
@@ -314,7 +317,11 @@ namespace Ogre
 
             if (gamma != 0)
             {
-                mGLSupport->getFBConfigAttrib(fbConfig, GL_FRAMEBUFFER_SRGB_CAPABLE_EXT, &gamma);
+                int result;
+                result = mGLSupport->getFBConfigAttrib( fbConfig, GLX_FRAMEBUFFER_SRGB_CAPABLE_EXT,
+                                                        &gamma );
+                if( result != Success )
+                    gamma = 0;
             }
 
             mHwGamma = (gamma != 0);
@@ -698,10 +705,15 @@ namespace Ogre
         if (mClosed || mIsExternalGLControl)
             return;
 
+        OgreProfileBeginDynamic( ("SwapBuffers: " + mName).c_str() );
+        OgreProfileGpuBeginDynamic( "SwapBuffers: " + mName );
+
         glXSwapBuffers(mGLSupport->getGLDisplay(), mContext->mDrawable);
         RenderWindow::swapBuffers();
-    }
 
+        OgreProfileEnd( "SwapBuffers: " + mName );
+        OgreProfileGpuEnd( "SwapBuffers: " + mName );
+    }
     //-------------------------------------------------------------------------------------------------//
     void GLXWindow::getCustomAttribute( const String& name, void* pData )
     {

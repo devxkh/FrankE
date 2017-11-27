@@ -88,7 +88,6 @@ namespace XE {
 		return _renderableCount++;
 	}
 
-
 	void Scene::create(Uint16 sceneID, void* fbData)
 	{
 		m_sceneID = sceneID;
@@ -103,6 +102,8 @@ namespace XE {
 		//systems.add<UIStateManager>(); // UISystem
 		//	SpawnSystem* spawnSysten = scene->systems.add<SpawnSystem>();
 		systems.configure();
+
+		loadResources();
 
 		//load scene from datasource
 		{

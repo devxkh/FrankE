@@ -13,6 +13,8 @@
 
 #include <ThirdParty/sfml/include/sfml/System/Clock.hpp>
 
+
+
 #include <mutex>
 #include <thread>
 
@@ -26,7 +28,6 @@ namespace Ogre
 	class RenderWindow;
 }
 
-#define UseRenderThread 0 // 1 = use renderthread, 0 = dont use renderthread
 
 namespace XE
 {
@@ -112,6 +113,7 @@ namespace XE
 
 	private:
 
+		
 		float mAccumTimeSinceLastLogicFrame;
 		
 		sf::Clock m_clock;
@@ -127,9 +129,8 @@ namespace XE
 	//	WindowManager	mWindowManager;
 
 		Ogre::RenderWindow*  _t_RenderWindow;
-		//todo multiple workspaces!
-		OgreWorkspace*			_t_OgreWorkspace;
-		
+	
+
 		//initialization order!
 		Ogre::Root*			mRoot;
 

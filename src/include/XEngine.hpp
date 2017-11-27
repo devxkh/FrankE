@@ -20,6 +20,8 @@
 
 #include <Ogre/OgreMain/include/OgreVector3.h>
 
+#include <XEngine/ResourceManager.hpp>
+
 #include <XEAudio.hpp>
 #include <XERenderer.hpp>
 #include <XEEffect.hpp>
@@ -75,7 +77,6 @@
 #include <memory>
 #include <thread>
 #include <mutex>
-
 
 namespace XE
 {
@@ -133,6 +134,11 @@ namespace XE
 		inline NetworkManager& getNetworkManager() {
 			return m_NetworkManager;
 		}
+
+		inline ResourceManager& getResourceMgr() {
+			return m_ResourceManager;
+		}
+
 		OgreSceneManager& getOgreSceneManager() {
 			return m_OgreSceneManager;
 		}
@@ -156,7 +162,6 @@ namespace XE
 			return *m_IDAL.get();
 		}
 
-
 		XESettings settings;
 
 		sf::Time elapsedTimeMainThread;
@@ -165,8 +170,6 @@ namespace XE
 
 
 	private:
-
-		void initResourceSystem();
 
 		void registerObject(sol::state& lua);
 
@@ -179,6 +182,7 @@ namespace XE
 		bool m_initialized;
 
 		//initialization order!
+		ResourceManager m_ResourceManager;
 		LuaEngine			_lua;
 		GraphicsManager   mGraphicsManager;
 		OgreSceneManager m_OgreSceneManager;

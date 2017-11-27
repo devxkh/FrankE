@@ -8,22 +8,23 @@ set(INCROOT ${PROJECT_SOURCE_DIR}/src/include)
 set(SRCROOT ${PROJECT_SOURCE_DIR}/src/TestXE/XETUI)
 
 set(XETCommon_SOURCES
-    ${TESTCOMMONROOT}/TestController.cpp
-  ${TESTCOMMONROOT}/TestScene.cpp
+    ${TESTCOMMONROOT}/TestPostProcess.cpp
+	${TESTCOMMONROOT}/TestScene.cpp
     ${TESTCOMMONROOT}/TestControllerSystem.cpp
     ${TESTCOMMONROOT}/Controllers_generated.h
     ${TESTCOMMONROOT}/Netmsg_generated.h
-	  ${TESTCOMMONROOT}/TestDAL.cpp
-#	${SRCROOT}/GUI.h
+	${TESTCOMMONROOT}/TestDAL.cpp
+	${TESTCOMMONROOT}/TestController.cpp
+   #	${SRCROOT}/GUI.h
 )
 source_group("src\\common" FILES ${XETCommon_SOURCES})
 
 # all header files
 set(XETCommon_HEADER
     ${TESTCOMMONROOT}/TestController.hpp
-     ${TESTCOMMONROOT}/TestScene.hpp
-
-	  ${TESTCOMMONROOT}/TestDAL.hpp
+    ${TESTCOMMONROOT}/TestScene.hpp
+	${TESTCOMMONROOT}/TestPostProcess.hpp
+	${TESTCOMMONROOT}/TestDAL.hpp
 	${TESTCOMMONROOT}/TestControllerSystem.hpp
 )
 

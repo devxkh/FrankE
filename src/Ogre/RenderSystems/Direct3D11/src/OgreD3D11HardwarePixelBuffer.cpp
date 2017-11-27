@@ -540,7 +540,9 @@ namespace v1 {
                     0,
                     0,
                     rsrcDx11->mParentTexture->GetTex1D(),
-                    static_cast<UINT>(rsrcDx11->mSubresourceIndex),
+                    D3D11CalcSubresource( static_cast<UINT>(rsrcDx11->mSubresourceIndex),
+                                          rsrcDx11->mFace,
+                                          rsrcDx11->mParentTexture->getNumMipmaps() + 1u ),
                     &srcBoxDx11);
                 if (mDevice.isError())
                 {
@@ -559,9 +561,11 @@ namespace v1 {
                     D3D11CalcSubresource(static_cast<UINT>(mSubresourceIndex), mFace, mParentTexture->getNumMipmaps()+1),
                     static_cast<UINT>(dstBox.left),
                     static_cast<UINT>(dstBox.top),
-                    mFace,
+                    0,
                     rsrcDx11->mParentTexture->GetTex2D(),
-                    static_cast<UINT>(rsrcDx11->mSubresourceIndex),
+                    D3D11CalcSubresource( static_cast<UINT>(rsrcDx11->mSubresourceIndex),
+                                          rsrcDx11->mFace,
+                                          rsrcDx11->mParentTexture->getNumMipmaps() + 1u ),
                     &srcBoxDx11);
                 if (mDevice.isError())
                 {
@@ -581,7 +585,9 @@ namespace v1 {
                     static_cast<UINT>(dstBox.top),
                     srcBox.front,
                     rsrcDx11->mParentTexture->GetTex2D(),
-                    static_cast<UINT>(rsrcDx11->mSubresourceIndex),
+                    D3D11CalcSubresource( static_cast<UINT>(rsrcDx11->mSubresourceIndex),
+                                          rsrcDx11->mFace,
+                                          rsrcDx11->mParentTexture->getNumMipmaps() + 1u ),
                     &srcBoxDx11);
                 if (mDevice.isError())
                 {
@@ -627,6 +633,14 @@ namespace v1 {
         case PF_DXT3:
         case PF_DXT4:
         case PF_DXT5:
+        case PF_BC4_UNORM:
+        case PF_BC4_SNORM:
+        case PF_BC5_UNORM:
+        case PF_BC5_SNORM:
+        case PF_BC6H_UF16:
+        case PF_BC6H_SF16:
+        case PF_BC7_UNORM:
+        case PF_BC7_UNORM_SRGB:
             isDds = true;
             break;
         default:

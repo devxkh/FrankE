@@ -156,6 +156,7 @@ namespace XE {
 		//                          ---- VERTEX SHADER ----
 		//---------------------------------------------------------------------------
 		bool useIdentityProjection = static_cast<const ScreenRenderable*>(queuedRenderable.renderable)->getUseCustomProjectionMatrix(); //>getUseIdentityProjection();
+		//bool useIdentityProjection = queuedRenderable.renderable->getUseIdentityProjection();
 
 		//uint materialIdx[]
 		*currentMappedConstBuffer = datablock->getAssignedSlot();
@@ -170,7 +171,7 @@ namespace XE {
 			mPreparedPass.viewProjMatrix[useIdentityProjection] = static_cast<ScreenRenderable*>(queuedRenderable.renderable)->getCustomProjectionMatrix();
 		
 			Matrix4 tmp = mPreparedPass.viewProjMatrix[useIdentityProjection] * worldMat;
-
+			
 #if !OGRE_DOUBLE_PRECISION
 		memcpy(currentMappedTexBuffer, &tmp, sizeof(Matrix4));
 		currentMappedTexBuffer += 16;

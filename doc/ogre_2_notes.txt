@@ -1,2 +1,28 @@
 Lightmasks
 http://www.ogre3d.org/forums/viewtopic.php?f=25&t=92405&p=536731#p536731
+
+
+wotk around hdr comppsitor nad gui renderable mirrored:
+compositor_node HdrRenderingNode
+{
+	texture rt0         target_width target_height PF_FLOAT16_RGBA explicit_resolve
+	texture oldLumRt   1   1 PF_FLOAT16_R	no_fsaa depth_pool 0
+
+	target rt0
+	{
+		pass clear
+		{
+			//colour_value 0.2 0.4 0.6 1
+			colour_value 6.667 13.333 20 1
+			//colour_value 13.333 26.667 40 1
+		}
+
+		pass render_scene
+		{
+			//lod_update_list	off					//Turn Lod off?
+			shadows				ShadowMapDebuggingShadowNode
+			overlays			off
+			rq_first	0
+			rq_last		253
+		}
+	}

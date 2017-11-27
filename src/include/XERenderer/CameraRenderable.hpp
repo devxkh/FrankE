@@ -63,6 +63,7 @@ namespace XE {
 
 
 		Ogre::Camera* _t_OgreCameraPtr;
+		XE::OgreWorkspace*			_t_OgreWorkspace;
 
 	private:
 
@@ -76,7 +77,6 @@ namespace XE {
 		XE::Uint16 m_ID;
 		Scene& m_Scene;
 
-		XE::OgreWorkspace*			_t_OgreWorkspace;
 
 		
 		bool m_settingIsDirty;

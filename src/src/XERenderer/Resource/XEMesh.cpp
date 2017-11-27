@@ -19,6 +19,7 @@
 
 #include <XERenderer/Resource/XEMaterial.hpp>
 
+
 namespace XE {
 
 
@@ -43,15 +44,19 @@ namespace XE {
 		AttributeInformation tangents;
 	};
 
-	void XEMesh::buildMesh(const gltf::Asset& asset, GraphicsManager& gMgr, Ogre::SceneManager* sceneMgr) {
+	XEMesh::XEMesh()
+		: m_datablock(nullptr)
+	{
 
-		Ogre::Item* item{nullptr};
+	}
 
+	void XEMesh::buildMesh(const gltf::Asset& asset, const std::string& meshName, GraphicsManager& gMgr, Ogre::SceneManager* sceneMgr) {
+
+	
 		Ogre::RenderSystem *renderSystem = gMgr.getRoot()->getRenderSystem();
 		Ogre::VaoManager *vaoManager = renderSystem->getVaoManager();
 
-		Ogre::MeshPtr ogreMesh = Ogre::MeshManager::getSingleton().createManual("PhysicsDebuggingMesh", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
-
+	
 		//https://github.com/Lugdunum3D/Lugdunum/blob/dev/src/lug/Graphics/GltfLoader.cpp
 		// Load the scene
 		if (asset.scene == -1) { // No scene to load
@@ -59,9 +64,13 @@ namespace XE {
 		}
 
 		//	const SceneGLTF& gltfScene = asset.scenes[asset.scene];
+		m_ogreMesh = Ogre::MeshManager::getSingleton().createManual(meshName, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+	
 
 			//for (uint32_t nodeIdx : gltfScene.nodes) {
 		for (auto& mesh : asset.meshes) {
+		
+			
 			//const NodeGLTF& gltfNode = asset.nodes[nodeIdx];
 
 			//Scene::Node* node = parent.createSceneNode(gltfNode.name);
@@ -73,7 +82,7 @@ namespace XE {
 
 			for (const gltf::Primitive& gltfPrimitive : mesh.primitives) {
 
-				Ogre::SubMesh *subMesh = ogreMesh->createSubMesh();
+				Ogre::SubMesh *subMesh = m_ogreMesh->createSubMesh();
 				Ogre::IndexBufferPacked* m_indexBuffer;
 
 				//	PrimitiveSet primitiveSet; //TODO = meshBuilder.addPrimitiveSet();
@@ -112,7 +121,7 @@ namespace XE {
 						//	return nullptr;
 					}
 
-					m_indexBuffer = vaoManager->createIndexBuffer(Ogre::IndexBufferPacked::IT_16BIT, accessor.count, Ogre::BT_DYNAMIC_PERSISTENT, NULL, false);
+					m_indexBuffer = vaoManager->createIndexBuffer(accessor.count >= 65536 ? Ogre::IndexBufferPacked::IT_32BIT : Ogre::IndexBufferPacked::IT_16BIT, accessor.count, Ogre::BT_DYNAMIC_PERSISTENT, NULL, false);
 
 					auto idx_dst = m_indexBuffer->map(0, accessor.count);
 
@@ -212,15 +221,10 @@ namespace XE {
 					subMesh->mVao[0].push_back(vao);
 					subMesh->mVao[1].push_back(vao);
 
-					ogreMesh->_setBounds(Ogre::Aabb::BOX_INFINITE);
+					m_ogreMesh->_setBounds(Ogre::Aabb::BOX_INFINITE);
 
-					item = sceneMgr->createItem(ogreMesh, Ogre::SCENE_DYNAMIC);
 					
-					Ogre::SceneNode *sceneNode = sceneMgr->getRootSceneNode(Ogre::SCENE_DYNAMIC)->createChildSceneNode(Ogre::SCENE_DYNAMIC);
-					sceneNode->attachObject(item);
-					sceneNode->setPosition(0, 10, -20);
-					sceneNode->rotate(Ogre::Vector3::UNIT_Y, Ogre::Radian(180));
-					
+				
 					//char* vtx_dst = reinterpret_cast<char*>(pVertexBuffer->map(0, accessor.count));
 					float* vtx_dst = reinterpret_cast<float*>(pVertexBuffer->map(0, primitiveInf.position.buffer.elementsCount));
 										
@@ -262,175 +266,175 @@ namespace XE {
 				
 				// Material
 				{
-					const gltf::Material& gltfMaterial = asset.materials[gltfPrimitive.material];
-					auto hlmspbs = gMgr.getRoot()->getHlmsManager()->getHlms(Ogre::HlmsTypes::HLMS_PBS);
-
-					Ogre::HlmsPbsDatablock *datablock = static_cast<Ogre::HlmsPbsDatablock*>(hlmspbs->getDatablock(gltfMaterial.name));
-
-					if (!datablock)
+					if (gltfPrimitive.material != -1)
 					{
-						Ogre::HlmsParamVec params;
-					//	params.push_back(std::pair<Ogre::IdString, Ogre::String>("normal_map", ""));
+						const gltf::Material& gltfMaterial = asset.materials[gltfPrimitive.material];
+						auto hlmspbs = gMgr.getRoot()->getHlmsManager()->getHlms(Ogre::HlmsTypes::HLMS_PBS);
 
-						datablock = static_cast<Ogre::HlmsPbsDatablock*>(hlmspbs->createDatablock(gltfMaterial.name,
-							gltfMaterial.name,
-							Ogre::HlmsMacroblock(),
-							Ogre::HlmsBlendblock(),
-							params));
+						m_datablock = static_cast<Ogre::HlmsPbsDatablock*>(hlmspbs->getDatablock(gltfMaterial.name));
+
+						if (!m_datablock)
+						{
+							Ogre::HlmsParamVec params;
+							//	params.push_back(std::pair<Ogre::IdString, Ogre::String>("normal_map", ""));
+
+							m_datablock = static_cast<Ogre::HlmsPbsDatablock*>(hlmspbs->createDatablock(gltfMaterial.name,
+								gltfMaterial.name,
+								Ogre::HlmsMacroblock(),
+								Ogre::HlmsBlendblock(),
+								params));
+						}
+						//	Ogre::HlmsPbsDatablock *datablock = static_cast<Ogre::HlmsPbsDatablock*>(gMgr.getRoot()->getHlmsManager()->getDatablock("StonesPbs"));
+
+
+						auto r = gltfMaterial.pbr.baseColorFactor[0];
+						auto g = gltfMaterial.pbr.baseColorFactor[1];
+						auto b = gltfMaterial.pbr.baseColorFactor[2];
+						auto a = gltfMaterial.pbr.baseColorFactor[3];
+
+						//gltfMaterial.emissiveFactor[0],
+						//	gltfMaterial.emissiveFactor[1],
+						//	gltfMaterial.emissiveFactor[2]
+
+						//if (gltfMaterial.pbr.baseColorTexture.index != -1) {
+						//	
+						//	const gltf::Texture& gltfTexture = asset.textures[gltfMaterial.pbr.baseColorTexture.index];		
+						//	auto path = asset.images[gltfTexture.source].uri;
+						//	auto texCoord = gltfMaterial.pbr.baseColorTexture.texCoord;
+
+						//	//---------------------------------------
+						//	Ogre::HlmsManager *hlmsManager = gMgr.getRoot()->getHlmsManager();
+						//	Ogre::HlmsTextureManager *hlmsTextureManager = hlmsManager->getTextureManager();
+
+						//	Ogre::TexturePtr myTexture = Ogre::TextureManager::getSingletonPtr()->createManual(
+						//		"MyTexture",
+						//		Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+						//		Ogre::TEX_TYPE_2D_ARRAY, 1024, 768, 0, Ogre::PF_A8R8G8B8, Ogre::TU_DYNAMIC_WRITE_ONLY);
+
+						//	Ogre::HlmsTextureManager::TextureLocation texLocation =
+						//		hlmsTextureManager->createOrRetrieveTexture("TestAtlas.png", "MyTexture", Ogre::HlmsTextureManager::TEXTURE_TYPE_DIFFUSE);
+
+						////	datablock->setTexture(1, texLocation.xIdx, texLocation.texture);
+
+						//	//texLocation.texture = myTexture;
+						//
+						//	////datablock->setTexture(0, texLocation.xIdx, texLocation.texture);
+						//	datablock->setTexture(Ogre::PBSM_DIFFUSE, texLocation.xIdx, texLocation.texture);//Ogre::PBSM_DIFFUSE, texLocation.xIdx, texLocation.texture);
+
+						///*	Ogre::TexturePtr myTexture = Ogre::TextureManager::getSingletonPtr()->createManual(
+						//		"Default_albedo",
+						//		Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+						//		Ogre::TEX_TYPE_2D_ARRAY, 1024, 768, 1, 0, Ogre::PF_A8R8G8B8, Ogre::TU_DYNAMIC_WRITE_ONLY);
+						//*/
+						////	datablock->setTexture(Ogre::PBSM_DIFFUSE, 0, myTexture);
+
+						//	//---------------------------------------
+
+						//	if (gltfTexture.sampler != -1) {
+						//		const gltf::Sampler& sampler = asset.samplers[gltfTexture.sampler];
+
+						//		switch (sampler.magFilter) {
+						//		/*case gltf::Sampler::MagFilter::None:
+						//			break;
+						//		case gltf::Sampler::MagFilter::Nearest:
+						//			textureBuilder.setMagFilter(Render::Texture::Filter::Nearest);
+						//			break;
+						//		case gltf::Sampler::MagFilter::Linear:
+						//			textureBuilder.setMagFilter(Render::Texture::Filter::Linear);
+						//			break;*/
+						//		}
+
+						//		switch (sampler.minFilter) {
+						//	/*	case gltf::Sampler::MinFilter::None:
+						//			break;
+						//		case gltf::Sampler::MinFilter::Nearest:
+						//			textureBuilder.setMinFilter(Render::Texture::Filter::Nearest);
+						//			break;
+						//		case gltf::Sampler::MinFilter::Linear:
+						//			textureBuilder.setMinFilter(Render::Texture::Filter::Linear);
+						//			break;
+						//		case gltf::Sampler::MinFilter::NearestMipMapNearest:
+						//			textureBuilder.setMinFilter(Render::Texture::Filter::Nearest);
+						//			textureBuilder.setMipMapFilter(Render::Texture::Filter::Nearest);
+						//			break;
+						//		case gltf::Sampler::MinFilter::LinearMipMapNearest:
+						//			textureBuilder.setMinFilter(Render::Texture::Filter::Linear);
+						//			textureBuilder.setMipMapFilter(Render::Texture::Filter::Nearest);
+						//			break;
+						//		case gltf::Sampler::MinFilter::NearestMipMapLinear:
+						//			textureBuilder.setMinFilter(Render::Texture::Filter::Nearest);
+						//			textureBuilder.setMipMapFilter(Render::Texture::Filter::Linear);
+						//			break;
+						//		case gltf::Sampler::MinFilter::LinearMipMapLinear:
+						//			textureBuilder.setMinFilter(Render::Texture::Filter::Linear);
+						//			textureBuilder.setMipMapFilter(Render::Texture::Filter::Linear);
+						//			break;*/
+						//		}
+
+						//		switch (sampler.wrapS) {
+						//		/*case gltf::Sampler::WrappingMode::ClampToEdge:
+						//			textureBuilder.setWrapS(Render::Texture::WrappingMode::ClampToEdge);
+						//			break;
+						//		case gltf::Sampler::WrappingMode::MirroredRepeat:
+						//			textureBuilder.setWrapS(Render::Texture::WrappingMode::MirroredRepeat);
+						//			break;
+						//		case gltf::Sampler::WrappingMode::Repeat:
+						//			textureBuilder.setWrapS(Render::Texture::WrappingMode::Repeat);
+						//			break;*/
+						//		}
+
+						//		switch (sampler.wrapT) {
+						//		/*case gltf::Sampler::WrappingMode::ClampToEdge:
+						//			textureBuilder.setWrapT(Render::Texture::WrappingMode::ClampToEdge);
+						//			break;
+						//		case gltf::Sampler::WrappingMode::MirroredRepeat:
+						//			textureBuilder.setWrapT(Render::Texture::WrappingMode::MirroredRepeat);
+						//			break;
+						//		case gltf::Sampler::WrappingMode::Repeat:
+						//			textureBuilder.setWrapT(Render::Texture::WrappingMode::Repeat);
+						//			break;*/
+						//		}
+						//	}
+						//}
+
+
+
+						/*if (gltfMaterial.pbr.metallicRoughnessTexture.index != -1) {
+
+							const gltf::Texture& gltfTexture = asset.textures[gltfMaterial.pbr.metallicRoughnessTexture.index];
+							auto path = asset.images[gltfTexture.source].uri;
+							auto texCoord = gltfMaterial.pbr.metallicRoughnessTexture.texCoord;
+						}
+
+						if (gltfMaterial.normalTexture.index != -1) {
+
+							const gltf::Texture& gltfTexture = asset.textures[gltfMaterial.normalTexture.index];
+							auto path = asset.images[gltfTexture.source].uri;
+							auto texCoord = gltfMaterial.normalTexture.texCoord;
+						}
+
+						if (gltfMaterial.occlusionTexture.index != -1) {
+
+							const gltf::Texture& gltfTexture = asset.textures[gltfMaterial.occlusionTexture.index];
+							auto path = asset.images[gltfTexture.source].uri;
+							auto texCoord = gltfMaterial.occlusionTexture.texCoord;
+						}
+
+						if (gltfMaterial.emissiveTexture.index != -1) {
+
+
+							const gltf::Texture& gltfTexture = asset.textures[gltfMaterial.emissiveTexture.index];
+							auto path = asset.images[gltfTexture.source].uri;
+							auto texCoord = gltfMaterial.emissiveTexture.texCoord;
+						}*/
+						gltfMaterial.pbr.metallicFactor;
+						gltfMaterial.pbr.roughnessFactor;
+
+
+						XE::XEMaterial material(gMgr.getRoot()->getHlmsManager());
+						material.loadMaterial(asset, gltfMaterial, m_datablock);
 					}
-					//	Ogre::HlmsPbsDatablock *datablock = static_cast<Ogre::HlmsPbsDatablock*>(gMgr.getRoot()->getHlmsManager()->getDatablock("StonesPbs"));
-
-
-					auto r = gltfMaterial.pbr.baseColorFactor[0];
-					auto g = gltfMaterial.pbr.baseColorFactor[1];
-					auto b = gltfMaterial.pbr.baseColorFactor[2];
-					auto a = gltfMaterial.pbr.baseColorFactor[3];
-
-					//gltfMaterial.emissiveFactor[0],
-					//	gltfMaterial.emissiveFactor[1],
-					//	gltfMaterial.emissiveFactor[2]
-
-					//if (gltfMaterial.pbr.baseColorTexture.index != -1) {
-					//	
-					//	const gltf::Texture& gltfTexture = asset.textures[gltfMaterial.pbr.baseColorTexture.index];		
-					//	auto path = asset.images[gltfTexture.source].uri;
-					//	auto texCoord = gltfMaterial.pbr.baseColorTexture.texCoord;
-
-					//	//---------------------------------------
-					//	Ogre::HlmsManager *hlmsManager = gMgr.getRoot()->getHlmsManager();
-					//	Ogre::HlmsTextureManager *hlmsTextureManager = hlmsManager->getTextureManager();
-
-					//	Ogre::TexturePtr myTexture = Ogre::TextureManager::getSingletonPtr()->createManual(
-					//		"MyTexture",
-					//		Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-					//		Ogre::TEX_TYPE_2D_ARRAY, 1024, 768, 0, Ogre::PF_A8R8G8B8, Ogre::TU_DYNAMIC_WRITE_ONLY);
-
-					//	Ogre::HlmsTextureManager::TextureLocation texLocation =
-					//		hlmsTextureManager->createOrRetrieveTexture("TestAtlas.png", "MyTexture", Ogre::HlmsTextureManager::TEXTURE_TYPE_DIFFUSE);
-
-					////	datablock->setTexture(1, texLocation.xIdx, texLocation.texture);
-
-					//	//texLocation.texture = myTexture;
-					//
-					//	////datablock->setTexture(0, texLocation.xIdx, texLocation.texture);
-					//	datablock->setTexture(Ogre::PBSM_DIFFUSE, texLocation.xIdx, texLocation.texture);//Ogre::PBSM_DIFFUSE, texLocation.xIdx, texLocation.texture);
-
-					///*	Ogre::TexturePtr myTexture = Ogre::TextureManager::getSingletonPtr()->createManual(
-					//		"Default_albedo",
-					//		Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-					//		Ogre::TEX_TYPE_2D_ARRAY, 1024, 768, 1, 0, Ogre::PF_A8R8G8B8, Ogre::TU_DYNAMIC_WRITE_ONLY);
-					//*/
-					////	datablock->setTexture(Ogre::PBSM_DIFFUSE, 0, myTexture);
-
-					//	//---------------------------------------
-
-					//	if (gltfTexture.sampler != -1) {
-					//		const gltf::Sampler& sampler = asset.samplers[gltfTexture.sampler];
-
-					//		switch (sampler.magFilter) {
-					//		/*case gltf::Sampler::MagFilter::None:
-					//			break;
-					//		case gltf::Sampler::MagFilter::Nearest:
-					//			textureBuilder.setMagFilter(Render::Texture::Filter::Nearest);
-					//			break;
-					//		case gltf::Sampler::MagFilter::Linear:
-					//			textureBuilder.setMagFilter(Render::Texture::Filter::Linear);
-					//			break;*/
-					//		}
-
-					//		switch (sampler.minFilter) {
-					//	/*	case gltf::Sampler::MinFilter::None:
-					//			break;
-					//		case gltf::Sampler::MinFilter::Nearest:
-					//			textureBuilder.setMinFilter(Render::Texture::Filter::Nearest);
-					//			break;
-					//		case gltf::Sampler::MinFilter::Linear:
-					//			textureBuilder.setMinFilter(Render::Texture::Filter::Linear);
-					//			break;
-					//		case gltf::Sampler::MinFilter::NearestMipMapNearest:
-					//			textureBuilder.setMinFilter(Render::Texture::Filter::Nearest);
-					//			textureBuilder.setMipMapFilter(Render::Texture::Filter::Nearest);
-					//			break;
-					//		case gltf::Sampler::MinFilter::LinearMipMapNearest:
-					//			textureBuilder.setMinFilter(Render::Texture::Filter::Linear);
-					//			textureBuilder.setMipMapFilter(Render::Texture::Filter::Nearest);
-					//			break;
-					//		case gltf::Sampler::MinFilter::NearestMipMapLinear:
-					//			textureBuilder.setMinFilter(Render::Texture::Filter::Nearest);
-					//			textureBuilder.setMipMapFilter(Render::Texture::Filter::Linear);
-					//			break;
-					//		case gltf::Sampler::MinFilter::LinearMipMapLinear:
-					//			textureBuilder.setMinFilter(Render::Texture::Filter::Linear);
-					//			textureBuilder.setMipMapFilter(Render::Texture::Filter::Linear);
-					//			break;*/
-					//		}
-
-					//		switch (sampler.wrapS) {
-					//		/*case gltf::Sampler::WrappingMode::ClampToEdge:
-					//			textureBuilder.setWrapS(Render::Texture::WrappingMode::ClampToEdge);
-					//			break;
-					//		case gltf::Sampler::WrappingMode::MirroredRepeat:
-					//			textureBuilder.setWrapS(Render::Texture::WrappingMode::MirroredRepeat);
-					//			break;
-					//		case gltf::Sampler::WrappingMode::Repeat:
-					//			textureBuilder.setWrapS(Render::Texture::WrappingMode::Repeat);
-					//			break;*/
-					//		}
-
-					//		switch (sampler.wrapT) {
-					//		/*case gltf::Sampler::WrappingMode::ClampToEdge:
-					//			textureBuilder.setWrapT(Render::Texture::WrappingMode::ClampToEdge);
-					//			break;
-					//		case gltf::Sampler::WrappingMode::MirroredRepeat:
-					//			textureBuilder.setWrapT(Render::Texture::WrappingMode::MirroredRepeat);
-					//			break;
-					//		case gltf::Sampler::WrappingMode::Repeat:
-					//			textureBuilder.setWrapT(Render::Texture::WrappingMode::Repeat);
-					//			break;*/
-					//		}
-					//	}
-					//}
-
-
-					item->setCastShadows(true);
-
-					/*if (gltfMaterial.pbr.metallicRoughnessTexture.index != -1) {
-						
-						const gltf::Texture& gltfTexture = asset.textures[gltfMaterial.pbr.metallicRoughnessTexture.index];
-						auto path = asset.images[gltfTexture.source].uri;
-						auto texCoord = gltfMaterial.pbr.metallicRoughnessTexture.texCoord;
-					}
-
-					if (gltfMaterial.normalTexture.index != -1) {
-
-						const gltf::Texture& gltfTexture = asset.textures[gltfMaterial.normalTexture.index];
-						auto path = asset.images[gltfTexture.source].uri;
-						auto texCoord = gltfMaterial.normalTexture.texCoord;
-					}
-
-					if (gltfMaterial.occlusionTexture.index != -1) {
-
-						const gltf::Texture& gltfTexture = asset.textures[gltfMaterial.occlusionTexture.index];
-						auto path = asset.images[gltfTexture.source].uri;
-						auto texCoord = gltfMaterial.occlusionTexture.texCoord;
-					}
-
-					if (gltfMaterial.emissiveTexture.index != -1) {
-
-
-						const gltf::Texture& gltfTexture = asset.textures[gltfMaterial.emissiveTexture.index];
-						auto path = asset.images[gltfTexture.source].uri;
-						auto texCoord = gltfMaterial.emissiveTexture.texCoord;
-					}*/
-					gltfMaterial.pbr.metallicFactor;
-					gltfMaterial.pbr.roughnessFactor;
-
-
-					XE::XEMaterial material(gMgr.getRoot()->getHlmsManager());
-					material.loadMaterial(asset, gltfMaterial,datablock);
-
-					//do it at last! here the texture baking happens! needed for normal maps etc.
-					item->setDatablock(datablock);
+					
 				}				
 			}
 		}

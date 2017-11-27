@@ -37,7 +37,7 @@ namespace XE
 			_t_OgreCameraPtr->setNearClipDistance(m_nearClipDistance); //0.2f);
 			_t_OgreCameraPtr->setFarClipDistance(m_farClipDistance);// 1000.0f);
 			_t_OgreCameraPtr->setAutoAspectRatio(m_autoAspectRatio); // true);
-
+		
 			//step 6 workspace
 			//	engine->getGraphicsManager().createWorkspace(0, &mCameraController.getOgreCamera()); //camera needed for workspace
 			//todo lock and stop render thread while adding renderwindow

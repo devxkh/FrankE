@@ -4,7 +4,15 @@
 
 #pragma once
 
-namespace XE{
+namespace XE {
+
+	/// set used rendersystem -> 1 = "GLES3", 2 = D3D11
+#define UseRenderSystem 1 
+	///use renderthread
+#define UseRenderThread
+	/// compile editor functions 
+#define CompileEditor
+
 
 	////////////////////////////////////////////////////////////
 	// Define helpers to create portable import / export macros for each module
@@ -81,12 +89,12 @@ namespace XE{
 	typedef unsigned int Uint32;
 
 	// 64 bits integer types
-	#if defined(_MSC_VER)
+#if defined(_MSC_VER)
 	typedef signed   __int64 Int64;
 	typedef unsigned __int64 Uint64;
-	#else
+#else
 	typedef signed   long long Int64;
 	typedef unsigned long long Uint64;
-	#endif
+#endif
 
 }

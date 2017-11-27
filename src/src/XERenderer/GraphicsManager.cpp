@@ -19,12 +19,7 @@
 
 #include <plog/Appenders/ConsoleAppender.h>
 
-
 #include <algorithm>
-
-
-
-
 
 #include "Compositor/OgreCompositorManager2.h"
 #include "Compositor/OgreCompositorWorkspace.h"
@@ -34,267 +29,14 @@
 
 #include "Compositor/Pass/PassQuad/OgreCompositorPassQuadDef.h"
 
-
-
-
 namespace XE
 {
-
-	void _t_createCustomTextures(Root *root, Ogre::RenderWindow* renderWindow)
-	{
-		TexturePtr tex = TextureManager::getSingleton().createManual(
-			"HalftoneVolume",
-			"General",
-			TEX_TYPE_3D,
-			64, 64, 64,
-			0,
-			PF_L8,
-			TU_DYNAMIC_WRITE_ONLY
-		);
-
-		if (!tex.isNull())
-		{
-			v1::HardwarePixelBufferSharedPtr ptr = tex->getBuffer(0, 0);
-			ptr->lock(v1::HardwareBuffer::HBL_DISCARD);
-			const PixelBox &pb = ptr->getCurrentLock();
-			Ogre::uint8 *data = static_cast<Ogre::uint8*>(pb.data);
-
-			size_t height = pb.getHeight();
-			size_t width = pb.getWidth();
-			size_t depth = pb.getDepth();
-			size_t rowPitch = pb.rowPitch;
-			size_t slicePitch = pb.slicePitch;
-
-			for (size_t z = 0; z < depth; ++z)
-			{
-				for (size_t y = 0; y < height; ++y)
-				{
-					for (size_t x = 0; x < width; ++x)
-					{
-						float fx = 32 - (float)x + 0.5f;
-						float fy = 32 - (float)y + 0.5f;
-						float fz = 32 - ((float)z) / 3 + 0.5f;
-						float distanceSquare = fx*fx + fy*fy + fz*fz;
-						data[slicePitch*z + rowPitch*y + x] = 0x00;
-						if (distanceSquare < 1024.0f)
-							data[slicePitch*z + rowPitch*y + x] += 0xFF;
-					}
-				}
-			}
-			ptr->unlock();
-		}
-
-		TexturePtr tex2 = TextureManager::getSingleton().createManual(
-			"DitherTex",
-			"General",
-			TEX_TYPE_2D,
-			renderWindow->getWidth(), renderWindow->getHeight(), 1,
-			0,
-			PF_L8,
-			TU_DYNAMIC_WRITE_ONLY
-		);
-
-		v1::HardwarePixelBufferSharedPtr ptr2 = tex2->getBuffer(0, 0);
-		ptr2->lock(v1::HardwareBuffer::HBL_DISCARD);
-		const PixelBox &pb2 = ptr2->getCurrentLock();
-		Ogre::uint8 *data2 = static_cast<Ogre::uint8*>(pb2.data);
-
-		size_t height2 = pb2.getHeight();
-		size_t width2 = pb2.getWidth();
-		size_t rowPitch2 = pb2.rowPitch;
-
-		for (size_t y = 0; y < height2; ++y)
-		{
-			for (size_t x = 0; x < width2; ++x)
-			{
-				data2[rowPitch2*y + x] = Ogre::Math::RangeRandom(64.0, 192);
-			}
-		}
-
-		ptr2->unlock();
-	}
-
-	void _t_createExtraEffectsFromCode(Root *root)
-	{
-		CompositorManager2 *compositorManager = root->getCompositorManager2();
-
-		// Bloom compositor is loaded from script but here is the hard coded equivalent
-		if (!compositorManager->hasNodeDefinition("Bloom"))
-		{
-			CompositorNodeDef *bloomDef = compositorManager->addNodeDefinition("Bloom");
-
-			//Input channels
-			bloomDef->addTextureSourceName("rt_input", 0, Ogre::TextureDefinitionBase::TEXTURE_INPUT);
-			bloomDef->addTextureSourceName("rt_output", 1, Ogre::TextureDefinitionBase::TEXTURE_INPUT);
-
-			bloomDef->mCustomIdentifier = "Ogre/Postprocess";
-
-			//Local textures
-			bloomDef->setNumLocalTextureDefinitions(2);
-			{
-				TextureDefinitionBase::TextureDefinition *texDef = bloomDef->addTextureDefinition("rt0");
-				texDef->widthFactor = 0.25f;
-				texDef->heightFactor = 0.25f;
-				texDef->formatList.push_back(Ogre::PF_R8G8B8);
-
-				texDef = bloomDef->addTextureDefinition("rt1");
-				texDef->widthFactor = 0.25f;
-				texDef->heightFactor = 0.25f;
-				texDef->formatList.push_back(Ogre::PF_R8G8B8);
-			}
-
-			bloomDef->setNumTargetPass(4);
-
-			{
-				CompositorTargetDef *targetDef = bloomDef->addTargetPass("rt0");
-
-				{
-					CompositorPassQuadDef *passQuad;
-					passQuad = static_cast<CompositorPassQuadDef*>(targetDef->addPass(PASS_QUAD));
-					passQuad->mMaterialName = "Postprocess/BrightPass2";
-					passQuad->addQuadTextureSource(0, "rt_input", 0);
-				}
-			}
-			{
-				CompositorTargetDef *targetDef = bloomDef->addTargetPass("rt1");
-
-				{
-					CompositorPassQuadDef *passQuad;
-					passQuad = static_cast<CompositorPassQuadDef*>(targetDef->addPass(PASS_QUAD));
-					passQuad->mMaterialName = "Postprocess/BlurV";
-					passQuad->addQuadTextureSource(0, "rt0", 0);
-				}
-			}
-			{
-				CompositorTargetDef *targetDef = bloomDef->addTargetPass("rt0");
-
-				{
-					CompositorPassQuadDef *passQuad;
-					passQuad = static_cast<CompositorPassQuadDef*>(targetDef->addPass(PASS_QUAD));
-					passQuad->mMaterialName = "Postprocess/BluH";
-					passQuad->addQuadTextureSource(0, "rt1", 0);
-				}
-			}
-			{
-				CompositorTargetDef *targetDef = bloomDef->addTargetPass("rt_output");
-
-				{
-					CompositorPassQuadDef *passQuad;
-					passQuad = static_cast<CompositorPassQuadDef*>(targetDef->addPass(PASS_QUAD));
-					passQuad->mMaterialName = "Postprocess/BloomBlend2";
-					passQuad->addQuadTextureSource(0, "rt_input", 0);
-					passQuad->addQuadTextureSource(1, "rt0", 0);
-				}
-			}
-
-			//Output channels
-			bloomDef->setNumOutputChannels(2);
-			bloomDef->mapOutputChannel(0, "rt_output");
-			bloomDef->mapOutputChannel(1, "rt_input");
-		}
-
-		//Glass compositor is loaded from script but here is the hard coded equivalent
-		//if (!compositorManager->hasNodeDefinition("Glass"))
-		//{
-		//	CompositorNodeDef *glassDef = compositorManager->addNodeDefinition("Glass");
-
-		//	//Input channels
-		//	glassDef->addTextureSourceName("rt_input", 0, TextureDefinitionBase::TEXTURE_INPUT);
-		//	glassDef->addTextureSourceName("rt_output", 1, TextureDefinitionBase::TEXTURE_INPUT);
-
-		//	glassDef->mCustomIdentifier = "Ogre/Postprocess";
-
-		//	glassDef->setNumTargetPass(1);
-
-		//	{
-		//		CompositorTargetDef *targetDef = glassDef->addTargetPass("rt_output");
-
-		//		{
-		//			CompositorPassQuadDef *passQuad;
-		//			passQuad = static_cast<CompositorPassQuadDef*>(targetDef->addPass(PASS_QUAD));
-		//			passQuad->mMaterialName = "Postprocess/Glass";
-		//			passQuad->addQuadTextureSource(0, "rt_input", 0);
-		//		}
-		//	}
-
-		//	//Output channels
-		//	glassDef->setNumOutputChannels(2);
-		//	glassDef->mapOutputChannel(0, "rt_output");
-		//	glassDef->mapOutputChannel(1, "rt_input");
-		//}
-
-		//if (!compositorManager->hasNodeDefinition("Motion Blur"))
-		//{
-		//	/// Motion blur effect
-		//	CompositorNodeDef *motionBlurDef = compositorManager->addNodeDefinition("Motion Blur");
-
-		//	//Input channels
-		//	motionBlurDef->addTextureSourceName("rt_input", 0, TextureDefinitionBase::TEXTURE_INPUT);
-		//	motionBlurDef->addTextureSourceName("rt_output", 1, TextureDefinitionBase::TEXTURE_INPUT);
-
-		//	motionBlurDef->mCustomIdentifier = "Ogre/Postprocess";
-
-		//	//Local textures
-		//	motionBlurDef->setNumLocalTextureDefinitions(1);
-		//	{
-		//		TextureDefinitionBase::TextureDefinition *texDef =
-		//			motionBlurDef->addTextureDefinition("sum");
-		//		texDef->width = 0;
-		//		texDef->height = 0;
-		//		texDef->formatList.push_back(Ogre::PF_R8G8B8);
-		//	}
-
-		//	motionBlurDef->setNumTargetPass(3);
-
-		//	/// Initialisation pass for sum texture
-		//	{
-		//		CompositorTargetDef *targetDef = motionBlurDef->addTargetPass("sum");
-		//		{
-		//			CompositorPassQuadDef *passQuad;
-		//			passQuad = static_cast<CompositorPassQuadDef*>(targetDef->addPass(PASS_QUAD));
-		//			passQuad->mNumInitialPasses = 1;
-		//			passQuad->mMaterialName = "Ogre/Copy/4xFP32";
-		//			passQuad->addQuadTextureSource(0, "rt_input", 0);
-		//		}
-		//	}
-		//	/// Do the motion blur
-		//	{
-		//		CompositorTargetDef *targetDef = motionBlurDef->addTargetPass("rt_output");
-
-		//		{
-		//			CompositorPassQuadDef *passQuad;
-		//			passQuad = static_cast<CompositorPassQuadDef*>(targetDef->addPass(PASS_QUAD));
-		//			passQuad->mMaterialName = "Postprocess/Combine";
-		//			passQuad->addQuadTextureSource(0, "rt_input", 0);
-		//			passQuad->addQuadTextureSource(1, "sum", 0);
-		//		}
-		//	}
-		//	/// Copy back sum texture for the next frame
-		//	{
-		//		CompositorTargetDef *targetDef = motionBlurDef->addTargetPass("sum");
-
-		//		{
-		//			CompositorPassQuadDef *passQuad;
-		//			passQuad = static_cast<CompositorPassQuadDef*>(targetDef->addPass(PASS_QUAD));
-		//			passQuad->mMaterialName = "Ogre/Copy/4xFP32";
-		//			passQuad->addQuadTextureSource(0, "rt_output", 0);
-		//		}
-		//	}
-
-		//	//Output channels
-		//	motionBlurDef->setNumOutputChannels(2);
-		//	motionBlurDef->mapOutputChannel(0, "rt_output");
-		//	motionBlurDef->mapOutputChannel(1, "rt_input");
-		//}
-	}
-
 	//#define GRAPHICS_THREAD 1  //compile with graphics render thread
 
 	GraphicsManager::GraphicsManager(XE::XEngine* engine) :
 		mRoot(0)
 
 		//	, mWindowManager()
-		, _t_OgreWorkspace(nullptr) //creates window in mainthread
 		, my_QueueManager()
 		, my_FromRSQueueManager()
 		//#ifdef GRAPHICS_THREAD
@@ -318,8 +60,6 @@ namespace XE
 
 		mRoot = OGRE_NEW Ogre::Root();
 
-
-
 		_renderTasks.push_back(RenderTask(RenderTaskID::AnimationAddTimes));
 		_renderTasks.push_back(RenderTask(RenderTaskID::AnimationTimes));
 		_renderTasks.push_back(RenderTask(RenderTaskID::DebugLines));
@@ -332,7 +72,7 @@ namespace XE
 
 		createRenderer();
 
-#if UseRenderThread == 1
+#ifdef UseRenderThread
 		//singlethread using updateRenderer function -> disable render function in engine!!!
 		//renderthread
 		mRenderThread = new (std::thread)(&GraphicsManager::RenderThread, this, this, engine);
@@ -344,9 +84,7 @@ namespace XE
 
 	GraphicsManager::~GraphicsManager()
 	{
-	//FIXME crash?	delete mRenderThread;
-		delete _t_OgreWorkspace;
-
+	
 		if (m_SdlWindow)
 		{
 			// Restore desktop resolution on exit
@@ -405,10 +143,13 @@ namespace XE
 
 		//todo manage multiple windows
 		//sf::Window* window = mWindowManager.createWindow(sf::VideoMode(800, 600), title, sf::Style::Default);
-		
+
 		getIntoRendererQueue().push([this]() {
 			
 			m_GUIRenderer._t_resizeRenderWindow(800,600);
+
+			
+
 
 			_t_RenderWindow = OgreWorkspace::_t_createRenderWindow(m_SdlWindow); //need window handle (else wnd is hidden), always a renderwindow is needed
 		});
@@ -430,24 +171,15 @@ namespace XE
 
 	void GraphicsManager::setRenderSystem()
 	{
-
-		//D3D11RenderSystem* mRenderSystem = new D3D11RenderSystem();
+#if UseRenderSystem == 1
 		Ogre::GL3PlusRenderSystem* mRenderSystem = new Ogre::GL3PlusRenderSystem();
+#else if UseRenderSystem == 2
+		//D3D11RenderSystem* mRenderSystem = new D3D11RenderSystem();
+#endif
 		// Register the render system
 		mRoot->addRenderSystem(mRenderSystem);
 		mRoot->setRenderSystem(mRenderSystem);
 	}
-
-	//void GraphicsManager::createWorkspace(Ogre::uint16 renderwindowID, OgreCamera* camera)
-	//{
-	//	//dont pass pointer you want to change in the thread!!! or else the old pointer gets invalid
-	//	my_QueueManager.push([this, camera](){
-	//		//	OgreCamera* gg = camera;
-	//		_t_OgreWorkspace = OGRE_NEW_T(OgreWorkspace, Ogre::MEMCATEGORY_GEOMETRY)(*mEngine, *this);
-	//		_t_OgreWorkspace->_t_createWorkspace(_t_RenderWindow, camera); //_t_RenderWindow only usable after initialization!
-
-	//	});
-	//}
 
 	float GraphicsManager::getAccumTimeSinceLastLogicFrame()
 	{
@@ -481,8 +213,8 @@ namespace XE
 			//Ogre::Archive *archiveUnlit = Ogre::ArchiveManager::getSingletonPtr()->load(dataFolder + "/XEUnlit/" + shaderSyntax, "FileSystem", true);
 			Ogre::Archive *archivePbs = Ogre::ArchiveManager::getSingletonPtr()->load(dataFolder + "/Pbs/" + shaderSyntax, "FileSystem", true);
 
-			Ogre::Archive *archiveLibraryAny = Ogre::ArchiveManager::getSingletonPtr()->load(dataFolder + "/Common/Any","FileSystem", true);
-			Ogre::Archive *archivePbsLibraryAny = Ogre::ArchiveManager::getSingletonPtr()->load(dataFolder + "/Pbs/Any","FileSystem", true);
+			Ogre::Archive *archiveLibraryAny = Ogre::ArchiveManager::getSingletonPtr()->load(dataFolder + "/Common/Any", "FileSystem", true);
+			Ogre::Archive *archivePbsLibraryAny = Ogre::ArchiveManager::getSingletonPtr()->load(dataFolder + "/Pbs/Any", "FileSystem", true);
 			Ogre::Archive *archiveUnlitLibraryAny = Ogre::ArchiveManager::getSingletonPtr()->load(dataFolder + "/Unlit/Any", "FileSystem", true);
 
 			Ogre::ArchiveVec library;
@@ -501,19 +233,11 @@ namespace XE
 			libraryPbs.push_back(archiveLibrary);
 			libraryPbs.push_back(archiveLibraryAny);
 			libraryPbs.push_back(archivePbsLibraryAny);
-			
+
 			Ogre::HlmsPbs *hlmsPbs = OGRE_NEW Ogre::HlmsPbs(archivePbs, &libraryPbs);
 			mRoot->getHlmsManager()->registerHlms(hlmsPbs);
 
-
-			//loading
-			//GpuProgramManager::getSingleton().setSaveMicrocodesToCache(true); //Make sure it's enabled.
-			//DataStreamPtr shaderCacheFile = mRoot->openFileStream("F:/Projekte/coop/XGame/data/MyCache.cache");
-			//GpuProgramManager::getSingleton().loadMicrocodeCache(shaderCacheFile);
-
-			_t_createCustomTextures(mRoot, _t_RenderWindow);
-			_t_createExtraEffectsFromCode(mRoot);
-
+			mEngine->getResourceMgr()._t_registerHLMSResources();
 
 		});
 	}
@@ -561,6 +285,7 @@ namespace XE
 			mEngine->getGraphicsManager().getGUIRenderer().update();
 		});
 				
+	
 		if (mRoot->isInitialised())
 			mRoot->renderOneFrame();
 		
@@ -573,10 +298,10 @@ namespace XE
 		double timeSinceLast = time / 1000000.0;
 		timeSinceLast = std::min(1.0, timeSinceLast); //Prevent from going haywire.
 
+	//	m_GUIRenderer._t_update(timeSinceLast);
+
 		mAccumTimeSinceLastLogicFrame = timeSinceLast;
 		
-		
-		m_GUIRenderer._t_update(timeSinceLast);
 	}
 
 	void GraphicsManager::createRenderer()

@@ -87,6 +87,7 @@ namespace XE
 		m_light->setCastShadows(lightData->castShadows());
 
 	//	m_light->setAttenuationBasedOnRadius(10.0f, 0.01f);
+		auto lightType = (Ogre::Light::LightTypes)lightData->lightType();
 
 		if (lightData->colourDiffuse())
 		{
@@ -100,7 +101,7 @@ namespace XE
 			m_light->setSpecularColour(specular); //Ogre::ColourValue::White);
 		}
 
-		m_light->setType((Ogre::Light::LightTypes)lightData->lightType()); // Ogre::Light::LT_DIRECTIONAL);
+		m_light->setType(lightType); // Ogre::Light::LT_DIRECTIONAL);
 
 		if (lightData->directionVector())
 			m_light->setDirection(Ogre::Vector3(lightData->directionVector()->x(), lightData->directionVector()->y(), lightData->directionVector()->z()).normalisedCopy());
@@ -110,6 +111,16 @@ namespace XE
 		if (lightData->attenuation())
 			m_light->setAttenuation(lightData->attenuation()->range(),lightData->attenuation()->constant(),lightData->attenuation()->linear(),lightData->attenuation()->quadratic());
 		
+		if (lightType == Ogre::Light::LightTypes::LT_SPOTLIGHT)
+		{
+		/*	m_light->setSpotlightInnerAngle(Ogre::Radian(179));
+			m_light->setSpotlightOuterAngle(Ogre::Radian(179));*/
+		//	m_light->setAttenuationBasedOnRadius(1000,0.1);
+
+			m_light->setSpotlightRange(Ogre::Degree(65), Ogre::Degree(90), 1);
+		}
+
+
 	//	m_light->setLightMask();
 	//	m_light->setSpotlightRange(Ogre::Degree(35), Ogre::Degree(50), 0.5);
 
@@ -138,9 +149,9 @@ namespace XE
 		Ogre::SceneNode *sceneNodeLines = m_Scene.getOgreSceneManager().__OgreSceneMgrPtr->getRootSceneNode(Ogre::SCENE_DYNAMIC)->createChildSceneNode(Ogre::SCENE_DYNAMIC);
 		sceneNodeLines->attachObject(manualObject);*/
 
-		//m_Scene.getOgreSceneManager().__OgreSceneMgrPtr->setAmbientLight(Ogre::ColourValue(1.0f, 1.0f, 1.0f),
-		//Ogre::ColourValue(0, 0, 0),
-		//-m_light->getDirection() + Ogre::Vector3::UNIT_Y * 0.2f);
+		/*m_Scene.getOgreSceneManager().__OgreSceneMgrPtr->setAmbientLight(Ogre::ColourValue(1.0f, 1.0f, 1.0f),
+		Ogre::ColourValue(0, 0, 0),
+		-m_light->getDirection() + Ogre::Vector3::UNIT_Y * 0.2f);*/
 
 		//----------------------------- InstantRadiosity
 		if (lightData->useInstantRadiosity())

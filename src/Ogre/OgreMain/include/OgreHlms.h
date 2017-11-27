@@ -694,7 +694,10 @@ namespace Ogre
         static const IdString NumShadowMapLights;
         static const IdString NumShadowMapTextures;
         static const IdString PssmSplits;
+        static const IdString PssmBlend;
+        static const IdString PssmFade;
         static const IdString ShadowCaster;
+        static const IdString ShadowCasterDirectional;
         static const IdString ShadowCasterPoint;
         static const IdString ShadowUsesDepthTexture;
         static const IdString RenderDepthOnly;
@@ -709,6 +712,7 @@ namespace Ogre
         static const IdString ForwardPlusDebug;
         static const IdString ForwardPlusFadeAttenRange;
         static const IdString ForwardPlusFineLightMask;
+        static const IdString ForwardPlusCoversEntireTarget;
         static const IdString Forward3DNumSlices;
         static const IdString FwdClusteredWidthxHeight;
         static const IdString FwdClusteredWidth;

@@ -66,8 +66,12 @@ layout_constbuffer(binding = 0) uniform PassBuffer
 	mat4 invView;
 @end
 
-@property( hlms_pssm_splits )@foreach( hlms_pssm_splits, n )
+@property( hlms_pssm_splits )@psub( hlms_pssm_splits_minus_one, hlms_pssm_splits, 1 )@foreach( hlms_pssm_splits, n )
 	float pssmSplitPoints@n;@end @end
+@property( hlms_pssm_blend )@foreach( hlms_pssm_splits_minus_one, n )
+	float pssmBlendPoints@n;@end @end
+@property( hlms_pssm_fade )
+	float pssmFadePoint;@end
 	@property( hlms_lights_spot )Light lights[@value(hlms_lights_spot)];@end
 @end @property( hlms_shadowcaster )
 	//Vertex shader
@@ -90,6 +94,7 @@ layout_constbuffer(binding = 0) uniform PassBuffer
 	vec4 f3dData;
 	@property( hlms_forwardplus == forward3d )
 		vec4 f3dGridHWW[@value( forward3d_num_slices )];
+		vec4 f3dViewportOffset;
 	@end
 	@property( hlms_forwardplus != forward3d )
 		vec4 fwdScreenToGrid;
@@ -124,12 +129,14 @@ struct Material
 	vec4 F0;
 	vec4 normalWeights;
 	vec4 cDetailWeights;
-	vec4 detailOffsetScaleD[4];
-	vec4 detailOffsetScaleN[4];
+	vec4 detailOffsetScale[4];
+	vec4 emissive;		//emissive.w contains mNormalMapWeight.
+	vec4 reserved[3];
 
 	uvec4 indices0_3;
-	//uintBitsToFloat( indices4_7.w ) contains mNormalMapWeight.
 	uvec4 indices4_7;
+
+	@insertpiece( custom_materialBuffer )
 };
 
 layout_constbuffer(binding = 1) uniform MaterialBuf

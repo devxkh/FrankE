@@ -467,10 +467,11 @@ namespace XE
 			const Ogre::HlmsSamplerblock* samplerblock = mHlmsManager->_getSamplerblock(gltfMaterial.emissiveTexture.index);
 			loadSampler(sampler, samplerblock);
 
-			pbsDatablock->setDetailMapBlendMode(1,Ogre::PbsBlendModes::PBSM_BLEND_ADD);
-			pbsDatablock->setDetailMapWeight(1, 6);
+			pbsDatablock->setEmissive(Ogre::Vector3(gltfMaterial.emissiveFactor[0], gltfMaterial.emissiveFactor[1], gltfMaterial.emissiveFactor[2]));
+		//	pbsDatablock->setDetailMapBlendMode(1,Ogre::PbsBlendModes::PBSM_BLEND_ADD);
+		//	pbsDatablock->setDetailMapWeight(1, 6);
 
-			loadTexture(asset, gltfMaterial, samplerblock, Ogre::PBSM_DETAIL1, gltfMaterial.emissiveTexture.index, pbsDatablock, packedTextures);
+			loadTexture(asset, gltfMaterial, samplerblock, Ogre::PBSM_EMISSIVE, gltfMaterial.emissiveTexture.index, pbsDatablock, packedTextures);
 		}
 
 		//There used to be a typo, so allow the wrong spelling.
@@ -610,17 +611,32 @@ namespace XE
 		{
 			Ogre::HlmsTextureManager::TEXTURE_TYPE_DIFFUSE,
 			Ogre::HlmsTextureManager::TEXTURE_TYPE_NORMALS,
-			Ogre::HlmsTextureManager::TEXTURE_TYPE_DIFFUSE,
+
+			datablock->getWorkflow() == Ogre::HlmsPbsDatablock::MetallicWorkflow
+			? Ogre::HlmsTextureManager::TEXTURE_TYPE_MONOCHROME
+			: Ogre::HlmsTextureManager::TEXTURE_TYPE_DIFFUSE,
+
 			Ogre::HlmsTextureManager::TEXTURE_TYPE_MONOCHROME,
 			Ogre::HlmsTextureManager::TEXTURE_TYPE_NON_COLOR_DATA,
-			Ogre::HlmsTextureManager::TEXTURE_TYPE_DETAIL,
-			Ogre::HlmsTextureManager::TEXTURE_TYPE_DETAIL,
-			Ogre::HlmsTextureManager::TEXTURE_TYPE_DETAIL,
-			Ogre::HlmsTextureManager::TEXTURE_TYPE_DETAIL,
-			Ogre::HlmsTextureManager::TEXTURE_TYPE_DETAIL_NORMAL_MAP,
-			Ogre::HlmsTextureManager::TEXTURE_TYPE_DETAIL_NORMAL_MAP,
-			Ogre::HlmsTextureManager::TEXTURE_TYPE_DETAIL_NORMAL_MAP,
-			Ogre::HlmsTextureManager::TEXTURE_TYPE_DETAIL_NORMAL_MAP,
+#ifdef OGRE_TEXTURE_ATLAS
+			HlmsTextureManager::TEXTURE_TYPE_DETAIL,
+			HlmsTextureManager::TEXTURE_TYPE_DETAIL,
+			HlmsTextureManager::TEXTURE_TYPE_DETAIL,
+			HlmsTextureManager::TEXTURE_TYPE_DETAIL,
+			HlmsTextureManager::TEXTURE_TYPE_DETAIL_NORMAL_MAP,
+			HlmsTextureManager::TEXTURE_TYPE_DETAIL_NORMAL_MAP,
+			HlmsTextureManager::TEXTURE_TYPE_DETAIL_NORMAL_MAP,
+			HlmsTextureManager::TEXTURE_TYPE_DETAIL_NORMAL_MAP,
+#else
+			Ogre::HlmsTextureManager::TEXTURE_TYPE_DIFFUSE,
+			Ogre::HlmsTextureManager::TEXTURE_TYPE_DIFFUSE,
+			Ogre::HlmsTextureManager::TEXTURE_TYPE_DIFFUSE,
+			Ogre::HlmsTextureManager::TEXTURE_TYPE_DIFFUSE,
+			Ogre::HlmsTextureManager::TEXTURE_TYPE_NORMALS,
+			Ogre::HlmsTextureManager::TEXTURE_TYPE_NORMALS,
+			Ogre::HlmsTextureManager::TEXTURE_TYPE_NORMALS,
+			Ogre::HlmsTextureManager::TEXTURE_TYPE_NORMALS,
+#endif
 			Ogre::HlmsTextureManager::TEXTURE_TYPE_ENV_MAP
 		};
 

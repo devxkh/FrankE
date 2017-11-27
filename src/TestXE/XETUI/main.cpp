@@ -11,8 +11,8 @@ int main(int argc, char **argv)
 
 	game.settings.load("F:/Projekte/coop/FrankE/data/settings.json");
 	game.setDAL(std::unique_ptr<XET::TestDAL>(new XET::TestDAL(game)));
-	game.init();
 	game.setScene(std::unique_ptr<XET::TestScene>(new XET::TestScene(game)));
+	game.init();
 	game.run(game.build<TestMenuState>(game, true));
 
 	while (game.running())

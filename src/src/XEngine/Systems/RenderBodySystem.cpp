@@ -41,11 +41,18 @@ namespace XE
 				if (entity.has_component<LightRenderable>())
 				{
 					entityx::ComponentHandle<LightRenderable> lightRenderable = entity.component<LightRenderable>();
+					
+					//TODO BAD!! creates each time a queue task!
 					lightRenderable->setPosition(body->getPosition());
 				}
 
 				body->isDirty(false);
-			}			
+			}	
+
+#ifdef CompileEditor
+			if (body->isSelected)
+				_graphicsMgr.getGUIRenderer().m_CurrentGizmoOrigin = body->GetWorldTransform();
+#endif
 		}
 
 		_graphicsMgr.getIntoRendererQueue().push([this]()

@@ -494,6 +494,10 @@ namespace XE
 		Ogre::Real getTargetDistance();
 		void setTargetDistance(Ogre::Real distance);
 
+		/// Return world space transform matrix.
+		const Ogre::Matrix4& GetWorldTransform() const;
+
+		bool isSelected;
 
 	protected:
 		/// Whether to yaw around a fixed axis.

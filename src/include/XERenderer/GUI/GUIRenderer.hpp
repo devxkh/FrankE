@@ -14,8 +14,12 @@
 #include <XERenderer/GUI/Font.hpp>
 #include <XERenderer/GUI/LayerRenderer.hpp>
 
-#include <OgreTexture.h>
-#include <ThirdParty/SDL/include/SDL.h>
+#include <Ogre/OgreMain/include/OgreVector2.h>
+#include <Ogre/OgreMain/include/OgreMatrix4.h>
+
+#ifdef CompileEditor
+#include <XERenderer/Editor/EditorUIRenderer.hpp>
+#endif
 
 namespace Ogre {
 	class ObjectMemoryManager;
@@ -28,7 +32,7 @@ namespace sol { class state;  }
 namespace XE
 {
 	//forwarding
-	class ImgGuiRenderable;
+	class ImgGuiMovableObject;
 	class WScreenRenderable;
 	class WScreen;
 	class GraphicsManager;
@@ -53,8 +57,7 @@ namespace XE
 	public:
 		GUIRenderer(GraphicsManager& graphicsManager);
 
-		~GUIRenderer();
-		
+		~GUIRenderer();		
 		
 		void addScreen(WScreen* screen);	
 
@@ -84,8 +87,23 @@ namespace XE
 		void _t_init(TextureAtlas* atlas, Ogre::ObjectMemoryManager* objManager, Ogre::SceneManager* sceneMgr);
 
 		void _t_resizeRenderWindow(size_t w, size_t h);
+		
+#ifdef CompileEditor		
+		void EnableEditor(bool enable);
 
-		static bool ProcessSDLEvent(SDL_Event* event);
+		void _t_initEditorUIRenderer(Ogre::Camera* camera);
+
+		EditorUIRenderer* _t_EditorUIRenderer;
+
+		//will be send(copied) to rendererthread each frame
+		Ogre::Matrix4 m_CurrentGizmoOrigin;
+		Ogre::Vector2 m_CurrentPointPosition; //mouse cursor
+
+		//copied from mainthread into renderthread
+		Ogre::Matrix4 _t_CurrentGizmoOrigin;
+		Ogre::Vector2 _t_CurrentPointPosition; //mouse cursor
+
+#endif
 
 		//internal
 		sf::Vector2f _whitePixelPos;
@@ -93,12 +111,17 @@ namespace XE
 		sf::Vector2f m_ViewportSize;
 
 	private:
-	
-		void _t_createFontTexture();
 
-		Ogre::FastArray<ImgGuiRenderable*> _t_ImgGuiRenderables;
+#ifdef CompileEditor
+		
+		bool m_editorEnabled;
+
+
+#endif
 
 		LayerRenderer m_layerRenderer;
+		
+		Ogre::Matrix4 m_ProjMatrix;
 
 		std::map<XE::Uint16, std::unique_ptr<TextureAtlas>> _t_atlas;
 		
@@ -108,9 +131,6 @@ namespace XE
 
 		sf::Vector2f m_TexelOffset;
 	
-		Ogre::TexturePtr mFontTex;
-
-		
 		std::vector<WScreen*> m_screens;
 		GraphicsManager& m_graphicsManager;
 

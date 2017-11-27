@@ -55,6 +55,9 @@ public:
 //KH	inline void setTerrain(Ogre::TerrainGroup* terrainGrp) { mTerrainGrp = terrainGrp; }
 	virtual void update(float deltaTime);
 
+	virtual void loadRendererResources() {};
+	virtual void loadResources() {};
+
 	//inline OgreDecal::BulletMesh& getWorldMesh() { return mWorldMesh; }
 	inline DecalGenerator& getDecalGenerator() { return mDecalGenerator; }
 //	void initDecalGenerator(btCollisionObject* meshPtr);

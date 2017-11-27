@@ -67,8 +67,12 @@ cbuffer PassBuffer : register(b0)
 	float4 irradianceSize;		//.w = 1.0f / irradianceTexture->getHeight()
 	float4x4 invView;
 @end
-@property( hlms_pssm_splits )@foreach( hlms_pssm_splits, n )
+@property( hlms_pssm_splits )@psub( hlms_pssm_splits_minus_one, hlms_pssm_splits, 1 )@foreach( hlms_pssm_splits, n )
 	float pssmSplitPoints@n;@end @end
+@property( hlms_pssm_blend )@foreach( hlms_pssm_splits_minus_one, n )
+	float pssmBlendPoints@n;@end @end
+@property( hlms_pssm_fade )
+	float pssmFadePoint;@end
 	@property( hlms_lights_spot )Light lights[@value(hlms_lights_spot)];@end
 @end @property( hlms_shadowcaster )
 	//Vertex shader
@@ -91,6 +95,7 @@ cbuffer PassBuffer : register(b0)
 	float4 f3dData;
 	@property( hlms_forwardplus == forward3d )
 		float4 f3dGridHWW[@value( forward3d_num_slices )];
+		float4 f3dViewportOffset;
 	@end
 	@property( hlms_forwardplus != forward3d )
 		float4 fwdScreenToGrid;
@@ -126,12 +131,14 @@ struct Material
 	float4 F0;
 	float4 normalWeights;
 	float4 cDetailWeights;
-	float4 detailOffsetScaleD[4];
-	float4 detailOffsetScaleN[4];
+	float4 detailOffsetScale[4];
+	float4 emissive;		//emissive.w contains mNormalMapWeight.
+	float4 reserved[3];
 
 	uint4 indices0_3;
-	//asfloat( indices4_7.w ) contains mNormalMapWeight.
 	uint4 indices4_7;
+
+	@insertpiece( custom_materialBuffer )
 };
 
 cbuffer MaterialBuf : register(b1)

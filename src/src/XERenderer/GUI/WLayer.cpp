@@ -76,17 +76,18 @@ namespace XE
 	{
 		if (m_guiRenderer.getGraphicsManager().GetRenderTask(RenderTaskID::RenderGUI).isDone)
 		{
+
 			//Ogre::Vector2 mSize = Ogre::Vector2(800, 600);
 
 		//	Ogre::Vector2 halfSize(width * 0.5 , height * 0.5); //from ScreenRenderable
 
 			Ogre::Vector3 mScale(1, 1, 1);
 
-			float mInvWidth = 1.0f / width; // mSize.x;
-			float mInvHeight = 1.0f / height; // mSize.y;
-			Ogre::Matrix4         mVertexTransform;
+	//		float mInvWidth = 1.0f / width; // mSize.x;
+	//		float mInvHeight = 1.0f / height; // mSize.y;
+//			Ogre::Matrix4         mVertexTransform;
 
-			mVertexTransform.makeTransform(Ogre::Vector3::ZERO, mScale, Ogre::Quaternion(1, 0, 0, 0));	//top	
+	//		mVertexTransform.makeTransform(Ogre::Vector3::ZERO, mScale, Ogre::Quaternion(1, 0, 0, 0));	//top	
 	//		mVertexTransform.makeTransform(Ogre::Vector3::ZERO, mScale, Ogre::Quaternion(Ogre::Degree(90), Ogre::Vector3::UNIT_Z)); //left side
 	//		mVertexTransform.makeTransform(Ogre::Vector3::ZERO, mScale, Ogre::Quaternion(Ogre::Degree(180), Ogre::Vector3::UNIT_Z)); //bottom
 	//		mVertexTransform.makeTransform(Ogre::Vector3::ZERO, mScale, Ogre::Quaternion(Ogre::Degree(270), Ogre::Vector3::UNIT_Z)); //right side
@@ -130,6 +131,7 @@ namespace XE
 
 			m_guiRenderer.getGraphicsManager().getIntoRendererQueue().push([this]() {			
 			
+
 				_t_renderableLayer->updateVertices(m_RenderBuffer);
 
 				//TODO move to location after last rendered layer !

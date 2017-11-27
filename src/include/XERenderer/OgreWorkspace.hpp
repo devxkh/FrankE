@@ -11,6 +11,9 @@
 
 #include <Ogre/OgreMain/include/Compositor/OgreCompositorWorkspaceListener.h>
 
+
+#include <XERenderer/Editor/ImgGuiRenderable.hpp>
+
 #include <memory>
 
 class SDL_Window;
@@ -160,11 +163,14 @@ namespace XE {
 		void _t_createWorkspace(Ogre::RenderWindow* renderWindow, Ogre::Camera* camera);
 
 		//inline sf::Window* getWindow() { return mWindow; }
-
+		
+		Ogre::CompositorWorkspace*  _t_compositorWorkspace;
 		
 	protected:
 
 	private:
+
+		std::auto_ptr<ImGUICompositorPassProvider> _t_ImGUIPassProvider;
 
 
 		std::auto_ptr<OgreCompositorPassProvider> mPassProvider;

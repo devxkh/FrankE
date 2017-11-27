@@ -1230,6 +1230,7 @@ namespace Ogre
         mIds["target_height"]       = ID_TARGET_HEIGHT;
         mIds["target_width_scaled"] = ID_TARGET_WIDTH_SCALED;
         mIds["target_height_scaled"]= ID_TARGET_HEIGHT_SCALED;
+        mIds["target_format"]       = ID_TARGET_FORMAT;
         mIds["no_gamma"]            = ID_NO_GAMMA;
         mIds["no_fsaa"]             = ID_NO_FSAA;
         mIds["explicit_resolve"]    = ID_EXPLICIT_RESOLVE;
@@ -1264,6 +1265,7 @@ namespace Ogre
         mIds["allow_write_after_write"] = ID_ALLOW_WRITE_AFTER_WRITE;
         mIds["expose"]          = ID_EXPOSE;
         mIds["shadow_map_full_viewport"]= ID_SHADOW_MAP_FULL_VIEWPORT;
+        mIds["profiling_id"]    = ID_PROFILING_ID;
         mIds["lod_bias"]        = ID_LOD_BIAS;
         mIds["lod_update_list"] = ID_LOD_UPDATE_LIST;
         mIds["lod_camera"]      = ID_LOD_CAMERA;
@@ -1339,6 +1341,8 @@ namespace Ogre
         mIds["compositor_node_shadow"]  = ID_SHADOW_NODE;
         mIds["num_splits"]              = ID_NUM_SPLITS;
         mIds["pssm_split_padding"]      = ID_PSSM_SPLIT_PADDING;
+        mIds["pssm_split_blend"]        = ID_PSSM_SPLIT_BLEND;
+        mIds["pssm_split_fade"]         = ID_PSSM_SPLIT_FADE;
         mIds["pssm_lambda"]             = ID_PSSM_LAMBDA;
         mIds["shadow_map_target_type"]  = ID_SHADOW_MAP_TARGET_TYPE;
         mIds["shadow_map_repeat"]       = ID_SHADOW_MAP_REPEAT;

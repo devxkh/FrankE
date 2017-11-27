@@ -20,7 +20,7 @@ namespace XE
 
 		while (m_rwqueue.peek() && max > 0)
 		{
-			bool succeeded = m_rwqueue.trydequeue(tmp);
+			bool succeeded = m_rwqueue.try_dequeue(tmp);
 			tmp();
 			max--;
 		}

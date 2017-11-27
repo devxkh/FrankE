@@ -14,6 +14,58 @@ TestScene::TestScene( XE::XEngine& engine)
 	//m_engine.getLua().loadFile("Scene/1_Scene.lua");
 }
 
+void TestScene::loadRendererResources()
+{
+	//load all materials before scene load -> for ogre3D
+	//TODO replace ogre resource loading with on demand async loading ....
+
+	mGraphicsManager.getIntoRendererQueue().push([this]() {
+
+		//	Ogre::ArchiveFactory *fac = new PhysFS::PhysFSArchiveFactory;
+		//		Ogre::ArchiveManager::getSingleton().addArchiveFactory(fac);
+
+		//------------------- basic stuff always needed ---------------------
+		m_engine.getResourceMgr()._t_addLocationForRender(m_engine.settings.dataRootFolder + "/assets/2.0/scripts/Compositors", "General", true, true);
+		m_engine.getResourceMgr()._t_addLocationForRender(m_engine.settings.dataRootFolder + "/assets/2.0/scripts/materials/Common", "General", true, true);
+		m_engine.getResourceMgr()._t_addLocationForRender(m_engine.settings.dataRootFolder + "/assets/2.0/scripts/materials/Common/GLSL", "General", true, true);
+		//debugging
+		m_engine.getResourceMgr()._t_addLocationForRender(m_engine.settings.dataRootFolder + "/assets/DebugPack/material_ball", "General", true, true);
+
+		// test 
+		m_engine.getResourceMgr()._t_addLocationForRender(m_engine.settings.dataRootFolder + "/assets/DamagedHelmet", "General", true, true);
+		m_engine.getResourceMgr()._t_addLocationForRender(m_engine.settings.dataRootFolder + "/assets/Test", "General", true, true);
+		m_engine.getResourceMgr()._t_addLocationForRender(m_engine.settings.dataRootFolder + "/assets/TestTextures", "General", true, true);
+
+		m_engine.getResourceMgr()._t_addLocationForRender(m_engine.settings.dataRootFolder + "/assets/2.0/scripts/Postprocessing", "TestGrp", true, true);
+		m_engine.getResourceMgr()._t_addLocationForRender(m_engine.settings.dataRootFolder + "/assets/Editor", "Editor", true, true);
+
+		const char *c_locations[7] =
+		{
+			"/2.0/scripts/materials/TutorialSky_Postprocess",
+			"/2.0/scripts/materials/Postprocessing",
+			"/2.0/scripts/materials/Postprocessing/GLSL",
+			//	"/2.0/scripts/materials/Postprocessing/HLSL",
+			//	"/2.0/scripts/materials/Postprocessing/Metal",
+			"/2.0/scripts/materials/Postprocessing/SceneAssets",
+
+			"/2.0/scripts/materials/HDR",
+			"/2.0/scripts/materials/HDR/GLSL",
+			//"/2.0/scripts/materials/HDR/HLSL",
+			//"/2.0/scripts/materials/HDR/Metal",
+			"/2.0/scripts/materials/PbsMaterials"
+		};
+
+
+		for (size_t i = 0; i<7; ++i)
+		{
+			Ogre::String dataFolder = m_engine.settings.resourceData.assetsFolder + c_locations[i];
+			m_engine.getResourceMgr()._t_addLocationForRender(dataFolder, "General");
+		}
+
+		m_engine.getResourceMgr()._t_initResourceGroup("General");
+	});
+}
+
 bool TestScene::createEntityType(entityx::Entity entity, void* entityData)
 {
 	bool deleteBufferInRenderThread = false;

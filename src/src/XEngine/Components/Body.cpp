@@ -11,6 +11,7 @@ namespace XE
 		, mYawFixedAxis(Ogre::Vector3::UNIT_Y)
 		,mPosition(0,0,0),
 		 _isDirty(true)	
+		, isSelected(false)
 		,_isNetIDDirty(true)
 		,mOrientation(1,0,0,0),
 		mScale(1,1,1),
@@ -41,6 +42,7 @@ namespace XE
 		mInheritOrientation(true),
 		mInheritScale(true)
 		,_isDirty(true)
+		, isSelected(false)
 		, _isNetIDDirty(true)
 		, m_parent(nullptr)
 		, m_hasTargetPosition(false)
@@ -72,6 +74,33 @@ namespace XE
 	const Ogre::Vector3& BodyComponent::getTargetPosition() {
 		return m_targetPosition;
 	}
+
+	const Ogre::Matrix4& BodyComponent::GetWorldTransform() const
+	{
+		//m00 * scale.x
+		//chunkBase[1] = _mm_mul_ps(chunkBase[1], scaleChunkBase[1]);   //m01 * scale.y
+		//chunkBase[2] = _mm_mul_ps(chunkBase[2], scaleChunkBase[2]);   //m02 * scale.z
+		//chunkBase[3] = posChunkBase[0];                                //m03 * pos.x
+
+		//chunkBase[4] = _mm_mul_ps(chunkBase[4], scaleChunkBase[0]);   //m10 * scale.x
+		//chunkBase[5] = _mm_mul_ps(chunkBase[5], scaleChunkBase[1]);   //m11 * scale.y
+		//chunkBase[6] = _mm_mul_ps(chunkBase[6], scaleChunkBase[2]);   //m12 * scale.z
+		//chunkBase[7] = posChunkBase[1];                                //m13 * pos.y
+
+		//chunkBase[8] = _mm_mul_ps(chunkBase[8], scaleChunkBase[0]);   //m20 * scale.x
+		//chunkBase[9] = _mm_mul_ps(chunkBase[9], scaleChunkBase[1]);   //m21 * scale.y
+		//chunkBase[10] = _mm_mul_ps(chunkBase[10], scaleChunkBase[2]);   //m22 * scale.z
+		//chunkBase[11] = posChunkBase[2];                                //m23 * pos.z
+
+		auto debug = Ogre::Matrix4(mScale.x, mScale.y, mScale.z,
+			mPosition.x, mScale.x, mScale.y, mScale.z,
+			mPosition.y, mScale.x, mScale.y, mScale.z,
+			mPosition.z, mScale.x, mScale.y, mScale.z, 1.0);
+			//, mPosition,		
+		//	mOrientation, mScale
+		return debug;
+	}
+
 
 	void BodyComponent::setTargetPosition(const Ogre::Vector3& targetPosition) {
 		

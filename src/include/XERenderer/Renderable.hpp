@@ -84,6 +84,7 @@ namespace XE {
 		//void setBlendmode();
 
 		bool isDirty;
+
 	protected:
 
 

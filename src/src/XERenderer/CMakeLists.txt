@@ -56,6 +56,7 @@ set(XERenderer_Editor_SOURCES
 	 ${SRCROOT}/Editor/ImGuiRenderable.cpp	 
 	 ${SRCROOT}/Editor/ImGuizmo.h
 	 ${SRCROOT}/Editor/ImGuizmo.cpp
+	 ${SRCROOT}/Editor/EditorUIRenderer.cpp
 	 ${SRCROOT}/../../Thirdparty/imgui/imgui.cpp		
 	 ${SRCROOT}/../../Thirdparty/imgui/imgui_draw.cpp 		
 	 ${SRCROOT}/../../Thirdparty/imgui/imgui_demo.cpp
@@ -63,16 +64,24 @@ set(XERenderer_Editor_SOURCES
 source_group("src\\Editor" FILES ${XERenderer_Editor_SOURCES})
 
 set(XERenderer_Editor_HEADER
+	 ${INCROOT}/Editor/EditorUIRenderer.hpp
 	 ${INCROOT}/Editor/LightVisualHelper.hpp
-	
-	 ${INCROOT}/Editor/ImguiManager.cpp	 
-	 ${INCROOT}/Editor/ImguiManager.h	
-	 ${INCROOT}/Editor/ImguiRenderable.cpp	 
-	 
-	 ${INCROOT}/Editor/ImGuiRenderable.h
+	 ${INCROOT}/Editor/ImgGuiRenderable.hpp 
+	 ${INCROOT}/Editor/IEditorUIState.hpp
 )
 
 source_group("include\\Editor" FILES ${XERenderer_Editor_HEADER})
+
+file(GLOB XERenderer_EditorUIState_SOURCES
+     ${SRCROOT}/Editor/UIState/*.cpp
+)
+source_group("src\\Editor\\UIState" FILES ${XERenderer_EditorUIState_SOURCES})
+
+file(GLOB XERenderer_EditorUIState_HEADER
+    ${INCROOT}/Editor/UIState/*.h
+    ${INCROOT}/Editor/UIState/*.hpp
+)
+source_group("include\\Editor\\UIState" FILES ${XERenderer_EditorUIState_HEADER})
 
 # ------------ Hlms ---------------
 set(XERenderer_Hlms_SOURCES   
@@ -80,6 +89,7 @@ set(XERenderer_Hlms_SOURCES
      ${SRCROOT}/Hlms/XEHlmsUnlit.cpp
 	 ${SRCROOT}/Hlms/XEHlmsUnlitDatablock.cpp
 	 ${SRCROOT}/Hlms/XEHlmsJsonUnlit.cpp
+	 ${SRCROOT}/Hlms/XEHlmsMaterial.cpp
 )
 source_group("src\\Hlms" FILES ${XERenderer_Hlms_SOURCES})
 
@@ -88,6 +98,7 @@ set(XERenderer_Hlms_HEADER
 	 ${INCROOT}/Hlms/XEHlmsUnlit.hpp
 	 ${INCROOT}/Hlms/XEHlmsUnlitDatablock.hpp
 	 ${INCROOT}/Hlms/XEHlmsJsonUnlit.hpp
+	 ${INCROOT}/Hlms/XEHlmsMaterial.hpp
 )
 
 source_group("include\\Hlms" FILES ${XERenderer_Hlms_HEADER})
@@ -163,6 +174,7 @@ enable_unity_build(XERenderer  ${XERenderer_SOURCES} ${XERenderer_private_SOURCE
 sfml_add_library(XERenderer 
 	SOURCES ${XERenderer_SOURCES} ${XERenderer_HEADER} ${XERenderer_private_SOURCES} ${XEGraphics_HEADER} ${XEGraphics_SOURCES} ${XERenderer_Editor_HEADER} ${XERenderer_Editor_SOURCES}
 	 ${XERenderer_Hlms_HEADER} ${XERenderer_Hlms_SOURCES} ${XERenderer_Animation_HEADER} ${XERenderer_Animation_SOURCES} ${XERenderer_Resources_SOURCES} ${XERenderer_Resources_HEADER}
+	 ${XERenderer_EditorUIState_HEADER} ${XERenderer_EditorUIState_SOURCES}
 	DEPENDS OgreMain XEDAL 
 	RenderSystem_GL3Plus 
 #	RenderSystem_Direct3D11

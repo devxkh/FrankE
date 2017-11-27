@@ -15,6 +15,8 @@ namespace XET {
 
 		virtual void update(float deltaTime) override;
 
+		virtual void loadRendererResources() override;
+
 	private:
 		XE::XEngine& m_engine;
 	};

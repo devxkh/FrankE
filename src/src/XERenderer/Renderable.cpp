@@ -186,10 +186,10 @@ namespace XE
 					meshV1->unload();
 
 					_t_OgreItemPtr = m_Scene.getOgreSceneManager().__OgreSceneMgrPtr->createItem(manual, (Ogre::SceneMemoryMgrTypes)Ogre::SCENE_DYNAMIC); //renderable->memType()); //Ogre::SCENE_DYNAMIC);
-				
-					_t_OgreItemPtr->setLightMask(0x0000001);
+					//_t_OgreItemPtr->setRenderQueueGroup(254);
+				//	_t_OgreItemPtr->setLightMask(0x0000001);
 					Ogre::HlmsManager *hlmsManager = m_GraphicsManager.getRoot()->getHlmsManager();
-					m_datablock = hlmsManager->getDatablock("StonesPbs");
+			//		m_datablock = hlmsManager->getDatablock("StonesPbs");
 					//_t_OgreItemPtr->setDatablock(datablock); //todo multiple materials per mesh	
 												   //floor->setMaterialName("Examples/Rockwall", "General");
 												   //floor->setCastShadows(false);
@@ -204,104 +204,6 @@ namespace XE
 																							AUTODETECT_RESOURCE_GROUP_NAME,
 																							Ogre::SCENE_DYNAMIC);
 
-	
-					//_t_OgreEntitySceneNodePtr->attachObject(_t_OgreItemPtr);
-
-
-					auto bbs = m_Scene.getOgreSceneManager().__OgreSceneMgrPtr->createBillboardSet();
-					Ogre::v1::Billboard* sunBillboard = bbs->createBillboard(Ogre::Vector3(0, 0, 0));
-					sunBillboard->setDimensions(25,25);
-					//You need sets Billboard::mDirection to some value other than the default Vector3::ZERO to make BBT_ORIENTED_SELF / BBT_PERPENDICULAR_SELF work.
-					sunBillboard->mDirection = Ogre::Vector3::UNIT_Y;
-					bbs->setBillboardType(Ogre::v1::BillboardType::BBT_ORIENTED_SELF);
-				
-					//bbs->Ogre::Renderable::setDatablock("TestModel");
-					bbs->setRenderQueueGroup(5);
-					m_Scene.getOgreSceneManager().__OgreSceneMgrPtr->getRenderQueue()->setRenderQueueMode(5, Ogre::RenderQueue::Modes::V1_FAST);
-
-					Ogre::HlmsManager *hlmsManager = m_GraphicsManager.getRoot()->getHlmsManager();
-					m_datablock = hlmsManager->getDatablock("BillBoardTest");
-					bbs->setDatablock(m_datablock);
-
-					Ogre::HlmsUnlitDatablock *datablockUnlit = (Ogre::HlmsUnlitDatablock*)m_datablock;
-					//	assert(dynamic_cast<Ogre::HlmsUnlit*>(hlmsManager->getHlms(Ogre::HLMS_UNLIT)));
-					/*	Ogre::HlmsUnlit *hlmsUnlit = static_cast<Ogre::HlmsUnlit*>(hlmsManager->getHlms(Ogre::HLMS_UNLIT));
-					
-						Ogre::HlmsUnlitDatablock *datablockUnlit = (Ogre::HlmsUnlitDatablock*)hlmsUnlit->createDatablock(
-							"TestMat", "TestMat", Ogre::HlmsMacroblock(), Ogre::HlmsBlendblock(), Ogre::HlmsParamVec());
-						datablockUnlit->setTexture(0, 0,
-							Ogre::TextureManager::getSingleton().load("tornado.png",
-								Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME), 0);*/
-					//	Ogre::Matrix4 mat(Ogre::Matrix4::IDENTITY);
-					//	//mat.setScale(Ogre::Vector3(1, 1, 1));
-					////	mat.setTrans(Ogre::Vector3(0.5, 0.5, 0));
-					//	Ogre::Matrix4 xform(Ogre::Matrix4::IDENTITY);
-					//	mat[0][3] = 1.0;
-					//	mat[1][3] = 0;
-
-					//	xform = mat * xform;
-						//datablockUnlit->setFlipbookAnim(2,3, 1); //x , y , speed
-					//	datablockUnlit->setAnimationMatrix(0, xform);
-						//auto tex = datablockUnlit->getTexture(0);
-	
-						//Ogre::ControllerManager::getSingleton().getElapsedTime();
-			
-					Ogre::HlmsSamplerblock samplerblock;
-					samplerblock.setAddressingMode(Ogre::TAM_WRAP);
-					datablockUnlit->setSamplerblock(0, samplerblock);
-
-					datablockUnlit->setEnableAnimationMatrix(0, true);
-					
-					Ogre::Controller<Ogre::Real>* ret = 0;
-
-					float speed = 1.0;
-					Ogre::TextureAnimationControllerValue* ctrlVal = 0;
-
-					if (speed != 0)
-					{
-						Ogre::SharedPtr< Ogre::ControllerValue<Ogre::Real> > val;
-						Ogre::SharedPtr< Ogre::ControllerFunction<Ogre::Real> > func;
-
-						val.bind(OGRE_NEW Ogre::TextureAnimationControllerValue(datablockUnlit, 0));
-						ctrlVal = static_cast<Ogre::TextureAnimationControllerValue*>(val.get());
-
-						// Create function: use -speed since we're altering texture coords so they have reverse effect
-						func.bind(OGRE_NEW Ogre::ScaleControllerFunction(-speed, true));
-						ret = Ogre::ControllerManager::getSingleton().createController(Ogre::ControllerManager::getSingleton().getFrameTimeSource(), val, func);
-					}
-
-						ctrlVal->tiledAnimation(4, 4);
-					//ctrlVal->scrollAnimation(1, 1);
-					//	ctrlVal->scrollAnimation(0, 1);
-					//	ctrlVal->rotationAnimation(1);
-					//	ctrlVal->scaleAnimation(1, 0);
-
-
-					//	auto controller = Ogre::ControllerManager::getSingleton().createTextureUVScroller(? ? , 1.0f);
-					
-						//Ogre::MaterialPtr m = Ogre::MaterialManager::getSingleton().create(
-						//	"MyOffsetMaterial", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, true);
-			
-/*
-						Ogre::Technique *technique = m->createTechnique();
-						Ogre::Pass *pass_ambient = technique->createPass();*/
-
-				//		auto controller = Ogre::ControllerManager::getSingleton().createTextureUVScroller(?? , 1.0f);
-						//datablockUnlit->getTexture()->get
-						//auto renderables = _t_OgreItemPtr->mRenderables[0];
-						//auto text = datablockUnlit->getTexture(2);
-					
-						//renderables->setMaterial(m);
-						//auto material = renderables->getMaterial();
-						//auto pass = material->getTechnique(0)->getPass(0);
-						//auto texUState = pass->createTextureUnitState("tornado.png", 0);
-						//auto controller = Ogre::ControllerManager::getSingleton().createTextureUVScroller(texUState, 1.0f);
-					/*	auto tech = renderables->get();
-						auto pass = tech->getPass(0);
-
-						 Ogre::TextureUnitState* t = pass->getTextureUnitState(0);*/
-				
-					_t_OgreEntitySceneNodePtr->attachObject(bbs);
 				}
 
 				else if (var->mesh_type() == XFBType::UMesh::UMesh_MeshFile)

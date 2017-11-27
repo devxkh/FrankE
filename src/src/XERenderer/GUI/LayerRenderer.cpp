@@ -27,7 +27,7 @@ namespace XE {
 
 		RenderableLayer* layer = new RenderableLayer(id,
 													m_graphMgr.getGUIRenderer(),
-													&_t_OgreSceneMgrPtr->_getEntityMemoryManager(Ogre::SCENE_DYNAMIC)	
+													&_t_OgreSceneMgrPtr->_getEntityMemoryManager(Ogre::SCENE_STATIC)
 													, _t_OgreSceneMgrPtr,
 													atlasId);
 		_t_renderableLayerPtrs.emplace_back(layer);

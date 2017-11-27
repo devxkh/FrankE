@@ -292,6 +292,44 @@ namespace gltf {
 				}
 
 				// TODO: primitives[j]["targets"]
+				// targets
+				if (primitives[j].find("targets") != primitives[j].end()) {
+
+					//https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#morph-targets
+
+					auto& targets = primitives[j]["targets"];
+					if (!targets.is_array()) {
+						throw MisformattedExceptionNotArray("primitives[j][targets]");
+					}
+
+					asset.meshes[i].primitives[j].targets.resize(targets.size());
+					for (uint32_t jt = 0; jt < targets.size(); ++jt) {
+
+						if (targets[jt].find("NORMAL") != targets[jt].end()) {
+							if (!targets[jt]["NORMAL"].is_number()) {
+								throw MisformattedExceptionNotNumber("meshes[i][primitives][j][targets][jt]");
+							}
+
+							asset.meshes[i].primitives[j].targets[jt]["NORMAL"] = targets[jt]["NORMAL"].get<int32_t>();
+						}
+
+						if (targets[jt].find("POSITION") != targets[jt].end()) {
+							if (!targets[jt]["POSITION"].is_number()) {
+								throw MisformattedExceptionNotNumber("meshes[i][primitives][j][targets][jt]");
+							}
+
+							asset.meshes[i].primitives[j].targets[jt]["POSITION"] = targets[jt]["POSITION"].get<int32_t>();
+						}
+
+						if (targets[jt].find("TANGENT") != targets[jt].end()) {
+							if (!targets[jt]["TANGENT"].is_number()) {
+								throw MisformattedExceptionNotNumber("meshes[i][primitives][j][targets][jt]");
+							}
+
+							asset.meshes[i].primitives[j].targets[jt]["TANGENT"] = targets[jt]["TANGENT"].get<int32_t>();
+						}
+					}
+				}
 			}
 
 			// TODO: meshes[i]["weights"]
@@ -653,7 +691,7 @@ namespace gltf {
 
 		buffer.data = new char[buffer.byteLength];
 
-		// TODO: load base64 uri
+		// TODO: load base64 uri and from resource manager!!! no absolute paths!
 		std::ifstream fileData(pathAppend(asset.dirName, buffer.uri), std::ios::binary);
 		if (!fileData.good()) {
 			throw MisformattedException("buffers[i].uri", "has not a valid uri (failed to open file)");
@@ -910,7 +948,8 @@ namespace gltf {
 					throw MisformattedExceptionNotString("images[i][uri]");
 				}
 
-				asset.images[i].uri = pathAppend(asset.dirName, images[i]["uri"]);
+				//asset.images[i].uri = pathAppend(asset.dirName, images[i]["uri"]);
+				asset.images[i].uri = images[i]["uri"];
 			}
 
 			// mimeType

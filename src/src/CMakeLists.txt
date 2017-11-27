@@ -224,8 +224,9 @@ source_group("include\\extern" FILES ${XEEngineExtern_HEADER})
 #--------------------------------------
 set(XEngine_main_INCLUDES
     ${INCROOT}/XEngine/XENetObserver.hpp
-     ${INCROOT}/XEngine/OgreLogListener.hpp
-   ${INCROOT}/XEngine/Scene.hpp
+    ${INCROOT}/XEngine/OgreLogListener.hpp
+    ${INCROOT}/XEngine/ResourceManager.hpp
+    ${INCROOT}/XEngine/Scene.hpp
     ${INCROOT}/XEngine/Settings.hpp
     ${INCROOT}/XEngine/Node.hpp
 	
@@ -238,6 +239,7 @@ set(XEngine_main_SOURCES
     ${SRCROOT}/XEngine/Scene.cpp
     ${SRCROOT}/XEngine/Settings.cpp
     ${SRCROOT}/XEngine/OgreLogListener.cpp
+    ${SRCROOT}/XEngine/ResourceManager.cpp
     ${SRCROOT}/XEngine/Node.cpp
     ${SRCROOT}/XEngine/XENetObserver.cpp
 )
