@@ -104,11 +104,11 @@ namespace VEX.Model.Scene.Model
 
         #region DBProperties
 
-        private long m_EntityID;
+        //private long m_EntityID;
 
-        [XmlIgnore]
-        [Browsable(false)]
-        public long EntityID { get { return m_EntityID; } set { m_EntityID = value; RaisePropertyChanged("EntityID"); } }
+        //[XmlIgnore]
+        //[Browsable(false)]
+        //public long EntityID { get { return m_EntityID; } set { m_EntityID = value; RaisePropertyChanged("EntityID"); } }
 
         #endregion
         

@@ -5,7 +5,6 @@ namespace XE
 	BodyComponent::BodyComponent()
 		: m_bodyDirection(0, 0, 0)
 		, m_bodyGoalDirection(1, 0, 0, 0)
-		, m_id(0)
 		, m_parent(nullptr)
 		, mYawFixed(true)
 		, mYawFixedAxis(Ogre::Vector3::UNIT_Y)
@@ -29,7 +28,6 @@ namespace XE
 		:
 		m_bodyDirection(0, 0, 0)
 		, m_bodyGoalDirection(1, 0, 0, 0)
-		, m_id(0)
 		, mYawFixed(true)
 		, mYawFixedAxis(Ogre::Vector3::UNIT_Y)
 		,mPosition(0, 0, 0),
@@ -583,7 +581,8 @@ namespace XE
 	//-----------------------------------------------------------------------
 	void BodyComponent::scale(const Ogre::Vector3& inScale)
 	{
-		mScale *= inScale;	
+		mScale *= inScale;
+		isDirty(true);
 	}
 	//-----------------------------------------------------------------------
 	void BodyComponent::scale(Ogre::Real x, Ogre::Real y, Ogre::Real z)

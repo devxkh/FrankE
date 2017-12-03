@@ -17,6 +17,12 @@
 #include <Ogre/Components/Hlms/Pbs/include/OgreHlmsPbsDatablock.h>
 #include <Ogre/Components/Hlms/Unlit/include/OgreHlmsUnlitDatablock.h>
 
+#ifdef CompileEditor
+#include <XEngine/Editor/SceneViewerUIState.hpp>
+#include <XEngine/Editor/GizmoUIState.hpp>
+#include "../XETCommon/EditorControllerSystem.hpp"
+#endif
+
 ControllerState::ControllerState(XE::XEngine& engine, bool replace)
 	: XE::XEState(engine, replace)
 {
@@ -24,6 +30,10 @@ ControllerState::ControllerState(XE::XEngine& engine, bool replace)
 
 	auto ctrlSystem = engine.getScene().systems.add<XET::TestControllerSystem>(engine);
 	auto spawnSystem = engine.getScene().systems.add<XE::SpawnSystem>(engine.getScene());
+
+#ifdef CompileEditor	
+	auto editorSystem = engine.getScene().systems.add<XET::EditorControllerSystem>(engine);
+#endif
 
 	engine.getScene().create(1);
 
@@ -47,11 +57,31 @@ ControllerState::ControllerState(XE::XEngine& engine, bool replace)
 	ctrlSystem->setBasicInputEvents(*ctrl);
 	ctrl->setActionMap(*ctrl);
 
-	m_engine.getGraphicsManager().getIntoRendererQueue().push([this,camRenderable]()
+	//create helmet entity
+	entityx::Entity entityHelmet = m_engine.getScene().entities.create();
+
+	XE::EditorComponent* editorComponent = entityHelmet.assign<XE::EditorComponent>().get();
+	XE::Renderable* renderable = entityHelmet.assign<XE::Renderable>(m_engine.getGraphicsManager(), m_engine.getScene(), nullptr).get();
+	XE::BodyComponent* bodyHelmet = entityHelmet.assign<XE::BodyComponent>().get();
+	bodyHelmet->setPosition(0, 10, 0);
+	bodyHelmet->isSelected = true;
+	editorComponent->id = 999;
+	editorComponent->name = "Helmet";
+
+	m_engine.getGraphicsManager().getIntoRendererQueue().push([this,camRenderable, renderable]()
 	{
 
 #ifdef CompileEditor	
 		m_engine.getGraphicsManager().getGUIRenderer()._t_initEditorUIRenderer(camRenderable->_t_OgreCameraPtr);
+
+		std::unique_ptr<XE::SceneViewerUIState> p1(new XE::SceneViewerUIState(m_engine.getGraphicsManager(), m_engine.getScene()));
+		p1->ID = XE::EUSID::SceneHierarchy;
+		m_engine.getGraphicsManager().getGUIRenderer()._t_EditorUIRenderer->createUIState(std::move(p1));
+		
+		//default Editor ui 
+		std::unique_ptr<XE::GizmoUIState> p2(new XE::GizmoUIState(m_engine.getScene(), m_engine.getGraphicsManager(), camRenderable->_t_OgreCameraPtr));
+		p2->ID = XE::EUSID::Gizmo;
+		m_engine.getGraphicsManager().getGUIRenderer()._t_EditorUIRenderer->createUIState(std::move(p2));
 #endif
 
 		XET::TestPostProcess pp(m_engine, *camRenderable);
@@ -96,26 +126,19 @@ ControllerState::ControllerState(XE::XEngine& engine, bool replace)
 
 		gltf::Asset assetEmissive;
 		//gltf::load(m_engine.settings.resourceData.assetsFolder + "/DebugPack/material_ball/material_ball.gltf", assetEmissive);
-			gltf::load(m_engine.settings.resourceData.assetsFolder + "/DamagedHelmet/DamagedHelmet.gltf", assetEmissive);
-	XE::XEMesh meshMaterialBall;
+		gltf::load(m_engine.settings.resourceData.assetsFolder + "/DamagedHelmet/DamagedHelmet.gltf", assetEmissive);
+		XE::XEMesh meshMaterialBall;
 		meshMaterialBall.buildMesh(assetEmissive, "Ball 1", m_engine.getGraphicsManager(), m_engine.getScene().getOgreSceneManager().__OgreSceneMgrPtr);
 		
 		{
-			Ogre::Item* item{ nullptr };
-			item = m_engine.getScene().getOgreSceneManager().__OgreSceneMgrPtr->createItem(meshMaterialBall.m_ogreMesh, Ogre::SCENE_DYNAMIC);
-			auto m_sceneNode = m_engine.getScene().getOgreSceneManager().__OgreSceneMgrPtr->getRootSceneNode(Ogre::SCENE_DYNAMIC)->createChildSceneNode(Ogre::SCENE_DYNAMIC);
-			m_sceneNode->attachObject(item);
-			item->setCastShadows(true);
-			//do it at last! here the texture baking happens! needed for normal maps etc.
-			if(meshMaterialBall.m_datablock)
-				item->setDatablock(meshMaterialBall.m_datablock);
+			renderable->_t_OgreItemPtr = m_engine.getScene().getOgreSceneManager().__OgreSceneMgrPtr->createItem(meshMaterialBall.m_ogreMesh, Ogre::SCENE_DYNAMIC);
+			renderable->_t_OgreItemPtr->setCastShadows(true);
 			
-			m_sceneNode->setPosition(0, 10, 0);
-
-			entityx::Entity entity = m_engine.getScene().entities.create();
-			XE::BodyComponent* body = entity.assign<XE::BodyComponent>().get();
-			body->setPosition(0,10,0);
-			body->isSelected = true;
+			//do it at last! here the texture baking happens! needed for normal maps etc.
+			if (meshMaterialBall.m_datablock)
+				renderable->_t_OgreItemPtr->setDatablock(meshMaterialBall.m_datablock);
+			
+			renderable->_t_OgreEntitySceneNodePtr->attachObject(renderable->_t_OgreItemPtr);	
 
 		//	m_sceneNode->rotate(Ogre::Quaternion(Ogre::Degree(90), Ogre::Vector3(1, 0, 0))); // needed for blender exported meshes!
 		}

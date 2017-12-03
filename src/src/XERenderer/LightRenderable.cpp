@@ -31,7 +31,7 @@ namespace XE
 			//mLightAxisNode->setPosition(0,30,0);
 			m_LightAxisNode->attachObject(m_light);
 			//	mLightAxisNode->setScale(Ogre::Vector3(0.12f, 0.12f, 0.12f));
-
+			
 			_setLightData(fbData);
 		});
 	}
@@ -131,8 +131,8 @@ namespace XE
 		//m_light->setPowerScale(100);
 		//m_light->setAttenuation(23.0f, 0.5f, 0.0f, 0.5f);
 
-	///	mCLightVisualHelper = new CLightVisualHelper(m_Scene, m_light);
-	//	mCLightVisualHelper->Show(true);
+	mCLightVisualHelper = new CLightVisualHelper(m_Scene, m_light, m_LightAxisNode);
+		mCLightVisualHelper->Show(true);
 		//light->setDirection(Ogre::Vector3(-1, -1, -1).normalisedCopy());
 		//light->setDirection(Ogre::Vector3(0, -1, 0));
 

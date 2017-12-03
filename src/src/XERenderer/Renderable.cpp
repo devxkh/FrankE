@@ -93,7 +93,7 @@ namespace XE
 
 		//Ogre::Vector3 interpPosition = Ogre::Math::lerp(_t_LastPosition, _t_CurrentPosition, weight);
 		
-		_t_OgreEntitySceneNodePtr->setPosition(m_scale);
+		_t_OgreEntitySceneNodePtr->setScale(m_scale);
 		_t_OgreEntitySceneNodePtr->setPosition(m_position);
 		_t_OgreEntitySceneNodePtr->setOrientation(m_rotation);
 		_t_OgreEntitySceneNodePtr->setVisible(m_isVisible);
@@ -147,6 +147,9 @@ namespace XE
 
 	void Renderable::_t_createItem(const void* fbData)
 	{
+		if (!fbData)
+			return;
+
 		const XFBType::RenderableComponent* renderable = (const XFBType::RenderableComponent*)fbData;
 
 		//	auto renderable = flatbuffers::GetRoot<XFBType::RenderableComponent>(fbData);

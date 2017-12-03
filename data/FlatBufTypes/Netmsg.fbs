@@ -181,7 +181,8 @@ enum ComponentType : ushort
 
 table Entity
 {
-	entityID:uint;
+	entityID:uint;	
+	name: string; 
 	deleteEntity:bool;
 	components:[Component];
 	deleteComponents:[Component];

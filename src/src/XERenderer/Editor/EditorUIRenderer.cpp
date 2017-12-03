@@ -18,7 +18,6 @@
 #include <XERenderer/GraphicsManager.hpp>
 #include <XERenderer/GUI/GUIRenderer.hpp>
 
-#include <XERenderer/Editor/UIState/GizmoUIState.hpp>
 
 static double       g_Time = 0.0f;
 static float        g_MouseWheel = 0.0f;

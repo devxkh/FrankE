@@ -42,6 +42,7 @@ namespace XE
 		AnimationAddTimes,
 		RenderBody,
 		RenderGUI,
+		RenderEditorUI,
 		Camera,
 	};
 
@@ -107,6 +108,8 @@ namespace XE
 		RenderTask& GetRenderTask(RenderTaskID id);
 
 		std::vector<Renderable*> _t_Renderables;
+		
+		mutable bool _isRenderThreadFinished;
 
 	protected:
 		void createRenderer();
@@ -123,6 +126,7 @@ namespace XE
 		SDL_Window* m_SdlWindow;
 
 		void RenderThread(GraphicsManager* graphicsMgr, XE::XEngine* engine);
+
 
 		std::vector<RenderTask> _renderTasks;
 

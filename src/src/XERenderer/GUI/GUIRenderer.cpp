@@ -23,9 +23,6 @@
 #include <XEScripts/LUAEngine.h>
 #include <XEUI/Glyph.hpp>
 
-#ifdef CompileEditor
-#include <XERenderer/Editor/UIState/GizmoUIState.hpp>
-#endif
 
 namespace XE
 {
@@ -123,11 +120,6 @@ namespace XE
 	void GUIRenderer::_t_initEditorUIRenderer(Ogre::Camera* camera) {
 		_t_EditorUIRenderer = new EditorUIRenderer(getGraphicsManager(), camera);
 		_t_EditorUIRenderer->init();
-
-		//default Editor ui 
-		std::unique_ptr<GizmoUIState> p1(new GizmoUIState(getGraphicsManager(), camera));
-		p1->ID = EUSID::Gizmo;
-		_t_EditorUIRenderer->createUIState(std::move(p1));
 	}
 #endif
 

@@ -49,7 +49,7 @@ namespace XE
 	{
 	public:
 
-		CLightVisualHelper(Scene& scene, Ogre::Light* light);
+		CLightVisualHelper(Scene& scene, Ogre::Light* light, Ogre::SceneNode* node);
 
 		virtual ~CLightVisualHelper();
 		

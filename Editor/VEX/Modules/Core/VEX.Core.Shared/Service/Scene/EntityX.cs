@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
@@ -106,8 +107,27 @@ namespace VEX.Service.Scene
             set { _NetID = value; RaisePropertyChanged("NetID"); }
         }
 
+        [Display(Name = "Name", Description = "", GroupName = "General")]
+        [DataMember]
+        public override string Name
+        {
+            get
+            {
+                return FB_Entity.Name;
+            }
+            set
+            {
+                if (FB_Entity != null)
+                {
+                    FB_Entity.Name = value;
+                }
+
+                base.Name = value;
+                RaisePropertyChanged("Name");
+            }
+        }
         
-       // [Editor(typeof(Xceed.Wpf.Toolkit.PropertyGrid.Editors.CollectionEditor), typeof(Xceed.Wpf.Toolkit.PropertyGrid.Editors.CollectionEditor))]
+        // [Editor(typeof(Xceed.Wpf.Toolkit.PropertyGrid.Editors.CollectionEditor), typeof(Xceed.Wpf.Toolkit.PropertyGrid.Editors.CollectionEditor))]
         [NewItemTypes(new Type[] { typeof(BodyComponent),typeof(AIComponent), typeof(RenderableComponent), typeof(SpawnPointComponent), typeof(SpawnComponent), typeof(CharacterComponent),
             typeof(LightComponent),typeof(AbilityComponent), typeof(AnimationComponent) , typeof(PhysicsComponent) , typeof(SoundComponent)})]
         [ExpandableObject]
@@ -138,7 +158,6 @@ namespace VEX.Service.Scene
                         {
                         //    body.SceneNodeID = (uint)(this.Parent as DBEntitesModel).Items.Count; // currentlty nodeid = entityID -> one body per entity!
                         }
-
                     }
                 }
             }
@@ -157,7 +176,6 @@ namespace VEX.Service.Scene
 
                 FBObject = value;
             } }
-
 
         public override List<System.Type> CanAddThisItems
         {

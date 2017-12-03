@@ -412,7 +412,6 @@ table BodyComponent
 	visible:bool = 1;	
 	enabled:bool = 1;
 	group:uint; // e.g. static grouping	
-
 }
 
 table AnimationComponent

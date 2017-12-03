@@ -25,7 +25,7 @@ namespace VEX.Model.Scene.Model.Objects
         private ComponentsList<ComponentX> _Components;
 
         private NetMsg.Entity m_FBData = new NetMsg.Entity();
-
+        private string m_Name;
         //     public NetMsg.Data FBMsgType { get { return NetMsg.Data.StaticComponent; } }
 
         #endregion
@@ -51,6 +51,9 @@ namespace VEX.Model.Scene.Model.Objects
 
         [DataMember]
         public uint EntityID { get; set; }
+    
+        [DataMember]
+        public string Name { get { return m_Name; } set { m_Name = value; SendToSocketServer(); } }
 
         [DataMember]
         public object Parent { get; set; }
@@ -58,6 +61,15 @@ namespace VEX.Model.Scene.Model.Objects
         //  public int Group { get { return m_Group; } set { m_Group = FB_Helper.UpdateSelectedObject(this, m_Group, value); } }
 
         #endregion
+
+        private void SendToSocketServer()
+        {
+            if (Parent == null)
+                return;
+
+            var entity = Parent as EntityX;
+        //TODO    entity.SendToSocket(entity.FB_Entity, NetMsg.Data.Entity, new System.Collections.Generic.List<Type>() { typeof(BodyComponent) });
+        }
 
 
         void OnCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -166,7 +178,7 @@ namespace VEX.Model.Scene.Model.Objects
                 componentsOffset = fbbParent.EndVector();
             }
 
-            var finishOffset = NetMsg.Entity.CreateEntity(fbbParent, EntityID, false, componentsOffset);
+            var finishOffset = NetMsg.Entity.CreateEntity(fbbParent, EntityID, fbbParent.CreateString(m_Name), false, componentsOffset);
 
             fbbParent.Finish(finishOffset.Value); //!!!!! important ..
 
@@ -193,7 +205,7 @@ namespace VEX.Model.Scene.Model.Objects
 
             VectorOffset componentsOffset = NetMsg.Entity.CreateComponentsVector(fbbParent, componentOffsets.ToArray());
 
-            var finishOffset = NetMsg.Entity.CreateEntity(fbbParent, EntityID, false, componentsOffset);
+            var finishOffset = NetMsg.Entity.CreateEntity(fbbParent, EntityID, fbbParent.CreateString(m_Name), false, componentsOffset);
 
             fbbParent.Finish(finishOffset.Value); //!!!!! important ..
 

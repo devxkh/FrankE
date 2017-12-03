@@ -47,6 +47,7 @@ namespace XE
 		, m_GUIRenderer(*this)
 		, m_SdlWindow(0)
 		, m_ogreLog()
+		, _isRenderThreadFinished(true)
 	{
 	//	static plog::ConsoleAppender<plog::TxtFormatter> consoleAppender; 
 	//	plog::init(plog::debug, "HelloLog.txt", 1000000).addAppender(&consoleAppender);
@@ -66,6 +67,7 @@ namespace XE
 		_renderTasks.push_back(RenderTask(RenderTaskID::RenderBody));
 		_renderTasks.push_back(RenderTask(RenderTaskID::Camera));
 		_renderTasks.push_back(RenderTask(RenderTaskID::RenderGUI));
+		_renderTasks.push_back(RenderTask(RenderTaskID::RenderEditorUI));
 
 		if (SDL_Init(SDL_INIT_EVERYTHING) != 0)
 			LOG(plog::error) << "Cannot initialize SDL2! - GraphicsSystem::initialize";
@@ -302,6 +304,7 @@ namespace XE
 
 		mAccumTimeSinceLastLogicFrame = timeSinceLast;
 		
+		_isRenderThreadFinished = true;
 	}
 
 	void GraphicsManager::createRenderer()

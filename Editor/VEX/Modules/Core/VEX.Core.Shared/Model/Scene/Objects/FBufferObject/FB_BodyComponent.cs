@@ -42,7 +42,7 @@ namespace VEX.Model.Scene.Model.Objects.FBufferObject
 
         [DataMember]
         public bool IsEnabled { get { return m_IsEnabled; } set { m_IsEnabled = value; SendToSocketServer(); } }
-
+        
         [DataMember]
         [ExpandableObject]
         public Quaternion Rotation

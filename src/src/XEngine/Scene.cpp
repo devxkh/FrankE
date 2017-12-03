@@ -320,12 +320,12 @@ namespace XE {
 
 	void Scene::createBodyComponent(entityx::Entity entity, const void* fbData)
 	{
-		const XFBType::BodyComponent* node = (const XFBType::BodyComponent*)fbData;
+		const XFBType::BodyComponent* fbBody = (const XFBType::BodyComponent*)fbData;
 
-		entityx::ComponentHandle<BodyComponent> body = entity.assign<BodyComponent>(node);// , scene->getNodeMemoryMgr());
+		entityx::ComponentHandle<BodyComponent> body = entity.assign<BodyComponent>(fbBody);// , scene->getNodeMemoryMgr());
 		auto netID = entity.component<NetIdComponent>();
 		netID->id = m_engine.getNetworkManager().newNetID();
-		body->sceneId = node->sceneId();
+		body->sceneId = fbBody->sceneId();
 
 		//set body for physics
 		if (entity.has_component<PhysicsComponent>())

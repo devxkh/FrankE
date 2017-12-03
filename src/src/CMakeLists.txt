@@ -55,7 +55,21 @@ set(XEngineModules_SOURCES
 )
 source_group("include\\modules" FILES ${XEngineModules_SOURCES})
 
+# ----------------------- Editor_SOURCES -------------------------------
 
+set(XEngine_Editor_SOURCES
+     ${SRCROOT}/XEngine/Editor/SceneViewerUIState.cpp
+     ${SRCROOT}/XEngine/Editor/GizmoUIState.cpp
+)
+source_group("src\\Editor" FILES ${XEngine_Editor_SOURCES})
+
+set(XEngine_Editor_HEADER
+    ${INCROOT}/XEngine/Editor/SceneViewerUIState.hpp
+    ${INCROOT}/XEngine/Editor/GizmoUIState.hpp
+)
+source_group("include\\Editor" FILES ${XEngine_Editor_HEADER})
+
+# ----------------------- End Editor_SOURCES -------------------------------
 
 set(SCRIPTINCROOT ${PROJECT_SOURCE_DIR}/src/include/XEScripts)
 set(SCRIPTSRCROOT ${PROJECT_SOURCE_DIR}/src/src/XEScripts)
@@ -369,6 +383,8 @@ sfml_add_library(XEngine
 				 ${XEAudio_SOURCES} ${XEAudio_HEADER} 
 			${XEScripts_SOURCES} ${XEScripts_HEADER} ${XEScripts_LUASRC} ${XEScripts_LUAHEADER}
 	 ${XEController_SOURCES} ${XEController_HEADER} ${XEController_UI_SOURCES} ${XEController_UI_HEADER}
+
+	 ${XEngine_Editor_SOURCES} ${XEngine_Editor_HEADER}
 
 	  ${XEAnimation_SOURCES} ${XEAnimation_HEADER} ${XEAnimationNodes_SOURCES} ${XEAnimationProp_SOURCES}
 	 #${XEAnimation_Ogre_SOURCES} 	${XEAnimation_Ogre_INCLUDES}

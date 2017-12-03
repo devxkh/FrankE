@@ -72,16 +72,6 @@ set(XERenderer_Editor_HEADER
 
 source_group("include\\Editor" FILES ${XERenderer_Editor_HEADER})
 
-file(GLOB XERenderer_EditorUIState_SOURCES
-     ${SRCROOT}/Editor/UIState/*.cpp
-)
-source_group("src\\Editor\\UIState" FILES ${XERenderer_EditorUIState_SOURCES})
-
-file(GLOB XERenderer_EditorUIState_HEADER
-    ${INCROOT}/Editor/UIState/*.h
-    ${INCROOT}/Editor/UIState/*.hpp
-)
-source_group("include\\Editor\\UIState" FILES ${XERenderer_EditorUIState_HEADER})
 
 # ------------ Hlms ---------------
 set(XERenderer_Hlms_SOURCES   
@@ -174,7 +164,6 @@ enable_unity_build(XERenderer  ${XERenderer_SOURCES} ${XERenderer_private_SOURCE
 sfml_add_library(XERenderer 
 	SOURCES ${XERenderer_SOURCES} ${XERenderer_HEADER} ${XERenderer_private_SOURCES} ${XEGraphics_HEADER} ${XEGraphics_SOURCES} ${XERenderer_Editor_HEADER} ${XERenderer_Editor_SOURCES}
 	 ${XERenderer_Hlms_HEADER} ${XERenderer_Hlms_SOURCES} ${XERenderer_Animation_HEADER} ${XERenderer_Animation_SOURCES} ${XERenderer_Resources_SOURCES} ${XERenderer_Resources_HEADER}
-	 ${XERenderer_EditorUIState_HEADER} ${XERenderer_EditorUIState_SOURCES}
 	DEPENDS OgreMain XEDAL 
 	RenderSystem_GL3Plus 
 #	RenderSystem_Direct3D11

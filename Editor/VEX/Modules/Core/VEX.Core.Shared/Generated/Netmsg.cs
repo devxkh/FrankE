@@ -471,34 +471,38 @@ public sealed class Entity : Table {
   public Entity __init(int _i, ByteBuffer _bb) { bb_pos = _i; bb = _bb; return this; }
 
   public uint EntityID { get { int o = __offset(4); return o != 0 ? bb.GetUint(o + bb_pos) : (uint)0; } }
-  public bool DeleteEntity { get { int o = __offset(6); return o != 0 ? 0!=bb.Get(o + bb_pos) : (bool)false; } }
+  public string Name { get { int o = __offset(6); return o != 0 ? __string(o + bb_pos) : null; } }
+  public bool DeleteEntity { get { int o = __offset(8); return o != 0 ? 0!=bb.Get(o + bb_pos) : (bool)false; } }
   public Component GetComponents(int j) { return GetComponents(new Component(), j); }
-  public Component GetComponents(Component obj, int j) { int o = __offset(8); return o != 0 ? obj.__init(__indirect(__vector(o) + j * 4), bb) : null; }
-  public int ComponentsLength { get { int o = __offset(8); return o != 0 ? __vector_len(o) : 0; } }
+  public Component GetComponents(Component obj, int j) { int o = __offset(10); return o != 0 ? obj.__init(__indirect(__vector(o) + j * 4), bb) : null; }
+  public int ComponentsLength { get { int o = __offset(10); return o != 0 ? __vector_len(o) : 0; } }
   public Component GetDeleteComponents(int j) { return GetDeleteComponents(new Component(), j); }
-  public Component GetDeleteComponents(Component obj, int j) { int o = __offset(10); return o != 0 ? obj.__init(__indirect(__vector(o) + j * 4), bb) : null; }
-  public int DeleteComponentsLength { get { int o = __offset(10); return o != 0 ? __vector_len(o) : 0; } }
+  public Component GetDeleteComponents(Component obj, int j) { int o = __offset(12); return o != 0 ? obj.__init(__indirect(__vector(o) + j * 4), bb) : null; }
+  public int DeleteComponentsLength { get { int o = __offset(12); return o != 0 ? __vector_len(o) : 0; } }
 
   public static Offset<Entity> CreateEntity(FlatBufferBuilder builder,
       uint entityID = 0,
+      StringOffset nameOffset = default(StringOffset),
       bool deleteEntity = false,
       VectorOffset componentsOffset = default(VectorOffset),
       VectorOffset deleteComponentsOffset = default(VectorOffset)) {
-    builder.StartObject(4);
+    builder.StartObject(5);
     Entity.AddDeleteComponents(builder, deleteComponentsOffset);
     Entity.AddComponents(builder, componentsOffset);
+    Entity.AddName(builder, nameOffset);
     Entity.AddEntityID(builder, entityID);
     Entity.AddDeleteEntity(builder, deleteEntity);
     return Entity.EndEntity(builder);
   }
 
-  public static void StartEntity(FlatBufferBuilder builder) { builder.StartObject(4); }
+  public static void StartEntity(FlatBufferBuilder builder) { builder.StartObject(5); }
   public static void AddEntityID(FlatBufferBuilder builder, uint entityID) { builder.AddUint(0, entityID, 0); }
-  public static void AddDeleteEntity(FlatBufferBuilder builder, bool deleteEntity) { builder.AddBool(1, deleteEntity, false); }
-  public static void AddComponents(FlatBufferBuilder builder, VectorOffset componentsOffset) { builder.AddOffset(2, componentsOffset.Value, 0); }
+  public static void AddName(FlatBufferBuilder builder, StringOffset nameOffset) { builder.AddOffset(1, nameOffset.Value, 0); }
+  public static void AddDeleteEntity(FlatBufferBuilder builder, bool deleteEntity) { builder.AddBool(2, deleteEntity, false); }
+  public static void AddComponents(FlatBufferBuilder builder, VectorOffset componentsOffset) { builder.AddOffset(3, componentsOffset.Value, 0); }
   public static VectorOffset CreateComponentsVector(FlatBufferBuilder builder, Offset<Component>[] data) { builder.StartVector(4, data.Length, 4); for (int i = data.Length - 1; i >= 0; i--) builder.AddOffset(data[i].Value); return builder.EndVector(); }
   public static void StartComponentsVector(FlatBufferBuilder builder, int numElems) { builder.StartVector(4, numElems, 4); }
-  public static void AddDeleteComponents(FlatBufferBuilder builder, VectorOffset deleteComponentsOffset) { builder.AddOffset(3, deleteComponentsOffset.Value, 0); }
+  public static void AddDeleteComponents(FlatBufferBuilder builder, VectorOffset deleteComponentsOffset) { builder.AddOffset(4, deleteComponentsOffset.Value, 0); }
   public static VectorOffset CreateDeleteComponentsVector(FlatBufferBuilder builder, Offset<Component>[] data) { builder.StartVector(4, data.Length, 4); for (int i = data.Length - 1; i >= 0; i--) builder.AddOffset(data[i].Value); return builder.EndVector(); }
   public static void StartDeleteComponentsVector(FlatBufferBuilder builder, int numElems) { builder.StartVector(4, numElems, 4); }
   public static Offset<Entity> EndEntity(FlatBufferBuilder builder) {

@@ -5,6 +5,11 @@
 #include  <XEngine.hpp>
 #include "Netmsg_generated.h"
 
+
+#ifdef CompileEditor	
+#include <XEngine/Editor/SceneViewerUIState.hpp>
+#endif
+
 namespace XET {
 
 TestScene::TestScene( XE::XEngine& engine)
@@ -76,6 +81,17 @@ bool TestScene::createEntityType(entityx::Entity entity, void* entityData)
 
 	if (!ent->components())
 		return false;
+
+#ifdef CompileEditor	
+	XE::EditorComponent* editorComponent;
+	if (entity.has_component<XE::Renderable>())
+		editorComponent = entity.component<XE::EditorComponent>().get();
+	else
+		editorComponent = entity.assign<XE::EditorComponent>().get();
+
+	editorComponent->id = ent->entityID();
+	editorComponent->name = ent->name()->c_str();
+#endif
 
 	//const NetMsg::Entity* ent = (const NetMsg::Entity*)entityData;
 	for each (auto var in *ent->components())

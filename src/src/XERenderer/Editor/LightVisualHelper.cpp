@@ -51,7 +51,7 @@ const size_t         gEstimatedVertexCount = gCircleVertexCount * 4 + 16;
 namespace XE {
 
 	// constructor
-	CLightVisualHelper::CLightVisualHelper(Scene& scene, Ogre::Light* light):
+	CLightVisualHelper::CLightVisualHelper(Scene& scene, Ogre::Light* light, Ogre::SceneNode* node):
 	//	: CEntityVisualHelper(parent),
 		mLightType(Ogre::Light::LT_POINT),
 		mColour1(0.6f, 0.8f, 0.9f),
@@ -94,50 +94,50 @@ namespace XE {
 		//mMaterial->getTechnique(0)->getPass(0)->setVertexColourTracking(Ogre::TVC_DIFFUSE);
 
 		// create 5 sections, four LineStrip (for max. 4 circles) and one Line version
-		mVisualHelperObject->begin("BaseWhite", Ogre::OperationType::OT_LINE_STRIP);
-		mVisualHelperObject->position(0, 0, 0);  // dummy
-		mVisualHelperObject->colour(1, 1, 1);    // dummy
-		mVisualHelperObject->position(0, 0, 0);  // dummy
-		mVisualHelperObject->colour(1, 1, 1);    // dummy
-		mVisualHelperObject->index(0);
-		mVisualHelperObject->end();
+		//mVisualHelperObject->begin("BaseWhite", Ogre::OperationType::OT_LINE_STRIP);
+		//mVisualHelperObject->position(0, 0, 0);  // dummy
+		//mVisualHelperObject->colour(1, 1, 1);    // dummy
+		//mVisualHelperObject->position(0, 0, 0);  // dummy
+		//mVisualHelperObject->colour(1, 1, 1);    // dummy
+		//mVisualHelperObject->index(0);
+		//mVisualHelperObject->end();
 
-		mVisualHelperObject->begin("BaseWhite", Ogre::OperationType::OT_LINE_STRIP);
-		mVisualHelperObject->position(0, 0, 0);  // dummy
-		mVisualHelperObject->colour(1, 1, 1);    // dummy
-		mVisualHelperObject->position(0, 0, 0);  // dummy
-		mVisualHelperObject->colour(1, 1, 1);    // dummy
-		mVisualHelperObject->index(1);
-		mVisualHelperObject->end();
+		//mVisualHelperObject->begin("BaseWhite", Ogre::OperationType::OT_LINE_STRIP);
+		//mVisualHelperObject->position(0, 0, 0);  // dummy
+		//mVisualHelperObject->colour(1, 1, 1);    // dummy
+		//mVisualHelperObject->position(0, 0, 0);  // dummy
+		//mVisualHelperObject->colour(1, 1, 1);    // dummy
+		//mVisualHelperObject->index(1);
+		//mVisualHelperObject->end();
 
-		mVisualHelperObject->begin("BaseWhite", Ogre::OperationType::OT_LINE_STRIP);
-		mVisualHelperObject->position(0, 0, 0);  // dummy
-		mVisualHelperObject->colour(1, 1, 1);    // dummy
-		mVisualHelperObject->position(0, 0, 0);  // dummy
-		mVisualHelperObject->colour(1, 1, 1);    // dummy
-		mVisualHelperObject->index(2);
-		mVisualHelperObject->end();
+		//mVisualHelperObject->begin("BaseWhite", Ogre::OperationType::OT_LINE_STRIP);
+		//mVisualHelperObject->position(0, 0, 0);  // dummy
+		//mVisualHelperObject->colour(1, 1, 1);    // dummy
+		//mVisualHelperObject->position(0, 0, 0);  // dummy
+		//mVisualHelperObject->colour(1, 1, 1);    // dummy
+		//mVisualHelperObject->index(2);
+		//mVisualHelperObject->end();
 
-		mVisualHelperObject->begin("BaseWhite", Ogre::OperationType::OT_LINE_STRIP);
-		mVisualHelperObject->position(0, 0, 0);  // dummy
-		mVisualHelperObject->colour(1, 1, 1);    // dummy
-		mVisualHelperObject->position(0, 0, 0);  // dummy
-		mVisualHelperObject->colour(1, 1, 1);    // dummy
-		mVisualHelperObject->index(3);
-		mVisualHelperObject->end();
+		//mVisualHelperObject->begin("BaseWhite", Ogre::OperationType::OT_LINE_STRIP);
+		//mVisualHelperObject->position(0, 0, 0);  // dummy
+		//mVisualHelperObject->colour(1, 1, 1);    // dummy
+		//mVisualHelperObject->position(0, 0, 0);  // dummy
+		//mVisualHelperObject->colour(1, 1, 1);    // dummy
+		//mVisualHelperObject->index(3);
+		//mVisualHelperObject->end();
 
-		mVisualHelperObject->begin("BaseWhite", Ogre::OperationType::OT_LINE_LIST);
-		mVisualHelperObject->position(0, 0, 0);  // dummy
-		mVisualHelperObject->colour(1, 1, 1);    // dummy
-		mVisualHelperObject->position(0, 0, 0);  // dummy
-		mVisualHelperObject->colour(1, 1, 1);    // dummy
-		mVisualHelperObject->line(4,5);
-		mVisualHelperObject->end();
+		//mVisualHelperObject->begin("BaseWhite", Ogre::OperationType::OT_LINE_LIST);
+		//mVisualHelperObject->position(0, 0, 0);  // dummy
+		//mVisualHelperObject->colour(1, 1, 1);    // dummy
+		//mVisualHelperObject->position(0, 0, 0);  // dummy
+		//mVisualHelperObject->colour(1, 1, 1);    // dummy
+		//mVisualHelperObject->line(4,5);
+		//mVisualHelperObject->end();
 
-		mVisualHelperObject->setVisible(false);
-
-		Ogre::SceneNode* node = mSceneManager->getRootSceneNode(Ogre::SCENE_DYNAMIC)->createChildSceneNode(Ogre::SCENE_DYNAMIC);
+	
+	//	Ogre::SceneNode* node = mSceneManager->getRootSceneNode(Ogre::SCENE_DYNAMIC)->createChildSceneNode(Ogre::SCENE_DYNAMIC);
 		node->attachObject(mVisualHelperObject);
+		//mVisualHelperObject->setVisible(false);
 
 		if (mLightType == Ogre::Light::LT_POINT)
 		{
@@ -266,66 +266,71 @@ namespace XE {
 
 
 		// draw inner circles
-		mVisualHelperObject->beginUpdate(0);
+		mVisualHelperObject->begin("BaseWhite", Ogre::OperationType::OT_LINE_STRIP);
+		//mVisualHelperObject->beginUpdate(0);
 		Ogre::Real firstInnerRadius = Ogre::Math::Tan(innerAngle / 2) * mSpotlightStartCircleOffset;
 		_drawCircle(firstInnerRadius, mSpotlightStartCircleOffset, mColour2, idx);
 		mVisualHelperObject->end();
 
-		mVisualHelperObject->beginUpdate(1);
+		mVisualHelperObject->begin("BaseWhite", Ogre::OperationType::OT_LINE_STRIP);
+		//mVisualHelperObject->beginUpdate(1);
 		Ogre::Real secondInnerRadius = Ogre::Math::Tan(innerAngle / 2) * mAttenuationRange;
 		_drawCircle(secondInnerRadius, mAttenuationRange, mColour2, idx);
 		mVisualHelperObject->end();
 
 		// draw first outer circles
-		mVisualHelperObject->beginUpdate(2);
+		mVisualHelperObject->begin("BaseWhite", Ogre::OperationType::OT_LINE_STRIP);
+		//mVisualHelperObject->beginUpdate(2);
 		Ogre::Real firstOuterRadius = Ogre::Math::Tan(outerAngle / 2) * mSpotlightStartCircleOffset;
 		_drawCircle(firstOuterRadius, mSpotlightStartCircleOffset, mColour1, idx);
 		mVisualHelperObject->end();
 
-		mVisualHelperObject->beginUpdate(3);
+		mVisualHelperObject->begin("BaseWhite", Ogre::OperationType::OT_LINE_STRIP);
+		//mVisualHelperObject->beginUpdate(3);
 		Ogre::Real secondOuterRadius = Ogre::Math::Tan(outerAngle / 2) * mAttenuationRange;
 		_drawCircle(secondOuterRadius, mAttenuationRange, mColour1, idx);
 		mVisualHelperObject->end();
 
-		mVisualHelperObject->beginUpdate(4);
+		//mVisualHelperObject->begin("BaseWhite", Ogre::OperationType::OT_LINE_LIST); 
+		//mVisualHelperObject->beginUpdate(4);
 
 		// draw 4 lines between inner circles
-		mVisualHelperObject->position(firstInnerRadius, 0, mSpotlightStartCircleOffset);
-		mVisualHelperObject->colour(mColour2);
-		mVisualHelperObject->position(secondInnerRadius, 0, mAttenuationRange);
-		mVisualHelperObject->colour(mColour2);
-		mVisualHelperObject->position(0, firstInnerRadius, mSpotlightStartCircleOffset);
-		mVisualHelperObject->colour(mColour2);
-		mVisualHelperObject->position(0, secondInnerRadius, mAttenuationRange);
-		mVisualHelperObject->colour(mColour2);
-		mVisualHelperObject->position(0, -firstInnerRadius, mSpotlightStartCircleOffset);
-		mVisualHelperObject->colour(mColour2);
-		mVisualHelperObject->position(0, -secondInnerRadius, mAttenuationRange);
-		mVisualHelperObject->colour(mColour2);
-		mVisualHelperObject->position(-firstInnerRadius, 0, mSpotlightStartCircleOffset);
-		mVisualHelperObject->colour(mColour2);
-		mVisualHelperObject->position(-secondInnerRadius, 0, mAttenuationRange);
-		mVisualHelperObject->colour(mColour2);
+		//mVisualHelperObject->position(firstInnerRadius, 0, mSpotlightStartCircleOffset);
+		//mVisualHelperObject->colour(mColour2);
+		//mVisualHelperObject->position(secondInnerRadius, 0, mAttenuationRange);
+		//mVisualHelperObject->colour(mColour2);
+		//mVisualHelperObject->position(0, firstInnerRadius, mSpotlightStartCircleOffset);
+		//mVisualHelperObject->colour(mColour2);
+		//mVisualHelperObject->position(0, secondInnerRadius, mAttenuationRange);
+		//mVisualHelperObject->colour(mColour2);
+		//mVisualHelperObject->position(0, -firstInnerRadius, mSpotlightStartCircleOffset);
+		//mVisualHelperObject->colour(mColour2);
+		//mVisualHelperObject->position(0, -secondInnerRadius, mAttenuationRange);
+		//mVisualHelperObject->colour(mColour2);
+		//mVisualHelperObject->position(-firstInnerRadius, 0, mSpotlightStartCircleOffset);
+		//mVisualHelperObject->colour(mColour2);
+		//mVisualHelperObject->position(-secondInnerRadius, 0, mAttenuationRange);
+		//mVisualHelperObject->colour(mColour2);
 
-		// draw 4 lines between outer circles
-		mVisualHelperObject->position(firstOuterRadius, 0, mSpotlightStartCircleOffset);
-		mVisualHelperObject->colour(mColour1);
-		mVisualHelperObject->position(secondOuterRadius, 0, mAttenuationRange);
-		mVisualHelperObject->colour(mColour1);
-		mVisualHelperObject->position(0, firstOuterRadius, mSpotlightStartCircleOffset);
-		mVisualHelperObject->colour(mColour1);
-		mVisualHelperObject->position(0, secondOuterRadius, mAttenuationRange);
-		mVisualHelperObject->colour(mColour1);
-		mVisualHelperObject->position(0, -firstOuterRadius, mSpotlightStartCircleOffset);
-		mVisualHelperObject->colour(mColour1);
-		mVisualHelperObject->position(0, -secondOuterRadius, mAttenuationRange);
-		mVisualHelperObject->colour(mColour1);
-		mVisualHelperObject->position(-firstOuterRadius, 0, mSpotlightStartCircleOffset);
-		mVisualHelperObject->colour(mColour1);
-		mVisualHelperObject->position(-secondOuterRadius, 0, mAttenuationRange);
-		mVisualHelperObject->colour(mColour1);
+		//// draw 4 lines between outer circles
+		//mVisualHelperObject->position(firstOuterRadius, 0, mSpotlightStartCircleOffset);
+		//mVisualHelperObject->colour(mColour1);
+		//mVisualHelperObject->position(secondOuterRadius, 0, mAttenuationRange);
+		//mVisualHelperObject->colour(mColour1);
+		//mVisualHelperObject->position(0, firstOuterRadius, mSpotlightStartCircleOffset);
+		//mVisualHelperObject->colour(mColour1);
+		//mVisualHelperObject->position(0, secondOuterRadius, mAttenuationRange);
+		//mVisualHelperObject->colour(mColour1);
+		//mVisualHelperObject->position(0, -firstOuterRadius, mSpotlightStartCircleOffset);
+		//mVisualHelperObject->colour(mColour1);
+		//mVisualHelperObject->position(0, -secondOuterRadius, mAttenuationRange);
+		//mVisualHelperObject->colour(mColour1);
+		//mVisualHelperObject->position(-firstOuterRadius, 0, mSpotlightStartCircleOffset);
+		//mVisualHelperObject->colour(mColour1);
+		//mVisualHelperObject->position(-secondOuterRadius, 0, mAttenuationRange);
+		//mVisualHelperObject->colour(mColour1);
 
-		mVisualHelperObject->end();
+		//mVisualHelperObject->end();
 	}
 
 
@@ -348,7 +353,7 @@ namespace XE {
 		//if (mHandle)
 		//	mHandle->setVisible(bShow);
 
-		mVisualHelperObject->setVisible(bShow); // && (OgitorsRoot::getSingletonPtr()->GetSelection()->getAsSingle() == mParent));
+	//	mVisualHelperObject->setVisible(bShow); // && (OgitorsRoot::getSingletonPtr()->GetSelection()->getAsSingle() == mParent));
 	}
 
 	//void CLightVisualHelper::OnDiffuseChange(const OgitorsPropertyBase* property, Ogre::Any value)

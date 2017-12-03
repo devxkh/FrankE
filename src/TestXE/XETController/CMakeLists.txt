@@ -14,7 +14,8 @@ set(XETCommon_SOURCES
     ${TESTCOMMONROOT}/Controllers_generated.h
     ${TESTCOMMONROOT}/Netmsg_generated.h
 	${TESTCOMMONROOT}/TestDAL.cpp
-	${TESTCOMMONROOT}/TestController.cpp
+	${TESTCOMMONROOT}/TestController.cpp	
+	${TESTCOMMONROOT}/EditorControllerSystem.cpp
    #	${SRCROOT}/GUI.h
 )
 source_group("src\\common" FILES ${XETCommon_SOURCES})
@@ -26,6 +27,7 @@ set(XETCommon_HEADER
 	${TESTCOMMONROOT}/TestPostProcess.hpp
 	${TESTCOMMONROOT}/TestDAL.hpp
 	${TESTCOMMONROOT}/TestControllerSystem.hpp
+	${TESTCOMMONROOT}/EditorControllerSystem.hpp
 )
 
 # Create named folders for the sources within the .vcproj

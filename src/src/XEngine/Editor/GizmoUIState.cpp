@@ -1,16 +1,21 @@
-#include <XERenderer/Editor/UIState/GizmoUIState.hpp>
+#include <XEngine/Editor/GizmoUIState.hpp>
 
 #include <ThirdParty/imgui/imgui.h>
 #include <XERenderer/Editor/ImGuizmo.h>
 #include <XERenderer/GraphicsManager.hpp>
+#include <XEngine/Scene.hpp>
+#include <XEngine/Components/Body.hpp>
+
 #include <Ogre/OgreMain/include/OgreCamera.h>
 #include <Ogre/OgreMain/include/OgreMatrix4.h>
 
+
 namespace XE {
 
-	GizmoUIState::GizmoUIState(GraphicsManager& graphicsMgr, Ogre::Camera* camera)
+	GizmoUIState::GizmoUIState(Scene& scene, GraphicsManager& graphicsMgr, Ogre::Camera* camera)
 	: m_camera (camera)
 		,m_graphicsMgr(graphicsMgr)
+		, m_scene(scene)
 	{
 
 	}
@@ -90,43 +95,40 @@ namespace XE {
 		ImGuizmo::Manipulate(view[0], proj[0]
 			, mCurrentGizmoOperation, mCurrentGizmoMode, tran[0], delta[0], nullptr); // useSnap ? &snap.x : NULL);
 
-																					  //move to engine level!
-																					  //if (ImGuizmo::IsUsing())
-																					  //{
-																					  //	tran = tran.transpose();
-																					  //	delta = delta.transpose();
+		if (ImGuizmo::IsUsing())
+		{
+			tran = tran.transpose();
+			delta = delta.transpose();
 
-																					  //	currentOrigin_ = Ogre::Matrix4(tran);
+			m_graphicsMgr.getFromRendererQueue().push([this, delta, currentOrigin_]() { //executed in mainthread			
 
-																					  //	for (const auto& node : nodes)
-																					  //	{
-																					  //		if (node == nullptr)
-																					  //		{
-																					  //		//	URHO3D_LOGERROR("Gizmo received null pointer of node.");
-																					  //			continue;
-																					  //		}
+				Ogre::Vector3 position;
+				Ogre::Vector3 scale;
+				Ogre::Quaternion orientation;
 
-																					  //		if (operation_ == GIZMOOP_SCALE)
-																					  //		{
-																					  //			// A workaround for ImGuizmo bug where delta matrix returns absolute scale value.
-																					  //			if (!nodeScaleStart_.Contains(node))
-																					  //				nodeScaleStart_[node] = node->GetScale();
-																					  //			node->SetScale(nodeScaleStart_[node] * delta.Scale());
-																					  //		}
-																					  //		else
-																					  //		{
-																					  //			// Delta matrix is always in world-space.
-																					  //			if (operation_ == GIZMOOP_ROTATE)
-																					  //				node->RotateAround(currentOrigin_.Translation(), -delta.Rotation(), TS_WORLD);
-																					  //			else
-																					  //				node->Translate(delta.Translation(), TS_WORLD);
-																					  //		}
-																					  //	}
+				delta.decomposition(position, scale, orientation);
 
-																					  //	return true;
-																					  //}
-																					  //else if (operation_ == GIZMOOP_SCALE && !nodeScaleStart_.Empty())
-																					  //	nodeScaleStart_.Clear();
-																					  //return false;
+				entityx::ComponentHandle<BodyComponent> body;
+
+				for (entityx::Entity entity : m_scene.entities.entities_with_components(body)) {
+
+					if (body->isSelected)
+					{
+						if (mCurrentGizmoOperation == ImGuizmo::TRANSLATE)
+						{
+							body->translate(delta.getTrans()); // .Translation());
+						}
+						else if (mCurrentGizmoOperation == ImGuizmo::ROTATE) {
+							body->rotate(delta.extractQuaternion()); //currentOrigin_.getTrans());
+						}
+						else if (mCurrentGizmoOperation == ImGuizmo::SCALE) {
+							body->scale(scale);
+						}
+					}
+				}
+			});
+		}
+
+		//return false;
 	}
 }

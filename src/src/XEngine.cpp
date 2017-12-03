@@ -4,6 +4,7 @@
 #include <XEDAL/PhysFS/PhysFSArchive.h>
 #include <XEPhysics/Physics/gkDynamicsWorld.h>
 
+
 #include <algorithm>
 
 //INITIALIZE_EASYLOGGINGPP
@@ -97,7 +98,6 @@ namespace XE
 
 
 		//m_DebugDrawer = std::unique_ptr<DebugDrawer>(new DebugDrawer(*m_scene.get(), 1));
-
 	}
 
 	void XEngine::registerObject(sol::state& lua)
@@ -288,6 +288,7 @@ namespace XE
 		//}
 
 		//sf::Time elapsed1 = m_clock.getElapsedTime();
+	
 
 		elapsedTimeMainThread = m_clock.restart();
 
@@ -307,6 +308,8 @@ namespace XE
 
 #ifndef UseRenderThread
 		mGraphicsManager.updateRenderer();  // only in singlethread mode! -> else it's  the job of the graphicsmanager!
+#else
+		mGraphicsManager._isRenderThreadFinished = false;
 #endif
 
 		mGraphicsManager.getFromRendererQueue().TriggerAllHandler();

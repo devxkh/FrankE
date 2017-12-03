@@ -66,12 +66,9 @@ namespace NetMsg {
 struct SpellComponent;
 struct StaticComponent;
 struct GameState;
-struct AbilityInfo;
 struct CharacterComponent;
-struct AbilityComponent;
 struct AIComponent;
 struct Chatmessage;
-struct ExecCommand;
 struct Login;
 struct ReturnStatus;
 struct PlayerComponent;
@@ -79,20 +76,6 @@ struct Entity;
 struct InputEvent;
 struct Component;
 struct MessageRoot;
-
-enum AbilityBehavior {
-  AbilityBehavior_AB_None = 0,
-  AbilityBehavior_AB_Punch = 1,
-  AbilityBehavior_AB_Bolt = 2,
-  AbilityBehavior_AB_Block = 3
-};
-
-inline const char **EnumNamesAbilityBehavior() {
-  static const char *names[] = { "AB_None", "AB_Punch", "AB_Bolt", "AB_Block", nullptr };
-  return names;
-}
-
-inline const char *EnumNameAbilityBehavior(AbilityBehavior e) { return EnumNamesAbilityBehavior()[static_cast<int>(e)]; }
 
 enum MsgStatus {
   MsgStatus_S_Unknown = 0,
@@ -112,16 +95,14 @@ enum UIStateId {
   UIStateId_Console = 0,
   UIStateId_Stats = 1,
   UIStateId_Settings = 2,
-  UIStateId_Controller = 3,
-  UIStateId_Welcome = 4,
-  UIStateId_Cusomize = 5,
-  UIStateId_Game = 6,
-  UIStateId_GameMenu = 7,
-  UIStateId_Count = 8
+  UIStateId_Welcome = 3,
+  UIStateId_Cusomize = 4,
+  UIStateId_Game = 5,
+  UIStateId_Count = 6
 };
 
 inline const char **EnumNamesUIStateId() {
-  static const char *names[] = { "Console", "Stats", "Settings", "Controller", "Welcome", "Cusomize", "Game", "GameMenu", "Count", nullptr };
+  static const char *names[] = { "Console", "Stats", "Settings", "Welcome", "Cusomize", "Game", "Count", nullptr };
   return names;
 }
 
@@ -138,36 +119,35 @@ enum PlayerState {
   PlayerState_InAir = 7,
   PlayerState_JumpLanding = 8,
   PlayerState_OnMenu = 9,
-  PlayerState_IsCustomizing = 10,
-  PlayerState_IsSpawning = 11,
-  PlayerState_Spectating = 12,
-  PlayerState_Casting = 13,
-  PlayerState_Emote_1 = 14,
-  PlayerState_Emote_2 = 15,
-  PlayerState_Emote_3 = 16,
-  PlayerState_Dancing_1 = 17,
-  PlayerState_Dancing_2 = 18,
-  PlayerState_Dancing_3 = 19,
-  PlayerState_Blocking_1 = 20,
-  PlayerState_Blocking_2 = 21,
-  PlayerState_Blocking_3 = 22,
-  PlayerState_Attack_1 = 23,
-  PlayerState_Attack_2 = 24,
-  PlayerState_Attack_3 = 25,
-  PlayerState_Attack_4 = 26,
-  PlayerState_Attack_5 = 27,
-  PlayerState_Attack_6 = 28,
-  PlayerState_Hitted_1 = 29,
-  PlayerState_Hitted_2 = 30,
-  PlayerState_Hitted_3 = 31,
-  PlayerState_Hitted_4 = 32,
-  PlayerState_Hitted_5 = 33,
-  PlayerState_Hitted_6 = 34,
-  PlayerState_Count = 35
+  PlayerState_IsSpawning = 10,
+  PlayerState_Spectating = 11,
+  PlayerState_Casting = 12,
+  PlayerState_Emote_1 = 13,
+  PlayerState_Emote_2 = 14,
+  PlayerState_Emote_3 = 15,
+  PlayerState_Dancing_1 = 16,
+  PlayerState_Dancing_2 = 17,
+  PlayerState_Dancing_3 = 18,
+  PlayerState_Blocking_1 = 19,
+  PlayerState_Blocking_2 = 20,
+  PlayerState_Blocking_3 = 21,
+  PlayerState_Attack_1 = 22,
+  PlayerState_Attack_2 = 23,
+  PlayerState_Attack_3 = 24,
+  PlayerState_Attack_4 = 25,
+  PlayerState_Attack_5 = 26,
+  PlayerState_Attack_6 = 27,
+  PlayerState_Hitted_1 = 28,
+  PlayerState_Hitted_2 = 29,
+  PlayerState_Hitted_3 = 30,
+  PlayerState_Hitted_4 = 31,
+  PlayerState_Hitted_5 = 32,
+  PlayerState_Hitted_6 = 33,
+  PlayerState_Count = 34
 };
 
 inline const char **EnumNamesPlayerState() {
-  static const char *names[] = { "Idling", "Joining", "Dying", "Dead", "Running", "Walking", "JumpStart", "InAir", "JumpLanding", "OnMenu", "IsCustomizing", "IsSpawning", "Spectating", "Casting", "Emote_1", "Emote_2", "Emote_3", "Dancing_1", "Dancing_2", "Dancing_3", "Blocking_1", "Blocking_2", "Blocking_3", "Attack_1", "Attack_2", "Attack_3", "Attack_4", "Attack_5", "Attack_6", "Hitted_1", "Hitted_2", "Hitted_3", "Hitted_4", "Hitted_5", "Hitted_6", "Count", nullptr };
+  static const char *names[] = { "Idling", "Joining", "Dying", "Dead", "Running", "Walking", "JumpStart", "InAir", "JumpLanding", "OnMenu", "IsSpawning", "Spectating", "Casting", "Emote_1", "Emote_2", "Emote_3", "Dancing_1", "Dancing_2", "Dancing_3", "Blocking_1", "Blocking_2", "Blocking_3", "Attack_1", "Attack_2", "Attack_3", "Attack_4", "Attack_5", "Attack_6", "Hitted_1", "Hitted_2", "Hitted_3", "Hitted_4", "Hitted_5", "Hitted_6", "Count", nullptr };
   return names;
 }
 
@@ -288,13 +268,12 @@ enum UComponent {
   UComponent_Camera = 11,
   UComponent_Light = 12,
   UComponent_SoundListener = 13,
-  UComponent_AbilityComponent = 14,
-  UComponent_PhysicsComponent = 15,
-  UComponent_SoundComponent = 16
+  UComponent_PhysicsComponent = 14,
+  UComponent_SoundComponent = 15
 };
 
 inline const char **EnumNamesUComponent() {
-  static const char *names[] = { "NONE", "CharacterComponent", "AIComponent", "SpawnPointComponent", "SpawnComponent", "AnimationComponent", "BodyComponent", "PlayerComponent", "SpellComponent", "RenderableComponent", "StaticComponent", "Camera", "Light", "SoundListener", "AbilityComponent", "PhysicsComponent", "SoundComponent", nullptr };
+  static const char *names[] = { "NONE", "CharacterComponent", "AIComponent", "SpawnPointComponent", "SpawnComponent", "AnimationComponent", "BodyComponent", "PlayerComponent", "SpellComponent", "RenderableComponent", "StaticComponent", "Camera", "Light", "SoundListener", "PhysicsComponent", "SoundComponent", nullptr };
   return names;
 }
 
@@ -310,12 +289,11 @@ enum Data {
   Data_ReturnStatus = 4,
   Data_InputEvent = 5,
   Data_Entity = 6,
-  Data_GameState = 7,
-  Data_ExecCommand = 8
+  Data_GameState = 7
 };
 
 inline const char **EnumNamesData() {
-  static const char *names[] = { "NONE", "Chatmessage", "Scene", "Login", "ReturnStatus", "InputEvent", "Entity", "GameState", "ExecCommand", nullptr };
+  static const char *names[] = { "NONE", "Chatmessage", "Scene", "Login", "ReturnStatus", "InputEvent", "Entity", "GameState", nullptr };
   return names;
 }
 
@@ -398,65 +376,9 @@ inline flatbuffers::Offset<GameState> CreateGameState(flatbuffers::FlatBufferBui
   return builder_.Finish();
 }
 
-struct AbilityInfo FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  ///entityID with the attached abilitycomponent
-  uint32_t abilityId() const { return GetField<uint32_t>(4, 0); }
-  ///instant abilities are loaded at character creation
-  uint8_t instant() const { return GetField<uint8_t>(6, 0); }
-  ///ability is attached to an entity and is not a entity itself
-  uint8_t isAttached() const { return GetField<uint8_t>(8, 0); }
-  bool Verify(flatbuffers::Verifier &verifier) const {
-    return VerifyTableStart(verifier) &&
-           VerifyField<uint32_t>(verifier, 4 /* abilityId */) &&
-           VerifyField<uint8_t>(verifier, 6 /* instant */) &&
-           VerifyField<uint8_t>(verifier, 8 /* isAttached */) &&
-           verifier.EndTable();
-  }
-};
-
-struct AbilityInfoBuilder {
-  flatbuffers::FlatBufferBuilder &fbb_;
-  flatbuffers::uoffset_t start_;
-  void add_abilityId(uint32_t abilityId) { fbb_.AddElement<uint32_t>(4, abilityId, 0); }
-  void add_instant(uint8_t instant) { fbb_.AddElement<uint8_t>(6, instant, 0); }
-  void add_isAttached(uint8_t isAttached) { fbb_.AddElement<uint8_t>(8, isAttached, 0); }
-  AbilityInfoBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
-  AbilityInfoBuilder &operator=(const AbilityInfoBuilder &);
-  flatbuffers::Offset<AbilityInfo> Finish() {
-    auto o = flatbuffers::Offset<AbilityInfo>(fbb_.EndTable(start_, 3));
-    return o;
-  }
-};
-
-inline flatbuffers::Offset<AbilityInfo> CreateAbilityInfo(flatbuffers::FlatBufferBuilder &_fbb,
-   uint32_t abilityId = 0,
-   uint8_t instant = 0,
-   uint8_t isAttached = 0) {
-  AbilityInfoBuilder builder_(_fbb);
-  builder_.add_abilityId(abilityId);
-  builder_.add_isAttached(isAttached);
-  builder_.add_instant(instant);
-  return builder_.Finish();
-}
-
 struct CharacterComponent FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  const flatbuffers::String *name() const { return GetPointer<const flatbuffers::String *>(4); }
-  float moveSpeed() const { return GetField<float>(6, 0); }
-  uint16_t hp() const { return GetField<uint16_t>(8, 0); }
-  uint16_t resourcePoints() const { return GetField<uint16_t>(10, 0); }
-  const XFBType::Vec3f *offsetPunch() const { return GetStruct<const XFBType::Vec3f *>(12); }
-  const flatbuffers::Vector<flatbuffers::Offset<AbilityInfo>> *abilities() const { return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<AbilityInfo>> *>(14); }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, 4 /* name */) &&
-           verifier.Verify(name()) &&
-           VerifyField<float>(verifier, 6 /* moveSpeed */) &&
-           VerifyField<uint16_t>(verifier, 8 /* hp */) &&
-           VerifyField<uint16_t>(verifier, 10 /* resourcePoints */) &&
-           VerifyField<XFBType::Vec3f>(verifier, 12 /* offsetPunch */) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, 14 /* abilities */) &&
-           verifier.Verify(abilities()) &&
-           verifier.VerifyVectorOfTables(abilities()) &&
            verifier.EndTable();
   }
 };
@@ -464,103 +386,16 @@ struct CharacterComponent FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
 struct CharacterComponentBuilder {
   flatbuffers::FlatBufferBuilder &fbb_;
   flatbuffers::uoffset_t start_;
-  void add_name(flatbuffers::Offset<flatbuffers::String> name) { fbb_.AddOffset(4, name); }
-  void add_moveSpeed(float moveSpeed) { fbb_.AddElement<float>(6, moveSpeed, 0); }
-  void add_hp(uint16_t hp) { fbb_.AddElement<uint16_t>(8, hp, 0); }
-  void add_resourcePoints(uint16_t resourcePoints) { fbb_.AddElement<uint16_t>(10, resourcePoints, 0); }
-  void add_offsetPunch(const XFBType::Vec3f *offsetPunch) { fbb_.AddStruct(12, offsetPunch); }
-  void add_abilities(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<AbilityInfo>>> abilities) { fbb_.AddOffset(14, abilities); }
   CharacterComponentBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
   CharacterComponentBuilder &operator=(const CharacterComponentBuilder &);
   flatbuffers::Offset<CharacterComponent> Finish() {
-    auto o = flatbuffers::Offset<CharacterComponent>(fbb_.EndTable(start_, 6));
+    auto o = flatbuffers::Offset<CharacterComponent>(fbb_.EndTable(start_, 0));
     return o;
   }
 };
 
-inline flatbuffers::Offset<CharacterComponent> CreateCharacterComponent(flatbuffers::FlatBufferBuilder &_fbb,
-   flatbuffers::Offset<flatbuffers::String> name = 0,
-   float moveSpeed = 0,
-   uint16_t hp = 0,
-   uint16_t resourcePoints = 0,
-   const XFBType::Vec3f *offsetPunch = 0,
-   flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<AbilityInfo>>> abilities = 0) {
+inline flatbuffers::Offset<CharacterComponent> CreateCharacterComponent(flatbuffers::FlatBufferBuilder &_fbb) {
   CharacterComponentBuilder builder_(_fbb);
-  builder_.add_abilities(abilities);
-  builder_.add_offsetPunch(offsetPunch);
-  builder_.add_moveSpeed(moveSpeed);
-  builder_.add_name(name);
-  builder_.add_resourcePoints(resourcePoints);
-  builder_.add_hp(hp);
-  return builder_.Finish();
-}
-
-///per default just a ghost object
-struct AbilityComponent FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  uint16_t id() const { return GetField<uint16_t>(4, 0); }
-  uint8_t hasPhysics() const { return GetField<uint8_t>(6, 0); }
-  float duration() const { return GetField<float>(8, 0); }
-  float cooldown() const { return GetField<float>(10, 0); }
-  float power() const { return GetField<float>(12, 0); }
-  XFBType::PhysicsShape shape() const { return static_cast<XFBType::PhysicsShape>(GetField<int8_t>(14, 0)); }
-  const XFBType::Vec3f *size() const { return GetStruct<const XFBType::Vec3f *>(16); }
-  const XFBType::Vec3f *offset() const { return GetStruct<const XFBType::Vec3f *>(18); }
-  AbilityBehavior abilityBehavior() const { return static_cast<AbilityBehavior>(GetField<uint16_t>(20, 0)); }
-  bool Verify(flatbuffers::Verifier &verifier) const {
-    return VerifyTableStart(verifier) &&
-           VerifyField<uint16_t>(verifier, 4 /* id */) &&
-           VerifyField<uint8_t>(verifier, 6 /* hasPhysics */) &&
-           VerifyField<float>(verifier, 8 /* duration */) &&
-           VerifyField<float>(verifier, 10 /* cooldown */) &&
-           VerifyField<float>(verifier, 12 /* power */) &&
-           VerifyField<int8_t>(verifier, 14 /* shape */) &&
-           VerifyField<XFBType::Vec3f>(verifier, 16 /* size */) &&
-           VerifyField<XFBType::Vec3f>(verifier, 18 /* offset */) &&
-           VerifyField<uint16_t>(verifier, 20 /* abilityBehavior */) &&
-           verifier.EndTable();
-  }
-};
-
-struct AbilityComponentBuilder {
-  flatbuffers::FlatBufferBuilder &fbb_;
-  flatbuffers::uoffset_t start_;
-  void add_id(uint16_t id) { fbb_.AddElement<uint16_t>(4, id, 0); }
-  void add_hasPhysics(uint8_t hasPhysics) { fbb_.AddElement<uint8_t>(6, hasPhysics, 0); }
-  void add_duration(float duration) { fbb_.AddElement<float>(8, duration, 0); }
-  void add_cooldown(float cooldown) { fbb_.AddElement<float>(10, cooldown, 0); }
-  void add_power(float power) { fbb_.AddElement<float>(12, power, 0); }
-  void add_shape(XFBType::PhysicsShape shape) { fbb_.AddElement<int8_t>(14, static_cast<int8_t>(shape), 0); }
-  void add_size(const XFBType::Vec3f *size) { fbb_.AddStruct(16, size); }
-  void add_offset(const XFBType::Vec3f *offset) { fbb_.AddStruct(18, offset); }
-  void add_abilityBehavior(AbilityBehavior abilityBehavior) { fbb_.AddElement<uint16_t>(20, static_cast<uint16_t>(abilityBehavior), 0); }
-  AbilityComponentBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
-  AbilityComponentBuilder &operator=(const AbilityComponentBuilder &);
-  flatbuffers::Offset<AbilityComponent> Finish() {
-    auto o = flatbuffers::Offset<AbilityComponent>(fbb_.EndTable(start_, 9));
-    return o;
-  }
-};
-
-inline flatbuffers::Offset<AbilityComponent> CreateAbilityComponent(flatbuffers::FlatBufferBuilder &_fbb,
-   uint16_t id = 0,
-   uint8_t hasPhysics = 0,
-   float duration = 0,
-   float cooldown = 0,
-   float power = 0,
-   XFBType::PhysicsShape shape = XFBType::PhysicsShape_SH_BOX,
-   const XFBType::Vec3f *size = 0,
-   const XFBType::Vec3f *offset = 0,
-   AbilityBehavior abilityBehavior = AbilityBehavior_AB_None) {
-  AbilityComponentBuilder builder_(_fbb);
-  builder_.add_offset(offset);
-  builder_.add_size(size);
-  builder_.add_power(power);
-  builder_.add_cooldown(cooldown);
-  builder_.add_duration(duration);
-  builder_.add_abilityBehavior(abilityBehavior);
-  builder_.add_id(id);
-  builder_.add_shape(shape);
-  builder_.add_hasPhysics(hasPhysics);
   return builder_.Finish();
 }
 
@@ -624,41 +459,6 @@ inline flatbuffers::Offset<Chatmessage> CreateChatmessage(flatbuffers::FlatBuffe
   ChatmessageBuilder builder_(_fbb);
   builder_.add_text(text);
   builder_.add_group(group);
-  return builder_.Finish();
-}
-
-struct ExecCommand FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  const flatbuffers::String *cmd() const { return GetPointer<const flatbuffers::String *>(4); }
-  const flatbuffers::String *cmdOpt() const { return GetPointer<const flatbuffers::String *>(6); }
-  bool Verify(flatbuffers::Verifier &verifier) const {
-    return VerifyTableStart(verifier) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, 4 /* cmd */) &&
-           verifier.Verify(cmd()) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, 6 /* cmdOpt */) &&
-           verifier.Verify(cmdOpt()) &&
-           verifier.EndTable();
-  }
-};
-
-struct ExecCommandBuilder {
-  flatbuffers::FlatBufferBuilder &fbb_;
-  flatbuffers::uoffset_t start_;
-  void add_cmd(flatbuffers::Offset<flatbuffers::String> cmd) { fbb_.AddOffset(4, cmd); }
-  void add_cmdOpt(flatbuffers::Offset<flatbuffers::String> cmdOpt) { fbb_.AddOffset(6, cmdOpt); }
-  ExecCommandBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
-  ExecCommandBuilder &operator=(const ExecCommandBuilder &);
-  flatbuffers::Offset<ExecCommand> Finish() {
-    auto o = flatbuffers::Offset<ExecCommand>(fbb_.EndTable(start_, 2));
-    return o;
-  }
-};
-
-inline flatbuffers::Offset<ExecCommand> CreateExecCommand(flatbuffers::FlatBufferBuilder &_fbb,
-   flatbuffers::Offset<flatbuffers::String> cmd = 0,
-   flatbuffers::Offset<flatbuffers::String> cmdOpt = 0) {
-  ExecCommandBuilder builder_(_fbb);
-  builder_.add_cmdOpt(cmdOpt);
-  builder_.add_cmd(cmd);
   return builder_.Finish();
 }
 
@@ -927,7 +727,6 @@ inline bool VerifyUComponent(flatbuffers::Verifier &verifier, const void *union_
     case UComponent_Camera: return verifier.VerifyTable(reinterpret_cast<const XFBType::Camera *>(union_obj));
     case UComponent_Light: return verifier.VerifyTable(reinterpret_cast<const XFBType::Light *>(union_obj));
     case UComponent_SoundListener: return verifier.VerifyTable(reinterpret_cast<const XFBType::SoundListener *>(union_obj));
-    case UComponent_AbilityComponent: return verifier.VerifyTable(reinterpret_cast<const AbilityComponent *>(union_obj));
     case UComponent_PhysicsComponent: return verifier.VerifyTable(reinterpret_cast<const XFBType::PhysicsComponent *>(union_obj));
     case UComponent_SoundComponent: return verifier.VerifyTable(reinterpret_cast<const XFBType::SoundComponent *>(union_obj));
     default: return false;
@@ -944,7 +743,6 @@ inline bool VerifyData(flatbuffers::Verifier &verifier, const void *union_obj, D
     case Data_InputEvent: return verifier.VerifyTable(reinterpret_cast<const InputEvent *>(union_obj));
     case Data_Entity: return verifier.VerifyTable(reinterpret_cast<const Entity *>(union_obj));
     case Data_GameState: return verifier.VerifyTable(reinterpret_cast<const GameState *>(union_obj));
-    case Data_ExecCommand: return verifier.VerifyTable(reinterpret_cast<const ExecCommand *>(union_obj));
     default: return false;
   }
 }

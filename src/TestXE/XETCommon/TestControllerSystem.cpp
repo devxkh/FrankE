@@ -80,41 +80,11 @@ namespace XET {
 			return;
 
 #ifdef CompileEditor
+	
+		mEngine.getGraphicsManager().getGUIRenderer().m_CurrentPointPosition = Ogre::Vector2(context.event->motion.x, context.event->motion.y);
+	
 		if (ImGui::IsAnyItemHovered() || ImGui::IsAnyWindowHovered() || ImGuizmo::IsOver())
 			return;
-
-		static ImGuizmo::OPERATION mCurrentGizmoOperation(ImGuizmo::ROTATE);
-		static ImGuizmo::MODE mCurrentGizmoMode(ImGuizmo::WORLD);
-		if (ImGui::IsKeyPressed(90))
-			mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
-		if (ImGui::IsKeyPressed(69))
-			mCurrentGizmoOperation = ImGuizmo::ROTATE;
-		if (ImGui::IsKeyPressed(82)) // r Key
-			mCurrentGizmoOperation = ImGuizmo::SCALE;
-		/*if (ImGui::RadioButton("Translate", mCurrentGizmoOperation == ImGuizmo::TRANSLATE))
-			mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
-		ImGui::SameLine();
-		if (ImGui::RadioButton("Rotate", mCurrentGizmoOperation == ImGuizmo::ROTATE))
-			mCurrentGizmoOperation = ImGuizmo::ROTATE;
-		ImGui::SameLine();
-		if (ImGui::RadioButton("Scale", mCurrentGizmoOperation == ImGuizmo::SCALE))
-			mCurrentGizmoOperation = ImGuizmo::SCALE;*/
-
-		if (mCurrentGizmoOperation == ImGuizmo::TRANSLATE)
-		{
-			entityx::ComponentHandle<XE::BodyComponent> body;
-
-			for (entityx::Entity entity : mEngine.getScene().entities.entities_with_components(body)) {
-				if (body->isSelected)
-				{
-					//body->setPosition(body->getPosition() += context.event->motion.xrel);// / tx;
-					//m_mouseMove.y += context.event->motion.yrel;// / ty;
-				}
-			}
-
-		}
-
-		mEngine.getGraphicsManager().getGUIRenderer().m_CurrentPointPosition = Ogre::Vector2(context.event->motion.x, context.event->motion.y);
 
 #endif
 

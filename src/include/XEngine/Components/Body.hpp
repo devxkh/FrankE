@@ -29,13 +29,7 @@ namespace XE
 
 		/// set parent scene node. Retains the world transform.
 		void setParent(BodyComponent* parent) { m_parent = parent; }
-
-		/// Return ID.
-		sf::Uint32 getID() const { return m_id; }
-
-		/// Return name.
-		const std::string& getName() const { return m_name; }
-
+		
 		/// Return parent scene node.
 		BodyComponent* getParent() const { return m_parent; }
 
@@ -52,10 +46,7 @@ namespace XE
 		const std::vector<std::shared_ptr<BodyComponent> >& getChildren() const { return m_children; }
 
 		void isDirty(bool isDirty);
-
-		/// set ID. Called by Scene.
-		void setID(sf::Uint32 id) { m_id = id; }
-
+		
 		/// set scene. Called by Scene.
 	//	void setScene(Scene* scene);
 		/// set enabled/disabled state with optional recursion. Optionally affect the remembered enable state.
@@ -526,9 +517,6 @@ namespace XE
 
 		/// Scene (root node.)
 		Scene* m_scene;
-		/// Unique ID within the scene.
-		sf::Uint32 m_id;
-		std::string m_name;
 
 		Ogre::Vector3 m_bodyDirection;      // player's local intended direction based on WASD keys
 		Ogre::Quaternion m_bodyGoalDirection;      // player's local intended direction based on WASD keys
