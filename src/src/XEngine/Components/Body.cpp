@@ -21,6 +21,10 @@ namespace XE
 		mInheritOrientation(true),
 		mInheritScale(true)
 		, m_hasTargetPosition(false)
+
+#ifdef CompileEditor
+		, _t_nodeScaleStart(Ogre::Vector3::ZERO)
+#endif
 	{
 	}
 
@@ -83,17 +87,26 @@ namespace XE
 		//chunkBase[4] = _mm_mul_ps(chunkBase[4], scaleChunkBase[0]);   //m10 * scale.x
 		//chunkBase[5] = _mm_mul_ps(chunkBase[5], scaleChunkBase[1]);   //m11 * scale.y
 		//chunkBase[6] = _mm_mul_ps(chunkBase[6], scaleChunkBase[2]);   //m12 * scale.z
-		//chunkBase[7] = posChunkBase[1];                                //m13 * pos.y
+		//chunkBase[7] = posChunkBase[1];                                //m13 * pos.y0
 
 		//chunkBase[8] = _mm_mul_ps(chunkBase[8], scaleChunkBase[0]);   //m20 * scale.x
 		//chunkBase[9] = _mm_mul_ps(chunkBase[9], scaleChunkBase[1]);   //m21 * scale.y
 		//chunkBase[10] = _mm_mul_ps(chunkBase[10], scaleChunkBase[2]);   //m22 * scale.z
 		//chunkBase[11] = posChunkBase[2];                                //m23 * pos.z
 
-		auto debug = Ogre::Matrix4(mScale.x, mScale.y, mScale.z,
-			mPosition.x, mScale.x, mScale.y, mScale.z,
-			mPosition.y, mScale.x, mScale.y, mScale.z,
-			mPosition.z, mScale.x, mScale.y, mScale.z, 1.0);
+	//	Ogre::Matrix4();
+		Ogre::Matrix3 kRot;
+		mOrientation.ToRotationMatrix(kRot);
+			
+		Ogre::Matrix3 kRotScaled( kRot[0][0] * mScale.x, kRot[0][1] * mScale.y, kRot[0][2] * mScale.z
+								, kRot[1][0] * mScale.x, kRot[1][1] * mScale.y, kRot[1][2] * mScale.z
+								, kRot[2][0] * mScale.x, kRot[2][1] * mScale.y, kRot[2][2] * mScale.z);
+
+
+		auto debug = Ogre::Matrix4(  kRotScaled[0][0], kRotScaled[0][1], kRotScaled[0][2],
+						mPosition.x, kRotScaled[1][0], kRotScaled[1][1], kRotScaled[1][2],
+						mPosition.y, kRotScaled[2][0], kRotScaled[2][1], kRotScaled[2][2],
+						mPosition.z, 0, 0, 0, 1.0);
 			//, mPosition,		
 		//	mOrientation, mScale
 		return debug;

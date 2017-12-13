@@ -198,6 +198,7 @@ namespace XE
 
 		FrameLimiter m_mtFrameLimiter;
 
+
 		std::unique_ptr<DebugDrawer> m_DebugDrawer;
 	};
 

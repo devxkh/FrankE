@@ -30,6 +30,7 @@
 #include <iterator>
 #include <algorithm>
 
+#include <XESystem/SystemConfig.hpp>
 
 #ifdef CompileEditor
 #include <XERenderer/Editor/EditorUIRenderer.hpp>

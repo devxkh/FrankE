@@ -111,13 +111,13 @@ void MyGUIPass::execute(const Ogre::Camera *lodCameraconst)
 //todo!	static_cast<MyGUI::OgreRenderManager*>(MyGUI::RenderManager::getInstancePtr())->render();
 }
 
-	OgreWorkspace::OgreWorkspace(XEngine& engine, GraphicsManager& graphicsMgr) :
+	OgreWorkspace::OgreWorkspace(GraphicsManager& graphicsMgr, Ogre::SceneManager* sceneMgr) :
 		mGraphicsManager(graphicsMgr),
 		m_imguilistener(),
 		_t_compositorWorkspace(nullptr),
 		//	mRenderWindow(nullptr),
 		//	mWindow(nullptr),
-		mEngine(engine)
+		_t_sceneMgr(sceneMgr)
 	{
 		//----------------------------------------------------------------
 		//------------------ create window -------------------------------

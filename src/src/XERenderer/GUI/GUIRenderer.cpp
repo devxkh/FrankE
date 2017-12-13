@@ -79,14 +79,11 @@ namespace XE
 	{
 		if (getGraphicsManager().GetRenderTask(RenderTaskID::RenderGUI).isDone)
 		{
-			//make copy
-			Ogre::Matrix4& tmpCurrentGizmoOrigin = m_CurrentGizmoOrigin;
-			Ogre::Vector2& tmpCurrentPointPosition = m_CurrentPointPosition;
-
-			getGraphicsManager().getIntoRendererQueue().push([this, tmpCurrentGizmoOrigin, tmpCurrentPointPosition]() {
+			getGraphicsManager().getIntoRendererQueue().push([this]() {
 				
-				_t_CurrentGizmoOrigin = tmpCurrentGizmoOrigin;
-				_t_CurrentPointPosition = tmpCurrentPointPosition;
+				//make copy
+				_t_CurrentGizmoOrigin = m_CurrentGizmoOrigin;
+				_t_CurrentPointPosition = m_CurrentPointPosition;
 
 				auto time = getGraphicsManager().getRoot()->getTimer()->getMicroseconds();
 
@@ -97,9 +94,7 @@ namespace XE
 			});
 		}
 
-		m_layerRenderer.update();
-
-	
+		m_layerRenderer.update();	
 	}
 
 #ifdef CompileEditor

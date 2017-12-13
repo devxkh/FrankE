@@ -18,15 +18,20 @@ namespace XE
 	class Scene;
 	class CLightVisualHelper;
 
-	struct LightRenderable
+
+	struct LightRenderable 
 	{
 		LightRenderable(GraphicsManager& gmanager, Scene& scene, const void* fbData);
 		
 		~LightRenderable();
 
+		
 		void setLightData(const void* fbData);
 
 		void setPosition(const Ogre::Vector3& pos);
+
+		void setDirection(const Ogre::Vector3& direction);
+
 
 	private:
 

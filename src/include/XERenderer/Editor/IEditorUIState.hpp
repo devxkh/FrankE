@@ -10,6 +10,7 @@ namespace XE {
 		//renderer
 		SceneHierarchy,
 		NodeProperties,
+		Compositor,
 
 		//mainthread
 		entities,

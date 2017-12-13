@@ -25,6 +25,8 @@ namespace XE
 
 		, _t_LastPosition(Ogre::Vector3::ZERO)
 		, _t_CurrentPosition(Ogre::Vector3::ZERO)
+
+		, m_XECompositor(gmanager, *this)
 	{
 		m_GraphicsManager.getIntoRendererQueue().push([this, id]() {
 
@@ -43,8 +45,9 @@ namespace XE
 			//todo lock and stop render thread while adding renderwindow
 //			_t_RenderWindow = OgreWorkspace::_t_createRenderWindow(window); //need window handle (else wnd is hidden), always a renderwindow is needed
 
-			_t_OgreWorkspace = OGRE_NEW_T(OgreWorkspace, Ogre::MEMCATEGORY_GEOMETRY)(m_Scene.getEngine(), m_GraphicsManager);
+			_t_OgreWorkspace = OGRE_NEW_T(OgreWorkspace, Ogre::MEMCATEGORY_GEOMETRY)(m_GraphicsManager, m_Scene.getOgreSceneManager().__OgreSceneMgrPtr);
 			_t_OgreWorkspace->_t_createWorkspace(m_GraphicsManager._t_getRenderWindow(id), _t_OgreCameraPtr); //_t_RenderWindow only usable after initialization!
+			m_XECompositor._t_OgreWorkspace = _t_OgreWorkspace;
 		});
 	}
 

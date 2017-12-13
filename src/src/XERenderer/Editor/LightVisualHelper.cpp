@@ -266,11 +266,11 @@ namespace XE {
 
 
 		// draw inner circles
-		mVisualHelperObject->begin("BaseWhite", Ogre::OperationType::OT_LINE_STRIP);
-		//mVisualHelperObject->beginUpdate(0);
-		Ogre::Real firstInnerRadius = Ogre::Math::Tan(innerAngle / 2) * mSpotlightStartCircleOffset;
-		_drawCircle(firstInnerRadius, mSpotlightStartCircleOffset, mColour2, idx);
-		mVisualHelperObject->end();
+		//mVisualHelperObject->begin("BaseWhite", Ogre::OperationType::OT_LINE_STRIP);
+		////mVisualHelperObject->beginUpdate(0);
+		//Ogre::Real firstInnerRadius = Ogre::Math::Tan(innerAngle / 2) * mSpotlightStartCircleOffset;
+		//_drawCircle(firstInnerRadius, mSpotlightStartCircleOffset, mColour2, idx);
+		//mVisualHelperObject->end();
 
 		mVisualHelperObject->begin("BaseWhite", Ogre::OperationType::OT_LINE_STRIP);
 		//mVisualHelperObject->beginUpdate(1);
@@ -279,11 +279,11 @@ namespace XE {
 		mVisualHelperObject->end();
 
 		// draw first outer circles
-		mVisualHelperObject->begin("BaseWhite", Ogre::OperationType::OT_LINE_STRIP);
-		//mVisualHelperObject->beginUpdate(2);
-		Ogre::Real firstOuterRadius = Ogre::Math::Tan(outerAngle / 2) * mSpotlightStartCircleOffset;
-		_drawCircle(firstOuterRadius, mSpotlightStartCircleOffset, mColour1, idx);
-		mVisualHelperObject->end();
+		//mVisualHelperObject->begin("BaseWhite", Ogre::OperationType::OT_LINE_STRIP);
+		////mVisualHelperObject->beginUpdate(2);
+		//Ogre::Real firstOuterRadius = Ogre::Math::Tan(outerAngle / 2) * mSpotlightStartCircleOffset;
+		//_drawCircle(firstOuterRadius, mSpotlightStartCircleOffset, mColour1, idx);
+		//mVisualHelperObject->end();
 
 		mVisualHelperObject->begin("BaseWhite", Ogre::OperationType::OT_LINE_STRIP);
 		//mVisualHelperObject->beginUpdate(3);

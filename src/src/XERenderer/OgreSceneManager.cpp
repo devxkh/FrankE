@@ -35,16 +35,7 @@ namespace XE
 			__lRootSceneNode = __OgreSceneMgrPtr->getRootSceneNode();
 		});
 	}
-
-	void  OgreSceneManager::setAmbientLight(Ogre::ColourValue& colour)
-	{
-		mGraphicsManager.getIntoRendererQueue().push([this, &colour](){
-		/*	__OgreSceneMgrPtr->setAmbientLight(Ogre::ColourValue(0.3f, 0.5f, 0.7f) * 0.1f * 0.75f,
-				Ogre::ColourValue(0.6f, 0.45f, 0.3f) * 0.065f * 0.75f,
-				-light->getDirection() + Ogre::Vector3::UNIT_Y * 0.2f);*/
-		});
-	}
-
+	
 	void OgreSceneManager::clearItems()
 	{
 		mGraphicsManager.getIntoRendererQueue().push([this]() {

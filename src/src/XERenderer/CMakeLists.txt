@@ -33,6 +33,24 @@ set(XERenderer_HEADER
 )
 source_group("include" FILES ${XERenderer_HEADER})
 
+# ------------ Compositor ---------------
+
+set(XERenderer_Compositor_SOURCES
+   
+	${SRCROOT}/Compositor/Compositor.cpp
+)
+source_group("src\\compositor" FILES ${XERenderer_Compositor_SOURCES})
+
+set(XERenderer_Compositor_HEADER
+ 
+	${INCROOT}/Compositor/Compositor.hpp
+)
+source_group("include\\compositor" FILES ${XERenderer_Compositor_HEADER})
+
+
+
+# ------------ Resources ---------------
+
 set(XERenderer_Resources_SOURCES
    
 	${SRCROOT}/Resource/gltfAsset.cpp
@@ -57,6 +75,7 @@ set(XERenderer_Editor_SOURCES
 	 ${SRCROOT}/Editor/ImGuizmo.h
 	 ${SRCROOT}/Editor/ImGuizmo.cpp
 	 ${SRCROOT}/Editor/EditorUIRenderer.cpp
+	 ${SRCROOT}/Editor/CompositorUIState.cpp
 	 ${SRCROOT}/../../Thirdparty/imgui/imgui.cpp		
 	 ${SRCROOT}/../../Thirdparty/imgui/imgui_draw.cpp 		
 	 ${SRCROOT}/../../Thirdparty/imgui/imgui_demo.cpp
@@ -67,7 +86,8 @@ set(XERenderer_Editor_HEADER
 	 ${INCROOT}/Editor/EditorUIRenderer.hpp
 	 ${INCROOT}/Editor/LightVisualHelper.hpp
 	 ${INCROOT}/Editor/ImgGuiRenderable.hpp 
-	 ${INCROOT}/Editor/IEditorUIState.hpp
+	 ${INCROOT}/Editor/IEditorUIState.hpp	 
+	 ${INCROOT}/Editor/CompositorUIState.hpp
 )
 
 source_group("include\\Editor" FILES ${XERenderer_Editor_HEADER})
@@ -164,6 +184,7 @@ enable_unity_build(XERenderer  ${XERenderer_SOURCES} ${XERenderer_private_SOURCE
 sfml_add_library(XERenderer 
 	SOURCES ${XERenderer_SOURCES} ${XERenderer_HEADER} ${XERenderer_private_SOURCES} ${XEGraphics_HEADER} ${XEGraphics_SOURCES} ${XERenderer_Editor_HEADER} ${XERenderer_Editor_SOURCES}
 	 ${XERenderer_Hlms_HEADER} ${XERenderer_Hlms_SOURCES} ${XERenderer_Animation_HEADER} ${XERenderer_Animation_SOURCES} ${XERenderer_Resources_SOURCES} ${XERenderer_Resources_HEADER}
+	 ${XERenderer_Compositor_SOURCES} ${XERenderer_Compositor_HEADER}
 	DEPENDS OgreMain XEDAL 
 	RenderSystem_GL3Plus 
 #	RenderSystem_Direct3D11

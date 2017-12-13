@@ -27,7 +27,6 @@ namespace XE {
 
 		OgreSceneManager(GraphicsManager& gmanager);
 		
-		void setAmbientLight(Ogre::ColourValue& colour);
 		void create();
 		void destroy();
 		void clearItems();

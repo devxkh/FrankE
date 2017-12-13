@@ -108,6 +108,7 @@ public:
 
 	Ogre::ColourValue ambientColor;
 
+
 protected:
 
 	virtual bool createEntityType(entityx::Entity entity, void* entityData) { return false; };

@@ -45,14 +45,15 @@ namespace XE {
 	class SceneViewerUIState : public IEditorUIState {
 
 	public:
-		SceneViewerUIState(const GraphicsManager& graphicsMgr, const Scene& scene);
+		SceneViewerUIState(GraphicsManager& graphicsMgr, Scene& scene);
 
 		void render();
 
 		std::vector<std::unique_ptr<EntityDebug>> _t_displayedEntities;
 
 	private:
-		const GraphicsManager& m_graphicsMgr;
-		const Scene& m_scene;
+		GraphicsManager& m_graphicsMgr;
+		Scene& m_scene;
+		Uint32 m_selected;
 	};
 }

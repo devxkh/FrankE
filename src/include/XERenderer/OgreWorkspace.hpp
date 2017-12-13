@@ -143,12 +143,13 @@ namespace XE {
 		Ogre::Camera* m_camera;
 	};
 
+	/// lives in rendererthread
 	class OgreWorkspace
 	{
 
 	public:
 
-		OgreWorkspace(XEngine& engine, GraphicsManager& graphicsMgr);
+		OgreWorkspace(GraphicsManager& graphicsMgr, Ogre::SceneManager* sceneMgr);
 		~OgreWorkspace();
 		
 		static Ogre::RenderWindow* _t_createRenderWindow(void* window = nullptr);
@@ -165,7 +166,8 @@ namespace XE {
 		//inline sf::Window* getWindow() { return mWindow; }
 		
 		Ogre::CompositorWorkspace*  _t_compositorWorkspace;
-		
+		Ogre::SceneManager* _t_sceneMgr;
+
 	protected:
 
 	private:
@@ -181,7 +183,6 @@ namespace XE {
 		Ogre::TexturePtr mRtt_texture;
 
 		GraphicsManager& mGraphicsManager;
-		XEngine& mEngine;
 	//	sf::Window* mWindow;
 	//	Ogre::RenderWindow* mRenderWindow;
 	};

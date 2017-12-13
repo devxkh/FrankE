@@ -8,6 +8,8 @@
 //#include <Ogre/OgreMain/include/OgreNode.h>
 #include <Ogre/OgreMain/include/OgreRay.h>
 
+#include <XERenderer/Compositor/Compositor.hpp>
+
 #include <XERenderer/Renderable.hpp>
 
 #include <XESystem/TransportData.hpp>
@@ -63,11 +65,13 @@ namespace XE {
 
 
 		Ogre::Camera* _t_OgreCameraPtr;
-		XE::OgreWorkspace*			_t_OgreWorkspace;
+		XE::OgreWorkspace*	_t_OgreWorkspace;
+		XECompositor m_XECompositor;
 
 	private:
 
 
+	
 		Ogre::Vector3 _t_LastPosition;
 		Ogre::Vector3 _t_CurrentPosition;
 

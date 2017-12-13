@@ -21,6 +21,7 @@
 #include <XEngine/Editor/SceneViewerUIState.hpp>
 #include <XEngine/Editor/GizmoUIState.hpp>
 #include "../XETCommon/EditorControllerSystem.hpp"
+#include <XERenderer/Editor/CompositorUIState.hpp>
 #endif
 
 ControllerState::ControllerState(XE::XEngine& engine, bool replace)
@@ -64,12 +65,14 @@ ControllerState::ControllerState(XE::XEngine& engine, bool replace)
 	XE::Renderable* renderable = entityHelmet.assign<XE::Renderable>(m_engine.getGraphicsManager(), m_engine.getScene(), nullptr).get();
 	XE::BodyComponent* bodyHelmet = entityHelmet.assign<XE::BodyComponent>().get();
 	bodyHelmet->setPosition(0, 10, 0);
+	bodyHelmet->rotate(Ogre::Quaternion(Ogre::Degree(90), Ogre::Vector3(1, 0, 0)));
 	bodyHelmet->isSelected = true;
 	editorComponent->id = 999;
 	editorComponent->name = "Helmet";
 
 	m_engine.getGraphicsManager().getIntoRendererQueue().push([this,camRenderable, renderable]()
 	{
+		camRenderable->m_XECompositor.setup();
 
 #ifdef CompileEditor	
 		m_engine.getGraphicsManager().getGUIRenderer()._t_initEditorUIRenderer(camRenderable->_t_OgreCameraPtr);
@@ -82,14 +85,21 @@ ControllerState::ControllerState(XE::XEngine& engine, bool replace)
 		std::unique_ptr<XE::GizmoUIState> p2(new XE::GizmoUIState(m_engine.getScene(), m_engine.getGraphicsManager(), camRenderable->_t_OgreCameraPtr));
 		p2->ID = XE::EUSID::Gizmo;
 		m_engine.getGraphicsManager().getGUIRenderer()._t_EditorUIRenderer->createUIState(std::move(p2));
+
+		//Compositor Editor UI
+		std::unique_ptr<XE::CompositorUIState> p3(new XE::CompositorUIState(m_engine.getGraphicsManager(), camRenderable->m_XECompositor));
+		p3->ID = XE::EUSID::Compositor;
+		m_engine.getGraphicsManager().getGUIRenderer()._t_EditorUIRenderer->createUIState(std::move(p3));
 #endif
 
-		XET::TestPostProcess pp(m_engine, *camRenderable);
+		//## 	XET::TestPostProcess pp(m_engine, *camRenderable);
 	//	pp.createCustomTextures();
 		
-		m_engine.getResourceMgr()._t_initResourceGroup("TestGrp");
 
-		pp.setupCompositor();
+//		m_engine.getResourceMgr()._t_initResourceGroup("TestGrp"); //needed for xecompositor
+		
+
+		//## 	pp.setupCompositor();
 //		pp.togglePostprocess("Bloom");
 
 		//load gltf
@@ -140,7 +150,7 @@ ControllerState::ControllerState(XE::XEngine& engine, bool replace)
 			
 			renderable->_t_OgreEntitySceneNodePtr->attachObject(renderable->_t_OgreItemPtr);	
 
-		//	m_sceneNode->rotate(Ogre::Quaternion(Ogre::Degree(90), Ogre::Vector3(1, 0, 0))); // needed for blender exported meshes!
+		//	renderable->_t_OgreEntitySceneNodePtr->rotate(Ogre::Quaternion(Ogre::Degree(90), Ogre::Vector3(1, 0, 0))); // needed for blender exported meshes!
 		}
 
 		//////{

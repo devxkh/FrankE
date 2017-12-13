@@ -490,6 +490,10 @@ namespace XE
 
 		bool isSelected;
 
+#ifdef CompileEditor
+		Ogre::Vector3 _t_nodeScaleStart;
+#endif
+
 	protected:
 		/// Whether to yaw around a fixed axis.
 		bool mYawFixed;

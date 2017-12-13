@@ -52,11 +52,17 @@ namespace XE
 		});
 	}
 
+	void LightRenderable::setDirection(const Ogre::Vector3& direction)
+	{
+		m_GraphicsManager.getIntoRendererQueue().push([this, direction]() {
+			m_light->setDirection(direction);
+		});
+	}
+
 	void LightRenderable::setLightData(const void* fbData)
 	{
 		m_GraphicsManager.getIntoRendererQueue().push([this, fbData]() {
 
-			
 			_setLightData(fbData);
 		});
 	}
@@ -111,13 +117,14 @@ namespace XE
 		if (lightData->attenuation())
 			m_light->setAttenuation(lightData->attenuation()->range(),lightData->attenuation()->constant(),lightData->attenuation()->linear(),lightData->attenuation()->quadratic());
 		
+	
 		if (lightType == Ogre::Light::LightTypes::LT_SPOTLIGHT)
 		{
 		/*	m_light->setSpotlightInnerAngle(Ogre::Radian(179));
 			m_light->setSpotlightOuterAngle(Ogre::Radian(179));*/
 		//	m_light->setAttenuationBasedOnRadius(1000,0.1);
-
-			m_light->setSpotlightRange(Ogre::Degree(65), Ogre::Degree(90), 1);
+		//	m_light->setAttenuation(1.0f, 1.0f, 1.0f, 1.0f);
+			m_light->setSpotlightRange(Ogre::Degree(80), Ogre::Degree(90), 0);
 		}
 
 
@@ -131,7 +138,7 @@ namespace XE
 		//m_light->setPowerScale(100);
 		//m_light->setAttenuation(23.0f, 0.5f, 0.0f, 0.5f);
 
-	mCLightVisualHelper = new CLightVisualHelper(m_Scene, m_light, m_LightAxisNode);
+		mCLightVisualHelper = new CLightVisualHelper(m_Scene, m_light, m_LightAxisNode);
 		mCLightVisualHelper->Show(true);
 		//light->setDirection(Ogre::Vector3(-1, -1, -1).normalisedCopy());
 		//light->setDirection(Ogre::Vector3(0, -1, 0));
@@ -149,9 +156,9 @@ namespace XE
 		Ogre::SceneNode *sceneNodeLines = m_Scene.getOgreSceneManager().__OgreSceneMgrPtr->getRootSceneNode(Ogre::SCENE_DYNAMIC)->createChildSceneNode(Ogre::SCENE_DYNAMIC);
 		sceneNodeLines->attachObject(manualObject);*/
 
-		/*m_Scene.getOgreSceneManager().__OgreSceneMgrPtr->setAmbientLight(Ogre::ColourValue(1.0f, 1.0f, 1.0f),
+		m_Scene.getOgreSceneManager().__OgreSceneMgrPtr->setAmbientLight(Ogre::ColourValue(1.0f, 1.0f, 1.0f),
 		Ogre::ColourValue(0, 0, 0),
-		-m_light->getDirection() + Ogre::Vector3::UNIT_Y * 0.2f);*/
+		-m_light->getDirection() + Ogre::Vector3::UNIT_Y * 0.2f);
 
 		//----------------------------- InstantRadiosity
 		if (lightData->useInstantRadiosity())

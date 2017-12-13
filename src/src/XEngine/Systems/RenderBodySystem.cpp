@@ -44,6 +44,7 @@ namespace XE
 					
 					//TODO BAD!! creates each time a queue task!
 					lightRenderable->setPosition(body->getPosition());
+					lightRenderable->setDirection(body->getOrientation() * Ogre::Vector3::UNIT_SCALE);
 				}
 
 				body->isDirty(false);

@@ -67,6 +67,15 @@ namespace XET {
 
 	void TestControllerSystem::onPointMoved(XE::ActionContext context)
 	{
+#ifdef CompileEditor
+
+		mEngine.getGraphicsManager().getGUIRenderer().m_CurrentPointPosition = Ogre::Vector2(context.event->motion.x, context.event->motion.y);
+
+		if (ImGui::IsAnyItemHovered() || ImGui::IsAnyWindowHovered() || ImGuizmo::IsOver())
+			return;
+
+#endif
+
 		// Ignore this if it happened due to a warp
 		if (handleWarpMotion(context.event->motion))
 			return;
@@ -79,14 +88,7 @@ namespace XET {
 		if (m_wantRelative && !m_windowHasFocus)
 			return;
 
-#ifdef CompileEditor
-	
-		mEngine.getGraphicsManager().getGUIRenderer().m_CurrentPointPosition = Ogre::Vector2(context.event->motion.x, context.event->motion.y);
-	
-		if (ImGui::IsAnyItemHovered() || ImGui::IsAnyWindowHovered() || ImGuizmo::IsOver())
-			return;
 
-#endif
 
 		entityx::ComponentHandle<TestControllerComponent> controller;
 		entityx::ComponentHandle<XE::ScreenComponent> screen;
@@ -143,27 +145,27 @@ namespace XET {
 		if (context.event->key.keysym.scancode == SDL_SCANCODE_1)
 		{
 		
-			void* fbEntityData = mEngine.getDAL().getEntity(7);
-			if (fbEntityData)
-			{
-				// Create a large amount of falling physics objects
-				const unsigned NUM_OBJECTS = 1000;
-				for (unsigned i = 0; i < NUM_OBJECTS; ++i)
-				{
-					auto entity = mEngine.getScene().entities.create();
-					mEngine.getScene().createEntity(entity, mEngine.getScene().getSceneID(), 7, fbEntityData, true);
+			//void* fbEntityData = mEngine.getDAL().getEntity(7);
+			//if (fbEntityData)
+			//{
+			//	// Create a large amount of falling physics objects
+			//	const unsigned NUM_OBJECTS = 1000;
+			//	for (unsigned i = 0; i < NUM_OBJECTS; ++i)
+			//	{
+			//		auto entity = mEngine.getScene().entities.create();
+			//		mEngine.getScene().createEntity(entity, mEngine.getScene().getSceneID(), 7, fbEntityData, true);
 
-					auto pBody = entity.component<XE::PhysicsComponent>();
-					
-					pBody->objects[0]->setTransformState(TransformState(XE::Vector3(0.0f, i * 4.0f + 100.0f, 0.0f), XE::Quaternion(1, 0, 0, 0), XE::Vector3(1, 1, 1)));
-				}
+			//		auto pBody = entity.component<XE::PhysicsComponent>();
+			//		
+			//		pBody->objects[0]->setTransformState(TransformState(XE::Vector3(0.0f, i * 4.0f + 100.0f, 0.0f), XE::Quaternion(1, 0, 0, 0), XE::Vector3(1, 1, 1)));
+			//	}
 
-				mEngine.getGraphicsManager().getIntoRendererQueue().push([fbEntityData]()
-				{
-					if (fbEntityData)
-						delete fbEntityData;
-				});
-			}
+			//	mEngine.getGraphicsManager().getIntoRendererQueue().push([fbEntityData]()
+			//	{
+			//		if (fbEntityData)
+			//			delete fbEntityData;
+			//	});
+			//}
 		}
 
 		entityx::ComponentHandle<TestControllerComponent> controller;
@@ -190,6 +192,11 @@ namespace XET {
 	{
 		std::cout << "onPointSelectStart! " << context.event->button.button << std::endl;
 
+#ifdef CompileEditor
+
+		if (ImGui::IsAnyItemHovered() || ImGui::IsAnyWindowHovered() || ImGuizmo::IsOver())
+			return;
+#endif
 
 		//setGrabMousePointer(true, context.window);
 		setMouseRelative(true, context.window);
@@ -210,6 +217,12 @@ namespace XET {
 	void TestControllerSystem::onPointSelectEnd(XE::ActionContext context)
 	{
 		std::cout << "onPointSelectEnd! " << context.event->button.button << std::endl;
+
+#ifdef CompileEditor
+
+		if (ImGui::IsAnyItemHovered() || ImGui::IsAnyWindowHovered() || ImGuizmo::IsOver())
+			return;
+#endif
 
 	//	setGrabMousePointer(false, context.window);
 		setMouseRelative(false, context.window);

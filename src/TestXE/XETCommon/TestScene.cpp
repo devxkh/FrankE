@@ -68,6 +68,8 @@ void TestScene::loadRendererResources()
 		}
 
 		m_engine.getResourceMgr()._t_initResourceGroup("General");
+
+		m_engine.getResourceMgr()._t_initResourceGroup("TestGrp"); //needed for xecompositor
 	});
 }
 

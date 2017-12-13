@@ -624,7 +624,10 @@ namespace XET
 		mBloomFullThreshold = preset.bloomThreshold;*/
 
 		setSkyColour(preset.skyColour, 1.0f);
-		setExposure(preset.exposure, preset.minAutoExposure, preset.maxAutoExposure);
+
+
+		setExposure(0.0f, 0.0f, 2.1f);
+		//setExposure(preset.exposure, preset.minAutoExposure, preset.maxAutoExposure);
 		setBloomThreshold(Ogre::max(preset.bloomThreshold - 2.0f, 0.0f),
 			Ogre::max(preset.bloomThreshold, 0.01f));
 		
@@ -636,10 +639,10 @@ namespace XET
 		}*/
 
 		//Ogre::SceneManager *sceneManager = mGraphicsSystem->getSceneManager();
-		sceneManager->setAmbientLight(preset.ambLowerHemisphere,
+		/*sceneManager->setAmbientLight(preset.ambLowerHemisphere,
 			preset.ambUpperHemisphere,
 			sceneManager->getAmbientLightHemisphereDir(),
-			preset.envmapScale);
+			preset.envmapScale);*/
 	}
 
 	//-----------------------------------------------------------------------------------
