@@ -2,6 +2,13 @@
 
 #include <XEngine.hpp>
 
+
+#ifdef CompileEditor	
+namespace XE {
+	class EntityViewerUIState;
+}
+#endif
+
 class ControllerState : public XE::XEState
 {
 public:
@@ -18,6 +25,10 @@ public:
 	void cleanup();
 	
 protected:
+
+#ifdef CompileEditor	
+	XE::EntityViewerUIState* m_EntityViewerUIState;
+#endif
 
 };
 

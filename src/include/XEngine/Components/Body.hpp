@@ -501,7 +501,7 @@ namespace XE
 		Ogre::Vector3 mYawFixedAxis;
 
 	private:
-		
+
 		bool				m_hasTargetPosition;
 		Ogre::Vector3       m_targetPosition;
 		Ogre::Vector3       m_targetDirection;

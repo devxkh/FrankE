@@ -16,10 +16,10 @@ namespace XE
 
 	void RenderBodySystem::update(entityx::EntityManager &es, entityx::EventManager &events, entityx::TimeDelta dt) {
 
-		if (!_graphicsMgr.GetRenderTask(RenderTaskID::RenderBody).isDone) // wait until render has done all tasks
+		if (!_graphicsMgr._isRenderThreadFinished) // wait until render has done all tasks
 			return;
 		
-		_graphicsMgr.GetRenderTask(RenderTaskID::RenderBody).isDone = false;
+	//	_graphicsMgr.GetRenderTask(RenderTaskID::RenderBody).isDone = false;
 
 		entityx::ComponentHandle<BodyComponent> body;
 		
@@ -52,7 +52,24 @@ namespace XE
 
 #ifdef CompileEditor
 			if (body->isSelected)
-				_graphicsMgr.getGUIRenderer().m_CurrentGizmoOrigin = body->GetWorldTransform();
+			{
+				/*const Ogre::Matrix4& debug = body->GetWorldTransform();
+				
+				Ogre::Vector3 position;
+				Ogre::Vector3 scale;
+				Ogre::Quaternion orientation;
+
+				debug.decomposition(position, scale, orientation);
+
+				position = body->getPosition();
+				orientation = body->getOrientation();
+				scale = body->getScale();*/
+
+				_graphicsMgr.getGUIRenderer().m_CurrentGizmoOrigin.position = body->getPosition(); // GetWorldTransform();
+				_graphicsMgr.getGUIRenderer().m_CurrentGizmoOrigin.rotation = body->getOrientation();
+				_graphicsMgr.getGUIRenderer().m_CurrentGizmoOrigin.scale = body->getScale();
+	
+			}
 #endif
 		}
 
@@ -64,9 +81,9 @@ namespace XE
 					_t_renderable->_t_update();
 			}
 
-			_graphicsMgr.getFromRendererQueue().push([this]() {
+			/*_graphicsMgr.getFromRendererQueue().push([this]() {
 				_graphicsMgr.GetRenderTask(RenderTaskID::RenderBody).isDone = true;
-			});
+			});*/
 		});
 	};
 }

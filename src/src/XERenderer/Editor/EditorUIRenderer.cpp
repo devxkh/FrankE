@@ -121,8 +121,6 @@ namespace XE {
 		auto scenemgr = m_graphicsManager.getRoot()->getSceneManager("MyFirstSceneManager");
 
 
-
-
 		for each (auto& uiState in m_EditorUIStates)
 		{
 			uiState.get()->render();

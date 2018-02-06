@@ -18,6 +18,7 @@
 #include <Ogre/Components/Hlms/Unlit/include/OgreHlmsUnlitDatablock.h>
 
 #ifdef CompileEditor
+#include <XEngine/Editor/EntityViewerUIState.hpp>
 #include <XEngine/Editor/SceneViewerUIState.hpp>
 #include <XEngine/Editor/GizmoUIState.hpp>
 #include "../XETCommon/EditorControllerSystem.hpp"
@@ -26,6 +27,11 @@
 
 ControllerState::ControllerState(XE::XEngine& engine, bool replace)
 	: XE::XEState(engine, replace)
+
+#ifdef CompileEditor	
+	, m_EntityViewerUIState(nullptr)
+#endif
+
 {
 	LOG(XE::info) << "InitState - Initialization";
 
@@ -37,8 +43,9 @@ ControllerState::ControllerState(XE::XEngine& engine, bool replace)
 #endif
 
 	engine.getScene().create(1);
-
-	engine.getGraphicsManager().getGUIRenderer().loadAtlas("dbData/UI/TestAtlas.fbbin"); // ("XEngine", "General"); //texturemanager initialized in createrenderwindow!!!
+	XE::FileResource fres;
+	engine.getResourceMgr().getBufferFromFile("dbData/UI/TestAtlas.fbbin", fres);
+	engine.getGraphicsManager().getGUIRenderer().loadAtlas(fres.buffer); // "dbData/UI/TestAtlas.fbbin"); // ("XEngine", "General"); //texturemanager initialized in createrenderwindow!!!
 
 	//create an empty entity for free style camera
 	entityx::Entity entity = engine.getScene().entities.create();
@@ -65,7 +72,7 @@ ControllerState::ControllerState(XE::XEngine& engine, bool replace)
 	XE::Renderable* renderable = entityHelmet.assign<XE::Renderable>(m_engine.getGraphicsManager(), m_engine.getScene(), nullptr).get();
 	XE::BodyComponent* bodyHelmet = entityHelmet.assign<XE::BodyComponent>().get();
 	bodyHelmet->setPosition(0, 10, 0);
-	bodyHelmet->rotate(Ogre::Quaternion(Ogre::Degree(90), Ogre::Vector3(1, 0, 0)));
+//	bodyHelmet->rotate(Ogre::Quaternion(Ogre::Degree(90), Ogre::Vector3(1, 0, 0)));
 	bodyHelmet->isSelected = true;
 	editorComponent->id = 999;
 	editorComponent->name = "Helmet";
@@ -90,6 +97,14 @@ ControllerState::ControllerState(XE::XEngine& engine, bool replace)
 		std::unique_ptr<XE::CompositorUIState> p3(new XE::CompositorUIState(m_engine.getGraphicsManager(), camRenderable->m_XECompositor));
 		p3->ID = XE::EUSID::Compositor;
 		m_engine.getGraphicsManager().getGUIRenderer()._t_EditorUIRenderer->createUIState(std::move(p3));
+
+
+		//Entity Editor UI
+		std::unique_ptr<XE::EntityViewerUIState> p4(new XE::EntityViewerUIState(m_engine.getGraphicsManager(), m_engine.getScene()));
+		p4->ID = XE::EUSID::EntityObject;
+		m_EntityViewerUIState = p4.get();
+		m_engine.getGraphicsManager().getGUIRenderer()._t_EditorUIRenderer->createUIState(std::move(p4));
+
 #endif
 
 		//## 	XET::TestPostProcess pp(m_engine, *camRenderable);
@@ -150,6 +165,11 @@ ControllerState::ControllerState(XE::XEngine& engine, bool replace)
 			
 			renderable->_t_OgreEntitySceneNodePtr->attachObject(renderable->_t_OgreItemPtr);	
 
+		//	renderable->setVisibility(true);
+			//without setVisibilityFlags -> item is not visible in release mode!!??
+			renderable->_t_OgreItemPtr->setVisibilityFlags(0x000000001); // 0x000000001);
+
+
 		//	renderable->_t_OgreEntitySceneNodePtr->rotate(Ogre::Quaternion(Ogre::Degree(90), Ogre::Vector3(1, 0, 0))); // needed for blender exported meshes!
 		}
 
@@ -182,8 +202,52 @@ ControllerState::~ControllerState()
 
 }
 
+#ifdef CompileEditor	
+static uint64_t lastSelected;
+static Ogre::Light* selectedLight;
+static XE::RenderableType selectedType;
+#endif
+
 void ControllerState::update(float deltaTime)
 {
+
+#ifdef CompileEditor	
+
+
+	entityx::ComponentHandle<XE::BodyComponent> body;
+
+	for (entityx::Entity entity : m_engine.getScene().entities.entities_with_components(body)) {
+
+		auto debug = body->getPosition();
+		if (body->isSelected && lastSelected != entity.id().id())
+		{
+			lastSelected = entity.id().id();
+			selectedType = XE::RenderableType::RT_None;
+			selectedLight = nullptr;
+
+			if (entity.has_component<XE::LightRenderable>())
+			{
+				entityx::ComponentHandle<XE::LightRenderable> lightRenderable = entity.component<XE::LightRenderable>();
+				selectedLight = lightRenderable->_t_light;
+				selectedType = XE::RenderableType::RT_LightRenderable;
+			}
+
+			m_engine.getGraphicsManager().getIntoRendererQueue().push([this]()
+			{
+				if (m_EntityViewerUIState)
+					m_EntityViewerUIState->components.clear();
+
+				if (m_EntityViewerUIState && selectedType == XE::RenderableType::RT_LightRenderable)
+				{
+					std::unique_ptr<XE::RenderableComponent> p1(new XE::RenderableComponent);
+					p1->renderableType = XE::RenderableType::RT_LightRenderable;
+					p1->_t_light = selectedLight;
+					m_EntityViewerUIState->components.push_back(std::move(p1));
+				}
+			});
+		}
+	};
+#endif
 
 }
 

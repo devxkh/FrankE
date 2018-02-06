@@ -136,7 +136,6 @@ namespace XE {
 		compositorManager->addWorkspace(sceneManager, renderWindow, camera, compositorName, true, 1);
 
 
-
 		setSkyColour(m_CompositorProperties.skyColour, 1.0f);
 
 

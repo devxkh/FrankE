@@ -54,6 +54,7 @@ namespace XE
 		, _t_OgreItemPtr(0)
 		, m_rotation(1, 0, 0, 0)
 		, m_datablock(0)
+		, m_isVisible(true)
 		//, m_worldOrientation(1 , 0, 0, 0)*/
 		//,m_transform(0, 0, 0)
 		//,m_worldTransform(0, 0, 0)
@@ -289,7 +290,7 @@ namespace XE
 				m_Scene.getOgreSceneManager().__OgreSceneMgrPtr->getRenderQueue()->setRenderQueueMode(renderable->renderqueue(), Ogre::RenderQueue::Modes::V1_FAST);
 */
 				m_isVisible = renderable->visible();
-				_t_OgreItemPtr->setVisibilityFlags(renderable->visibilityFlags());
+				//_t_OgreItemPtr->setVisibilityFlags(renderable->visibilityFlags());
 				_t_OgreEntitySceneNodePtr->attachObject(_t_OgreItemPtr);
 				_t_OgreItemPtr->setVisibilityFlags(renderable->visibilityFlags()); // 0x000000001);
 				_t_OgreItemPtr->setCastShadows(renderable->castShadows());

@@ -35,6 +35,7 @@ namespace XE
 	class XEngine;
 	class OgreWorkspace;
 
+
 	enum RenderTaskID
 	{
 		DebugLines,
@@ -81,7 +82,10 @@ namespace XE
 		
 		void registerHlms(void);
 
+		/// from renderer thread into main thread
 		QueueManager& getFromRendererQueue() { return my_FromRSQueueManager; }
+
+		/// from main thread into renderer thread
 		QueueManager& getIntoRendererQueue() { return my_QueueManager; }
 
 		void updateRenderer();

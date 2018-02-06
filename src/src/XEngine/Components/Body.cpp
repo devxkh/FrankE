@@ -1,5 +1,7 @@
 #include <XEngine/Components/Body.hpp>
 
+#include <ThirdParty/plog/Log.h>
+
 namespace XE
 {
 	BodyComponent::BodyComponent()
@@ -21,7 +23,6 @@ namespace XE
 		mInheritOrientation(true),
 		mInheritScale(true)
 		, m_hasTargetPosition(false)
-
 #ifdef CompileEditor
 		, _t_nodeScaleStart(Ogre::Vector3::ZERO)
 #endif
@@ -53,7 +54,12 @@ namespace XE
 
 		setScale(transform->scale()->x(), transform->scale()->y(), transform->scale()->z());
 
-		setOrientation(transform->rotation()->w(), transform->rotation()->x(), transform->rotation()->y(), transform->rotation()->z());
+		setOrientation(Ogre::Quaternion::IDENTITY);
+		pitch(Ogre::Degree(transform->rotation()->x() * -1));
+		yaw(Ogre::Degree(transform->rotation()->y() * -1));
+		roll(Ogre::Degree(transform->rotation()->z() * -1));
+
+	//	setOrientation(transform->rotation()->w(), transform->rotation()->x(), transform->rotation()->y(), transform->rotation()->z());
 	}
 
 	BodyComponent::~BodyComponent()
@@ -98,7 +104,7 @@ namespace XE
 		Ogre::Matrix3 kRot;
 		mOrientation.ToRotationMatrix(kRot);
 			
-		Ogre::Matrix3 kRotScaled( kRot[0][0] * mScale.x, kRot[0][1] * mScale.y, kRot[0][2] * mScale.z
+		const Ogre::Matrix3 kRotScaled( kRot[0][0] * mScale.x, kRot[0][1] * mScale.y, kRot[0][2] * mScale.z
 								, kRot[1][0] * mScale.x, kRot[1][1] * mScale.y, kRot[1][2] * mScale.z
 								, kRot[2][0] * mScale.x, kRot[2][1] * mScale.y, kRot[2][2] * mScale.z);
 
@@ -109,10 +115,12 @@ namespace XE
 						mPosition.z, 0, 0, 0, 1.0);
 			//, mPosition,		
 		//	mOrientation, mScale
+		
+	//	LOG(plog::info) << "body-trans:" << debug;
+
 		return debug;
 	}
-
-
+	
 	void BodyComponent::setTargetPosition(const Ogre::Vector3& targetPosition) {
 		
 		setHasTargetPosition(true);

@@ -58,12 +58,14 @@ source_group("include\\modules" FILES ${XEngineModules_SOURCES})
 # ----------------------- Editor_SOURCES -------------------------------
 
 set(XEngine_Editor_SOURCES
+     ${SRCROOT}/XEngine/Editor/EntityViewerUIState.cpp
      ${SRCROOT}/XEngine/Editor/SceneViewerUIState.cpp
      ${SRCROOT}/XEngine/Editor/GizmoUIState.cpp
 )
 source_group("src\\Editor" FILES ${XEngine_Editor_SOURCES})
 
 set(XEngine_Editor_HEADER
+    ${INCROOT}/XEngine/Editor/EntityViewerUIState.hpp
     ${INCROOT}/XEngine/Editor/SceneViewerUIState.hpp
     ${INCROOT}/XEngine/Editor/GizmoUIState.hpp
 )
@@ -111,7 +113,7 @@ source_group("src\\Scripts\\LUA" FILES ${XEScripts_LUASRC})
 
 # ----------------------- Properties->C/C++->General->Additional Include Directories -------------------------------
 #include_directories (${PROJECT_SOURCE_DIR}/src/include)
-
+include_directories (${PROJECT_SOURCE_DIR}/src/Ogre/Components/Hlms/Pbs/include)
 
 #file(GLOB XEScripts_SOURCES *.cpp)
 #file(GLOB XEScripts_HEADER *.hpp)

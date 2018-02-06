@@ -7,6 +7,11 @@
 
 #include <memory>
 
+
+namespace Ogre {
+	class InstantRadiosity;
+}
+
 namespace XE {
 
 	struct EditorComponent
@@ -52,6 +57,11 @@ namespace XE {
 		std::vector<std::unique_ptr<EntityDebug>> _t_displayedEntities;
 
 	private:
+
+		void enableIR(bool enable);
+
+		Ogre::InstantRadiosity* mInstantRadiosity;
+
 		GraphicsManager& m_graphicsMgr;
 		Scene& m_scene;
 		Uint32 m_selected;

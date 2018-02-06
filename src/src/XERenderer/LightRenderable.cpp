@@ -18,18 +18,18 @@ namespace XE
 		: m_GraphicsManager(gmanager)
 		, m_Scene(scene)
 		, m_LightAxisNode(0)
-		, m_light(0)
+		, _t_light(0)
 		, mInstantRadiosity(0)
 	{
 		m_GraphicsManager.getIntoRendererQueue().push([this, fbData]() {
 
-			m_light = m_Scene.getOgreSceneManager().__OgreSceneMgrPtr->createLight();
+			_t_light = m_Scene.getOgreSceneManager().__OgreSceneMgrPtr->createLight();
 			Ogre::SceneNode *rootNode = m_Scene.getOgreSceneManager().__OgreSceneMgrPtr->getRootSceneNode();
 
 			m_LightAxisNode = rootNode->createChildSceneNode();
 
 			//mLightAxisNode->setPosition(0,30,0);
-			m_LightAxisNode->attachObject(m_light);
+			m_LightAxisNode->attachObject(_t_light);
 			//	mLightAxisNode->setScale(Ogre::Vector3(0.12f, 0.12f, 0.12f));
 			
 			_setLightData(fbData);
@@ -39,7 +39,7 @@ namespace XE
 	LightRenderable::~LightRenderable()
 	{
 		m_GraphicsManager.getIntoRendererQueue().push([this]() {
-			m_Scene.getOgreSceneManager().__OgreSceneMgrPtr->destroyLight(m_light);
+			m_Scene.getOgreSceneManager().__OgreSceneMgrPtr->destroyLight(_t_light);
 			m_LightAxisNode->getParentSceneNode()->removeAndDestroyChild(m_LightAxisNode);
 			m_Scene.getOgreSceneManager().__OgreSceneMgrPtr->destroySceneNode(m_LightAxisNode);
 		});
@@ -55,7 +55,7 @@ namespace XE
 	void LightRenderable::setDirection(const Ogre::Vector3& direction)
 	{
 		m_GraphicsManager.getIntoRendererQueue().push([this, direction]() {
-			m_light->setDirection(direction);
+			_t_light->setDirection(direction);
 		});
 	}
 
@@ -89,8 +89,8 @@ namespace XE
 		LOG(plog::info) << "lightType:" << lightData->lightType();
 		LOG(plog::info) << "powerScale:" << lightData->powerScale();
 
-		m_light->setPowerScale(lightData->powerScale()); //Ogre::Math::PI);// 1.0f);
-		m_light->setCastShadows(lightData->castShadows());
+		_t_light->setPowerScale(lightData->powerScale()); //Ogre::Math::PI);// 1.0f);
+		_t_light->setCastShadows(lightData->castShadows());
 
 	//	m_light->setAttenuationBasedOnRadius(10.0f, 0.01f);
 		auto lightType = (Ogre::Light::LightTypes)lightData->lightType();
@@ -98,24 +98,24 @@ namespace XE
 		if (lightData->colourDiffuse())
 		{
 			auto diffuse = Ogre::ColourValue(lightData->colourDiffuse()->r(), lightData->colourDiffuse()->g(), lightData->colourDiffuse()->b(), lightData->colourDiffuse()->a());
-			m_light->setDiffuseColour(diffuse);// Ogre::ColourValue::White);
+			_t_light->setDiffuseColour(diffuse);// Ogre::ColourValue::White);
 		}
 
 		if (lightData->colourSpecular())
 		{
 			auto specular = Ogre::ColourValue(lightData->colourSpecular()->r(), lightData->colourSpecular()->g(), lightData->colourSpecular()->b(), lightData->colourSpecular()->a());
-			m_light->setSpecularColour(specular); //Ogre::ColourValue::White);
+			_t_light->setSpecularColour(specular); //Ogre::ColourValue::White);
 		}
 
-		m_light->setType(lightType); // Ogre::Light::LT_DIRECTIONAL);
+		_t_light->setType(lightType); // Ogre::Light::LT_DIRECTIONAL);
 
 		if (lightData->directionVector())
-			m_light->setDirection(Ogre::Vector3(lightData->directionVector()->x(), lightData->directionVector()->y(), lightData->directionVector()->z()).normalisedCopy());
+			_t_light->setDirection(Ogre::Vector3(lightData->directionVector()->x(), lightData->directionVector()->y(), lightData->directionVector()->z()).normalisedCopy());
 		
 		//m_light->setDirection(Ogre::Vector3(-0.505, 3.4, 5.423867).normalisedCopy());
 
 		if (lightData->attenuation())
-			m_light->setAttenuation(lightData->attenuation()->range(),lightData->attenuation()->constant(),lightData->attenuation()->linear(),lightData->attenuation()->quadratic());
+			_t_light->setAttenuation(lightData->attenuation()->range(),lightData->attenuation()->constant(),lightData->attenuation()->linear(),lightData->attenuation()->quadratic());
 		
 	
 		if (lightType == Ogre::Light::LightTypes::LT_SPOTLIGHT)
@@ -124,7 +124,7 @@ namespace XE
 			m_light->setSpotlightOuterAngle(Ogre::Radian(179));*/
 		//	m_light->setAttenuationBasedOnRadius(1000,0.1);
 		//	m_light->setAttenuation(1.0f, 1.0f, 1.0f, 1.0f);
-			m_light->setSpotlightRange(Ogre::Degree(80), Ogre::Degree(90), 0);
+			_t_light->setSpotlightRange(Ogre::Degree(80), Ogre::Degree(90), 0);
 		}
 
 
@@ -138,7 +138,7 @@ namespace XE
 		//m_light->setPowerScale(100);
 		//m_light->setAttenuation(23.0f, 0.5f, 0.0f, 0.5f);
 
-		mCLightVisualHelper = new CLightVisualHelper(m_Scene, m_light, m_LightAxisNode);
+		mCLightVisualHelper = new CLightVisualHelper(m_Scene, _t_light, m_LightAxisNode);
 		mCLightVisualHelper->Show(true);
 		//light->setDirection(Ogre::Vector3(-1, -1, -1).normalisedCopy());
 		//light->setDirection(Ogre::Vector3(0, -1, 0));
@@ -156,10 +156,10 @@ namespace XE
 		Ogre::SceneNode *sceneNodeLines = m_Scene.getOgreSceneManager().__OgreSceneMgrPtr->getRootSceneNode(Ogre::SCENE_DYNAMIC)->createChildSceneNode(Ogre::SCENE_DYNAMIC);
 		sceneNodeLines->attachObject(manualObject);*/
 
-		m_Scene.getOgreSceneManager().__OgreSceneMgrPtr->setAmbientLight(Ogre::ColourValue(1.0f, 1.0f, 1.0f),
+	/*	m_Scene.getOgreSceneManager().__OgreSceneMgrPtr->setAmbientLight(Ogre::ColourValue(1.0f, 1.0f, 1.0f),
 		Ogre::ColourValue(0, 0, 0),
-		-m_light->getDirection() + Ogre::Vector3::UNIT_Y * 0.2f);
-
+		-_t_light->getDirection() + Ogre::Vector3::UNIT_Y * 0.2f);
+*/
 		//----------------------------- InstantRadiosity
 		if (lightData->useInstantRadiosity())
 		{

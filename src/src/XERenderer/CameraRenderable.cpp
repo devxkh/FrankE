@@ -27,6 +27,7 @@ namespace XE
 		, _t_CurrentPosition(Ogre::Vector3::ZERO)
 
 		, m_XECompositor(gmanager, *this)
+		, m_autoAspectRatio(true)
 	{
 		m_GraphicsManager.getIntoRendererQueue().push([this, id]() {
 

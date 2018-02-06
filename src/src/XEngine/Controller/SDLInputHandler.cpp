@@ -114,7 +114,7 @@ namespace XE {
 		m_grabPointer = m_wantMouseGrab && m_mouseInWindow && m_windowHasFocus;
 		SDL_SetWindowGrab(window, m_grabPointer ? SDL_TRUE : SDL_FALSE);
 
-		SDL_ShowCursor(m_wantMouseVisible || !m_windowHasFocus);
+		//SDL_ShowCursor(m_wantMouseVisible || !m_windowHasFocus);
 
 		bool relative = m_wantRelative && m_mouseInWindow && m_windowHasFocus;
 		if (m_isMouseRelative == relative)

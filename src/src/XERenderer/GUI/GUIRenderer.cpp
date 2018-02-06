@@ -39,7 +39,7 @@ namespace XE
 		, m_layerRenderer(graphicsManager)
 
 #ifdef CompileEditor
-		, m_CurrentGizmoOrigin(Ogre::Matrix4::IDENTITY)
+	//	, m_CurrentGizmoOrigin(Ogre::Matrix4::IDENTITY)
 		, _t_EditorUIRenderer(nullptr)
 #endif
 
@@ -160,109 +160,109 @@ namespace XE
 
 	void GUIRenderer::registerObject(sol::state& lua)
 	{
-		lua.new_usertype<GUIRenderer>("GUIRenderer",
+		lua.new_usertype<GUIRenderer>("GUIRenderer"
 
 			//properties
 			//"guiRenderer", sol::property(&GraphicsManager::getGUIRenderer)
 
 			//functions
-			"loadAtlas", &GUIRenderer::loadAtlas
+			//,"loadAtlas", &GUIRenderer::loadAtlas
 			);
 
 		auto stateView = lua.set("GUIRenderer", this); //set object instance
 	}
 
-	bool GUIRenderer::loadAtlas(const std::string& fileName)
+	void GUIRenderer::loadAtlas(const void *buf) //const std::string& fileName)
 	{
-		PhysFsStream wonderfullStream;
-		if (wonderfullStream.open(fileName.c_str()))//"UI/TestAtlas.fbbin"))
-		{
-			// Make sure that the stream's reading position is at the beginning
-			wonderfullStream.seek(0);
+		//PhysFsStream wonderfullStream;
+		//if (wonderfullStream.open(fileName.c_str()))//"UI/TestAtlas.fbbin"))
+		//{
+		//	// Make sure that the stream's reading position is at the beginning
+		//	wonderfullStream.seek(0);
 
-			std::vector<char> buffer(wonderfullStream.getSize());
-			if (wonderfullStream.read(buffer.data(), wonderfullStream.getSize()))
+		//	std::vector<char> buffer(wonderfullStream.getSize());
+		//	if (wonderfullStream.read(buffer.data(), wonderfullStream.getSize()))
+		//	{
+		auto atlas = XFBType::GetAtlas(buf);//&buffer[0]);
+
+		std::string atlasName = atlas->name()->c_str();
+		addAtlas(atlasName, atlas->texture()->c_str(), Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+
+		LOG(plog::info) << "load sprite data";
+
+		//sprites
+		for (auto it = atlas->sprites()->begin(); it != atlas->sprites()->end(); ++it)
+		{
+			std::unique_ptr<SpriteData> newSprite = std::unique_ptr<SpriteData>(new SpriteData());
+			newSprite->spriteWidth = (*it)->width(); // width
+			newSprite->spriteHeight = (*it)->height(); // height
+			newSprite->uvLeft = (*it)->posX();
+			newSprite->uvBottom = (*it)->posY() - (*it)->height();
+			newSprite->uvTop = (*it)->posY();
+			newSprite->uvRight = newSprite->uvLeft + (*it)->posX();
+
+			_sprites[(*it)->name()->c_str()] = std::move(newSprite);
+		}
+
+		//fonts
+		for (auto it = atlas->fonts()->begin(); it != atlas->fonts()->end(); ++it)
+		{
+			Font newFont;
+
+
+			//glyphs
+			for (auto itGlyph = (*it)->glyphs()->begin(); itGlyph != (*it)->glyphs()->end(); ++itGlyph)
 			{
-				auto atlas = XFBType::GetAtlas(&buffer[0]);
+				//LOG(plog::info) << "Glyph:";
+			//	std::cout << "code:" << (*itGlyph)->code() << std::endl; //->> Attention!! causing sometimes a memory crash??
 
-				std::string atlasName = atlas->name()->c_str();
-				addAtlas(atlasName, atlas->texture()->c_str(), Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+				FontGlyph newGlyph;
+				newGlyph.glyphAdvance = (*itGlyph)->glyphAdvance();
+				newGlyph.glyphHeight = (*itGlyph)->glyphHeight();
+				newGlyph.glyphWidth = (*itGlyph)->glyphWidth();
 
-				LOG(plog::info) << "load sprite data";
-
-				//sprites
-				for (auto it = atlas->sprites()->begin(); it != atlas->sprites()->end(); ++it)
+				if ((*itGlyph)->kerningList())
 				{
-					std::unique_ptr<SpriteData> newSprite = std::unique_ptr<SpriteData>(new SpriteData());
-					newSprite->spriteWidth = (*it)->width(); // width
-					newSprite->spriteHeight = (*it)->height(); // height
-					newSprite->uvLeft = (*it)->posX();
-					newSprite->uvBottom = (*it)->posY() - (*it)->height();
-					newSprite->uvTop = (*it)->posY();
-					newSprite->uvRight = newSprite->uvLeft + (*it)->posX();
-
-					_sprites[(*it)->name()->c_str()] = std::move(newSprite);
-				}
-
-				//fonts
-				for (auto it = atlas->fonts()->begin(); it != atlas->fonts()->end(); ++it)
-				{
-					Font newFont;
-					
-
-					//glyphs
-					for (auto itGlyph = (*it)->glyphs()->begin(); itGlyph != (*it)->glyphs()->end(); ++itGlyph)
+					//kerning
+					for (auto itKerning = (*itGlyph)->kerningList()->begin(); itKerning != (*itGlyph)->kerningList()->end(); ++itKerning)
 					{
-						//LOG(plog::info) << "Glyph:";
-					//	std::cout << "code:" << (*itGlyph)->code() << std::endl; //->> Attention!! causing sometimes a memory crash??
+						//	std::cout << "itKerning:" << (*itKerning)->character() << std::endl; //->> Attention!! causing sometimes a memory crash??
 
-						FontGlyph newGlyph;
-						newGlyph.glyphAdvance = (*itGlyph)->glyphAdvance();
-						newGlyph.glyphHeight = (*itGlyph)->glyphHeight();
-						newGlyph.glyphWidth = (*itGlyph)->glyphWidth();
-
-						if ((*itGlyph)->kerningList())
-						{
-							//kerning
-							for (auto itKerning = (*itGlyph)->kerningList()->begin(); itKerning != (*itGlyph)->kerningList()->end(); ++itKerning)							
-							{
-							//	std::cout << "itKerning:" << (*itKerning)->character() << std::endl; //->> Attention!! causing sometimes a memory crash??
-								
-								newGlyph.kerning.emplace_back(GlyphKerning((*itKerning)->character(), (*itKerning)->kerning()));
-							}
-						}
-
-						newGlyph.uvBottom = (*itGlyph)->uvBottom();
-						newGlyph.uvHeight = (*itGlyph)->uvHeight();
-						newGlyph.uvLeft = (*itGlyph)->uvLeft();
-						newGlyph.uvRight = (*itGlyph)->uvRight();
-						newGlyph.uvTop = (*itGlyph)->uvTop();
-						newGlyph.uvWidth = (*itGlyph)->uvWidth();
-						newGlyph.verticalOffset = (*itGlyph)->verticalOffset();
-
-						newFont.mGlyphs.emplace((*itGlyph)->code(),newGlyph);
+						newGlyph.kerning.emplace_back(GlyphKerning((*itKerning)->character(), (*itKerning)->kerning()));
 					}
-					
-					newFont.mBaseline = (*it)->baseline();
-					newFont.mLetterSpacing = (*it)->letterSpacing();
-					newFont.mLineHeight = (*it)->lineHeight();
-					newFont.mLineSpacing = (*it)->lineSpacing();
-					newFont.mMonoWidth = (*it)->monoWidth();
-					//	newFont->mRangeBegin = (*it)->rangeBegin();
-					//	newFont->mRangeEnd = (*it)->rangeEnd();
-					newFont.mSpaceLength = (*it)->spaceLength();
-
-					_fonts.emplace((*it)->id(),newFont);
 				}
 
-				//todo from renderthread! ?? into main thread_calculateCoordinates();
+				newGlyph.uvBottom = (*itGlyph)->uvBottom();
+				newGlyph.uvHeight = (*itGlyph)->uvHeight();
+				newGlyph.uvLeft = (*itGlyph)->uvLeft();
+				newGlyph.uvRight = (*itGlyph)->uvRight();
+				newGlyph.uvTop = (*itGlyph)->uvTop();
+				newGlyph.uvWidth = (*itGlyph)->uvWidth();
+				newGlyph.verticalOffset = (*itGlyph)->verticalOffset();
+
+				newFont.mGlyphs.emplace((*itGlyph)->code(), newGlyph);
 			}
+
+			newFont.mBaseline = (*it)->baseline();
+			newFont.mLetterSpacing = (*it)->letterSpacing();
+			newFont.mLineHeight = (*it)->lineHeight();
+			newFont.mLineSpacing = (*it)->lineSpacing();
+			newFont.mMonoWidth = (*it)->monoWidth();
+			//	newFont->mRangeBegin = (*it)->rangeBegin();
+			//	newFont->mRangeEnd = (*it)->rangeEnd();
+			newFont.mSpaceLength = (*it)->spaceLength();
+
+			_fonts.emplace((*it)->id(), newFont);
 		}
-		else
-		{
-			LOG(plog::error) << "GUIRenderer::loadAtlas -> atlasfile not found: " << fileName;
-			return false;
-		}
+
+		//todo from renderthread! ?? into main thread_calculateCoordinates();
+//	}
+/*}
+else
+{
+	LOG(plog::error) << "GUIRenderer::loadAtlas -> atlasfile not found: " << fileName;
+	return false;
+}*/
 	}
 	
 	void  GUIRenderer::_calculateCoordinates(sf::Vector2f texelOffset, sf::Vector2f inverseTextureSize)

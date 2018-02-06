@@ -32,6 +32,7 @@ namespace XE
 
 		void setDirection(const Ogre::Vector3& direction);
 
+		Ogre::Light* _t_light;
 
 	private:
 
@@ -42,7 +43,6 @@ namespace XE
 
 		Ogre::InstantRadiosity          *mInstantRadiosity;
 
-		Ogre::Light* m_light;
 		Ogre::SceneNode* m_LightAxisNode;
 		Scene& m_Scene;
 

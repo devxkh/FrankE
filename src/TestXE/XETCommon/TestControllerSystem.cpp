@@ -67,14 +67,7 @@ namespace XET {
 
 	void TestControllerSystem::onPointMoved(XE::ActionContext context)
 	{
-#ifdef CompileEditor
 
-		mEngine.getGraphicsManager().getGUIRenderer().m_CurrentPointPosition = Ogre::Vector2(context.event->motion.x, context.event->motion.y);
-
-		if (ImGui::IsAnyItemHovered() || ImGui::IsAnyWindowHovered() || ImGuizmo::IsOver())
-			return;
-
-#endif
 
 		// Ignore this if it happened due to a warp
 		if (handleWarpMotion(context.event->motion))
@@ -89,6 +82,14 @@ namespace XET {
 			return;
 
 
+#ifdef CompileEditor
+
+		mEngine.getGraphicsManager().getGUIRenderer().m_CurrentPointPosition = Ogre::Vector2(context.event->motion.x, context.event->motion.y);
+
+		if (ImGui::IsAnyItemHovered() || ImGui::IsAnyWindowHovered() || ImGuizmo::IsOver())
+			return;
+
+#endif
 
 		entityx::ComponentHandle<TestControllerComponent> controller;
 		entityx::ComponentHandle<XE::ScreenComponent> screen;
@@ -192,15 +193,23 @@ namespace XET {
 	{
 		std::cout << "onPointSelectStart! " << context.event->button.button << std::endl;
 
+		setGrabMousePointer(true, context.window);
+		setMouseRelative(true, context.window);
+
 #ifdef CompileEditor
 
 		if (ImGui::IsAnyItemHovered() || ImGui::IsAnyWindowHovered() || ImGuizmo::IsOver())
+		{
+			ImGuizmo::Enable(true);
 			return;
+		}
+		
+		mEngine.getGraphicsManager().getGUIRenderer()._t_EditorUIRenderer->IsGizmoEnabled = false;
+
+		ImGuizmo::Enable(false);
 #endif
 
-		//setGrabMousePointer(true, context.window);
-		setMouseRelative(true, context.window);
-		setMouseVisible(false, context.window);
+		//	setMouseVisible(false, context.window);
 
 		entityx::ComponentHandle<TestControllerComponent> controller;
 		entityx::ComponentHandle<XE::ScreenComponent> screen;
@@ -217,16 +226,21 @@ namespace XET {
 	void TestControllerSystem::onPointSelectEnd(XE::ActionContext context)
 	{
 		std::cout << "onPointSelectEnd! " << context.event->button.button << std::endl;
+		
+		setGrabMousePointer(false, context.window);
+		setMouseRelative(false, context.window);
+		//	setMouseVisible(true, context.window);
 
 #ifdef CompileEditor
 
 		if (ImGui::IsAnyItemHovered() || ImGui::IsAnyWindowHovered() || ImGuizmo::IsOver())
 			return;
+
+		ImGuizmo::Enable(true);
+		mEngine.getGraphicsManager().getGUIRenderer()._t_EditorUIRenderer->IsGizmoEnabled = true;
+
 #endif
 
-	//	setGrabMousePointer(false, context.window);
-		setMouseRelative(false, context.window);
-		setMouseVisible(true, context.window);
 
 		entityx::ComponentHandle<TestControllerComponent> controller;
 		entityx::ComponentHandle<XE::ScreenComponent> screen;

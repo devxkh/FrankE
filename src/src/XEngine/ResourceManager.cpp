@@ -3,6 +3,10 @@
 #include <Ogre/OgreMain/include/OgreSingleton.h>
 #include <Ogre/OgreMain/include/OgreResourceGroupManager.h>
 
+#include <XEDAL/PhysFS/PhysFsStream.hpp>
+
+#include <ThirdParty/plog/Log.h>
+
 namespace XE {
 
 	void ResourceManager::_t_addLocationForRender(const std::string& location, const std::string& group, bool recursive, bool readOnly, const std::string& locType)
@@ -24,6 +28,29 @@ namespace XE {
 	//	}
 	}
 
+	void ResourceManager::getBufferFromFile(const std::string& filePath, FileResource& res)
+	{
+		PhysFsStream wonderfullStream;
+		if (wonderfullStream.open(filePath.c_str()))//"UI/TestAtlas.fbbin"))
+		{
+			// Make sure that the stream's reading position is at the beginning
+			wonderfullStream.seek(0);
+
+			//std::unique_ptr<std::vector<char>> buffer(new std::vector<char>(wonderfullStream.getSize()));
+			//std::vector<char> buffer(wonderfullStream.getSize());
+			//if (wonderfullStream.read(buffer->data(), wonderfullStream.getSize()))
+			res.bufferVec.resize(wonderfullStream.getSize());
+			if (wonderfullStream.read(res.bufferVec.data(), wonderfullStream.getSize()))
+			{
+				res.buffer = &res.bufferVec[0];
+			}
+		}
+		else
+		{
+			LOG(plog::error) << "GUIRenderer::getBufferFromFile -> atlasfile not found: " << filePath;
+			//return false;
+		}
+	}
 
 	void ResourceManager::_t_registerHLMSResources()
 	{		

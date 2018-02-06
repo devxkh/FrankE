@@ -96,5 +96,5 @@ namespace XE {
 	typedef signed   long long Int64;
 	typedef unsigned long long Uint64;
 #endif
-
+	
 }

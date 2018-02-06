@@ -11,8 +11,9 @@ namespace XE {
 		SceneHierarchy,
 		NodeProperties,
 		Compositor,
-
+		
 		//mainthread
+		EntityObject,
 		entities,
 		physicObjects
 	};

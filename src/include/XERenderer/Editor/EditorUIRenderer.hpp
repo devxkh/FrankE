@@ -8,6 +8,7 @@
 
 #include <vector>
 #include <memory>
+#include <atomic>
 
 namespace Ogre {
 	class Matrix4;
@@ -36,6 +37,8 @@ namespace XE {
 		IEditorUIState& createUIState(std::unique_ptr<IEditorUIState> uiState);
 
 		IEditorUIState* getUIState(int ID);
+
+		std::atomic<bool> IsGizmoEnabled;
 
 	private:	
 

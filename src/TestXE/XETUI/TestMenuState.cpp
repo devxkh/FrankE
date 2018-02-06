@@ -31,8 +31,12 @@ TestMenuState::TestMenuState(XE::XEngine& engine, bool replace)
 	
 	engine.getScene().create(1);
 
-	if (!engine.getGraphicsManager().getGUIRenderer().loadAtlas("dbData/UI/TestAtlas.fbbin"))
-		return;
+	XE::FileResource fres;
+	engine.getResourceMgr().getBufferFromFile("dbData/UI/TestAtlas.fbbin", fres);
+	engine.getGraphicsManager().getGUIRenderer().loadAtlas(fres.buffer); // "dbData/UI/TestAtlas.fbbin"); // ("XEngine", "General"); //texturemanager initialized in createrenderwindow!!!
+
+	/*if (!engine.getGraphicsManager().getGUIRenderer().loadAtlas("dbData/UI/TestAtlas.fbbin"))
+		return;*/
 	
 	//create an empty entity for free style camera
 	entityx::Entity entity = engine.getScene().entities.create();

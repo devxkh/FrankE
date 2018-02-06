@@ -38,6 +38,16 @@ namespace XE
 	class GraphicsManager;
 	class TextureAtlas;
 
+
+#ifdef CompileEditor
+	struct TransformInfo
+	{
+		Ogre::Vector3 position;
+		Ogre::Quaternion rotation;
+		Ogre::Vector3 scale;
+	};
+#endif
+
 	struct AtlasData
 	{
 		TextureAtlas*  _t_textureAtlasPtr;
@@ -65,7 +75,7 @@ namespace XE
 		
 		void registerObject(sol::state& lua);
 		
-		bool loadAtlas(const std::string& fileName);
+		void loadAtlas(const void *buf);
 		
 	//	sf::Vector2i GetTextStringMetrics(const std::basic_string<XE::Uint32>& string, unsigned int font_size) const;
 
@@ -96,11 +106,12 @@ namespace XE
 		EditorUIRenderer* _t_EditorUIRenderer;
 
 		//will be send(copied) to rendererthread each frame
-		Ogre::Matrix4 m_CurrentGizmoOrigin;
+
+		TransformInfo  m_CurrentGizmoOrigin;
 		Ogre::Vector2 m_CurrentPointPosition; //mouse cursor
 
 		//copied from mainthread into renderthread
-		Ogre::Matrix4 _t_CurrentGizmoOrigin;
+		TransformInfo _t_CurrentGizmoOrigin;
 		Ogre::Vector2 _t_CurrentPointPosition; //mouse cursor
 
 #endif
