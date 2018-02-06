@@ -20,9 +20,6 @@ Frankenstein 3D Engine (MIT) - x64
 # EDITOR
 - [VEX](https://github.com/devxkh/FrankE/blob/master/Editor)  Client/Server Editor(WPF) for FrankE  
 
-- Imgui included
-<img src="https://raw.githubusercontent.com/devxkh/FrankE/master/doc/Screen_imgui.png" width="250">
-
 # Examples
 
 ### Controller Example
