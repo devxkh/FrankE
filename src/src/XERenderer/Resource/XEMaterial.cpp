@@ -467,7 +467,7 @@ namespace XE
 			const Ogre::HlmsSamplerblock* samplerblock = mHlmsManager->_getSamplerblock(gltfMaterial.emissiveTexture.index);
 			loadSampler(sampler, samplerblock);
 
-			pbsDatablock->setEmissive(Ogre::Vector3(gltfMaterial.emissiveFactor[0], gltfMaterial.emissiveFactor[1], gltfMaterial.emissiveFactor[2]));
+			pbsDatablock->setEmissive(Ogre::Vector3(gltfMaterial.emissiveFactor[0], gltfMaterial.emissiveFactor[1], gltfMaterial.emissiveFactor[2])); 
 		//	pbsDatablock->setDetailMapBlendMode(1,Ogre::PbsBlendModes::PBSM_BLEND_ADD);
 		//	pbsDatablock->setDetailMapWeight(1, 6);
 

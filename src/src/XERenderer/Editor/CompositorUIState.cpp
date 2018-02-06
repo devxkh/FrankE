@@ -6,6 +6,10 @@
 #include <XERenderer/GraphicsManager.hpp>
 #include <XERenderer/Compositor/Compositor.hpp>
 
+#include <XERenderer/OgreWorkspace.hpp>
+
+#include <Ogre/OgreMain/include/OgreSceneManager.h>
+
 namespace XE {
 
 	CompositorUIState::CompositorUIState(GraphicsManager& graphicsMgr, XECompositor& compositor)
@@ -14,6 +18,7 @@ namespace XE {
 		, minThreshold(0.0f), fullColourThreshold(1.0f)
 		, envmapScale(1.0f)
 		, mPreset(5)
+		, hemisphereDir(Ogre::Vector3::NEGATIVE_UNIT_Y)
 	{
 
 	}
@@ -123,10 +128,13 @@ namespace XE {
 
 		m_compositor.setBloomThreshold(minThreshold, fullColourThreshold);
 
-		ImGui::InputFloat3("upperHemisphere", upperHemisphere.ptr());
+		hemisphereDir = m_compositor._t_OgreWorkspace->_t_sceneMgr->getAmbientLightHemisphereDir();
+		upperHemisphere = m_compositor._t_OgreWorkspace->_t_sceneMgr->getAmbientLightUpperHemisphere();
+		lowerHemisphere = m_compositor._t_OgreWorkspace->_t_sceneMgr->getAmbientLightLowerHemisphere();
 
-		ImGui::InputFloat3("lowerHemisphere", lowerHemisphere.ptr());
-		
+		ImGui::Text("Ambient light");
+		ImGui::ColorEdit4("UpperHemisphere Color", upperHemisphere.ptr());
+		ImGui::ColorEdit4("LowerHemisphere Color", lowerHemisphere.ptr());		
 		ImGui::InputFloat3("hemisphereDir", hemisphereDir.ptr());
 		ImGui::InputFloat("envmapScale", &envmapScale);
 

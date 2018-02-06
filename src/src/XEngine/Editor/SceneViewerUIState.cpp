@@ -68,23 +68,13 @@ namespace XE {
 			mInstantRadiosity = 0;
 		}
 	}
-
+	
 	void SceneViewerUIState::render() {
 		
 		ImGui::Begin("Entities");
 
 		if (ImGui::Checkbox("Use Instant Radiosity", &useInstantRadiosity))
 			enableIR(useInstantRadiosity);
-
-		/*lightSpecularColor = component->_t_light->getSpecularColour();
-		if (ImGui::ColorEdit4("Specular Color", (float*)&lightSpecularColor))
-			component->_t_light->setSpecularColour(lightSpecularColor);*/
-
-		if (ImGui::Checkbox("Use Instant Radiosity", &useInstantRadiosity))
-			m_scene.getOgreSceneManager().__OgreSceneMgrPtr->setAmbientLight(Ogre::ColourValue(1.0f, 1.0f, 1.0f),
-			Ogre::ColourValue(0, 0, 0), Ogre::Vector3::UNIT_Y * 0.2f);
-		//Ogre::ColourValue(0, 0, 0), -_t_light->getDirection() + Ogre::Vector3::UNIT_Y * 0.2f);
-
 
 		for each (auto& displayEntity in _t_displayedEntities)
 		{
