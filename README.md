@@ -26,7 +26,7 @@ Frankenstein 3D Engine (MIT) - x64
 
 can move any entity with an attached body component.
 
-![Example-Controller](https://raw.githubusercontent.com/devxkh/FrankE/master/doc/Screen_XETController.png)
+![Example-Controller](https://raw.githubusercontent.com/devxkh/FrankE/master/doc/Screen_XETController_v2.png)
 
 ### UI Example
 
