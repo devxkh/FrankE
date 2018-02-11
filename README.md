@@ -1,4 +1,4 @@
-# FrankE  [Development frozen]
+# FrankE  [Development frozen/paused]
 Frankenstein 3D Engine (MIT) - x64
  - main / rendererthread(Ogre3D)
  - inputmapping (thor/ SDL2)
